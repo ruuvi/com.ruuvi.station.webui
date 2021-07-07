@@ -1,11 +1,12 @@
 import React, { Component } from "react";
-import logo from '../img/ruuvi-logo.png'
+import logo from '../img/ruuvi-vector-logo.svg'
 import NetworkApi from '../NetworkApi'
-import { Center } from "@chakra-ui/react"
+import { Center, HStack } from "@chakra-ui/react"
 import { Stack, Image } from "@chakra-ui/react"
 import { Input, Text } from "@chakra-ui/react"
 import { Button } from "@chakra-ui/react"
 import { CircularProgress, SlideFade } from "@chakra-ui/react"
+import { PinInput, PinInputField } from "@chakra-ui/react"
 
 class SignIn extends Component {
     constructor(props) {
@@ -50,41 +51,50 @@ class SignIn extends Component {
     }
     render() {
         return (
-            <Center>
-                <Stack spacing="24px">
-                    <Image alt="logo" src={logo} fit="scale-down" />
-                    {this.state.loading ? (
-                        <SlideFade initialScale={1} in={this.state.loading} unmountOnExit style={{ textAlign: "center" }}>
-                            <CircularProgress isIndeterminate color="teal" />
-                        </SlideFade>
-                    ) : (
-                        <span>
-                            {this.state.pageState === 0 &&
-                                <SlideFade initialScale={1} in={this.state.pageState === 0} unmountOnExit>
-                                    <Stack spacing="12px">
-                                        <Text>
-                                            Login to Ruuvi Network {new NetworkApi().isStaging() ? "(staging)" : ""}
+            <HStack style={{ backgroundColor: "white" }} style={{ minHeight: "100%" }}>
+                <Center style={{ width: "100%", marginTop: "100px" }}>
+                    <Stack spacing="24px">
+                        <Image alt="logo" width={300} src={logo} fit="scale-down" />
+                        {this.state.loading ? (
+                            <SlideFade initialScale={1} in={this.state.loading} unmountOnExit style={{ textAlign: "center" }}>
+                                <CircularProgress isIndeterminate color="teal" />
+                            </SlideFade>
+                        ) : (
+                            <span>
+                                {this.state.pageState === 0 &&
+                                    <SlideFade initialScale={1} in={this.state.pageState === 0} unmountOnExit>
+                                        <Stack spacing="12px">
+                                            <Text>
+                                                Login to Ruuvi Network {new NetworkApi().isStaging() ? "(staging)" : ""}
+                                            </Text>
+                                            <Input placeholder="Email" value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} />
+                                            <Button colorScheme="teal" onClick={this.register.bind(this)}>Login / Register</Button>
+                                        </Stack>
+                                    </SlideFade>
+                                }
+                                {this.state.pageState === 1 &&
+                                    <SlideFade initialScale={0} in={this.state.pageState === 1} unmountOnExit>
+                                        <Stack spacing="12px">
+                                            <Text>
+                                                Check your mail, and enter the code here.
                                         </Text>
-                                        <Input placeholder="Email" value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} />
-                                        <Button colorScheme="teal" onClick={this.register.bind(this)}>Login / Register</Button>
-                                    </Stack>
-                                </SlideFade>
-                            }
-                            {this.state.pageState === 1 &&
-                                <SlideFade initialScale={0} in={this.state.pageState === 1} unmountOnExit>
-                                    <Stack spacing="12px">
-                                        <Text>
-                                            Check your mail, and enter the code here.
-                                        </Text>
-                                        <Input placeholder="Validation code" value={this.state.validationCode} onChange={e => this.setState({ ...this.state, validationCode: e.target.value })} />
-                                        <Button colorScheme="teal" onClick={this.validate.bind(this)}>Submit</Button>
-                                    </Stack>
-                                </SlideFade>
-                            }
-                        </span>
-                    )}
-                </Stack>
-            </Center>
+                                            <HStack style={{marginLeft: "50px"}}>
+                                                <PinInput type="alphanumeric" value={this.state.validationCode} onChange={e => this.setState({ ...this.state, validationCode: e })}>
+                                                    <PinInputField />
+                                                    <PinInputField />
+                                                    <PinInputField />
+                                                    <PinInputField />
+                                                </PinInput>
+                                            </HStack>
+                                            <Button colorScheme="teal" onClick={this.validate.bind(this)}>Submit</Button>
+                                        </Stack>
+                                    </SlideFade>
+                                }
+                            </span>
+                        )}
+                    </Stack>
+                </Center>
+            </HStack>
         )
     }
 }

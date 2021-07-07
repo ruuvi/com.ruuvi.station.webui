@@ -14,11 +14,35 @@ import {
     Input,
     IconButton,
     Box,
+    Avatar,
+    HStack,
+    SimpleGrid,
+    GridItem,
+    CircularProgress,
+    Progress,
+    List,
+    ListItem,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
+import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
 import { EditIcon, CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
+import {
+    Accordion,
+    AccordionItem,
+    AccordionButton,
+    AccordionPanel,
+    AccordionIcon,
+} from "@chakra-ui/react"
+
+var unitHelper = {
+    "temperature": { label: "Temperature", unit: "°C", value: (value) => value },
+    "humidity": { label: "Humidity", unit: "%", value: (value) => value },
+    "pressure": { label: "Pressure", unit: "hPa", value: (value) => value / 100 },
+    "movementCounter": { label: "Movement", unit: "Times", value: (value) => value },
+    "battery": { label: "Battery", unit: "V", value: (value) => value / 1000 },
+}
 
 class Sensor extends Component {
     constructor(props) {
@@ -72,11 +96,12 @@ class Sensor extends Component {
             this.setState({ data: null, loading: false })
         })
     }
-    getLatestReading() {
+    getLatestReading(kv) {
         if (!this.state.data || !this.state.data.measurements.length) return [];
         var ms = this.state.data.measurements;
         if (!ms || !ms.length) return [];
         ms = ms[0].parsed;
+        if (!kv) return ms;
         var objs = Object.keys(ms);
         return objs.map(x => {
             return { key: x, value: ms[x] }
@@ -98,46 +123,119 @@ class Sensor extends Component {
             window.location.reload()
         })
     }
+    setGraphKey(key) {
+        console.log("key", key)
+        this.setState({ ...this.state, graphKey: key });
+    }
     render() {
         return (
-            <Box borderWidth="1px" borderRadius="lg" overflow="hidden" padding="4px">
-                <Heading>
-                    {this.props.sensor.name || this.props.sensor.sensor}
-                    <IconButton onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}><EditIcon /></IconButton>
-                    <IconButton onClick={() => this.props.prev()}><ArrowBackIcon /></IconButton>
-                    <IconButton onClick={() => this.props.next()}><ArrowForwardIcon /></IconButton>
-                    <IconButton onClick={() => this.props.close()}><CloseIcon /></IconButton>
-                </Heading>
+            <Box borderWidth="1px" borderRadius="lg" overflow="hidden" padding="15px" style={{ backgroundColor: "white" }}>
+                <HStack>
+                    <Avatar bg="#01ae90" size="xl" name={this.props.sensor.name || this.props.sensor.sensor} />
+                    <div style={{ width: "50%" }}>
+                        <Heading>
+                            {this.props.sensor.name || this.props.sensor.sensor}
+                        </Heading>
+                        <i>
+                            Last update: {this.getTimeSinceLastUpdate()}m ago
+                        </i>
+                    </div>
+                    <span style={{ width: "100%", textAlign: "right", marginTop: "-50px" }}>
+                        <IconButton isRound={true} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><EditIcon /></IconButton>
+                        <IconButton isRound={true} onClick={() => this.props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><ArrowBackIcon /></IconButton>
+                        <IconButton isRound={true} onClick={() => this.props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginRight: "5px" }}><ArrowForwardIcon /></IconButton>
+                        <IconButton isRound={true} onClick={() => this.props.close()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0" }}><CloseIcon /></IconButton>
+                    </span>
+                </HStack>
                 {this.state.editName !== null && <div>
                     <Input value={this.state.editName} onChange={v => this.updateStateVar("editName", v.target.value)} />
                     <Button onClick={() => this.update()}>Update</Button>
                 </div>}
                 {this.state.loading ? (
-                    <Stack marginRight="12px">
-                        <Skeleton height="20px" />
-                        <Skeleton height="80px" />
-                        <Skeleton height="80px" />
-                        <Skeleton height="300px" />
-                        <Skeleton height="40px" />
+                    <Stack style={{ marginTop: "30px" }}>
+                        <Progress isIndeterminate={true} color="#e6f6f2" />
                     </Stack>
                 ) : (
                     <div>
                         {this.state.data && <div>
-                            {this.props.sensor.name && <div><b>{this.props.sensor.sensor}</b></div>}
-                            <div>
-                                Last update: {this.getTimeSinceLastUpdate()}m ago
-                            </div>
-                            <StatGroup>
-                                {this.getLatestReading().map(x => {
-                                    return (
-                                        <Stat key={x.key} margin="12px" onClick={() => this.setState({ ...this.state, graphKey: x.key })}>
-                                            <StatLabel>{x.key}</StatLabel>
-                                            <StatNumber>{x.value}</StatNumber>
-                                        </Stat>
-                                    )
+                            <StatGroup style={{ marginTop: "30px", marginBottom: "30px" }}>
+                                {["temperature", "humidity", "pressure", "movementCounter", "battery"].map(x => {
+                                    return <SensorReading value={unitHelper[x].value(this.getLatestReading()[x])}
+                                        label={unitHelper[x].label}
+                                        unit={unitHelper[x].unit}
+                                        selected={this.state.graphKey === x}
+                                        onClick={() => this.setGraphKey(x)} />
                                 })}
                             </StatGroup>
+
+                            <div style={{ marginLeft: "30px", marginBottom: "-20px" }}>
+                                {unitHelper[this.state.graphKey].label} ({unitHelper[this.state.graphKey].unit})
+                            </div>
                             <Graph dataKey={this.state.graphKey} data={this.state.data.measurements} cursor={true} />
+
+                            <Accordion>
+                                <AccordionItem>
+                                    <h2>
+                                        <AccordionButton>
+                                            <Box flex="1" textAlign="left">
+                                                Alerts
+                                            </Box>
+                                            <AccordionIcon />
+                                        </AccordionButton>
+                                    </h2>
+                                    <AccordionPanel pb={4}>
+                                        <b>
+                                            Not impelemeted
+                                        </b>
+                                    </AccordionPanel>
+                                </AccordionItem>
+
+                                <AccordionItem>
+                                    <h2>
+                                        <AccordionButton>
+                                            <Box flex="1" textAlign="left">
+                                                Offset Correction
+                                            </Box>
+                                            <AccordionIcon />
+                                        </AccordionButton>
+                                    </h2>
+                                    <AccordionPanel pb={4}>
+                                        <b>
+                                            Not implemented
+                                        </b>
+                                    </AccordionPanel>
+                                </AccordionItem>
+
+                                <AccordionItem>
+                                    <h2>
+                                        <AccordionButton>
+                                            <Box flex="1" textAlign="left">
+                                                Sensor Info
+                                            </Box>
+                                            <AccordionIcon />
+                                        </AccordionButton>
+                                    </h2>
+                                    <AccordionPanel pb={4}>
+                                        <List>
+                                            {this.getLatestReading(true).map(x => {
+                                                return (
+                                                    <ListItem>
+                                                        <b>
+                                                            {x.key}
+                                                        </b>
+                                                        <br />
+                                                        {x.value}
+                                                    </ListItem>
+                                                )
+                                            })}
+                                        </List>
+                                    </AccordionPanel>
+                                </AccordionItem>
+                            </Accordion>
+
+                            <div style={{ marginTop: "500px" }}>
+                            </div>
+
                             <StatGroup>{[{ k: "2.9 hours", v: 2.9 }, { k: "3.1 hours", v: 3.1 }, { k: "8 hours", v: 8 }, { k: "12 hours", v: 12 }, { k: "1 day", v: 24 }, { k: "1 week", v: 24 * 7 }, { k: "2 weeks", v: 24 * 7 * 2 }, { k: "1 month", v: 24 * 7 * 4 }, { k: "2 months", v: 24 * 7 * 4 * 2 }, { k: "3 months", v: 24 * 7 * 4 * 3 }].map(x => {
                                 return <Button key={x.v} colorScheme={x.v === this.state.from ? "teal" : undefined}
                                     onClick={() => { this.setState({ ...this.state, from: x.v }, () => this.loadData(true)); }}>{x.k}</Button>
@@ -154,6 +252,16 @@ class Sensor extends Component {
                             resolvedMode: <b>{this.state.resolvedMode}</b>
                             <br />
                             {this.state.data.measurements.length} broadcasts
+                            <StatGroup>
+                                {this.getLatestReading(true).map(x => {
+                                    return (
+                                        <Stat key={x.key} margin="12px" onClick={() => this.setState({ ...this.state, graphKey: x.key })}>
+                                            <StatLabel>{x.key}</StatLabel>
+                                            <StatNumber>{x.value}</StatNumber>
+                                        </Stat>
+                                    )
+                                })}
+                            </StatGroup>
                         </div>}
                     </div>
                 )}

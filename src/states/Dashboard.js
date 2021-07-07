@@ -56,13 +56,19 @@ class Dashboard extends Component {
                     }
                     {this.getCurrentSensor() ? (
                         <GridItem colSpan={12}>
-                            <Sensor sensor={this.getCurrentSensor()} close={() => this.props.history.push('/')} next={() => this.nextIndex(1)} prev={() => this.nextIndex(-1)} />
+                            <Sensor sensor={this.getCurrentSensor()} 
+                            close={() => this.props.history.push('/')} 
+                            next={() => this.nextIndex(1)} 
+                            prev={() => this.nextIndex(-1)} 
+                             />
                         </GridItem>
                     ) : (
                         <>
                             {this.state.sensors.map(x => {
-                                return <GridItem onClick={() => this.props.history.push('/' + x.sensor)}>
+                                return <GridItem>
+                                    <a href={"#/"+x.sensor}>
                                     <SensorCard sensor={x} />
+                                    </a>
                                 </GridItem>
                             })}
                         </>

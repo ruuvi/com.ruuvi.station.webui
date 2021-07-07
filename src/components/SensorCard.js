@@ -54,7 +54,7 @@ class SensorCard extends Component {
     }
     render() {
         return (
-            <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden" padding="4px">
+            <Box maxW="sm" height="550px" borderWidth="1px" borderRadius="lg" overflow="hidden" padding="4px" style={{backgroundColor: "white"}}>
                 <Heading size="xs">
                     {this.props.sensor.name || this.props.sensor.sensor}
                 </Heading>
