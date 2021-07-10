@@ -8,7 +8,7 @@ import NetworkApi from "./NetworkApi";
 import SignIn from "./states/SignIn";
 import logo from './img/ruuvi-vector-logo.svg'
 
-import { ChakraProvider, Button, Text, HStack, Image } from "@chakra-ui/react"
+import { ChakraProvider, Text, HStack, Image } from "@chakra-ui/react"
 import Dashboard from "./states/Dashboard";
 // 1. Import `extendTheme`
 import { extendTheme } from "@chakra-ui/react"
@@ -38,16 +38,6 @@ export default function App() {
     new NetworkApi().removeToken()
     forceUpdate()
   }
-  const seeSettings = () => {
-    new NetworkApi().getSettings(settings => {
-      alert(JSON.stringify(settings, null, 2))
-    })
-  }
-  const seeAlerts = () => {
-    new NetworkApi().getAlerts(alerts => {
-      alert(JSON.stringify(alerts, null, 2))
-    })
-  }
   var user = new NetworkApi().getUser()
   var sensors = [];
   if (!user) {
@@ -64,13 +54,10 @@ export default function App() {
           <Image alt="logo" height={30} src={logo} fit="scale-down" />
           <Text>
             {new NetworkApi().isStaging() ? "(staging) " : ""}
-            {user.email}
           </Text>
-          <Button size="sm" onClick={() => seeSettings()}>See settings</Button>
-          <Button size="sm" onClick={() => seeAlerts()}>See alerts</Button>
           <span style={{ width: "100%", textAlign: "right" }}>
             <SensorMenu sensors={sensors} />
-            <UserMenu logout={logout} />
+            <UserMenu logout={logout} email={user.email}/>
           </span>
         </HStack>
         <div style={{ marginTop: "20px" }}>

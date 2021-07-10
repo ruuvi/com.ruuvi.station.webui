@@ -48,7 +48,7 @@ class Dashboard extends Component {
             <Box margin="36px">
                 <SimpleGrid columns={{ sm: 1, md: 2, lg: 4 }} spacing="40px">
                     {this.state.loading &&
-                        <GridItem>
+                        <GridItem colSpan={4}>
                             <center>
                                 <Spinner size="xl" />
                             </center>

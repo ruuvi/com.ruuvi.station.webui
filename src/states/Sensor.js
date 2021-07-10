@@ -5,7 +5,6 @@ import {
     StatLabel,
     StatNumber,
     StatGroup,
-    Skeleton,
     Heading,
     Stack,
     Button,
@@ -16,9 +15,6 @@ import {
     Box,
     Avatar,
     HStack,
-    SimpleGrid,
-    GridItem,
-    CircularProgress,
     Progress,
     List,
     ListItem,
@@ -200,9 +196,15 @@ class Sensor extends Component {
                                         </AccordionButton>
                                     </h2>
                                     <AccordionPanel pb={4}>
-                                        <b>
-                                            Not implemented
-                                        </b>
+                                        <List>
+                                            {["offsetTemperature", "offsetHumidity", "offsetPressure"].map(x => {
+                                                return <ListItem>
+                                                    <b>{x}</b>
+                                                    <br />
+                                                    {this.state.data[x]}
+                                                </ListItem>
+                                            })}
+                                        </List>
                                     </AccordionPanel>
                                 </AccordionItem>
 

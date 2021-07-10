@@ -51,7 +51,7 @@ class SignIn extends Component {
     }
     render() {
         return (
-            <HStack style={{ backgroundColor: "white" }} style={{ minHeight: "100%" }}>
+            <HStack style={{ minHeight: "100%", backgroundColor: "white" }}>
                 <Center style={{ width: "100%", marginTop: "100px" }}>
                     <Stack spacing="24px">
                         <Image alt="logo" width={300} src={logo} fit="scale-down" />
