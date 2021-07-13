@@ -14,6 +14,7 @@ import Dashboard from "./states/Dashboard";
 import { extendTheme } from "@chakra-ui/react"
 import UserMenu from "./components/UserMenu";
 import SensorMenu from "./components/SensorMenu";
+import LanguageMenu from "./components/LanguageMenu";
 // 2. Call `extendTheme` and pass your custom values
 const theme = extendTheme({
   styles: {
@@ -41,7 +42,7 @@ export default function App() {
   var user = new NetworkApi().getUser()
   var sensors = [];
   if (!user) {
-    return <ChakraProvider theme={theme}>
+    return <ChakraProvider theme={theme} style={{minHeight:"100%"}}>
       <SignIn loginSuccessful={data => {
         forceUpdate()
       }} />
@@ -50,13 +51,14 @@ export default function App() {
   return (
     <ChakraProvider theme={theme}>
       <HashRouter>
-        <HStack style={{ backgroundColor: "white", boxShadow: "0px 1px 2px #dddddd", paddingLeft: "25px", paddingRight: "25px" }} height="50px">
+        <HStack style={{ backgroundColor: "white", boxShadow: "0px 1px 2px #dddddd", paddingLeft: "25px", paddingRight: "25px" }} height="60px">
           <Image alt="logo" height={30} src={logo} fit="scale-down" />
           <Text>
             {new NetworkApi().isStaging() ? "(staging) " : ""}
           </Text>
           <span style={{ width: "100%", textAlign: "right" }}>
             <SensorMenu sensors={sensors} />
+            <LanguageMenu />
             <UserMenu logout={logout} email={user.email}/>
           </span>
         </HStack>

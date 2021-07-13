@@ -45,8 +45,8 @@ class Dashboard extends Component {
     }
     render() {
         return (
-            <Box margin="36px">
-                <SimpleGrid columns={{ sm: 1, md: 2, lg: 4 }} spacing="40px">
+            <Box marginTop="36px" marginLeft="75px" marginRight="75px">
+                <SimpleGrid columns={{ sm: 1, md: 2, lg: 4 }} spacing="8px">
                     {this.state.loading &&
                         <GridItem colSpan={4}>
                             <center>
@@ -55,7 +55,7 @@ class Dashboard extends Component {
                         </GridItem>
                     }
                     {this.getCurrentSensor() ? (
-                        <GridItem colSpan={12}>
+                        <GridItem colSpan={4}>
                             <Sensor sensor={this.getCurrentSensor()} 
                             close={() => this.props.history.push('/')} 
                             next={() => this.nextIndex(1)} 

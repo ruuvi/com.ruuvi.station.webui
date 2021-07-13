@@ -6,8 +6,11 @@ const parseRawRuuvi = function (data) {
     temperature -= 65534;
   }
   robject.temperature = temperature / 200.0;
+  robject.temperature = +robject.temperature.toFixed(2);
 
   robject.humidity = (((data[5] & 0xff) << 8) | (data[6] & 0xff)) / 400.0;
+  robject.humidity = +robject.humidity.toFixed(2);
+
   robject.pressure = (((data[7] & 0xff) << 8) | (data[8] & 0xff)) + 50000;
 
   let accelerationX = (data[9] << 8) | (data[10] & 0xff);

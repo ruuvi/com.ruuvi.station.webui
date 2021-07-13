@@ -6,6 +6,8 @@ import {
     StatGroup,
     Heading,
     Box,
+    SimpleGrid,
+    GridItem,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "./Graph";
@@ -54,7 +56,7 @@ class SensorCard extends Component {
     }
     render() {
         return (
-            <Box maxW="sm" height="550px" borderWidth="1px" borderRadius="lg" overflow="hidden" padding="4px" style={{backgroundColor: "white"}}>
+            <Box maxW="sm" height="360px" borderWidth="1px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}>
                 <Heading size="xs">
                     {this.props.sensor.name || this.props.sensor.sensor}
                 </Heading>
@@ -68,21 +70,14 @@ class SensorCard extends Component {
                             <Heading size="lg">
                                 {this.getLatestReading().temperature} °C
                             </Heading>
-                            <Graph title="" dataKey={"temperature"} data={this.state.data.measurements} />
-                            <StatGroup>
-                                <Stat margin="12px" size="xs">
-                                    <StatNumber>{this.getLatestReading().humidity}%</StatNumber>
-                                </Stat>
-                                <Stat margin="12px" size="xs">
-                                    <StatNumber>{this.getLatestReading().battery / 1000}V</StatNumber>
-                                </Stat>
-                                <Stat margin="12px" size="xs">
-                                    <StatNumber>{this.getLatestReading().pressure}Pha</StatNumber>
-                                </Stat>
-                                <Stat margin="12px" size="xs">
-                                    <StatNumber>{this.getLatestReading().movementCounter} motions</StatNumber>
-                                </Stat>
-                            </StatGroup>
+                            <Graph title="" dataKey={"temperature"} data={this.state.data.measurements} height={200} legend={false} />
+                            <hr style={{margin: "10px 0 10px 0"}} />
+                            <SimpleGrid columns={{ sm: 2 }}>
+                                <GridItem>{this.getLatestReading().humidity}%</GridItem>
+                                <GridItem>{this.getLatestReading().battery / 1000}V</GridItem>
+                                <GridItem>{this.getLatestReading().pressure / 100}hPa</GridItem>
+                                <GridItem>{this.getLatestReading().movementCounter} motions</GridItem>
+                            </SimpleGrid>
                         </div>}
                     </div>
                 )}

@@ -23,7 +23,7 @@ const parseRawRuuvi = function(manufacturerDataString) {
   let humidity = manufacturerDataString.substring(humidityStart, humidityEnd);
   humidity = parseInt(humidity, 16);
   humidity /= 2; //scale
-  robject.humidity = humidity;
+  robject.humidity = +humidity.toFixed(2);
 
   let temperatureString = manufacturerDataString.substring(temperatureStart, temperatureEnd);
   let temperature = parseInt(temperatureString.substring(0, 2), 16); //Full degrees
