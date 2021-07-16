@@ -6,7 +6,7 @@ import {
     MenuItem,
     Button,
 } from "@chakra-ui/react"
-import { ChevronDownIcon } from "@chakra-ui/icons";
+import { MdArrowDropDown } from "react-icons/md"
 import NetworkApi from "../NetworkApi";
 
 class LanguageMenu extends Component {
@@ -26,15 +26,13 @@ class LanguageMenu extends Component {
     render() {
         return (
             <Menu>
-                <MenuButton disabled={true} as={Button} rightIcon={<ChevronDownIcon />} style={{ backgroundColor: "transparent" }}>
+                <MenuButton disabled={false} as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>
                     En
                 </MenuButton>
                 <MenuList>
-                    <MenuItem>En</MenuItem>
-                    <MenuItem>Fi</MenuItem>
-                    <MenuItem>Sv</MenuItem>
-                    <MenuItem>Ru</MenuItem>
-                    <MenuItem>Fr</MenuItem>
+                    {["En", "Fi", "Sv", "Ru", "Fr"].map(x => {
+                        return <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>{x}</MenuItem>
+                    })}
                 </MenuList>
             </Menu>
         )

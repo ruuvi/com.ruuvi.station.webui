@@ -1,9 +1,6 @@
 import React, { Component } from "react";
 import NetworkApi from '../NetworkApi'
 import {
-    Stat,
-    StatNumber,
-    StatGroup,
     Heading,
     Box,
     SimpleGrid,
@@ -13,6 +10,17 @@ import 'uplot/dist/uPlot.min.css';
 import Graph from "./Graph";
 import parse from "../decoder/parser";
 import { Spinner } from "@chakra-ui/react"
+
+const smallSensorValue = {
+    fontFamily: "montserrat",
+    fontSize: 16,
+    fontWeight: 600,
+}
+
+const smallSensorValueUnit = {
+    fontFamily: "montserrat",
+    fontSize: 12,
+}
 
 class SensorCard extends Component {
     constructor(props) {
@@ -56,8 +64,8 @@ class SensorCard extends Component {
     }
     render() {
         return (
-            <Box maxW="sm" height="360px" borderWidth="1px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}>
-                <Heading size="xs">
+            <Box maxW="sm" height="350px" borderWidth="1px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}>
+                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
                     {this.props.sensor.name || this.props.sensor.sensor}
                 </Heading>
                 {this.state.loading ? (
@@ -67,16 +75,23 @@ class SensorCard extends Component {
                 ) : (
                     <div>
                         {this.state.data && <div>
-                            <Heading size="lg">
-                                {this.getLatestReading().temperature} °C
-                            </Heading>
-                            <Graph title="" dataKey={"temperature"} data={this.state.data.measurements} height={200} legend={false} />
-                            <hr style={{margin: "10px 0 10px 0"}} />
-                            <SimpleGrid columns={{ sm: 2 }}>
-                                <GridItem>{this.getLatestReading().humidity}%</GridItem>
-                                <GridItem>{this.getLatestReading().battery / 1000}V</GridItem>
-                                <GridItem>{this.getLatestReading().pressure / 100}hPa</GridItem>
-                                <GridItem>{this.getLatestReading().movementCounter} motions</GridItem>
+                            <div>
+                                <span class="main-stat">
+                                    {this.getLatestReading().temperature}
+                                </span>
+                                <span class="main-stat-unit">
+                                    °C
+                                </span>
+                            </div>
+                            <div style={{ marginLeft: -30, marginRight: -30, marginTop: -20, marginBottom: -10 }}>
+                                <Graph title="" dataKey={"temperature"} data={this.state.data.measurements} height={200} legend={false} cardView={true} />
+                            </div>
+                            <hr style={{ margin: "0px 0 10px 0" }} />
+                            <SimpleGrid columns={{ sm: 2 }} style={{ width: "100%" }}>
+                                <GridItem><span style={smallSensorValue}>{this.getLatestReading().humidity}</span> <span style={smallSensorValueUnit}>%</span></GridItem>
+                                <GridItem><span style={smallSensorValue}>{this.getLatestReading().battery / 1000}</span> <span style={smallSensorValueUnit}>V</span></GridItem>
+                                <GridItem><span style={smallSensorValue}>{this.getLatestReading().pressure / 100}</span> <span style={smallSensorValueUnit}>hPa</span></GridItem>
+                                <GridItem><span style={smallSensorValue}>{this.getLatestReading().movementCounter}</span> <span style={smallSensorValueUnit}>motions</span></GridItem>
                             </SimpleGrid>
                         </div>}
                     </div>

@@ -6,7 +6,7 @@ import {
     MenuItem,
     Button,
 } from "@chakra-ui/react"
-import { ChevronDownIcon } from "@chakra-ui/icons";
+import { MdArrowDropDown } from "react-icons/md"
 import NetworkApi from "../NetworkApi";
 import { withRouter } from 'react-router-dom'
 
@@ -26,12 +26,12 @@ class SensorMenu extends Component {
     render() {
         return (
             <Menu>
-                <MenuButton as={Button} rightIcon={<ChevronDownIcon />} style={{ backgroundColor: "transparent" }}>
+                <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>
                     Sensors
                 </MenuButton>
                 <MenuList>
                     {this.state.sensors.map(x => {
-                        return <MenuItem onClick={() => this.props.history.push('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
+                        return <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.props.history.push('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
                     })}
                 </MenuList>
             </Menu>

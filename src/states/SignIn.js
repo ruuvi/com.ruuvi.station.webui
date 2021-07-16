@@ -8,6 +8,21 @@ import { Button } from "@chakra-ui/react"
 import { CircularProgress, SlideFade } from "@chakra-ui/react"
 import { PinInput, PinInputField } from "@chakra-ui/react"
 
+const loginText = {
+    fontFamily: "montserrat",
+    fontWeight: 800,
+    fontSize: 36,
+}
+const infoText = {
+    fontFamily: "mulish",
+    fontSize: 16,
+}
+const buttonText = {
+    fontFamily: "montserrat",
+    fontWeight: "bold",
+    fontSize: 16,
+}
+
 class SignIn extends Component {
     constructor(props) {
         super(props)
@@ -60,9 +75,9 @@ class SignIn extends Component {
                             </Center>
                             <Center style={{ width: "100%" }}>
                                 <div style={{ width: "75%" }}>
-                                <Heading>
-                                    Login to Ruuvi Station {new NetworkApi().isStaging() ? "(staging)" : ""}
-                                </Heading>
+                                    <Heading style={loginText}>
+                                        Login to Ruuvi Station {new NetworkApi().isStaging() ? "(staging)" : ""}
+                                    </Heading>
                                     {this.state.loading ? (
                                         <SlideFade initialScale={1} in={this.state.loading} unmountOnExit style={{ textAlign: "center" }}>
                                             <CircularProgress isIndeterminate color="teal" />
@@ -72,11 +87,11 @@ class SignIn extends Component {
                                             {this.state.pageState === 0 &&
                                                 <SlideFade initialScale={1} in={this.state.pageState === 0} unmountOnExit>
                                                     <Stack spacing="12px">
-                                                        <Text>
+                                                        <Text style={infoText}>
                                                             Type your email below. You will receive a confirmation code to your email inbox.
-                                                    </Text>
+                                                        </Text>
                                                         <Input placeholder="Email" value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} />
-                                                        <Button colorScheme="teal" onClick={this.register.bind(this)}>Login / Register</Button>
+                                                        <Button colorScheme="teal" onClick={this.register.bind(this)} style={buttonText}>Login / Register</Button>
                                                     </Stack>
                                                 </SlideFade>
                                             }
@@ -94,7 +109,7 @@ class SignIn extends Component {
                                                                 <PinInputField />
                                                             </PinInput>
                                                         </HStack>
-                                                        <Button colorScheme="teal" onClick={this.validate.bind(this)}>Submit</Button>
+                                                        <Button colorScheme="teal" onClick={this.validate.bind(this)} style={buttonText}>Submit</Button>
                                                     </Stack>
                                                 </SlideFade>
                                             }

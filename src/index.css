@@ -11,6 +11,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #e6f6f2;
   height: 100%;
+  color: #1b4847 !important;
 }
 
 code {
@@ -20,4 +21,16 @@ code {
 
 #root {
   height: 100%
+}
+
+.main-stat {
+  font-family: oswald;
+  font-size: 38px;
+  font-weight: bold;
+}
+
+.main-stat-unit {
+  font-family: oswald;
+  font-size: 14px;
+  margin-left: 2px;
 }

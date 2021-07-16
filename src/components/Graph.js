@@ -4,6 +4,11 @@ import 'uplot/dist/uPlot.min.css';
 import { SizeMe } from 'react-sizeme'
 
 
+function mmdd(ts) {
+    var d = new Date(ts*1000);
+    return (d.getMonth() + 1) + "/" + d.getDate()
+}
+
 class Graph extends Component {
     constructor(props) {
         super(props)
@@ -40,7 +45,10 @@ class Graph extends Component {
                         cursor: { show: this.props.cursor || false, drag: { x: true, y: true, uni: 50 } },
                         scales: { x: { time: true } },
                         axes: [
-                            { grid: { show: false }, },
+                            {
+                                grid: { show: false },
+                                values: this.props.cardView ? (self, ticks) => ticks.map(rawValue => mmdd(rawValue)) : undefined,
+                            },
                         ],
                     }}
                     data={this.getGraphData()}

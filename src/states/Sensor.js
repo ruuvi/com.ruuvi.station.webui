@@ -40,6 +40,19 @@ var unitHelper = {
     "battery": { label: "Battery", unit: "V", value: (value) => value / 1000 },
 }
 
+const graphInfo = {
+    fontFamily: "mulish",
+    fontSize: 14,
+    marginLeft: "30px",
+    marginBottom: "-20px",
+}
+
+const sensorName = {
+    fontFamily: "montserrat",
+    fontSize: "54px",
+    fontWeight: 800,
+}
+
 class Sensor extends Component {
     constructor(props) {
         super(props)
@@ -127,14 +140,14 @@ class Sensor extends Component {
         return (
             <Box borderWidth="1px" borderRadius="lg" overflow="hidden" padding="15px" style={{ backgroundColor: "white" }}>
                 <HStack>
-                    <Avatar bg="#01ae90" size="xl" name={this.props.sensor.name || this.props.sensor.sensor} />
+                    <Avatar bg="#01ae90" size="xl" name={this.props.sensor.name || this.props.sensor.sensor} src={this.props.sensor.picture} />
                     <div style={{ width: "50%" }}>
-                        <Heading>
+                        <Heading style={sensorName}>
                             {this.props.sensor.name || this.props.sensor.sensor}
                         </Heading>
-                        <i>
+                        <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
                             Last update: {this.getTimeSinceLastUpdate()}m ago
-                        </i>
+                        </div>
                     </div>
                     <span style={{ width: "100%", textAlign: "right", marginTop: "-50px" }}>
                         <IconButton isRound={true} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><EditIcon /></IconButton>
@@ -164,7 +177,7 @@ class Sensor extends Component {
                                 })}
                             </StatGroup>
 
-                            <div style={{ marginLeft: "30px", marginBottom: "-20px" }}>
+                            <div style={graphInfo}>
                                 {unitHelper[this.state.graphKey].label} ({unitHelper[this.state.graphKey].unit})
                             </div>
                             <Graph dataKey={this.state.graphKey} data={this.state.data.measurements} cursor={true} />

@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import 'typeface-montserrat';
+import 'typeface-mulish';
+import 'typeface-oswald';
 
 ReactDOM.render(
   <React.StrictMode>

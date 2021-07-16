@@ -6,8 +6,8 @@ import {
     MenuItem,
     Button,
 } from "@chakra-ui/react"
-import { ChevronDownIcon } from "@chakra-ui/icons";
 import { FaUserAlt } from "react-icons/fa"
+import { MdArrowDropDown } from "react-icons/md"
 import NetworkApi from "../NetworkApi";
 
 class UserMenu extends Component {
@@ -27,14 +27,14 @@ class UserMenu extends Component {
     render() {
         return (
             <Menu>
-                <MenuButton as={Button} rightIcon={<ChevronDownIcon />} style={{ backgroundColor: "transparent" }}>
+                <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent" }}>
                     <FaUserAlt />
                 </MenuButton>
-                <MenuList>
-                    <MenuItem>{this.props.email}</MenuItem>
-                    <MenuItem onClick={() => this.seeSettings()}>Show settings</MenuItem>
-                    <MenuItem onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
-                    <MenuItem onClick={() => this.props.logout()}>Logout</MenuItem>
+                <MenuList >
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>{this.props.email}</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.props.logout()}>Logout</MenuItem>
                 </MenuList>
             </Menu>
         )
