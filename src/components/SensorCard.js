@@ -74,7 +74,7 @@ class SensorCard extends Component {
                     </center>
                 ) : (
                     <div>
-                        {this.state.data && <div>
+                        {this.state.data && this.state.data.measurements.length ? <div>
                             <div>
                                 <span class="main-stat">
                                     {this.getLatestReading().temperature}
@@ -93,7 +93,9 @@ class SensorCard extends Component {
                                 <GridItem><span style={smallSensorValue}>{this.getLatestReading().pressure / 100}</span> <span style={smallSensorValueUnit}>hPa</span></GridItem>
                                 <GridItem><span style={smallSensorValue}>{this.getLatestReading().movementCounter}</span> <span style={smallSensorValueUnit}>motions</span></GridItem>
                             </SimpleGrid>
-                        </div>}
+                        </div>:<div>
+                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>No data.<br/>The sensor need to be in range of a gateway.</center>
+                            </div>}
                     </div>
                 )}
             </Box>
