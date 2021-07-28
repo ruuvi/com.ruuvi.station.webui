@@ -1,15 +1,14 @@
 import React, { Component } from "react";
 import NetworkApi from '../NetworkApi'
 import {
-    Stat,
-    StatLabel,
-    StatNumber,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
     StatGroup,
     Heading,
     Stack,
     Button,
-    RadioGroup,
-    Radio,
     Input,
     IconButton,
     Box,
@@ -18,19 +17,19 @@ import {
     Progress,
     List,
     ListItem,
-} from "@chakra-ui/react"
-import 'uplot/dist/uPlot.min.css';
-import Graph from "../components/Graph";
-import SensorReading from "../components/SensorReading";
-import parse from "../decoder/parser";
-import { EditIcon, CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
-import {
     Accordion,
     AccordionItem,
     AccordionButton,
     AccordionPanel,
     AccordionIcon,
 } from "@chakra-ui/react"
+import 'uplot/dist/uPlot.min.css';
+import Graph from "../components/Graph";
+import SensorReading from "../components/SensorReading";
+import parse from "../decoder/parser";
+import { EditIcon, CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
+
+import { MdArrowDropDown } from "react-icons/md"
 
 var unitHelper = {
     "temperature": { label: "Temperature", unit: "°C", value: (value) => value },
@@ -39,6 +38,13 @@ var unitHelper = {
     "movementCounter": { label: "Movement", unit: "Times", value: (value) => value },
     "battery": { label: "Battery", unit: "V", value: (value) => value / 1000 },
 }
+
+function getUnitHelper(key) {
+    if (unitHelper[key]) return unitHelper[key]
+    return { label: "", unit: "", value: (value) => value }
+}
+
+var timespans = [{ k: "1 hours", v: 1 }, { k: "2 hours", v: 2 }, { k: "8 hours", v: 8 }, { k: "12 hours", v: 12 }, { k: "1 day", v: 24 }, { k: "2 days", v: 24 * 2 }, { k: "1 week", v: 24 * 7 }, { k: "2 weeks", v: 24 * 7 * 2 }, { k: "1 month", v: 24 * 7 * 4 }, { k: "2 months", v: 24 * 7 * 4 * 2 }, { k: "3 months", v: 24 * 7 * 4 * 3 }, { k: "6 months", v: 24 * 7 * 4 * 6 }]
 
 const graphInfo = {
     fontFamily: "mulish",
@@ -51,6 +57,28 @@ const sensorName = {
     fontFamily: "montserrat",
     fontSize: "54px",
     fontWeight: 800,
+}
+
+const collapseText = {
+    fontFamily: "montserrat",
+    fontSize: "24px",
+    fontWeight: 800,
+}
+const detailedTitle = {
+    fontFamily: "mulish",
+    fontSize: "16px",
+    fontWeight: 800,
+}
+const detailedText = {
+    fontFamily: "mulish",
+    fontSize: "14px",
+    width: "100%",
+    textAlign: "right",
+    verticalAlign: "middle",
+}
+const detailedSubText = {
+    fontFamily: "mulish",
+    fontSize: "14px",
 }
 
 class Sensor extends Component {
@@ -169,52 +197,66 @@ class Sensor extends Component {
                         {this.state.data && <div>
                             <StatGroup style={{ marginTop: "30px", marginBottom: "30px" }}>
                                 {["temperature", "humidity", "pressure", "movementCounter", "battery"].map(x => {
-                                    return <SensorReading value={unitHelper[x].value(this.getLatestReading()[x])}
-                                        label={unitHelper[x].label}
-                                        unit={unitHelper[x].unit}
+                                    return <SensorReading value={getUnitHelper(x).value(this.getLatestReading()[x])}
+                                        label={getUnitHelper(x).label}
+                                        unit={getUnitHelper(x).unit}
                                         selected={this.state.graphKey === x}
                                         onClick={() => this.setGraphKey(x)} />
                                 })}
                             </StatGroup>
+                            <table width="100%">
+                                <td>
+                                    <div style={{ ...collapseText, marginLeft: "30px" }}>
+                                        Last {timespans.find(x => x.v === this.state.from).k}
+                                    </div>
+                                    <div style={graphInfo}>
+                                        {getUnitHelper(this.state.graphKey).label} ({getUnitHelper(this.state.graphKey).unit})
+                                    </div>
+                                </td>
+                                <td style={{ textAlign: "right" }}>
+                                    <Menu>
+                                        <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>
+                                            {timespans.find(x => x.v === this.state.from).k}
+                                        </MenuButton>
+                                        <MenuList>
+                                            {timespans.map(x => {
+                                                return <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.setState({ ...this.state, from: x.v }, () => this.loadData(true))}>{x.k}</MenuItem>
+                                            })}
+                                        </MenuList>
+                                    </Menu>
+                                </td>
+                            </table>
 
-                            <div style={graphInfo}>
-                                {unitHelper[this.state.graphKey].label} ({unitHelper[this.state.graphKey].unit})
-                            </div>
+
                             <Graph dataKey={this.state.graphKey} data={this.state.data.measurements} cursor={true} />
-
-                            <Accordion>
+                            <Accordion allowMultiple style={{ marginLeft: -15, marginRight: -15 }}>
                                 <AccordionItem>
-                                    <h2>
-                                        <AccordionButton>
-                                            <Box flex="1" textAlign="left">
-                                                Alerts
+                                    <AccordionButton>
+                                        <Box flex="1" textAlign="left" style={collapseText}>
+                                            Alerts
                                             </Box>
-                                            <AccordionIcon />
-                                        </AccordionButton>
-                                    </h2>
-                                    <AccordionPanel pb={4}>
-                                        <b>
-                                            Not impelemeted
-                                        </b>
-                                    </AccordionPanel>
-                                </AccordionItem>
-
-                                <AccordionItem>
-                                    <h2>
-                                        <AccordionButton>
-                                            <Box flex="1" textAlign="left">
-                                                Offset Correction
-                                            </Box>
-                                            <AccordionIcon />
-                                        </AccordionButton>
-                                    </h2>
-                                    <AccordionPanel pb={4}>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <hr />
+                                    <AccordionPanel pb={4} style={{ backgroundColor: "#f6fcfb" }}>
+                                        <div style={{ marginTop: 16, marginBottom: 8 }}>
+                                            <div style={{ detailedTitle }}>
+                                                Not impelemeted
+                                            </div>
+                                        </div>
                                         <List>
-                                            {["offsetTemperature", "offsetHumidity", "offsetPressure"].map(x => {
+                                            {["Temperature", "Humidity", "Pressure"].map(x => {
                                                 return <ListItem>
-                                                    <b>{x}</b>
-                                                    <br />
-                                                    {this.state.data[x]}
+                                                    <table width="100%" style={{ marginTop: 16, marginBottom: 16 }}>
+                                                        <td>
+                                                            <div style={detailedTitle}>{x}</div>
+                                                            <div style={detailedSubText}>{x}</div>
+                                                        </td>
+                                                        <td style={detailedText}>
+                                                            -
+                                                        </td>
+                                                    </table>
+                                                    <hr />
                                                 </ListItem>
                                             })}
                                         </List>
@@ -222,61 +264,77 @@ class Sensor extends Component {
                                 </AccordionItem>
 
                                 <AccordionItem>
-                                    <h2>
-                                        <AccordionButton>
-                                            <Box flex="1" textAlign="left">
-                                                Sensor Info
+                                    <AccordionButton>
+                                        <Box flex="1" textAlign="left" style={collapseText}>
+                                            Offset Correction
                                             </Box>
-                                            <AccordionIcon />
-                                        </AccordionButton>
-                                    </h2>
-                                    <AccordionPanel pb={4}>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <hr />
+                                    <AccordionPanel pb={4} style={{ backgroundColor: "#f6fcfb" }}>
+                                        <List>
+                                            {["Temperature", "Humidity", "Pressure"].map(x => {
+                                                return <ListItem>
+                                                    <table width="100%" style={{ marginTop: 16, marginBottom: 16 }}>
+                                                        <td style={detailedTitle}> {x}</td>
+                                                        <td style={detailedText}>
+                                                            {this.state.data["offset" + x]}
+                                                        </td>
+                                                    </table>
+                                                    <hr />
+                                                </ListItem>
+                                            })}
+                                        </List>
+                                    </AccordionPanel>
+                                </AccordionItem>
+
+                                <AccordionItem>
+                                    <AccordionButton>
+                                        <Box flex="1" textAlign="left" style={collapseText}>
+                                            Sensor Info
+                                            </Box>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <hr />
+                                    <AccordionPanel pb={4} style={{ backgroundColor: "#f6fcfb" }}>
                                         <List>
                                             {this.getLatestReading(true).map(x => {
                                                 return (
                                                     <ListItem>
-                                                        <b>
-                                                            {x.key}
-                                                        </b>
-                                                        <br />
-                                                        {x.value}
+                                                        <table width="100%" style={{ marginTop: 16, marginBottom: 16 }} onClick={() => this.setGraphKey(x.key)}>
+                                                            <td style={detailedTitle}> {x.key}</td>
+                                                            <td style={detailedText}>
+                                                                {x.value}
+                                                            </td>
+                                                        </table>
+                                                        <hr />
                                                     </ListItem>
                                                 )
                                             })}
+                                            <ListItem>
+                                                <table width="100%" style={{ marginTop: 16, marginBottom: 16 }}>
+                                                    <td width="50%">
+                                                        <div style={detailedTitle}>Remove</div>
+                                                        <div style={detailedSubText}>Remove this sensor</div>
+                                                    </td>
+                                                    <td style={detailedText}>
+                                                        <Button backgroundColor="#43c7ba" color="white" borderRadius="24">Remove</Button>
+                                                    </td>
+                                                </table>
+                                                <hr />
+                                            </ListItem>
                                         </List>
                                     </AccordionPanel>
                                 </AccordionItem>
                             </Accordion>
 
-                            <div style={{ marginTop: "500px" }}>
+                            <div style={{ marginTop: "200px" }}>
                             </div>
-
-                            <StatGroup>{[{ k: "2.9 hours", v: 2.9 }, { k: "3.1 hours", v: 3.1 }, { k: "8 hours", v: 8 }, { k: "12 hours", v: 12 }, { k: "1 day", v: 24 }, { k: "1 week", v: 24 * 7 }, { k: "2 weeks", v: 24 * 7 * 2 }, { k: "1 month", v: 24 * 7 * 4 }, { k: "2 months", v: 24 * 7 * 4 * 2 }, { k: "3 months", v: 24 * 7 * 4 * 3 }].map(x => {
-                                return <Button key={x.v} colorScheme={x.v === this.state.from ? "teal" : undefined}
-                                    onClick={() => { this.setState({ ...this.state, from: x.v }, () => this.loadData(true)); }}>{x.k}</Button>
-                            })}</StatGroup>
-                            <RadioGroup onChange={this.setMode.bind(this)} value={this.state.mode}>
-                                <Stack direction="row">
-                                    <Radio value="dense">Dense</Radio>
-                                    <Radio value="mixed">Mixed</Radio>
-                                    <Radio value="sparse">Sparse</Radio>
-                                </Stack>
-                            </RadioGroup>
                             table: <b>{this.state.table}</b>
                             <br />
                             resolvedMode: <b>{this.state.resolvedMode}</b>
                             <br />
                             {this.state.data.measurements.length} broadcasts
-                            <StatGroup>
-                                {this.getLatestReading(true).map(x => {
-                                    return (
-                                        <Stat key={x.key} margin="12px" onClick={() => this.setState({ ...this.state, graphKey: x.key })}>
-                                            <StatLabel>{x.key}</StatLabel>
-                                            <StatNumber>{x.value}</StatNumber>
-                                        </Stat>
-                                    )
-                                })}
-                            </StatGroup>
                         </div>}
                     </div>
                 )}
