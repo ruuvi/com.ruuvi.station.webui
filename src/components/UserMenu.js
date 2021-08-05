@@ -9,6 +9,7 @@ import {
 import { FaUserAlt } from "react-icons/fa"
 import { MdArrowDropDown } from "react-icons/md"
 import NetworkApi from "../NetworkApi";
+import { withTranslation } from 'react-i18next';
 
 class UserMenu extends Component {
     constructor(props) {
@@ -16,15 +17,16 @@ class UserMenu extends Component {
     }
     seeSettings = () => {
         new NetworkApi().getSettings(settings => {
-            alert(JSON.stringify(settings, null, 2))
+            alert(JSON.stringify(settings))
         })
     }
     seeAlerts = () => {
         new NetworkApi().getAlerts(alerts => {
-            alert(JSON.stringify(alerts, null, 2))
+            alert(JSON.stringify(alerts))
         })
     }
     render() {
+        var { t } = this.props
         return (
             <Menu>
                 <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent" }}>
@@ -34,11 +36,11 @@ class UserMenu extends Component {
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>{this.props.email}</MenuItem>
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.props.logout()}>Logout</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.props.logout()}>{t("Logout")}</MenuItem>
                 </MenuList>
             </Menu>
         )
     }
 }
 
-export default UserMenu;
+export default withTranslation()(UserMenu);

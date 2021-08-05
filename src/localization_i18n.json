@@ -1,0 +1,53 @@
+{
+  "en": {
+    "translation": {
+      "Sensors": "Sensors",
+      "Motions": "Motions",
+      "Temperature": "Temperature",
+      "Humidity": "Humidity",
+      "Pressure": "Pressure",
+      "Movement": "Movement",
+      "Battery": "Battery",
+      "Alerts": "Alerts",
+      "Offset Correction": "Offset Correction",
+      "Sensor Info": "Sensor Info",
+      "Remove": "Remove",
+      "Remove this sensor": "Remove this sensor",
+      "Logout": "Logout"
+    }
+  },
+  "fi": {
+    "translation": {
+      "Sensors": "Antiruit",
+      "Motions": "Liikkeet",
+      "Temperature": "Lämpötila",
+      "Humidity": "Kosteus",
+      "Pressure": "Ilmanpaine",
+      "Movement": "Liike",
+      "Battery": "Paristojännite",
+      "Alerts": "Hälytykset",
+      "Offset Correction": "Offset-korjaus",
+      "Sensor Info": "Anturin tiedot",
+      "Remove": "Poista",
+      "Remove this sensor": "Irrota tämä anturi",
+      "Logout": "Kirjautua ulos"
+    }
+  },
+  "sv": {
+    "translation": {
+      "Sensors": "Sensorer",
+      "Motions": "Rörelser",
+      "Temperature": "Temperatur",
+      "Humidity": "Luftfuktighet",
+      "Pressure": "Lufttryck",
+      "Movement": "Rörelse",
+      "Battery": "Batteri",
+      "Alerts": "Alarm",
+      "Offset Correction": "Kalibrering",
+      "Sensor Info": "Sensor info",
+      "Remove": "Ta bort",
+      "Remove this sensor": "Ta bort sensorn",
+      "Logout": "Logga ut"
+    }
+  }
+}

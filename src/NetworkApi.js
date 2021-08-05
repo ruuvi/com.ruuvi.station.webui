@@ -38,7 +38,6 @@ class NetworkApi {
                 throw (response)
             })
             .then(response => {
-                console.log("RESP", response)
                 success(response);
             })
             .catch(error => fail ? fail(error) : {});
@@ -87,7 +86,6 @@ class NetworkApi {
                 throw (response)
             })
             .then(response => {
-                console.log("RESP", response)
                 success(response);
             })
     }

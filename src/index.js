@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
@@ -6,10 +6,17 @@ import reportWebVitals from './reportWebVitals';
 import 'typeface-montserrat';
 import 'typeface-mulish';
 import 'typeface-oswald';
+import './i18n';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Suspense fallback={
+      <center style={{ width: "100%", marginTop: 100 }}>
+        Loading
+      </center>
+    }>
+      <App />
+    </Suspense>
   </React.StrictMode>,
   document.getElementById('root')
 );

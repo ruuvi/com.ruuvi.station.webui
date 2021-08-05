@@ -10,6 +10,7 @@ class Dashboard extends Component {
         this.state = {
             loading: true,
             sensors: [],
+            alerts: [],
         }
     }
     getCurrentSensor() {
@@ -21,17 +22,22 @@ class Dashboard extends Component {
             if (resp.result === "success") {
                 var d = resp.data.sensors;
                 this.setState({ ...this.state, sensors: d, loading: false })
+                new NetworkApi().getAlerts(data => {
+                    if (data.result === "success") {
+                        console.log(data.data.sensors)
+                        this.setState({ ...this.state, alerts: data.data.sensors })
+                    }
+                })
             } else if (resp.result === "error") {
                 alert(resp.error)
-                // maybe dont be so quick to kick the user out?
-                new NetworkApi().removeToken()
+                //new NetworkApi().removeToken()
             }
         }, (e) => {
             alert("Network error")
             console.log("err", e)
-            // maybe dont be so quick to kick the user out?
-            new NetworkApi().removeToken()
+            //new NetworkApi().removeToken()
         })
+
     }
     nextIndex(direction) {
         var current = this.getCurrentSensor().sensor;
@@ -56,18 +62,18 @@ class Dashboard extends Component {
                     }
                     {this.getCurrentSensor() ? (
                         <GridItem colSpan={4}>
-                            <Sensor sensor={this.getCurrentSensor()} 
-                            close={() => this.props.history.push('/')} 
-                            next={() => this.nextIndex(1)} 
-                            prev={() => this.nextIndex(-1)} 
-                             />
+                            <Sensor sensor={this.getCurrentSensor()}
+                                close={() => this.props.history.push('/')}
+                                next={() => this.nextIndex(1)}
+                                prev={() => this.nextIndex(-1)}
+                            />
                         </GridItem>
                     ) : (
                         <>
                             {this.state.sensors.map(x => {
                                 return <GridItem>
-                                    <a href={"#/"+x.sensor}>
-                                    <SensorCard sensor={x} />
+                                    <a href={"#/" + x.sensor}>
+                                        <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
                                     </a>
                                 </GridItem>
                             })}

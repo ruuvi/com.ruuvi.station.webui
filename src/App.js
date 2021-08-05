@@ -48,6 +48,10 @@ export default function App() {
       }} />
     </ChakraProvider>
   }
+  new NetworkApi().getSettings(settings => {
+    if (settings.result === "success")
+      localStorage.setItem("settings", JSON.stringify(settings.data.settings))
+  })
   return (
     <ChakraProvider theme={theme}>
       <HashRouter>

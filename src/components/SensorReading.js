@@ -18,15 +18,15 @@ const labelStyle = {
 
 export default function SensorReading(props) {
     return (
-        <Stat style={{ margin: "15px", height: "100px", backgroundColor: "#e6f6f2", border: props.selected ? "1px solid rgba(1,174,144,0.7)" : "1px solid rgba(1,174,144,0)", borderRadius: "10px" }} onClick={props.onClick}>
+        <Stat style={{ margin: "15px", height: "100px", backgroundColor: props.alertTriggered ? "#f4acac" : "#e6f6f2", border: props.selected ? "1px solid rgba(1,174,144,0.7)" : "1px solid rgba(1,174,144,0)", borderRadius: "10px", cursor:"pointer" }} onClick={props.onClick}>
             <center style={{ height: 100 }}>
                 <div style={middle}>
                     <div>
                         <div style={{ marginBottom: -10, marginTop: -10}}>
-                            <span class="main-stat">
+                            <span className="main-stat">
                                 {props.value}
                             </span>
-                            <span class="main-stat-unit">
+                            <span className="main-stat-unit">
                                 {props.unit}
                             </span>
                         </div>
