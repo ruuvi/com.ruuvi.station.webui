@@ -308,7 +308,7 @@ class Sensor extends Component {
                                                             <tr>
                                                                 <td style={detailedTitle}> {t(x)}</td>
                                                                 <td style={detailedText}>
-                                                                    {this.state.data["offset" + x]}
+                                                                    {localeNumber(this.state.data["offset" + x], 2)}
                                                                 </td>
                                                             </tr>
                                                         </tbody>
