@@ -10,6 +10,7 @@ import { FaUserAlt } from "react-icons/fa"
 import { MdArrowDropDown } from "react-icons/md"
 import NetworkApi from "../NetworkApi";
 import { withTranslation } from 'react-i18next';
+import pjson from "./../../package.json"
 
 class UserMenu extends Component {
     constructor(props) {
@@ -33,9 +34,12 @@ class UserMenu extends Component {
                     <FaUserAlt />
                 </MenuButton>
                 <MenuList >
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>{this.props.email}</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", }}>{this.props.email}</MenuItem>
+                    {/**
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
+                    */}
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>Version {pjson.version}</MenuItem>
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.props.logout()}>{t("Logout")}</MenuItem>
                 </MenuList>
             </Menu>

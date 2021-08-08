@@ -10,12 +10,11 @@ import logo from './img/ruuvi-vector-logo.svg'
 
 import { ChakraProvider, Text, HStack, Image } from "@chakra-ui/react"
 import Dashboard from "./states/Dashboard";
-// 1. Import `extendTheme`
 import { extendTheme } from "@chakra-ui/react"
 import UserMenu from "./components/UserMenu";
 import SensorMenu from "./components/SensorMenu";
 import LanguageMenu from "./components/LanguageMenu";
-// 2. Call `extendTheme` and pass your custom values
+
 const theme = extendTheme({
   styles: {
     global: {
