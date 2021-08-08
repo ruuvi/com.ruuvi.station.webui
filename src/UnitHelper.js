@@ -4,6 +4,9 @@ const unitHelper = {
     "pressure": { label: "Pressure", unit: "hPa", value: (value) => value / 100, decimals: 2 },
     "movementCounter": { label: "Movement", unit: "Times", value: (value) => value, decimals: 0 },
     "battery": { label: "Battery", unit: "V", value: (value) => value / 1000, decimals: 3 },
+    "accelerationX": { label: "Acceleration X", unit: "g", value: (value) => value / 1000, decimals: 3 },
+    "accelerationY": { label: "Acceleration Y", unit: "g", value: (value) => value / 1000, decimals: 3 },
+    "accelerationZ": { label: "Acceleration Z", unit: "g", value: (value) => value / 1000, decimals: 3 },
 }
 
 export function getUnitHelper(key) {
