@@ -31,6 +31,16 @@ const theme = extendTheme({
   },
 })
 
+const bottomText = {
+  width: "100%",
+  textAlign: "center",
+  padding: "20px",
+  fontFamily: "mulish",
+  fontSize: 18,
+  fontWeight: 800,
+  color: "#c8dbd9",
+}
+
 export default function App() {
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
@@ -72,6 +82,7 @@ export default function App() {
             <Route path="/:id" component={Dashboard} />
             <Route path="/" component={Dashboard} />
           </Switch>
+          <div style={bottomText}>ruuvi.com</div>
         </div>
       </HashRouter>
     </ChakraProvider>
