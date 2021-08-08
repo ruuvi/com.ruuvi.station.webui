@@ -276,7 +276,7 @@ class Sensor extends Component {
                                                             <tr>
                                                                 <td width="50%">
                                                                     <div style={detailedTitle}>{t(x)}</div>
-                                                                    <div style={detailedSubText}>{t(this.getAlertText(x.toLocaleLowerCase()))}</div>
+                                                                    <div style={detailedSubText}>{this.getAlert(x.toLocaleLowerCase()) && this.getAlert(x.toLocaleLowerCase()).enabled && <span>{t(this.getAlertText(x.toLocaleLowerCase()))}</span>}</div>
                                                                 </td>
                                                                 <td style={detailedText}>
                                                                     <Switch isDisabled isChecked={this.getAlert(x.toLocaleLowerCase()) && this.getAlert(x.toLocaleLowerCase()).enabled} />
