@@ -10,9 +10,6 @@ function mmdd(ts) {
 }
 
 class Graph extends Component {
-    constructor(props) {
-        super(props)
-    }
     getGraphData() {
         if (!this.props.data) return [[], []];
         var d = JSON.parse(JSON.stringify(this.props.data));

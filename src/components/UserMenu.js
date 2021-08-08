@@ -13,9 +13,6 @@ import { withTranslation } from 'react-i18next';
 import pjson from "./../../package.json"
 
 class UserMenu extends Component {
-    constructor(props) {
-        super(props)
-    }
     seeSettings = () => {
         new NetworkApi().getSettings(settings => {
             alert(JSON.stringify(settings))

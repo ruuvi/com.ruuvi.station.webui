@@ -28,7 +28,7 @@ import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
 import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
-import { EditIcon, CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
+import { CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 import { MdArrowDropDown } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";

@@ -65,7 +65,7 @@ export default function App() {
     <ChakraProvider theme={theme}>
       <HashRouter>
         <HStack style={{ backgroundColor: "white", boxShadow: "0px 1px 2px #dddddd", paddingLeft: "25px", paddingRight: "25px" }} height="60px">
-          <a href="#">
+          <a href="/#">
             <Image alt="logo" height={30} src={logo} fit="scale-down" />
           </a>
           <Text>
