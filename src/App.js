@@ -82,7 +82,7 @@ export default function App() {
             <Route path="/:id" component={Dashboard} />
             <Route path="/" component={Dashboard} />
           </Switch>
-          <div style={bottomText}>ruuvi.com</div>
+          <div style={bottomText}><a href="https://ruuvi.com/" target="_blank" rel="noreferrer">ruuvi.com</a></div>
         </div>
       </HashRouter>
     </ChakraProvider>
