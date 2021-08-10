@@ -36,11 +36,23 @@ class SensorCard extends Component {
         this.loadData(true)
     }
     loadData() {
-        new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), "sparse", resp => {
-            console.log("resp", resp)
+        new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: "dense", limit: 1, sort: "desc" }, resp => {
             if (resp.result === "success") {
                 let d = parse(resp.data);
-                this.setState({ data: d, loading: false, table: d.table, resolvedMode: d.resolvedMode })
+                this.setState({ lastParsedReading: d.measurements.length === 1 ? d.measurements[0] : null })
+                new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: "sparse" }, resp => {
+                    if (resp.result === "success") {
+                        let d = parse(resp.data);
+                        this.setState({ data: d, loading: false, table: d.table, resolvedMode: d.resolvedMode })
+                    } else if (resp.result === "error") {
+                        alert(resp.error)
+                        this.setState({ ...this.state, loading: false })
+                    }
+                }, (e) => {
+                    alert("LoadData error: " + e.toString())
+                    console.log("err", e)
+                    this.setState({ data: null, loading: false })
+                })
             } else if (resp.result === "error") {
                 alert(resp.error)
                 this.setState({ ...this.state, loading: false })
@@ -50,14 +62,12 @@ class SensorCard extends Component {
             console.log("err", e)
             this.setState({ data: null, loading: false })
         })
+
     }
     getLatestReading() {
-        if (!this.state.data || !this.state.data.measurements.length) return [];
-        var ms = this.state.data.measurements;
-        if (!ms || !ms.length) return [];
-        return ms[0].parsed;
+        if (!this.state.lastParsedReading) return [];
+        return this.state.lastParsedReading.parsed;
     }
-
     getTimeSinceLastUpdate() {
         if (!this.state.data || !this.state.data.measurements.length) return " - ";
         var now = new Date().getTime() / 1000
@@ -67,7 +77,6 @@ class SensorCard extends Component {
     getAlert(type) {
         if (!this.props.alerts) return null
         var idx = this.props.alerts.alerts.findIndex(x => x.type === type)
-        console.log(idx)
         if (idx !== -1) {
             return this.props.alerts.alerts[idx]
         }
@@ -92,7 +101,7 @@ class SensorCard extends Component {
                 ) : (
                     <div>
                         {this.state.data && this.state.data.measurements.length ? <div>
-                            <div style={{color: this.isAlertTriggerd("temperature") ? "#f27575" : undefined}}>
+                            <div style={{ color: this.isAlertTriggerd("temperature") ? "#f27575" : undefined }}>
                                 <span class="main-stat">
                                     {localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals)}
                                 </span>
@@ -105,10 +114,10 @@ class SensorCard extends Component {
                             </div>
                             <hr style={{ margin: "0px 0 10px 0" }} />
                             <SimpleGrid columns={{ sm: 2 }} style={{ width: "100%" }}>
-                                <GridItem style={{back: this.isAlertTriggerd("humidity") ? "#f27575" : undefined}}><span style={smallSensorValue}>{localeNumber(getUnitHelper("humidity").value(this.getLatestReading().humidity), getUnitHelper("humidity").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("humidity").unit}</span></GridItem>
-                                <GridItem style={{color: this.isAlertTriggerd("battery") ? "#f27575" : undefined}}><span style={smallSensorValue}>{localeNumber(getUnitHelper("battery").value(this.getLatestReading().battery),  getUnitHelper("battery").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("battery").unit}</span></GridItem>
-                                <GridItem style={{color: this.isAlertTriggerd("pressure") ? "#f27575" : undefined}}><span style={smallSensorValue}>{localeNumber(getUnitHelper("pressure").value(this.getLatestReading().pressure),  getUnitHelper("pressure").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("pressure").unit}</span></GridItem>
-                                <GridItem style={{color: this.isAlertTriggerd("movementCounter") ? "#f27575" : undefined}}><span style={smallSensorValue}>{localeNumber(getUnitHelper("movementCounter").value(this.getLatestReading().movementCounter),  getUnitHelper("movementCounter").decimals)}</span> <span style={smallSensorValueUnit}>{t(getUnitHelper("movementCounter").unit).toLowerCase()}</span></GridItem>
+                                <GridItem style={{ back: this.isAlertTriggerd("humidity") ? "#f27575" : undefined }}><span style={smallSensorValue}>{localeNumber(getUnitHelper("humidity").value(this.getLatestReading().humidity), getUnitHelper("humidity").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("humidity").unit}</span></GridItem>
+                                <GridItem style={{ color: this.isAlertTriggerd("battery") ? "#f27575" : undefined }}><span style={smallSensorValue}>{localeNumber(getUnitHelper("battery").value(this.getLatestReading().battery), getUnitHelper("battery").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("battery").unit}</span></GridItem>
+                                <GridItem style={{ color: this.isAlertTriggerd("pressure") ? "#f27575" : undefined }}><span style={smallSensorValue}>{localeNumber(getUnitHelper("pressure").value(this.getLatestReading().pressure), getUnitHelper("pressure").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("pressure").unit}</span></GridItem>
+                                <GridItem style={{ color: this.isAlertTriggerd("movementCounter") ? "#f27575" : undefined }}><span style={smallSensorValue}>{localeNumber(getUnitHelper("movementCounter").value(this.getLatestReading().movementCounter), getUnitHelper("movementCounter").decimals)}</span> <span style={smallSensorValueUnit}>{t(getUnitHelper("movementCounter").unit).toLowerCase()}</span></GridItem>
                             </SimpleGrid>
                         </div> : <div>
                             <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>No data.<br />The sensor need to be in range of a gateway.</center>

@@ -122,7 +122,7 @@ class Sensor extends Component {
                 if (alerts) this.setState({ ...this.state, alerts: alerts.alerts })
             }
         })
-        new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), this.state.mode, resp => {
+        new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: this.state.mode }, resp => {
             if (resp.result === "success") {
                 let d = parse(resp.data);
                 this.setState({ data: d, loading: false, table: d.table, resolvedMode: d.resolvedMode })
@@ -343,7 +343,7 @@ class Sensor extends Component {
                                                         <table width="100%" style={{ marginTop: 16, marginBottom: 16, cursor: "pointer" }} onClick={() => this.setGraphKey(x.key)}>
                                                             <tbody>
                                                                 <tr>
-                                                                    <td style={detailedTitle}> {t(getUnitHelper(x.key).label || x.key)}</td>
+                                                                    <td style={detailedTitle}> {t(getUnitHelper(x.key).label || x.key)}</td>
                                                                     <td style={detailedText}>
                                                                         {localeNumber(getUnitHelper(x.key).value(x.value), getUnitHelper(x.key).decimals)} {getUnitHelper(x.key).unit}
                                                                     </td>

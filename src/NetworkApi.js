@@ -57,13 +57,14 @@ class NetworkApi {
             .then(response => success(response))
             .catch(error => fail ? fail(error) : {});
     };
-    get(mac, from, mode, success, fail) {
+    get(mac, from, settings, success, fail) {
         if (!this.options) if (fail) return fail("Not signed in"); else return
         var q = "?sensor=" + encodeURIComponent(mac)
-        q += "&mode=" + encodeURIComponent(mode)
+        q += "&mode=" + encodeURIComponent(settings.mode || "mixed")
         q += "&since=" + from
         q += "&until=" + parseInt(new Date().getTime() / 1000)
-        q += "&limit=100000"
+        q += "&limit=" + (settings.limit || 100000)
+        if (settings.sort) q += "&sort=" + settings.sort
         fetch(this.url + "/get" + q, this.options).then(function (response) {
             return response.json();
         })
