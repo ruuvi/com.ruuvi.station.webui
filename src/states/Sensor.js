@@ -31,7 +31,7 @@ import parse from "../decoder/parser";
 import { CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 import { MdArrowDropDown } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
-import { getUnitHelper, localeNumber, temperatureOffsetToUserFormat } from "../UnitHelper";
+import { getUnitHelper, localeNumber, temperatureOffsetToUserFormat, temperatureToUserFormat } from "../UnitHelper";
 
 var uppercaseFirst = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -172,8 +172,12 @@ class Sensor extends Component {
         return null
     }
     getAlertText(type) {
+        console.log("type", type)
         var idx = this.state.alerts.findIndex(x => x.type === type)
         if (idx !== -1) {
+            if (type === "temperature") {
+                return "Alert when under " + temperatureToUserFormat(this.state.alerts[idx].min) + " or over " + temperatureToUserFormat(this.state.alerts[idx].max)
+            }
             return "Alert when under " + this.state.alerts[idx].min + " or over " + this.state.alerts[idx].max
         }
         return uppercaseFirst(type)
