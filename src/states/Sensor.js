@@ -39,6 +39,9 @@ var uppercaseFirst = (string) => {
 
 var timespans = [{ k: "1 hours", v: 1 }, { k: "2 hours", v: 2 }, { k: "8 hours", v: 8 }, { k: "12 hours", v: 12 }, { k: "1 day", v: 24 }, { k: "2 days", v: 24 * 2 }, { k: "1 week", v: 24 * 7 }, { k: "2 weeks", v: 24 * 7 * 2 }, { k: "1 month", v: 24 * 7 * 4 }, { k: "2 months", v: 24 * 7 * 4 * 2 }, { k: "3 months", v: 24 * 7 * 4 * 3 }, { k: "6 months", v: 24 * 7 * 4 * 6 }]
 
+var bigCardFields = ["temperature", "humidity", "pressure", "movementCounter", "battery"];
+var sensorInfoOrder = ["mac", "dataFormat", "accelerationX", "accelerationY", "accelerationZ", "txPower", "rssi", "movementSequenceNumber"];
+
 const graphInfo = {
     fontFamily: "mulish",
     fontSize: 14,
@@ -62,6 +65,7 @@ const detailedTitle = {
     fontFamily: "mulish",
     fontSize: "16px",
     fontWeight: 800,
+    width: "50%",
 }
 const detailedText = {
     fontFamily: "mulish",
@@ -106,7 +110,6 @@ class Sensor extends Component {
         }
     }
     setMode(mode) {
-        console.log(mode)
         this.setState({ ...this.state, mode: mode }, () => {
             this.loadData(true);
         })
@@ -120,7 +123,6 @@ class Sensor extends Component {
             }
         })
         new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), this.state.mode, resp => {
-            console.log("resp", resp)
             if (resp.result === "success") {
                 let d = parse(resp.data);
                 this.setState({ data: d, loading: false, table: d.table, resolvedMode: d.resolvedMode })
@@ -172,7 +174,6 @@ class Sensor extends Component {
         return null
     }
     getAlertText(type) {
-        console.log("type", type)
         var idx = this.state.alerts.findIndex(x => x.type === type)
         if (idx !== -1) {
             if (type === "temperature") {
@@ -220,7 +221,7 @@ class Sensor extends Component {
                     <div>
                         {this.state.data && <div>
                             <StatGroup style={{ marginTop: "30px", marginBottom: "30px" }}>
-                                {["temperature", "humidity", "pressure", "movementCounter", "battery"].map(x => {
+                                {bigCardFields.map(x => {
                                     return <SensorReading key={x} value={localeNumber(getUnitHelper(x).value(this.getLatestReading()[x]), getUnitHelper(x).decimals)}
                                         alertTriggered={this.isAlertTriggerd(x)}
                                         label={t(getUnitHelper(x).label)}
@@ -334,15 +335,17 @@ class Sensor extends Component {
                                     <hr />
                                     <AccordionPanel pb={4} style={{ backgroundColor: "#f6fcfb" }}>
                                         <List>
-                                            {this.getLatestReading(true).map(x => {
+                                            {sensorInfoOrder.map(order => {
+                                                var x = this.getLatestReading(true).find(x => x.key === order);
+                                                if (!x) return null
                                                 return (
                                                     <ListItem key={x.key}>
                                                         <table width="100%" style={{ marginTop: 16, marginBottom: 16, cursor: "pointer" }} onClick={() => this.setGraphKey(x.key)}>
                                                             <tbody>
                                                                 <tr>
-                                                                    <td style={detailedTitle}> {t(uppercaseFirst(x.key))}</td>
+                                                                    <td style={detailedTitle}> {t(getUnitHelper(x.key).label || x.key)}</td>
                                                                     <td style={detailedText}>
-                                                                        {localeNumber(getUnitHelper(x.key).value(x.value), getUnitHelper(x.key).decimals)}
+                                                                        {localeNumber(getUnitHelper(x.key).value(x.value), getUnitHelper(x.key).decimals)} {getUnitHelper(x.key).unit}
                                                                     </td>
                                                                 </tr>
                                                             </tbody>

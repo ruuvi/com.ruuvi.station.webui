@@ -7,6 +7,10 @@ const unitHelper = {
     "accelerationX": { label: "Acceleration X", unit: "g", value: (value) => value / 1000, decimals: 3 },
     "accelerationY": { label: "Acceleration Y", unit: "g", value: (value) => value / 1000, decimals: 3 },
     "accelerationZ": { label: "Acceleration Z", unit: "g", value: (value) => value / 1000, decimals: 3 },
+    "rssi": { label: "Signal strength (RSSI)", unit: "dBm", value: (value) => value, decimals: 0 },
+    "txPower": { label: "Tx Power", unit: "dBm", value: (value) => value, decimals: 0 },
+    "mac": { label: "MAC Address", unit: "", value: (value) => value, decimals: 0 },
+    "dataFormat": { label: "Data Format", unit: "", value: (value) => value, decimals: 0 },
 }
 
 export function getUnitHelper(key) {
