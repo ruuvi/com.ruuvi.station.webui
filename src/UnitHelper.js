@@ -34,3 +34,14 @@ export function localeNumber(value, decimals) {
     if (typeof (value) !== "number") return value
     return value.toLocaleString("fi-FI", { minimumFractionDigits: decimals })
 }
+
+export function temperatureOffsetToUserFormat(temperature) {
+    var settings = localStorage.getItem("settings");
+    if (settings) {
+        settings = JSON.parse(settings)
+        if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
+            temperature = +(temperature * 1.8);
+        }
+    }
+    return temperature;
+}

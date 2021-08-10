@@ -31,7 +31,7 @@ import parse from "../decoder/parser";
 import { CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 import { MdArrowDropDown } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
-import { getUnitHelper, localeNumber } from "../UnitHelper";
+import { getUnitHelper, localeNumber, temperatureOffsetToUserFormat } from "../UnitHelper";
 
 var uppercaseFirst = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -308,7 +308,7 @@ class Sensor extends Component {
                                                             <tr>
                                                                 <td style={detailedTitle}> {t(x)}</td>
                                                                 <td style={detailedText}>
-                                                                    {localeNumber(this.state.data["offset" + x], 2)}
+                                                                    {localeNumber(temperatureOffsetToUserFormat(this.state.data["offset" + x]), 2)} {getUnitHelper(x.toLocaleLowerCase()).unit}
                                                                 </td>
                                                             </tr>
                                                         </tbody>
