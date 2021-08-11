@@ -36,7 +36,7 @@ export function getUnitHelper(key) {
 
 export function localeNumber(value, decimals) {
     if (typeof (value) !== "number") return value
-    return value.toLocaleString("fi-FI", { minimumFractionDigits: decimals })
+    return value.toLocaleString("fi-FI", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 }
 
 export function temperatureToUserFormat(temperature) {
@@ -58,7 +58,7 @@ export function temperatureOffsetToUserFormat(temperature) {
     if (settings) {
         settings = JSON.parse(settings)
         if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
-            temperature = +(temperature * 1.8);
+            temperature = temperature * 1.8;
         }
     }
     return temperature;
