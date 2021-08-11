@@ -192,9 +192,9 @@ class Sensor extends Component {
         var { t } = this.props
         return (
             <Box borderWidth="1px" borderRadius="lg" overflow="hidden" padding="15px" style={{ backgroundColor: "white" }}>
-                <HStack>
+                <HStack alignItems="start">
                     <Avatar bg="#01ae90" size="xl" name={this.props.sensor.name || this.props.sensor.sensor} src={this.props.sensor.picture} />
-                    <div style={{ width: "50%" }}>
+                    <div style={{ width: "65%" }}>
                         <Heading style={sensorName} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}>
                             {this.props.sensor.name || this.props.sensor.sensor}
                         </Heading>
@@ -202,11 +202,11 @@ class Sensor extends Component {
                             Last update: {this.getTimeSinceLastUpdate()}m ago
                         </div>
                     </div>
-                    <span style={{ width: "100%", textAlign: "right", marginTop: "-50px" }}>
+                    <span style={{ width: "100%", textAlign: "right", height: "100%"}}>
                         {/*<IconButton isRound={true} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><EditIcon /></IconButton>*/}
-                        <IconButton isRound={true} onClick={() => this.props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><ArrowBackIcon /></IconButton>
-                        <IconButton isRound={true} onClick={() => this.props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginRight: "5px" }}><ArrowForwardIcon /></IconButton>
-                        <IconButton isRound={true} onClick={() => this.props.close()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0" }}><CloseIcon /></IconButton>
+                        <IconButton isRound={true} onClick={() => this.props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "2px", marginRight: "5px" }}><ArrowBackIcon /></IconButton>
+                        <IconButton isRound={true} onClick={() => this.props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><ArrowForwardIcon /></IconButton>
+                        <IconButton isRound={true} onClick={() => this.props.close()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
                     </span>
                 </HStack>
                 {this.state.editName !== null && <div>

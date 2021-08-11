@@ -8,6 +8,7 @@ const middle = {
     alignItems: "center",
     justifyContent: "center",
     height: "100%",
+    padding: "10px",
 }
 
 const labelStyle = {

@@ -51,7 +51,7 @@ class Dashboard extends Component {
     }
     render() {
         return (
-            <Box marginTop="36px" marginLeft="75px" marginRight="75px">
+            <Box marginTop="36px" marginLeft="5%" marginRight="5%">
                 <SimpleGrid columns={{ sm: 1, md: 2, lg: 4 }} spacing="8px">
                     {this.state.loading &&
                         <GridItem colSpan={4}>
