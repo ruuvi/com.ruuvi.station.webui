@@ -11,6 +11,7 @@ const unitHelper = {
     "txPower": { label: "Tx Power", unit: "dBm", value: (value) => value, decimals: 0 },
     "mac": { label: "MAC Address", unit: "", value: (value) => value, decimals: 0 },
     "dataFormat": { label: "Data Format", unit: "", value: (value) => value, decimals: 0 },
+    "measurementSequenceNumber": { label: "Measurement Sequence Number", unit: "", value: (value) => value, decimals: 0 },
 }
 
 export function getUnitHelper(key) {

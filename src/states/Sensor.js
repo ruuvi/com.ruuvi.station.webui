@@ -39,8 +39,8 @@ var uppercaseFirst = (string) => {
 
 var timespans = [{ k: "1 hours", v: 1 }, { k: "2 hours", v: 2 }, { k: "8 hours", v: 8 }, { k: "12 hours", v: 12 }, { k: "1 day", v: 24 }, { k: "2 days", v: 24 * 2 }, { k: "1 week", v: 24 * 7 }, { k: "2 weeks", v: 24 * 7 * 2 }, { k: "1 month", v: 24 * 7 * 4 }, { k: "2 months", v: 24 * 7 * 4 * 2 }, { k: "3 months", v: 24 * 7 * 4 * 3 }, { k: "6 months", v: 24 * 7 * 4 * 6 }]
 
-var bigCardFields = ["temperature", "humidity", "pressure", "movementCounter", "battery"];
-var sensorInfoOrder = ["mac", "dataFormat", "accelerationX", "accelerationY", "accelerationZ", "txPower", "rssi", "movementSequenceNumber"];
+var bigCardFields = ["temperature", "humidity", "pressure", "movementCounter"];
+var sensorInfoOrder = ["mac", "dataFormat", "battery", "accelerationX", "accelerationY", "accelerationZ", "txPower", "rssi", "measurementSequenceNumber"];
 
 const graphInfo = {
     fontFamily: "mulish",
