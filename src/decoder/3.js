@@ -2,7 +2,9 @@
 // which is licenced under BSD-3
 // Credits to GitHub user ojousima
 
-const parseRawRuuvi = function(manufacturerDataString) {
+const { round } = require("../UnitHelper");
+
+const parseRawRuuvi = function (manufacturerDataString) {
   let humidityStart = 6;
   let humidityEnd = 8;
   let temperatureStart = 8;
@@ -23,7 +25,8 @@ const parseRawRuuvi = function(manufacturerDataString) {
   let humidity = manufacturerDataString.substring(humidityStart, humidityEnd);
   humidity = parseInt(humidity, 16);
   humidity /= 2; //scale
-  robject.humidity = +humidity.toFixed(2);
+  robject.humidity = round(humidity, 2);
+
 
   let temperatureString = manufacturerDataString.substring(temperatureStart, temperatureEnd);
   let temperature = parseInt(temperatureString.substring(0, 2), 16); //Full degrees
@@ -33,7 +36,7 @@ const parseRawRuuvi = function(manufacturerDataString) {
     temperature = temperature - 128;
     temperature = 0 - temperature;
   }
-  robject.temperature = +temperature.toFixed(2); // Round to 2 decimals, format as a number
+  robject.temperature = round(temperature, 2);
 
   let pressure = parseInt(manufacturerDataString.substring(pressureStart, pressureEnd), 16); // uint16_t pascals
   pressure += 50000; //Ruuvi format

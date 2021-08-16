@@ -1,3 +1,4 @@
+import { round } from "../UnitHelper";
 import decoder from "./decode";
 
 function parse(d) {
@@ -20,15 +21,16 @@ function parse(d) {
         for (var i = 0; i < d.measurements.length; i++) {
             if (d.offsetTemperature !== 0) {
                 d.measurements[i].parsed.temperature += d.offsetTemperature
-                d.measurements[i].parsed.temperature = +d.measurements[i].parsed.temperature.toFixed(2)
+                d.measurements[i].parsed.temperature = round(d.measurements[i].parsed.temperature, 2)
+
             }
             if (d.offsetHumidity !== 0) {
                 d.measurements[i].parsed.humidity += d.offsetHumidity
-                d.measurements[i].parsed.humidity = +d.measurements[i].parsed.humidity.toFixed(2)
+                d.measurements[i].parsed.humidity = round(d.measurements[i].parsed.humidity, 2)
             }
             if (d.offsetPressure !== 0) {
                 d.measurements[i].parsed.pressure += d.offsetPressure
-                d.measurements[i].parsed.pressure = +d.measurements[i].parsed.pressure.toFixed(2)
+                d.measurements[i].parsed.pressure = round(d.measurements[i].parsed.pressure, 2)
             }
         }
     }
@@ -37,12 +39,12 @@ function parse(d) {
         settings = JSON.parse(settings)
         if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
             d.measurements.forEach(x => {
-                x.parsed.temperature = +((x.parsed.temperature * 1.8) + 32).toFixed(2);
+                x.parsed.temperature = round(((x.parsed.temperature * 1.8) + 32), 2);
             })
         }
         else if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
             d.measurements.forEach(x => {
-                x.parsed.temperature = +(x.parsed.temperature + 273.15).toFixed(2);
+                x.parsed.temperature = round((x.parsed.temperature + 273.15), 2);
             })
         }
     }

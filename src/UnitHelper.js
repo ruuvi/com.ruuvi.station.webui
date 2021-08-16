@@ -51,7 +51,7 @@ export function temperatureToUserFormat(temperature) {
             temperature = temperature + 273.15;
         }
     }
-    return +(temperature).toFixed(2)
+    return round(temperature, 2)
 }
 
 export function temperatureOffsetToUserFormat(temperature) {
@@ -63,4 +63,11 @@ export function temperatureOffsetToUserFormat(temperature) {
         }
     }
     return temperature;
+}
+
+export function round(number, deciamals) {
+    var f = 1;
+    for (var i = 0; i < deciamals; i++) f += "0"
+    f = +f
+    return Math.round(number * f) / f
 }
