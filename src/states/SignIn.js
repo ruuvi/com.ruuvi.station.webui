@@ -22,6 +22,13 @@ const buttonText = {
     fontWeight: "bold",
     fontSize: 16,
 }
+const sideBackground = {
+    backgroundColor: "gray",
+    backgroundImage: "url('https://ruuvi.com/i/u/station-bg.jpg')",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
+}
 
 class SignIn extends Component {
     constructor(props) {
@@ -120,7 +127,7 @@ class SignIn extends Component {
                         </Stack>
                     </Center>
                 </GridItem>
-                <GridItem style={{ backgroundColor: "gray" }}></GridItem>
+                <GridItem style={sideBackground}></GridItem>
             </SimpleGrid>
         )
     }
