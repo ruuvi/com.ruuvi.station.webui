@@ -52,30 +52,25 @@ class Dashboard extends Component {
     render() {
         return (
             <Box marginTop="36px" marginLeft="5%" marginRight="5%">
-                <SimpleGrid columns={{ sm: 1, md: 2, lg: 4 }} spacing="8px">
+                <SimpleGrid minChildWidth="310px" spacing="8px" alignItems="center">
                     {this.state.loading &&
-                        <GridItem colSpan={4}>
-                            <center>
-                                <Spinner size="xl" />
-                            </center>
-                        </GridItem>
+                        <center>
+                            <Spinner size="xl" />
+                        </center>
                     }
                     {this.getCurrentSensor() ? (
-                        <GridItem colSpan={4}>
-                            <Sensor sensor={this.getCurrentSensor()}
-                                close={() => this.props.history.push('/')}
-                                next={() => this.nextIndex(1)}
-                                prev={() => this.nextIndex(-1)}
-                            />
-                        </GridItem>
+                        <Sensor sensor={this.getCurrentSensor()}
+                            close={() => this.props.history.push('/')}
+                            next={() => this.nextIndex(1)}
+                            prev={() => this.nextIndex(-1)}
+                        />
                     ) : (
                         <>
                             {this.state.sensors.map(x => {
-                                return <GridItem>
-                                    <a href={"#/" + x.sensor}>
-                                        <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
-                                    </a>
-                                </GridItem>
+                        
+                                return <a href={"#/" + x.sensor} style={{alignItems:"center"}}>
+                                    <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
+                                </a>
                             })}
                         </>
                     )}

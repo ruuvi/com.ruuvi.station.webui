@@ -90,7 +90,7 @@ class SensorCard extends Component {
     render() {
         var { t } = this.props;
         return (
-            <Box maxW="sm" height="350px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}>
+            <Box  height="350px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}>
                 <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
                     {this.props.sensor.name || this.props.sensor.sensor}
                 </Heading>
@@ -113,7 +113,7 @@ class SensorCard extends Component {
                                 <Graph title="" dataKey={"temperature"} data={this.state.data.measurements} height={200} legend={false} cardView={true} />
                             </div>
                             <hr style={{ margin: "0px 0 10px 0" }} />
-                            <SimpleGrid columns={{ sm: 2 }} style={{ width: "100%" }}>
+                            <SimpleGrid columns={2} style={{ width: "100%" }}>
                                 <GridItem style={{ back: this.isAlertTriggerd("humidity") ? "#f27575" : undefined }}><span style={smallSensorValue}>{localeNumber(getUnitHelper("humidity").value(this.getLatestReading().humidity), getUnitHelper("humidity").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("humidity").unit}</span></GridItem>
                                 <GridItem style={{ color: this.isAlertTriggerd("battery") ? "#f27575" : undefined }}><span style={smallSensorValue}>{localeNumber(getUnitHelper("battery").value(this.getLatestReading().battery), getUnitHelper("battery").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("battery").unit}</span></GridItem>
                                 <GridItem style={{ color: this.isAlertTriggerd("pressure") ? "#f27575" : undefined }}><span style={smallSensorValue}>{localeNumber(getUnitHelper("pressure").value(this.getLatestReading().pressure), getUnitHelper("pressure").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("pressure").unit}</span></GridItem>
