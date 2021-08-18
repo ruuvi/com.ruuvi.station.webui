@@ -7,6 +7,8 @@ import { Input, Text } from "@chakra-ui/react"
 import { Button } from "@chakra-ui/react"
 import { CircularProgress, SlideFade } from "@chakra-ui/react"
 import { PinInput, PinInputField } from "@chakra-ui/react"
+import { withTranslation } from 'react-i18next';
+import LanguageMenu from "../components/LanguageMenu";
 
 const loginText = {
     fontFamily: "montserrat",
@@ -72,6 +74,7 @@ class SignIn extends Component {
         })
     }
     render() {
+        const { i18n } = this.props;
         return (
             <SimpleGrid columns={{ sm: 1, md: 2 }} style={{ minHeight: "100%" }}>
                 <GridItem>
@@ -82,6 +85,9 @@ class SignIn extends Component {
                             </Center>
                             <Center style={{ width: "100%" }}>
                                 <div style={{ width: "75%" }}>
+                                    <center>
+                                        <LanguageMenu loginPage={true} />
+                                    </center>
                                     <Heading style={loginText}>
                                         Login to Ruuvi Station {new NetworkApi().isStaging() ? "(staging)" : ""}
                                     </Heading>
@@ -133,4 +139,4 @@ class SignIn extends Component {
     }
 }
 
-export default SignIn;
+export default withTranslation()(SignIn);

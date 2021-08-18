@@ -29,6 +29,15 @@ class LanguageMenu extends Component {
     }
     render() {
         const { i18n } = this.props;
+        if (this.props.loginPage) {
+            return (
+                <>
+                    {["en", "fi", "sv"].map(x => {
+                        return <span key={x} style={{ fontFamily: "mulish", margin: 3, fontSize: 16, fontWeight: "bold", cursor: "pointer", textDecoration: (i18n.language || "en") === x ? "underline" : "" }} onClick={() => this.langChange(x)}> {this.uppercaseFirst(x)}</span>
+                    })}
+                </>
+            )
+        }
         return (
             <Menu>
                 <MenuButton disabled={false} as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>
