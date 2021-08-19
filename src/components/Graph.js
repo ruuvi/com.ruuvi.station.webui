@@ -3,10 +3,14 @@ import UplotReact from 'uplot-react';
 import 'uplot/dist/uPlot.min.css';
 import { SizeMe } from 'react-sizeme'
 
+function ddmm(ts) {
+    var d = new Date(ts * 1000);
+    return d.getDate() + "/" + (d.getMonth() + 1)
+}
 
-function mmdd(ts) {
-    var d = new Date(ts*1000);
-    return (d.getMonth() + 1) + "/" + d.getDate()
+function hhmm(ts) {
+    var d = new Date(ts * 1000);
+    return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2)
 }
 
 class Graph extends Component {
@@ -18,6 +22,15 @@ class Graph extends Component {
         d.map(x => x.parsed[this.props.dataKey])]
     }
     render() {
+        var useDatesOnX = false;
+        if (this.props.xFrom && this.props.xTo) {
+            if (this.props.xTo - this.props.xFrom > 60 * 60 * 24 * 2) useDatesOnX = true;
+        } else {
+            if (this.props.data && this.props.data.length) {
+                var dataXSpan = this.props.data[0].timestamp - this.props.data[this.props.data.length - 1].timestamp;
+                if (dataXSpan > 60 * 60 * 24 * 2) useDatesOnX = true;
+            }
+        }
         return (
             <SizeMe>{({ size }) =>
                 <UplotReact
@@ -44,7 +57,7 @@ class Graph extends Component {
                         axes: [
                             {
                                 grid: { show: false },
-                                values: this.props.cardView ? (self, ticks) => ticks.map(rawValue => mmdd(rawValue)) : undefined,
+                                values: useDatesOnX ? (self, ticks) => ticks.map(rawValue => ddmm(rawValue)) : (self, ticks) => ticks.map(rawValue => hhmm(rawValue)),
                             },
                         ],
                     }}
