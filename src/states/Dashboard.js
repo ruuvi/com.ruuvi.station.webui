@@ -52,6 +52,11 @@ class Dashboard extends Component {
         else setNext = this.state.sensors[indexOfCurrent + direction].sensor
         this.props.history.push('/' + setNext)
     }
+    removeSensor() {
+        var current = this.getCurrentSensor().sensor;
+        this.setState({ ...this.state, sensors: this.state.sensors.filter(x => x.sensor !== current) })
+        this.props.history.push('/')
+    }
     render() {
         return (
             <Box marginTop="36px" marginLeft="5%" marginRight="5%">
@@ -66,6 +71,7 @@ class Dashboard extends Component {
                             close={() => this.props.history.push('/')}
                             next={() => this.nextIndex(1)}
                             prev={() => this.nextIndex(-1)}
+                            remove={() => this.removeSensor()}
                         />
                     ) : (
                         <>

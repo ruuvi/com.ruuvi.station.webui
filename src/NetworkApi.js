@@ -103,6 +103,22 @@ class NetworkApi {
                 success(response);
             })
     }
+    unclaim(mac, success) {
+        fetch(this.url + "/unclaim", {
+            ...this.options,
+            method: 'POST',
+            body: JSON.stringify({ sensor: mac }),
+        })
+            .then(function (response) {
+                if (response.status === 200) {
+                    return response.json();
+                }
+                throw (response)
+            })
+            .then(response => {
+                success(response);
+            })
+    }
     getSettings(success) {
         fetch(this.url + "/settings", this.options).then(function (response) {
             return response.json();

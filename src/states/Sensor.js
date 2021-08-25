@@ -32,6 +32,7 @@ import { CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 import { MdArrowDropDown } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber, temperatureOffsetToUserFormat, temperatureToUserFormat } from "../UnitHelper";
+import { withRouter } from 'react-router-dom';
 
 var uppercaseFirst = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -93,7 +94,7 @@ class Sensor extends Component {
             editName: null,
             alerts: [],
         }
-
+        console.log("PROPS", this.props)
     }
     componentDidMount() {
         if (this.props.sensor) {
@@ -201,6 +202,20 @@ class Sensor extends Component {
         var alert = this.getAlert(type.toLocaleLowerCase())
         if (!alert) return false
         return alert.triggered;
+    }
+    remove() {
+        var mac = this.props.sensor.sensor
+        if (window.confirm(this.props.t("remove_tag_confirm"))) {
+            new NetworkApi().unclaim(mac, resp => {
+                if (resp.result === "success") {
+                    this.props.remove();
+                } else {
+                    alert(resp.result)
+                }
+            }, fail => {
+                alert(fail)
+            })
+        }
     }
     render() {
         var { t } = this.props
@@ -378,7 +393,7 @@ class Sensor extends Component {
                                                                 <div style={detailedSubText}>{t("remove_this_sensor")}</div>
                                                             </td>
                                                             <td style={detailedText}>
-                                                                <Button backgroundColor="#43c7ba" color="white" borderRadius="24">{t("remove")}</Button>
+                                                                <Button backgroundColor="#43c7ba" color="white" borderRadius="24" onClick={() => this.remove()}>{t("remove")}</Button>
                                                             </td>
                                                         </tr>
                                                     </tbody>
@@ -397,4 +412,4 @@ class Sensor extends Component {
     }
 }
 
-export default withTranslation()(Sensor);
+export default withRouter(withTranslation()(Sensor));
