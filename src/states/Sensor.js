@@ -196,6 +196,7 @@ class Sensor extends Component {
         return uppercaseFirst(type)
     }
     isAlertTriggerd(type) {
+        if (type === "movementCounter") type = "movement";
         var alert = this.getAlert(type.toLocaleLowerCase())
         if (!alert) return false
         return alert.triggered;
