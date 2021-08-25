@@ -52,9 +52,11 @@ export default function App() {
   var sensors = [];
   if (!user) {
     return <ChakraProvider theme={theme} style={{ minHeight: "100%" }}>
-      <SignIn loginSuccessful={data => {
-        forceUpdate()
-      }} />
+      <HashRouter>
+        <SignIn loginSuccessful={data => {
+          forceUpdate()
+        }} />
+      </HashRouter>
     </ChakraProvider>
   }
   new NetworkApi().getSettings(settings => {

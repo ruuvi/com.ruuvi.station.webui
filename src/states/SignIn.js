@@ -9,6 +9,8 @@ import { CircularProgress, SlideFade } from "@chakra-ui/react"
 import { PinInput, PinInputField } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import LanguageMenu from "../components/LanguageMenu";
+import { withRouter } from 'react-router-dom';
+
 
 const loginText = {
     fontFamily: "montserrat",
@@ -40,6 +42,18 @@ class SignIn extends Component {
             validationCode: "",
             pageState: 0,
             loading: false,
+        }
+    }
+    componentDidMount() {
+        let token = new URLSearchParams(this.props.location.search).get('token');
+        if (token) {
+            this.props.history.push({
+                pathname: '/',
+                search: ''
+            })
+            this.setState({ ...this.state, validationCode: token, loading: true }, () => {
+                this.validate()
+            })
         }
     }
     register() {
@@ -113,7 +127,7 @@ class SignIn extends Component {
                                                     <Stack spacing="12px">
                                                         <Text>
                                                             {t("sign_in_check_email")}
-                                                    </Text>
+                                                        </Text>
                                                         <HStack style={{ marginLeft: "50px" }}>
                                                             <PinInput type="alphanumeric" value={this.state.validationCode} onChange={e => this.setState({ ...this.state, validationCode: e })}>
                                                                 <PinInputField />
@@ -139,4 +153,4 @@ class SignIn extends Component {
     }
 }
 
-export default withTranslation()(SignIn);
+export default withRouter(withTranslation()(SignIn));
