@@ -236,7 +236,7 @@ class Sensor extends Component {
                         {this.state.data && <div>
                             <StatGroup style={{ marginTop: "30px", marginBottom: "30px" }}>
                                 {bigCardFields.map(x => {
-                                    return <SensorReading key={x} value={localeNumber(getUnitHelper(x).value(this.getLatestReading()[x]), getUnitHelper(x).decimals)}
+                                    return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x]), getUnitHelper(x).decimals)}
                                         alertTriggered={this.isAlertTriggerd(x)}
                                         label={t(getUnitHelper(x).label)}
                                         unit={getUnitHelper(x).unit}
