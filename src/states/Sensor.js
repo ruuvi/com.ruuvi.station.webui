@@ -351,14 +351,15 @@ class Sensor extends Component {
                                             {sensorInfoOrder.map(order => {
                                                 var x = this.getLatestReading(true).find(x => x.key === order);
                                                 if (!x) return null
+                                                let uh = getUnitHelper(x.key)
                                                 return (
                                                     <ListItem key={x.key}>
-                                                        <table width="100%" style={{ marginTop: 16, marginBottom: 16, cursor: "pointer" }} onClick={() => this.setGraphKey(x.key)}>
+                                                        <table width="100%" style={{ marginTop: 16, marginBottom: 16, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : console.log("Not graphable")}>
                                                             <tbody>
                                                                 <tr>
-                                                                    <td style={detailedTitle}> {t(getUnitHelper(x.key).label || x.key)}</td>
-                                                                    <td style={detailedText}>
-                                                                        {localeNumber(getUnitHelper(x.key).value(x.value), getUnitHelper(x.key).decimals)} {getUnitHelper(x.key).unit}
+                                                                    <td style={detailedTitle}> {t(uh.label || x.key)}</td>
+                                                                    <td style={{...detailedText, textDecoration: uh.graphable ? "underline" : ""}}>
+                                                                        {localeNumber(uh.value(x.value), uh.decimals)} {uh.unit}
                                                                     </td>
                                                                 </tr>
                                                             </tbody>
