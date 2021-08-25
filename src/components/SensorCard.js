@@ -92,7 +92,7 @@ class SensorCard extends Component {
         return (
             <Box height="350px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}>
                 <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
-                    {this.props.sensor.name || this.props.sensor.sensor}
+                    {this.props.sensor.name}
                 </Heading>
                 {this.state.loading ? (
                     <center>

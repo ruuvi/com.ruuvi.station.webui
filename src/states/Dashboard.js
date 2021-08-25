@@ -17,6 +17,9 @@ class Dashboard extends Component {
         let id = this.props.match.params.id;
         return this.state.sensors.find(x => x.sensor === id);
     }
+    componentDidUpdate() {
+        document.title = "Ruuvi Station"
+    }
     componentDidMount() {
         new NetworkApi().user(resp => {
             if (resp.result === "success") {
@@ -67,8 +70,8 @@ class Dashboard extends Component {
                     ) : (
                         <>
                             {this.state.sensors.map(x => {
-                        
-                                return <a href={"#/" + x.sensor} style={{alignItems:"center"}}>
+
+                                return <a href={"#/" + x.sensor} style={{ alignItems: "center" }}>
                                     <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
                                 </a>
                             })}

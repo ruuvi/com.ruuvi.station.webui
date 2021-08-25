@@ -105,6 +105,7 @@ class Sensor extends Component {
         //clearInterval(this.updateInterval);
     }
     componentDidUpdate(prevProps) {
+        document.title = "Ruuvi Sensor: " + this.props.sensor.name
         if (this.props.sensor !== prevProps.sensor) {
             this.loadData(true)
         }
@@ -206,10 +207,10 @@ class Sensor extends Component {
         return (
             <Box borderWidth="1px" borderRadius="lg" overflow="hidden" padding="15px" style={{ backgroundColor: "white" }}>
                 <HStack alignItems="start">
-                    <Avatar bg="#01ae90" size="xl" name={this.props.sensor.name || this.props.sensor.sensor} src={this.props.sensor.picture} />
+                    <Avatar bg="#01ae90" size="xl" name={this.props.sensor.name} src={this.props.sensor.picture} />
                     <div style={{ width: "65%" }}>
                         <Heading style={sensorName} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}>
-                            {this.props.sensor.name || this.props.sensor.sensor}
+                            {this.props.sensor.name}
                         </Heading>
                         <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
                             {t("updated")}: {this.getTimeSinceLastUpdate()}m {t("ago")}
@@ -358,7 +359,7 @@ class Sensor extends Component {
                                                             <tbody>
                                                                 <tr>
                                                                     <td style={detailedTitle}> {t(uh.label || x.key)}</td>
-                                                                    <td style={{...detailedText, textDecoration: uh.graphable ? "underline" : ""}}>
+                                                                    <td style={{ ...detailedText, textDecoration: uh.graphable ? "underline" : "" }}>
                                                                         {localeNumber(uh.value(x.value), uh.decimals)} {uh.unit}
                                                                     </td>
                                                                 </tr>

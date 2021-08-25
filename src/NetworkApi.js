@@ -54,7 +54,18 @@ class NetworkApi {
         fetch(this.url + "/user", this.options).then(function (response) {
             return response.json();
         })
-            .then(response => success(response))
+            .then(response => {
+                console.log("RESPONSE", response)
+                if (response.data && response.data.sensors.length > 0) {
+                    for (var i = 0; i < response.data.sensors.length; i++) {
+                        if (!response.data.sensors[i].name) {
+                            let splitMac = response.data.sensors[i].sensor.split(":")
+                            response.data.sensors[i].name = "Ruuvi " + splitMac[4] + splitMac[5]
+                        }
+                    }
+                }
+                success(response)
+            })
             .catch(error => fail ? fail(error) : {});
     };
     get(mac, from, settings, success, fail) {
