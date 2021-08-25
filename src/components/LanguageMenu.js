@@ -22,6 +22,7 @@ class LanguageMenu extends Component {
         })
     }
     langChange = (lng) => {
+        localStorage.setItem("selected_language", lng)
         this.props.i18n.changeLanguage(lng);
     }
     uppercaseFirst = (string) => {
