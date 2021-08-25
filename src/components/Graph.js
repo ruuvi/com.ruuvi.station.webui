@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import UplotReact from 'uplot-react';
 import 'uplot/dist/uPlot.min.css';
 import { SizeMe } from 'react-sizeme'
+import { withTranslation } from 'react-i18next';
 
 function ddmm(ts) {
     var d = new Date(ts * 1000);
@@ -42,10 +43,10 @@ class Graph extends Component {
                             show: this.props.legend === undefined ? true : this.props.legend,
                         },
                         series: [{
-                            label: '',
+                            label: this.props.t('time'),
                             value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
                         }, {
-                            label: this.props.dataKey,
+                            label: this.props.t(this.props.dataKey),
                             spanGaps: true,
                             points: { show: this.props.points || false, size: 4, fill: "green" },
                             width: 2,
@@ -68,4 +69,4 @@ class Graph extends Component {
     }
 }
 
-export default Graph;
+export default withTranslation()(Graph);

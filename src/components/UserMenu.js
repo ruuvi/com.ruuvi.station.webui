@@ -36,8 +36,8 @@ class UserMenu extends Component {
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
                     */}
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>Version {pjson.version}</MenuItem>
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.props.logout()}>{t("Logout")}</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>{t("version")} {pjson.version}</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.props.logout()}>{t("sign_out")}</MenuItem>
                 </MenuList>
             </Menu>
         )

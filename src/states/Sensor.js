@@ -176,10 +176,22 @@ class Sensor extends Component {
     getAlertText(type) {
         var idx = this.state.alerts.findIndex(x => x.type === type)
         if (idx !== -1) {
-            if (type === "temperature") {
-                return "Alert when under " + temperatureToUserFormat(this.state.alerts[idx].min) + " or over " + temperatureToUserFormat(this.state.alerts[idx].max)
+            if (type === "movement") {
+                return this.props.t("alert_movement_description")
             }
-            return "Alert when under " + this.state.alerts[idx].min + " or over " + this.state.alerts[idx].max
+            var min = this.state.alerts[idx].min
+            var max = this.state.alerts[idx].max
+            if (type === "temperature") {
+                min = temperatureToUserFormat(min)
+                max = temperatureToUserFormat(max)
+            }
+            let regx = "\{(.*?)\}"
+            var alertText = this.props.t("alert_description")
+            var match = alertText.match(regx)
+            alertText = alertText.replace(match[0], min)
+            var match = alertText.match(regx)
+            alertText = alertText.replace(match[0], max)
+            return alertText;
         }
         return uppercaseFirst(type)
     }
@@ -199,10 +211,10 @@ class Sensor extends Component {
                             {this.props.sensor.name || this.props.sensor.sensor}
                         </Heading>
                         <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
-                            Last update: {this.getTimeSinceLastUpdate()}m ago
+                            {t("updated")}: {this.getTimeSinceLastUpdate()}m {t("ago")}
                         </div>
                     </div>
-                    <span style={{ width: "100%", textAlign: "right", height: "100%"}}>
+                    <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
                         {/*<IconButton isRound={true} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><EditIcon /></IconButton>*/}
                         <IconButton isRound={true} onClick={() => this.props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "2px", marginRight: "5px" }}><ArrowBackIcon /></IconButton>
                         <IconButton isRound={true} onClick={() => this.props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><ArrowForwardIcon /></IconButton>
@@ -211,7 +223,7 @@ class Sensor extends Component {
                 </HStack>
                 {this.state.editName !== null && <div>
                     <Input value={this.state.editName} onChange={v => this.updateStateVar("editName", v.target.value)} />
-                    <Button onClick={() => this.update()}>Update</Button>
+                    <Button onClick={() => this.update()}>{t("update")}</Button>
                 </div>}
                 {this.state.loading ? (
                     <Stack style={{ marginTop: "30px" }}>
@@ -235,10 +247,10 @@ class Sensor extends Component {
                                     <tr>
                                         <td>
                                             <div style={{ ...collapseText, marginLeft: "30px" }}>
-                                                Last {timespans.find(x => x.v === this.state.from).k}
+                                                {t("last")} {timespans.find(x => x.v === this.state.from).k}
                                             </div>
                                             <div style={graphInfo}>
-                                                {getUnitHelper(this.state.graphKey).label} ({getUnitHelper(this.state.graphKey).unit})
+                                                {t(getUnitHelper(this.state.graphKey).label)} ({getUnitHelper(this.state.graphKey).unit})
                                     </div>
                                         </td>
                                         <td style={{ textAlign: "right" }}>
@@ -263,7 +275,7 @@ class Sensor extends Component {
                                 <AccordionItem>
                                     <AccordionButton>
                                         <Box flex="1" textAlign="left" style={collapseText}>
-                                            {t("Alerts")}
+                                            {t("alerts")}
                                         </Box>
                                         <AccordionIcon />
                                     </AccordionButton>
@@ -280,8 +292,8 @@ class Sensor extends Component {
                                                         <tbody>
                                                             <tr>
                                                                 <td width="50%">
-                                                                    <div style={detailedTitle}>{t(x)}</div>
-                                                                    <div style={detailedSubText}>{x !== "Movement" && this.getAlert(x.toLocaleLowerCase()) && this.getAlert(x.toLocaleLowerCase()).enabled && <span>{t(this.getAlertText(x.toLocaleLowerCase()))}</span>}</div>
+                                                                    <div style={detailedTitle}>{t(x.toLocaleLowerCase())}</div>
+                                                                    <div style={detailedSubText}>{this.getAlert(x.toLocaleLowerCase()) && this.getAlert(x.toLocaleLowerCase()).enabled && <span>{this.getAlertText(x.toLocaleLowerCase())}</span>}</div>
                                                                 </td>
                                                                 <td style={detailedText}>
                                                                     <Switch isDisabled isChecked={this.getAlert(x.toLocaleLowerCase()) && this.getAlert(x.toLocaleLowerCase()).enabled} />
@@ -299,7 +311,7 @@ class Sensor extends Component {
                                 <AccordionItem>
                                     <AccordionButton>
                                         <Box flex="1" textAlign="left" style={collapseText}>
-                                            {t("Offset Correction")}
+                                            {t("offset_correction")}
                                         </Box>
                                         <AccordionIcon />
                                     </AccordionButton>
@@ -311,7 +323,7 @@ class Sensor extends Component {
                                                     <table width="100%" style={{ marginTop: 16, marginBottom: 16 }}>
                                                         <tbody>
                                                             <tr>
-                                                                <td style={detailedTitle}> {t(x)}</td>
+                                                                <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
                                                                 <td style={detailedText}>
                                                                     {localeNumber(temperatureOffsetToUserFormat(this.state.data["offset" + x]), 2)} {getUnitHelper(x.toLocaleLowerCase()).unit}
                                                                 </td>
@@ -328,7 +340,7 @@ class Sensor extends Component {
                                 <AccordionItem>
                                     <AccordionButton>
                                         <Box flex="1" textAlign="left" style={collapseText}>
-                                            {t("Sensor Info")}
+                                            {t("sensor_info")}
                                         </Box>
                                         <AccordionIcon />
                                     </AccordionButton>
@@ -359,11 +371,11 @@ class Sensor extends Component {
                                                     <tbody>
                                                         <tr>
                                                             <td width="50%">
-                                                                <div style={detailedTitle}>{t("Remove")}</div>
-                                                                <div style={detailedSubText}>{t("Remove this sensor")}</div>
+                                                                <div style={detailedTitle}>{t("remove")}</div>
+                                                                <div style={detailedSubText}>{t("remove_this_sensor")}</div>
                                                             </td>
                                                             <td style={detailedText}>
-                                                                <Button backgroundColor="#43c7ba" color="white" borderRadius="24">{t("Remove")}</Button>
+                                                                <Button backgroundColor="#43c7ba" color="white" borderRadius="24">{t("remove")}</Button>
                                                             </td>
                                                         </tr>
                                                     </tbody>

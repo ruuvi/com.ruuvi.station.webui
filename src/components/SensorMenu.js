@@ -29,7 +29,7 @@ class SensorMenu extends Component {
         return (
             <Menu>
                 <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>
-                    {t("Sensors")}
+                    {t("sensors")}
                 </MenuButton>
                 <MenuList>
                     {this.state.sensors.map(x => {
