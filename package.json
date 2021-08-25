@@ -1,6 +1,9 @@
 {
   "name": "ruuvi_web_ui",
   "version": "0.1.1",
+  "settings": {
+    "sensorNameMaxLength": 30
+  },
   "private": true,
   "dependencies": {
     "@chakra-ui/icons": "^1.0.13",

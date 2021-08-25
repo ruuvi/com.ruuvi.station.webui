@@ -1,3 +1,5 @@
+import pjson from '../package.json';
+
 class NetworkApi {
     constructor() {
         this.url = "https://network.ruuvi.com"
@@ -55,13 +57,13 @@ class NetworkApi {
             return response.json();
         })
             .then(response => {
-                console.log("RESPONSE", response)
                 if (response.data && response.data.sensors.length > 0) {
                     for (var i = 0; i < response.data.sensors.length; i++) {
                         if (!response.data.sensors[i].name) {
                             let splitMac = response.data.sensors[i].sensor.split(":")
                             response.data.sensors[i].name = "Ruuvi " + splitMac[4] + splitMac[5]
                         }
+                        response.data.sensors[i].name = response.data.sensors[i].name.substring(0, pjson.settings.sensorNameMaxLength);
                     }
                 }
                 success(response)
