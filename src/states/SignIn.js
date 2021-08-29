@@ -90,65 +90,60 @@ class SignIn extends Component {
     render() {
         const { i18n, t } = this.props;
         return (
-            <SimpleGrid columns={{ sm: 1, md: 2 }} style={{ minHeight: "100%" }}>
-                <GridItem>
+            <Center style={{ width: "100%" }}>
+                <Stack spacing="24px">
                     <Center style={{ width: "100%" }}>
-                        <Stack spacing="24px">
-                            <Center style={{ width: "100%" }}>
-                                <Image alt="logo" width={100} src={logo} fit="scale-down" style={{ height: "200px" }} />
-                            </Center>
-                            <Center style={{ width: "100%" }}>
-                                <div style={{ width: "75%" }}>
-                                    <center>
-                                        <LanguageMenu loginPage={true} />
-                                    </center>
-                                    <Heading style={loginText}>
-                                        {t("login_to_ruuvi_station")} {new NetworkApi().isStaging() ? "(staging)" : ""}
-                                    </Heading>
-                                    {this.state.loading ? (
-                                        <SlideFade initialScale={1} in={this.state.loading} unmountOnExit style={{ textAlign: "center" }}>
-                                            <CircularProgress isIndeterminate color="teal" />
-                                        </SlideFade>
-                                    ) : (
-                                        <span>
-                                            {this.state.pageState === 0 &&
-                                                <SlideFade initialScale={1} in={this.state.pageState === 0} unmountOnExit>
-                                                    <Stack spacing="12px">
-                                                        <Text style={infoText}>
-                                                            {t("type_your_email")}
-                                                        </Text>
-                                                        <Input placeholder={t("email")} value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} />
-                                                        <Button colorScheme="teal" onClick={this.register.bind(this)} style={buttonText}>{t("login")}</Button>
-                                                    </Stack>
-                                                </SlideFade>
-                                            }
-                                            {this.state.pageState === 1 &&
-                                                <SlideFade initialScale={0} in={this.state.pageState === 1} unmountOnExit>
-                                                    <Stack spacing="12px">
-                                                        <Text>
-                                                            {t("sign_in_check_email")}
-                                                        </Text>
-                                                        <HStack style={{ marginLeft: "50px" }}>
-                                                            <PinInput type="alphanumeric" value={this.state.validationCode} onChange={e => this.setState({ ...this.state, validationCode: e })}>
-                                                                <PinInputField />
-                                                                <PinInputField />
-                                                                <PinInputField />
-                                                                <PinInputField />
-                                                            </PinInput>
-                                                        </HStack>
-                                                        <Button colorScheme="teal" onClick={this.validate.bind(this)} style={buttonText}>{t("submit")}</Button>
-                                                    </Stack>
-                                                </SlideFade>
-                                            }
-                                        </span>
-                                    )}
-                                </div>
-                            </Center>
-                        </Stack>
+                        <Image alt="logo" width={100} src={logo} fit="scale-down" style={{ height: "200px" }} />
                     </Center>
-                </GridItem>
-                <GridItem style={sideBackground}></GridItem>
-            </SimpleGrid>
+                    <center>
+                        <div style={{ width: "80%" }}>
+                            <center>
+                                <LanguageMenu loginPage={true} />
+                            </center>
+                            <Heading style={loginText}>
+                                {t("login_to_ruuvi_station")} {new NetworkApi().isStaging() ? "(staging)" : ""}
+                            </Heading>
+                            {this.state.loading ? (
+                                <SlideFade initialScale={1} in={this.state.loading} unmountOnExit style={{ textAlign: "center" }}>
+                                    <CircularProgress isIndeterminate color="teal" />
+                                </SlideFade>
+                            ) : (
+                                <span>
+                                    {this.state.pageState === 0 &&
+                                        <SlideFade initialScale={1} in={this.state.pageState === 0} unmountOnExit>
+                                            <Stack spacing="12px">
+                                                <Text style={infoText}>
+                                                    {t("type_your_email")}
+                                                </Text>
+                                                <Input placeholder={t("email")} value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} />
+                                                <Button colorScheme="teal" onClick={this.register.bind(this)} style={buttonText}>{t("login")}</Button>
+                                            </Stack>
+                                        </SlideFade>
+                                    }
+                                    {this.state.pageState === 1 &&
+                                        <SlideFade initialScale={0} in={this.state.pageState === 1} unmountOnExit>
+                                            <Stack spacing="12px">
+                                                <Text>
+                                                    {t("sign_in_check_email")}
+                                                </Text>
+                                                <HStack style={{ marginLeft: "50px" }}>
+                                                    <PinInput type="alphanumeric" value={this.state.validationCode} onChange={e => this.setState({ ...this.state, validationCode: e })}>
+                                                        <PinInputField />
+                                                        <PinInputField />
+                                                        <PinInputField />
+                                                        <PinInputField />
+                                                    </PinInput>
+                                                </HStack>
+                                                <Button colorScheme="teal" onClick={this.validate.bind(this)} style={buttonText}>{t("submit")}</Button>
+                                            </Stack>
+                                        </SlideFade>
+                                    }
+                                </span>
+                            )}
+                        </div>
+                    </center>
+                </Stack>
+            </Center>
         )
     }
 }
