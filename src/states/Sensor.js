@@ -254,11 +254,11 @@ class Sensor extends Component {
                 min = temperatureToUserFormat(min)
                 max = temperatureToUserFormat(max)
             }
-            let regx = "\{(.*?)\}"
+            let regx = "{(.*?)}"
             var alertText = this.props.t("alert_description")
             var match = alertText.match(regx)
             alertText = alertText.replace(match[0], min)
-            var match = alertText.match(regx)
+            match = alertText.match(regx)
             alertText = alertText.replace(match[0], max)
             return alertText;
         }

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { GridItem, Spinner, Box, SimpleGrid } from "@chakra-ui/react"
+import { Spinner, Box, SimpleGrid } from "@chakra-ui/react"
 
 class Dashboard extends Component {
     constructor(props) {

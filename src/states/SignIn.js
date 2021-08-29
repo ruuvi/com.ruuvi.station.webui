@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import logo from '../img/ruuvi-vector-logo.svg'
 import NetworkApi from '../NetworkApi'
-import { Center, GridItem, Heading, HStack, SimpleGrid } from "@chakra-ui/react"
+import { Center, Heading, HStack } from "@chakra-ui/react"
 import { Stack, Image } from "@chakra-ui/react"
 import { Input, Text } from "@chakra-ui/react"
 import { Button } from "@chakra-ui/react"
@@ -25,13 +25,6 @@ const buttonText = {
     fontFamily: "montserrat",
     fontWeight: "bold",
     fontSize: 16,
-}
-const sideBackground = {
-    backgroundColor: "gray",
-    backgroundImage: "url('https://ruuvi.com/i/u/station-bg.jpg')",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "cover",
 }
 
 class SignIn extends Component {
@@ -88,7 +81,7 @@ class SignIn extends Component {
         })
     }
     render() {
-        const { i18n, t } = this.props;
+        const { t } = this.props;
         return (
             <Center style={{ width: "100%" }}>
                 <Stack spacing="24px">
