@@ -310,7 +310,7 @@ class Sensor extends Component {
                                         onClick={() => this.setGraphKey(x)} />
                                 })}
                             </StatGroup>
-                            <div style={{ marginBottom: "10px" }}>
+                            <div style={{ marginBottom: "20px" }}>
                                 <table width="100%">
                                     <tbody>
                                         <tr>
