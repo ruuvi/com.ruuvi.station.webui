@@ -58,7 +58,7 @@ class SensorCard extends Component {
                 this.setState({ ...this.state, loading: false })
             }
         }, (e) => {
-            alert("LoadData error: " + e.toString())
+            //alert("LoadData error: " + e.toString())
             console.log("err", e)
             this.setState({ data: null, loading: false })
         })
