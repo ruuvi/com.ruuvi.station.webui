@@ -23,6 +23,7 @@ import {
     AccordionPanel,
     AccordionIcon,
     Switch,
+    useMediaQuery,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
@@ -57,10 +58,18 @@ const sensorName = {
     cursor: 'pointer',
 }
 
+const graphLengthText = {
+    fontFamily: "montserrat",
+    fontSize: "24px",
+    fontWeight: 800,
+    marginLeft: "30px"
+}
+
 const collapseText = {
     fontFamily: "montserrat",
     fontSize: "24px",
     fontWeight: 800,
+    padding: "10px",
 }
 const detailedTitle = {
     fontFamily: "mulish",
@@ -80,6 +89,65 @@ const detailedSubText = {
     fontSize: "14px",
 }
 
+const accordionPanel = {
+    backgroundColor: "#f6fcfb",
+}
+const accordionContent = {
+    marginTop: 26,
+    marginBottom: 26
+}
+
+function SensorHeader(props) {
+    const [isLargeDisplay] = useMediaQuery("(min-width: 600px)")
+    if (isLargeDisplay) {
+        return <HStack alignItems="start">
+            <Avatar bg="#01ae90" size="xl" name={props.sensor.name} src={props.sensor.picture} />
+            <div style={{ width: "65%" }}>
+                <Heading style={sensorName} onClick={() => props.editName()}>
+                    {props.sensor.name}
+                </Heading>
+                <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
+                    {props.timeSinceLastUpdate}m {props.t("ago")}
+                </div>
+            </div>
+            <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
+                {/*<IconButton isRound={true} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><EditIcon /></IconButton>*/}
+                <IconButton isRound={true} onClick={() => props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "2px", marginRight: "5px" }}><ArrowBackIcon /></IconButton>
+                <IconButton isRound={true} onClick={() => props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><ArrowForwardIcon /></IconButton>
+                <IconButton isRound={true} onClick={() => props.close()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
+            </span>
+        </HStack>
+    } else {
+        return <center>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td width="33%" style={{ verticalAlign: "top" }}>
+                        <IconButton isRound={true} onClick={() => props.close()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
+                    </td>
+                    <td width="33%" align="center">
+                        <Avatar bg="#01ae90" size="xl" name={props.sensor.name} src={props.sensor.picture} />
+                    </td>
+                    <td width="33%" align="right" style={{ verticalAlign: "top" }}>
+                        <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
+                            {/*<IconButton isRound={true} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><EditIcon /></IconButton>*/}
+                            <IconButton isRound={true} onClick={() => props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "2px", marginRight: "5px" }}><ArrowBackIcon /></IconButton>
+                            <IconButton isRound={true} onClick={() => props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><ArrowForwardIcon /></IconButton>
+                        </span>
+                    </td>
+                </tr>
+            </table>
+            <div style={{ width: "65%" }}>
+                <Heading style={sensorName} onClick={() => props.editName()}>
+                    {props.sensor.name}
+                </Heading>
+                <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
+                    {props.timeSinceLastUpdate}m {props.t("ago")}
+                </div>
+            </div>
+        </center>
+    }
+}
+
 class Sensor extends Component {
     constructor(props) {
         super(props)
@@ -94,7 +162,6 @@ class Sensor extends Component {
             editName: null,
             alerts: [],
         }
-        console.log("PROPS", this.props)
     }
     componentDidMount() {
         if (this.props.sensor) {
@@ -220,24 +287,8 @@ class Sensor extends Component {
     render() {
         var { t } = this.props
         return (
-            <Box borderWidth="1px" borderRadius="lg" overflow="hidden" padding="15px" style={{ backgroundColor: "white" }}>
-                <HStack alignItems="start">
-                    <Avatar bg="#01ae90" size="xl" name={this.props.sensor.name} src={this.props.sensor.picture} />
-                    <div style={{ width: "65%" }}>
-                        <Heading style={sensorName} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}>
-                            {this.props.sensor.name}
-                        </Heading>
-                        <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
-                            {t("updated")}: {this.getTimeSinceLastUpdate()}m {t("ago")}
-                        </div>
-                    </div>
-                    <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
-                        {/*<IconButton isRound={true} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><EditIcon /></IconButton>*/}
-                        <IconButton isRound={true} onClick={() => this.props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "2px", marginRight: "5px" }}><ArrowBackIcon /></IconButton>
-                        <IconButton isRound={true} onClick={() => this.props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><ArrowForwardIcon /></IconButton>
-                        <IconButton isRound={true} onClick={() => this.props.close()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
-                    </span>
-                </HStack>
+            <Box borderWidth="1px" borderRadius="lg" overflow="hidden" padding="35px" style={{ backgroundColor: "white" }}>
+                <SensorHeader {...this.props} timeSinceLastUpdate={this.getTimeSinceLastUpdate()} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} />
                 {this.state.editName !== null && <div>
                     <Input value={this.state.editName} onChange={v => this.updateStateVar("editName", v.target.value)} />
                     <Button onClick={() => this.update()}>{t("update")}</Button>
@@ -259,36 +310,38 @@ class Sensor extends Component {
                                         onClick={() => this.setGraphKey(x)} />
                                 })}
                             </StatGroup>
-                            <table width="100%">
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <div style={{ ...collapseText, marginLeft: "30px" }}>
-                                                {t("last")} {timespans.find(x => x.v === this.state.from).k}
-                                            </div>
-                                            <div style={graphInfo}>
-                                                {t(getUnitHelper(this.state.graphKey).label)} ({getUnitHelper(this.state.graphKey).unit})
+                            <div style={{ marginBottom: "10px" }}>
+                                <table width="100%">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div style={graphLengthText}>
+                                                    {t("last")} {timespans.find(x => x.v === this.state.from).k}
+                                                </div>
+                                                <div style={graphInfo}>
+                                                    {t(getUnitHelper(this.state.graphKey).label)} ({getUnitHelper(this.state.graphKey).unit})
                                     </div>
-                                        </td>
-                                        <td style={{ textAlign: "right" }}>
-                                            <Menu>
-                                                <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>
-                                                    {timespans.find(x => x.v === this.state.from).k}
-                                                </MenuButton>
-                                                <MenuList>
-                                                    {timespans.map(x => {
-                                                        return <MenuItem key={x.v} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.setState({ ...this.state, from: x.v }, () => this.loadData(true))}>{x.k}</MenuItem>
-                                                    })}
-                                                </MenuList>
-                                            </Menu>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                            </td>
+                                            <td style={{ textAlign: "right" }}>
+                                                <Menu>
+                                                    <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 14 }}>
+                                                        {timespans.find(x => x.v === this.state.from).k}
+                                                    </MenuButton>
+                                                    <MenuList>
+                                                        {timespans.map(x => {
+                                                            return <MenuItem key={x.v} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.setState({ ...this.state, from: x.v }, () => this.loadData(true))}>{x.k}</MenuItem>
+                                                        })}
+                                                    </MenuList>
+                                                </Menu>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
 
-
-                            <Graph dataKey={this.state.graphKey} data={this.state.data.measurements} cursor={true} />
-                            <Accordion allowMultiple style={{ marginLeft: -15, marginRight: -15 }}>
+                            <Graph dataKey={this.state.graphKey} data={this.state.data.measurements} height={450} cursor={true} />
+                            <div style={{ height: "20px" }} />
+                            <Accordion allowMultiple style={{ marginLeft: -35, marginRight: -35 }}>
                                 <AccordionItem>
                                     <AccordionButton>
                                         <Box flex="1" textAlign="left" style={collapseText}>
@@ -297,7 +350,7 @@ class Sensor extends Component {
                                         <AccordionIcon />
                                     </AccordionButton>
                                     <hr />
-                                    <AccordionPanel pb={4} style={{ backgroundColor: "#f6fcfb" }}>
+                                    <AccordionPanel pb={4} style={accordionPanel}>
                                         <div style={{ marginTop: 16, marginBottom: 8 }}>
                                             <div style={{ detailedTitle }}>
                                             </div>
@@ -305,7 +358,7 @@ class Sensor extends Component {
                                         <List>
                                             {["Temperature", "Humidity", "Pressure", "Movement"].map(x => {
                                                 return <ListItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
-                                                    <table width="100%" style={{ marginTop: 16, marginBottom: 16 }}>
+                                                    <table width="100%" style={accordionContent}>
                                                         <tbody>
                                                             <tr>
                                                                 <td width="50%">
@@ -318,7 +371,7 @@ class Sensor extends Component {
                                                             </tr>
                                                         </tbody>
                                                     </table>
-                                                    <hr />
+                                                    {x !== "Movement" && <hr />}
                                                 </ListItem>
                                             })}
                                         </List>
@@ -333,11 +386,11 @@ class Sensor extends Component {
                                         <AccordionIcon />
                                     </AccordionButton>
                                     <hr />
-                                    <AccordionPanel pb={4} style={{ backgroundColor: "#f6fcfb" }}>
+                                    <AccordionPanel pb={4} style={accordionPanel}>
                                         <List>
                                             {["Temperature", "Humidity", "Pressure"].map(x => {
                                                 return <ListItem key={x}>
-                                                    <table width="100%" style={{ marginTop: 16, marginBottom: 16 }}>
+                                                    <table width="100%" style={accordionContent}>
                                                         <tbody>
                                                             <tr>
                                                                 <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
@@ -347,7 +400,7 @@ class Sensor extends Component {
                                                             </tr>
                                                         </tbody>
                                                     </table>
-                                                    <hr />
+                                                    {x !== "Pressure" && <hr />}
                                                 </ListItem>
                                             })}
                                         </List>
@@ -362,7 +415,7 @@ class Sensor extends Component {
                                         <AccordionIcon />
                                     </AccordionButton>
                                     <hr />
-                                    <AccordionPanel pb={4} style={{ backgroundColor: "#f6fcfb" }}>
+                                    <AccordionPanel pb={4} style={accordionPanel}>
                                         <List>
                                             {sensorInfoOrder.map(order => {
                                                 var x = this.getLatestReading(true).find(x => x.key === order);
@@ -370,7 +423,7 @@ class Sensor extends Component {
                                                 let uh = getUnitHelper(x.key)
                                                 return (
                                                     <ListItem key={x.key}>
-                                                        <table width="100%" style={{ marginTop: 16, marginBottom: 16, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : console.log("Not graphable")}>
+                                                        <table width="100%" style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : console.log("Not graphable")}>
                                                             <tbody>
                                                                 <tr>
                                                                     <td style={detailedTitle}> {t(uh.label || x.key)}</td>
@@ -385,7 +438,7 @@ class Sensor extends Component {
                                                 )
                                             })}
                                             <ListItem>
-                                                <table width="100%" style={{ marginTop: 16, marginBottom: 16 }}>
+                                                <table width="100%" style={accordionContent}>
                                                     <tbody>
                                                         <tr>
                                                             <td width="50%">
@@ -398,7 +451,6 @@ class Sensor extends Component {
                                                         </tr>
                                                     </tbody>
                                                 </table>
-                                                <hr />
                                             </ListItem>
                                         </List>
                                     </AccordionPanel>

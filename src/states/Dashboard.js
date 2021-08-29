@@ -59,7 +59,7 @@ class Dashboard extends Component {
     }
     render() {
         return (
-            <Box marginTop="36px" marginLeft="5%" marginRight="5%">
+            <Box marginTop="36px" marginLeft={{ base: "10px", md: "50px" }} marginRight={{ base: "10px", md: "50px" }}>
                 <SimpleGrid minChildWidth="310px" spacing="8px" alignItems="center">
                     {this.state.loading &&
                         <center>
@@ -76,7 +76,6 @@ class Dashboard extends Component {
                     ) : (
                         <>
                             {this.state.sensors.map(x => {
-
                                 return <a href={"#/" + x.sensor} style={{ alignItems: "center" }}>
                                     <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
                                 </a>

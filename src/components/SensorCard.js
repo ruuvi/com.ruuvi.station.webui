@@ -90,7 +90,7 @@ class SensorCard extends Component {
     render() {
         var { t } = this.props;
         return (
-            <Box height="350px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}>
+            <Box height="360px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}>
                 <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
                     {this.props.sensor.name}
                 </Heading>
@@ -109,7 +109,7 @@ class SensorCard extends Component {
                                     {getUnitHelper("temperature").unit}
                                 </span>
                             </div>
-                            <div style={{ marginLeft: -30, marginRight: -30, marginTop: -20, marginBottom: -10 }}>
+                            <div style={{ marginLeft: -30, marginRight: -30, marginTop: -10, marginBottom: -10 }}>
                                 <Graph title="" dataKey={"temperature"} data={this.state.data.measurements} height={200} legend={false} cardView={true} />
                             </div>
                             <hr style={{ margin: "0px 0 10px 0" }} />

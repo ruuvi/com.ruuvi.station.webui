@@ -17,13 +17,14 @@ const labelStyle = {
     fontWeight: 600,
 }
 
+const height = "120px"
 export default function SensorReading(props) {
     return (
-        <Stat style={{ margin: "15px", height: "100px", backgroundColor: props.alertTriggered ? "#f4acac" : "#e6f6f2", border: props.selected ? "1px solid rgba(1,174,144,0.7)" : "1px solid rgba(1,174,144,0)", borderRadius: "10px", cursor:"pointer" }} onClick={props.onClick}>
-            <center style={{ height: 100 }}>
+        <Stat style={{ margin: "5px", height: height, backgroundColor: props.alertTriggered ? "#f4acac" : "rgba(230,246,242,0.5)", border: props.selected ? "2px solid rgba(1,174,144,0.3)" : "2px solid rgba(1,174,144,0)", borderRadius: "10px", cursor: "pointer" }} onClick={props.onClick}>
+            <center style={{ height: height }}>
                 <div style={middle}>
                     <div>
-                        <div style={{ marginBottom: -10, marginTop: -10}}>
+                        <div style={{ marginBottom: -10, marginTop: -10 }}>
                             <span className="main-stat">
                                 {props.value}
                             </span>
