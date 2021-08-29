@@ -110,7 +110,7 @@ class SensorCard extends Component {
                                 </span>
                             </div>
                             <div style={{ marginLeft: -30, marginRight: -30, marginTop: -10, marginBottom: -10 }}>
-                                <Graph title="" dataKey={"temperature"} data={this.state.data.measurements} height={200} legend={false} cardView={true} />
+                                <Graph title="" dataKey={"temperature"} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.state.from} />
                             </div>
                             <hr style={{ margin: "0px 0 10px 0" }} />
                             <SimpleGrid columns={2} style={{ width: "100%" }}>

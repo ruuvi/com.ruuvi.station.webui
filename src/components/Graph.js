@@ -54,7 +54,7 @@ class Graph extends Component {
                             stroke: "rgba(1,174,144,1)",
                         }],
                         cursor: { show: this.props.cursor || false, drag: { x: true, y: true, uni: 50 } },
-                        scales: { x: { time: true } },
+                        scales: { x: { time: true, auto: this.props.from === undefined, range: this.props.from ? [this.props.from/1000, new Date().getTime()/1000] : undefined } },
                         axes: [
                             {
                                 grid: { show: false },

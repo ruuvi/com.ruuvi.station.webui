@@ -339,7 +339,7 @@ class Sensor extends Component {
                                 </table>
                             </div>
 
-                            <Graph dataKey={this.state.graphKey} data={this.state.data.measurements} height={450} cursor={true} />
+                            <Graph dataKey={this.state.graphKey} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
                             <div style={{ height: "20px" }} />
                             <Accordion allowMultiple style={{ marginLeft: -35, marginRight: -35 }}>
                                 <AccordionItem>
