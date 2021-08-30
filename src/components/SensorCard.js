@@ -84,6 +84,7 @@ class SensorCard extends Component {
         return null
     }
     isAlertTriggerd(type) {
+        if (type === "movementCounter") type = "movement";
         var alert = this.getAlert(type.toLocaleLowerCase())
         if (!alert) return false
         return alert.triggered;
