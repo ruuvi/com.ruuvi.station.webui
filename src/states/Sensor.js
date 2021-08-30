@@ -253,7 +253,12 @@ class Sensor extends Component {
             if (type === "temperature") {
                 min = temperatureToUserFormat(min)
                 max = temperatureToUserFormat(max)
+            } else if (type === "pressure") {
+                min /= 100;
+                max /= 100;
             }
+            min = localeNumber(min, 2)
+            max = localeNumber(max, 2)
             let regx = "{(.*?)}"
             var alertText = this.props.t("alert_description")
             var match = alertText.match(regx)
@@ -395,7 +400,15 @@ class Sensor extends Component {
                                                             <tr>
                                                                 <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
                                                                 <td style={detailedText}>
-                                                                    {localeNumber(temperatureOffsetToUserFormat(this.state.data["offset" + x]), 2)} {getUnitHelper(x.toLocaleLowerCase()).unit}
+                                                                    {x === "Pressure" ? (
+                                                                        <>
+                                                                            {localeNumber((this.state.data["offset" + x] / 100), 2)} {getUnitHelper(x.toLocaleLowerCase()).unit}
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            {localeNumber(temperatureOffsetToUserFormat(this.state.data["offset" + x]), 2)} {getUnitHelper(x.toLocaleLowerCase()).unit}
+                                                                        </>
+                                                                    )}
                                                                 </td>
                                                             </tr>
                                                         </tbody>
