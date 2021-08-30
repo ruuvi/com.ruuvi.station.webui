@@ -76,7 +76,7 @@ class Dashboard extends Component {
                     ) : (
                         <>
                             {this.state.sensors.map(x => {
-                                return <a href={"#/" + x.sensor} style={{ alignItems: "center" }}>
+                                return <a key={x.sensor} href={"#/" + x.sensor} style={{ alignItems: "center" }}>
                                     <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
                                 </a>
                             })}

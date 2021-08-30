@@ -34,6 +34,8 @@ class SensorCard extends Component {
             from: 24 * 3,
             graphDataKey: "temperature",
         }
+    }
+    componentDidMount() {
         this.loadData(true)
     }
     loadData() {
@@ -104,10 +106,10 @@ class SensorCard extends Component {
                     <div>
                         {this.state.data && this.state.data.measurements.length ? <div>
                             <div style={{ color: this.isAlertTriggerd("temperature") ? "#f27575" : undefined }}>
-                                <span class="main-stat">
+                                <span className="main-stat">
                                     {localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals)}
                                 </span>
-                                <span class="main-stat-unit">
+                                <span className="main-stat-unit">
                                     {getUnitHelper("temperature").unit}
                                 </span>
                             </div>
@@ -117,7 +119,7 @@ class SensorCard extends Component {
                             <hr style={{ margin: "0px 0 10px 0" }} />
                             <SimpleGrid columns={2} style={{ width: "100%" }}>
                                 {["humidity", "battery", "pressure", "movementCounter"].map(x => {
-                                    return <GridItem style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
+                                    return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
                                         <span style={smallSensorValue}>{localeNumber(getUnitHelper(x).value(this.getLatestReading()[x]), getUnitHelper(x).decimals)}</span>
                                         <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
                                     </GridItem>

@@ -14,11 +14,13 @@ import { withTranslation } from 'react-i18next';
 class SensorMenu extends Component {
     constructor(props) {
         super(props)
-        this.state = {sensors: []}
+        this.state = { sensors: [] }
+    }
+    componentDidMount() {
         new NetworkApi().user(resp => {
             if (resp.result === "success") {
                 var d = resp.data.sensors;
-                this.setState({ ...this.state, sensors: d,})
+                this.setState({ ...this.state, sensors: d })
             } else if (resp.result === "error") {
                 console.log("sensor menu error", resp.error)
             }
