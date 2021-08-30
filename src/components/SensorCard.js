@@ -32,6 +32,7 @@ class SensorCard extends Component {
             lastParsedReading: null,
             loading: true,
             from: 24 * 3,
+            graphDataKey: "temperature",
         }
         this.loadData(true)
     }
@@ -110,14 +111,16 @@ class SensorCard extends Component {
                                 </span>
                             </div>
                             <div style={{ marginLeft: -30, marginRight: -30, marginTop: -10, marginBottom: -10 }}>
-                                <Graph title="" dataKey={"temperature"} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.state.from} />
+                                <Graph title="" dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.state.from} />
                             </div>
                             <hr style={{ margin: "0px 0 10px 0" }} />
                             <SimpleGrid columns={2} style={{ width: "100%" }}>
-                                <GridItem style={{ back: this.isAlertTriggerd("humidity") ? "#f27575" : undefined }}><span style={smallSensorValue}>{localeNumber(getUnitHelper("humidity").value(this.getLatestReading().humidity), getUnitHelper("humidity").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("humidity").unit}</span></GridItem>
-                                <GridItem style={{ color: this.isAlertTriggerd("battery") ? "#f27575" : undefined }}><span style={smallSensorValue}>{localeNumber(getUnitHelper("battery").value(this.getLatestReading().battery), getUnitHelper("battery").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("battery").unit}</span></GridItem>
-                                <GridItem style={{ color: this.isAlertTriggerd("pressure") ? "#f27575" : undefined }}><span style={smallSensorValue}>{localeNumber(getUnitHelper("pressure").value(this.getLatestReading().pressure), getUnitHelper("pressure").decimals)}</span> <span style={smallSensorValueUnit}>{getUnitHelper("pressure").unit}</span></GridItem>
-                                <GridItem style={{ color: this.isAlertTriggerd("movementCounter") ? "#f27575" : undefined }}><span style={smallSensorValue}>{localeNumber(getUnitHelper("movementCounter").value(this.getLatestReading().movementCounter), getUnitHelper("movementCounter").decimals)}</span> <span style={smallSensorValueUnit}>{t(getUnitHelper("movementCounter").unit.toLocaleLowerCase(), getUnitHelper("movementCounter").unit).toLowerCase()}</span></GridItem>
+                                {["humidity", "battery", "pressure", "movementCounter"].map(x => {
+                                    return <GridItem style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
+                                        <span style={smallSensorValue}>{localeNumber(getUnitHelper(x).value(this.getLatestReading()[x]), getUnitHelper(x).decimals)}</span>
+                                        <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
+                                    </GridItem>
+                                })}
                             </SimpleGrid>
                         </div> : <div>
                             <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>No data.<br />The sensor need to be in range of a gateway.</center>
