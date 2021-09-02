@@ -54,11 +54,21 @@ class Graph extends Component {
                             stroke: "rgba(1,174,144,1)",
                         }],
                         cursor: { show: this.props.cursor || false, drag: { x: true, y: true, uni: 50 } },
-                        scales: { x: { time: true, auto: this.props.from === undefined, range: this.props.from ? [this.props.from/1000, new Date().getTime()/1000] : undefined } },
+                        scales: {
+                            x: {
+                                time: true, auto: this.props.from === undefined, range: (_, fromMin, fromMax) => {
+                                    if (!this.props.data || (this.props.data.length && fromMax === this.props.data[0].timestamp && fromMin === this.props.data[this.props.data.length - 1].timestamp)) {
+                                        fromMin = this.props.from / 1000
+                                        fromMax = new Date().getTime() / 1000
+                                    }
+                                    return [fromMin, fromMax]
+                                }
+                            }
+                        },
                         axes: [
                             {
                                 grid: { show: false },
-                                values: useDatesOnX ? (self, ticks) => ticks.map(rawValue => ddmm(rawValue)) : (self, ticks) => ticks.map(rawValue => hhmm(rawValue)),
+                                values: useDatesOnX ? (_, ticks) => ticks.map(rawValue => ddmm(rawValue)) : (_, ticks) => ticks.map(rawValue => hhmm(rawValue)),
                             },
                         ],
                     }}
