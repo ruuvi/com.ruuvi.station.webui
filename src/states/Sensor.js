@@ -34,6 +34,7 @@ import { MdArrowDropDown } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber, temperatureOffsetToUserFormat, temperatureToUserFormat } from "../UnitHelper";
 import { withRouter } from 'react-router-dom';
+import DurationText from "../components/DurationText";
 
 var uppercaseFirst = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -114,7 +115,7 @@ function SensorHeader(props) {
                     {props.sensor.name}
                 </Heading>
                 <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
-                    {props.timeSinceLastUpdate}m {props.t("ago")}
+                    <DurationText from={props.lastUpdateTime} t={props.t} />
                 </div>
             </div>
             <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
@@ -148,7 +149,7 @@ function SensorHeader(props) {
                     {props.sensor.name}
                 </Heading>
                 <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
-                    {props.timeSinceLastUpdate}m {props.t("ago")}
+                    <DurationText from={props.lastUpdateTime} t={props.t} />
                 </div>
             </div>
         </center>
@@ -171,12 +172,14 @@ class Sensor extends Component {
         }
     }
     componentDidMount() {
+        //this.interval = setInterval(() => this.forceUpdate(), 1000);
         if (this.props.sensor) {
             this.loadData(true)
             //this.updateInterval = setInterval(this.loadData.bind(this), 10 * 1000);
         }
     }
     componentWillUnmount() {
+        //clearInterval(this.interval);
         //clearInterval(this.updateInterval);
     }
     componentDidUpdate(prevProps) {
@@ -227,7 +230,11 @@ class Sensor extends Component {
         if (!this.state.data || !this.state.data.measurements.length) return " - ";
         var now = new Date().getTime() / 1000
         var lastUpdate = this.state.data.measurements[0].timestamp
-        return Math.floor(((now - lastUpdate) / 60))
+        return Math.floor(((now - lastUpdate)))
+    }
+    getLastUpdateTime() {
+        if (!this.state.data || !this.state.data.measurements.length) return " - ";
+        return this.state.data.measurements[0].timestamp
     }
     updateStateVar(key, value) {
         var state = this.state;
@@ -300,7 +307,7 @@ class Sensor extends Component {
         var { t } = this.props
         return (
             <Box borderWidth="1px" borderRadius="lg" overflow="hidden" padding="35px" style={{ backgroundColor: "white" }}>
-                <SensorHeader {...this.props} timeSinceLastUpdate={this.getTimeSinceLastUpdate()} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} />
+                <SensorHeader {...this.props} lastUpdateTime={this.getLastUpdateTime()} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} />
                 {this.state.editName !== null && <div>
                     <Input value={this.state.editName} onChange={v => this.updateStateVar("editName", v.target.value)} />
                     <Button onClick={() => this.update()}>{t("update")}</Button>
