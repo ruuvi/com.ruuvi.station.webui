@@ -39,7 +39,7 @@ var uppercaseFirst = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-var timespans = [{ k: "1 hours", v: 1 }, { k: "2 hours", v: 2 }, { k: "8 hours", v: 8 }, { k: "12 hours", v: 12 }, { k: "1 day", v: 24 }, { k: "2 days", v: 24 * 2 }, { k: "1 week", v: 24 * 7 }, { k: "2 weeks", v: 24 * 7 * 2 }, { k: "1 month", v: 24 * 7 * 4 }, { k: "2 months", v: 24 * 7 * 4 * 2 }, { k: "3 months", v: 24 * 7 * 4 * 3 }, { k: "6 months", v: 24 * 7 * 4 * 6 }]
+var timespans = [{ k: "1", t: "hour", v: 1 }, { k: "2", t: "hours", v: 2 }, { k: "8", t: "hours", v: 8 }, { k: "12", t: "hours", v: 12 }, { k: "1", t: "day", v: 24 }, { k: "2", t: "days", v: 24 * 2 }, { k: "1", t: "week", v: 24 * 7 }, { k: "2", t: "weeks", v: 24 * 7 * 2 }, { k: "1", t: "month", v: 24 * 7 * 4 }, { k: "2", t: "months", v: 24 * 7 * 4 * 2 }, { k: "3", t: "months", v: 24 * 7 * 4 * 3 }, { k: "6", t: "months", v: 24 * 7 * 4 * 6 }]
 
 var bigCardFields = ["temperature", "humidity", "pressure", "movementCounter"];
 var sensorInfoOrder = ["mac", "dataFormat", "battery", "accelerationX", "accelerationY", "accelerationZ", "txPower", "rssi", "measurementSequenceNumber"];
@@ -310,7 +310,7 @@ class Sensor extends Component {
                                     return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x]), getUnitHelper(x).decimals)}
                                         alertTriggered={this.isAlertTriggerd(x)}
                                         label={t(getUnitHelper(x).label)}
-                                        unit={getUnitHelper(x).unit}
+                                        unit={t(getUnitHelper(x).unit)}
                                         selected={this.state.graphKey === x}
                                         onClick={() => this.setGraphKey(x)} />
                                 })}
@@ -321,7 +321,7 @@ class Sensor extends Component {
                                         <tr>
                                             <td>
                                                 <div style={graphLengthText}>
-                                                    {t("last")} {timespans.find(x => x.v === this.state.from).k}
+                                                    {t("last")} {timespans.find(x => x.v === this.state.from).k} {t(timespans.find(x => x.v === this.state.from).t)}
                                                 </div>
                                                 <div style={graphInfo}>
                                                     {t(getUnitHelper(this.state.graphKey).label)} ({getUnitHelper(this.state.graphKey).unit})
@@ -330,11 +330,11 @@ class Sensor extends Component {
                                             <td style={{ textAlign: "right" }}>
                                                 <Menu>
                                                     <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 14 }}>
-                                                        {timespans.find(x => x.v === this.state.from).k}
+                                                        {timespans.find(x => x.v === this.state.from).k} {t(timespans.find(x => x.v === this.state.from).t)}
                                                     </MenuButton>
                                                     <MenuList>
                                                         {timespans.map(x => {
-                                                            return <MenuItem key={x.v} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.setState({ ...this.state, from: x.v }, () => this.loadData(true))}>{x.k}</MenuItem>
+                                                            return <MenuItem key={x.v} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.setState({ ...this.state, from: x.v }, () => this.loadData(true))}>{x.k} {t(x.t)}</MenuItem>
                                                         })}
                                                     </MenuList>
                                                 </Menu>
@@ -344,7 +344,7 @@ class Sensor extends Component {
                                 </table>
                             </div>
 
-                            <Graph dataKey={this.state.graphKey} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                            <Graph dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
                             <div style={{ height: "20px" }} />
                             <Accordion allowMultiple style={{ marginLeft: -35, marginRight: -35 }}>
                                 <AccordionItem>

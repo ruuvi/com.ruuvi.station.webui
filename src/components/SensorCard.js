@@ -120,13 +120,13 @@ class SensorCard extends Component {
                             <SimpleGrid columns={2} style={{ width: "100%" }}>
                                 {["humidity", "battery", "pressure", "movementCounter"].map(x => {
                                     return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
-                                        <span style={smallSensorValue}>{localeNumber(getUnitHelper(x).value(this.getLatestReading()[x]), getUnitHelper(x).decimals)}</span>
+                                        <span style={smallSensorValue}>{this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x]), getUnitHelper(x).decimals)}</span>
                                         <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
                                     </GridItem>
                                 })}
                             </SimpleGrid>
                         </div> : <div>
-                            <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>No data.<br />The sensor need to be in range of a gateway.</center>
+                            <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>{t("no_data").split("\n").map(x => <div>{x}</div>)}</center>
                         </div>}
                     </div>
                 )}

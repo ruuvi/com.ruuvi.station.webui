@@ -46,7 +46,7 @@ class Graph extends Component {
                             label: this.props.t('time'),
                             value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
                         }, {
-                            label: this.props.t(this.props.dataKey),
+                            label: this.props.dataName || this.props.t(this.props.dataKey),
                             spanGaps: true,
                             points: { show: this.props.points || false, size: 4, fill: "green" },
                             width: 2,
