@@ -58,6 +58,13 @@ const sensorName = {
     cursor: 'pointer',
 }
 
+const sensorNameMobile = {
+    fontFamily: "montserrat",
+    fontSize: "34px",
+    fontWeight: 800,
+    cursor: 'pointer',
+}
+
 const graphLengthText = {
     fontFamily: "montserrat",
     fontSize: "24px",
@@ -136,8 +143,8 @@ function SensorHeader(props) {
                     </td>
                 </tr>
             </table>
-            <div style={{ width: "65%" }}>
-                <Heading style={sensorName} onClick={() => props.editName()}>
+            <div style={{ width: "65%", marginTop: "5px" }}>
+                <Heading style={sensorNameMobile} onClick={() => props.editName()}>
                     {props.sensor.name}
                 </Heading>
                 <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
