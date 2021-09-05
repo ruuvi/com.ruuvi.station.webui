@@ -41,12 +41,13 @@ class SensorCard extends Component {
     loadData() {
         new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: "dense", limit: 1, sort: "desc" }, resp => {
             if (resp.result === "success") {
-                let d = parse(resp.data);
-                this.setState({ lastParsedReading: d.measurements.length === 1 ? d.measurements[0] : null })
+                let oneDenseData = parse(resp.data);
+                var lastParsedReading = oneDenseData.measurements.length === 1 ? oneDenseData.measurements[0] : null
                 new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: "sparse" }, resp => {
                     if (resp.result === "success") {
                         let d = parse(resp.data);
-                        this.setState({ data: d, loading: false, table: d.table, resolvedMode: d.resolvedMode })
+                        if (lastParsedReading === null && d.measurements.length > 0) lastParsedReading = d.measurements[0]
+                        this.setState({ data: d, lastParsedReading: lastParsedReading, loading: false, table: d.table, resolvedMode: d.resolvedMode })
                     } else if (resp.result === "error") {
                         alert(resp.error)
                         this.setState({ ...this.state, loading: false })
