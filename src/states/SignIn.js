@@ -16,10 +16,13 @@ const loginText = {
     fontFamily: "montserrat",
     fontWeight: 800,
     fontSize: 36,
+    paddingTop: 8,
+    paddingBottom: 8,
 }
 const infoText = {
     fontFamily: "mulish",
     fontSize: 16,
+    paddingBottom: 8,
 }
 const buttonText = {
     fontFamily: "montserrat",
@@ -108,7 +111,7 @@ class SignIn extends Component {
                                                 <Text style={infoText}>
                                                     {t("type_your_email")}
                                                 </Text>
-                                                <Input placeholder={t("email")} value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} />
+                                                <Input placeholder={t("email")} value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} autoFocus />
                                                 <Button colorScheme="teal" isDisabled={!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)} onClick={this.register.bind(this)} style={buttonText}>{t("login")}</Button>
                                             </Stack>
                                         </SlideFade>
@@ -120,7 +123,7 @@ class SignIn extends Component {
                                                     {t("sign_in_check_email")}
                                                 </Text>
                                                 <HStack style={{ marginLeft: "50px" }}>
-                                                    <PinInput type="alphanumeric" value={this.state.validationCode} onChange={e => this.setState({ ...this.state, validationCode: e })}>
+                                                    <PinInput type="alphanumeric" value={this.state.validationCode} onChange={e => this.setState({ ...this.state, validationCode: e })} autoFocus>
                                                         <PinInputField />
                                                         <PinInputField />
                                                         <PinInputField />

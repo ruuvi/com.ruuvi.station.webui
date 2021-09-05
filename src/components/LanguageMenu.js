@@ -34,7 +34,7 @@ class LanguageMenu extends Component {
             return (
                 <>
                     {["en", "fi", "sv"].map(x => {
-                        return <span key={x} style={{ fontFamily: "mulish", margin: 3, fontSize: 16, fontWeight: "bold", cursor: "pointer", textDecoration: (i18n.language || "en") === x ? "underline" : "" }} onClick={() => this.langChange(x)}> {this.uppercaseFirst(x)}</span>
+                        return <span key={x} style={{ fontFamily: "mulish", margin: 6, fontSize: 16, fontWeight: "bold", cursor: "pointer", textDecoration: (i18n.language || "en") === x ? "underline" : "" }} onClick={() => this.langChange(x)}>{this.uppercaseFirst(x)}</span>
                     })}
                 </>
             )
@@ -46,7 +46,7 @@ class LanguageMenu extends Component {
                 </MenuButton>
                 <MenuList>
                     {["en", "fi", "sv"].map(x => {
-                        return <MenuItem key={x} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.langChange(x)}>{this.uppercaseFirst(x)}</MenuItem>
+                        return <MenuItem key={x} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold"}} onClick={() => this.langChange(x)}>{this.uppercaseFirst(x)}</MenuItem>
                     })}
                 </MenuList>
             </Menu>
