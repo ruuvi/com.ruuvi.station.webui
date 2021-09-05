@@ -16,13 +16,13 @@ const loginText = {
     fontFamily: "montserrat",
     fontWeight: 800,
     fontSize: 36,
-    paddingTop: 8,
-    paddingBottom: 8,
+    paddingTop: 18,
+    paddingBottom: 18,
 }
 const infoText = {
     fontFamily: "mulish",
     fontSize: 16,
-    paddingBottom: 8,
+    paddingBottom: 18,
 }
 const buttonText = {
     fontFamily: "montserrat",
