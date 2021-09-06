@@ -95,7 +95,14 @@
       "login_to_ruuvi_station": "Kirjaudu Ruuvi Stationiin",
       "update": "Päivitä",
       "last": "Viimeinen",
-      "time": "Aika"
+      "time": "Aika",
+      "day": "Päivä",
+      "week": "Viikko",
+      "weeks": "Viikkoa",
+      "month": "Kuukausi",
+      "months": "Kuukautta",
+      "hour": "Tunti",
+      "no_data": "Ei tallennettuja mittauksia.\nAnturin tulee olla reitittimen kuuluvuusalueella."
     }
   },
   "sv": {
