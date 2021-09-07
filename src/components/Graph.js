@@ -3,6 +3,7 @@ import UplotReact from 'uplot-react';
 import 'uplot/dist/uPlot.min.css';
 import { SizeMe } from 'react-sizeme'
 import { withTranslation } from 'react-i18next';
+import { getUnitHelper } from "../UnitHelper";
 
 function ddmm(ts) {
     var d = new Date(ts * 1000);
@@ -20,7 +21,7 @@ class Graph extends Component {
         var d = JSON.parse(JSON.stringify(this.props.data));
         d = d.reverse();
         return [d.map(x => x.timestamp),
-        d.map(x => x.parsed[this.props.dataKey])]
+        d.map(x => getUnitHelper(this.props.dataKey).value(x.parsed[this.props.dataKey]))]
     }
     render() {
         var useDatesOnX = false;

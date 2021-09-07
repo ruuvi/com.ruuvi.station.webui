@@ -22,7 +22,6 @@ function parse(d) {
             if (d.offsetTemperature !== 0) {
                 d.measurements[i].parsed.temperature += d.offsetTemperature
                 d.measurements[i].parsed.temperature = round(d.measurements[i].parsed.temperature, 2)
-
             }
             if (d.offsetHumidity !== 0) {
                 d.measurements[i].parsed.humidity += d.offsetHumidity
