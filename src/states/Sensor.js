@@ -290,8 +290,14 @@ class Sensor extends Component {
         return alert.triggered;
     }
     remove() {
+        var user = new NetworkApi().getUser().email
+        var owner = this.props.sensor.owner
+        var confirmText = this.props.t("remove_claimed_sensor")
+        if (user !== owner) {
+            confirmText = this.props.t("remove_shared_sensor")
+        }
         var mac = this.props.sensor.sensor
-        if (window.confirm(this.props.t("remove_tag_confirm"))) {
+        if (window.confirm(confirmText)) {
             new NetworkApi().unclaim(mac, resp => {
                 if (resp.result === "success") {
                     this.props.remove();
