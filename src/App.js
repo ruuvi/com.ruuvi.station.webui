@@ -46,6 +46,7 @@ export default function App() {
   const forceUpdate = React.useCallback(() => updateState({}), []);
   const logout = () => {
     new NetworkApi().removeToken()
+    window.location.replace("/#/")
     forceUpdate()
   }
   var user = new NetworkApi().getUser()
