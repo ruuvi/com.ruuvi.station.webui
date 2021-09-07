@@ -24,6 +24,7 @@ class Graph extends Component {
         d.map(x => getUnitHelper(this.props.dataKey).value(x.parsed[this.props.dataKey]))]
     }
     render() {
+        var uh = getUnitHelper(this.props.dataKey)
         var useDatesOnX = false;
         if (this.props.from) {
             if ((new Date().getTime() - this.props.from) / 1000 > 60 * 60 * 24 * 2) useDatesOnX = true;
@@ -70,7 +71,10 @@ class Graph extends Component {
                             {
                                 grid: { show: false },
                                 values: useDatesOnX ? (_, ticks) => ticks.map(rawValue => ddmm(rawValue)) : (_, ticks) => ticks.map(rawValue => hhmm(rawValue)),
-                            },
+                            }, {
+                                size: 70,
+                                values: (_, ticks) => ticks.map(rawValue => rawValue.toFixed(uh.decimals)),
+                            }
                         ],
                     }}
                     data={this.getGraphData()}
