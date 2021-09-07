@@ -25,8 +25,8 @@ class Graph extends Component {
     }
     render() {
         var useDatesOnX = false;
-        if (this.props.xFrom && this.props.xTo) {
-            if (this.props.xTo - this.props.xFrom > 60 * 60 * 24 * 2) useDatesOnX = true;
+        if (this.props.from) {
+            if ((new Date().getTime() - this.props.from) / 1000 > 60 * 60 * 24 * 2) useDatesOnX = true;
         } else {
             if (this.props.data && this.props.data.length) {
                 var dataXSpan = this.props.data[0].timestamp - this.props.data[this.props.data.length - 1].timestamp;
@@ -47,7 +47,7 @@ class Graph extends Component {
                             label: this.props.t('time'),
                             value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
                         }, {
-                            label: this.props.dataName || this.props.t(this.props.dataKey),
+                            label: this.props.dataName || this.props.t(this.props.dataKey),
                             spanGaps: true,
                             points: { show: this.props.points || false, size: 4, fill: "green" },
                             width: 2,
@@ -58,7 +58,7 @@ class Graph extends Component {
                         scales: {
                             x: {
                                 time: true, auto: this.props.from === undefined, range: (_, fromMin, fromMax) => {
-                                    if (!this.props.data || (this.props.data.length && fromMax === this.props.data[0].timestamp && fromMin === this.props.data[this.props.data.length - 1].timestamp)) {
+                                    if (!this.props.data  || this.props.data.length === 1 || (this.props.data.length && fromMax === this.props.data[0].timestamp && fromMin === this.props.data[this.props.data.length - 1].timestamp)) {
                                         fromMin = this.props.from / 1000
                                         fromMax = new Date().getTime() / 1000
                                     }
