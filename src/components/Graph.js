@@ -3,7 +3,7 @@ import UplotReact from 'uplot-react';
 import 'uplot/dist/uPlot.min.css';
 import { SizeMe } from 'react-sizeme'
 import { withTranslation } from 'react-i18next';
-import { getUnitHelper } from "../UnitHelper";
+import { getUnitHelper, localeNumber } from "../UnitHelper";
 
 function ddmm(ts) {
     var d = new Date(ts * 1000);
@@ -59,7 +59,7 @@ class Graph extends Component {
                         scales: {
                             x: {
                                 time: true, auto: this.props.from === undefined, range: (_, fromMin, fromMax) => {
-                                    if (!this.props.data  || this.props.data.length === 1 || (this.props.data.length && fromMax === this.props.data[0].timestamp && fromMin === this.props.data[this.props.data.length - 1].timestamp)) {
+                                    if (!this.props.data || this.props.data.length === 1 || (this.props.data.length && fromMax === this.props.data[0].timestamp && fromMin === this.props.data[this.props.data.length - 1].timestamp)) {
                                         fromMin = this.props.from / 1000
                                         fromMax = new Date().getTime() / 1000
                                     }
@@ -73,7 +73,7 @@ class Graph extends Component {
                                 values: useDatesOnX ? (_, ticks) => ticks.map(rawValue => ddmm(rawValue)) : (_, ticks) => ticks.map(rawValue => hhmm(rawValue)),
                             }, {
                                 size: 70,
-                                values: (_, ticks) => ticks.map(rawValue => rawValue.toFixed(uh.decimals)),
+                                values: (_, ticks) => ticks.map(rawValue => localeNumber(rawValue, uh.decimals)),
                             }
                         ],
                     }}
