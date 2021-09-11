@@ -32,9 +32,10 @@ import parse from "../decoder/parser";
 import { CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 import { MdArrowDropDown } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
-import { getUnitHelper, localeNumber, temperatureOffsetToUserFormat, temperatureToUserFormat } from "../UnitHelper";
+import { getUnitHelper, localeNumber, temperatureToUserFormat } from "../UnitHelper";
 import { withRouter } from 'react-router-dom';
 import DurationText from "../components/DurationText";
+import Store from "../Store";
 
 var uppercaseFirst = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -165,7 +166,7 @@ class Sensor extends Component {
             data: null,
             loading: true,
             graphKey: "temperature",
-            from: 24,
+            from: new Store().getGraphFrom() || 24,
             table: "",
             resolvedMode: "",
             mode: "mixed",
@@ -307,6 +308,10 @@ class Sensor extends Component {
             })
         }
     }
+    updateFrom(v) {
+        this.setState({ ...this.state, from: v }, () => this.loadData(true))
+        new Store().setGraphFrom(v)
+    }
     render() {
         var { t } = this.props
         return (
@@ -352,7 +357,7 @@ class Sensor extends Component {
                                                     </MenuButton>
                                                     <MenuList>
                                                         {timespans.map(x => {
-                                                            return <MenuItem key={x.v} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.setState({ ...this.state, from: x.v }, () => this.loadData(true))}>{x.k} {t(x.t)}</MenuItem>
+                                                            return <MenuItem key={x.v} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.updateFrom(x.v)}>{x.k} {t(x.t)}</MenuItem>
                                                         })}
                                                     </MenuList>
                                                 </Menu>
