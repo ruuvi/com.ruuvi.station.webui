@@ -7,6 +7,7 @@ function parse(d) {
         if (x.parsed) x.parsed.rssi = x.rssi;
     })
     d.measurements = d.measurements.filter(x => x.parsed !== null) || []
+    if (d.measurements.length === 0) return d;
     function compare(a, b) {
         if (a.timestamp > b.timestamp) {
             return -1;
@@ -17,6 +18,7 @@ function parse(d) {
         return 0;
     }
     d.measurements.sort(compare);
+    d.latestTimestamp = d.measurements[0].timestamp;
     if (d.offsetTemperature !== 0 || d.offsetHumidity !== 0 || d.offsetPressure !== 0) {
         for (var i = 0; i < d.measurements.length; i++) {
             if (d.offsetTemperature !== 0) {

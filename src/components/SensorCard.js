@@ -12,6 +12,7 @@ import parse from "../decoder/parser";
 import { Spinner } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
+import DurationText from "./DurationText";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -23,6 +24,13 @@ const smallSensorValueUnit = {
     fontFamily: "montserrat",
     fontSize: 12,
 }
+
+const lastUpdatedText = {
+    fontFamily: "montserrat",
+    fontSize: 16,
+    fontWeight: 500,
+    color: "#85a4a3"
+  }
 
 class SensorCard extends Component {
     constructor(props) {
@@ -95,43 +103,48 @@ class SensorCard extends Component {
     render() {
         var { t } = this.props;
         return (
-            <Box height="360px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}>
-                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
-                    {this.props.sensor.name}
-                </Heading>
-                {this.state.loading ? (
-                    <center>
-                        <Spinner size="xl" />
-                    </center>
-                ) : (
-                    <div>
-                        {this.state.data && this.state.data.measurements.length ? <div>
-                            <div style={{ color: this.isAlertTriggerd("temperature") ? "#f27575" : undefined }}>
-                                <span className="main-stat">
-                                    {localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals)}
-                                </span>
-                                <span className="main-stat-unit">
-                                    {getUnitHelper("temperature").unit}
-                                </span>
-                            </div>
-                            <div style={{ marginLeft: -30, marginRight: -30, marginTop: -10, marginBottom: -10 }}>
-                                <Graph title="" dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.state.from} />
-                            </div>
-                            <hr style={{ margin: "0px 0 10px 0" }} />
-                            <SimpleGrid columns={2} style={{ width: "100%" }}>
-                                {["humidity", "battery", "pressure", "movementCounter"].map(x => {
-                                    return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
-                                        <span style={smallSensorValue}>{this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x]), getUnitHelper(x).decimals)}</span>
-                                        <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
-                                    </GridItem>
-                                })}
-                            </SimpleGrid>
-                        </div> : <div>
-                            <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>{t("no_data").split("\n").map(x => <div>{x}</div>)}</center>
-                        </div>}
-                    </div>
-                )}
-            </Box>
+            <div>
+                <Box height="360px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}>
+                    <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
+                        {this.props.sensor.name}
+                    </Heading>
+                    {this.state.loading ? (
+                        <center>
+                            <Spinner size="xl" />
+                        </center>
+                    ) : (
+                        <div>
+                            {this.state.data && this.state.data.measurements.length ? <div>
+                                <div style={{ color: this.isAlertTriggerd("temperature") ? "#f27575" : undefined }}>
+                                    <span className="main-stat">
+                                        {localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals)}
+                                    </span>
+                                    <span className="main-stat-unit">
+                                        {getUnitHelper("temperature").unit}
+                                    </span>
+                                </div>
+                                <div style={{ marginLeft: -30, marginRight: -30, marginTop: -10, marginBottom: -10 }}>
+                                    <Graph title="" dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.state.from} />
+                                </div>
+                                <hr style={{ margin: "0px 0 10px 0" }} />
+                                <SimpleGrid columns={2} style={{ width: "100%" }}>
+                                    {["humidity", "battery", "pressure", "movementCounter"].map(x => {
+                                        return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
+                                            <span style={smallSensorValue}>{this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x]), getUnitHelper(x).decimals)}</span>
+                                            <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
+                                        </GridItem>
+                                    })}
+                                </SimpleGrid>
+                            </div> : <div>
+                                <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>{t("no_data").split("\n").map(x => <div>{x}</div>)}</center>
+                            </div>}
+                        </div>
+                    )}
+                </Box>
+                <div style={{ ...lastUpdatedText, width: "100%", textAlign: "right", marginTop: 5 }}>
+                    <DurationText from={this.state.data ? this.state.data.latestTimestamp : " - "} t={this.props.t} />
+                </div>
+            </div>
         )
     }
 }

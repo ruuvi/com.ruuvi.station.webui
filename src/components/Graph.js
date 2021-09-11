@@ -52,8 +52,8 @@ class Graph extends Component {
                             spanGaps: true,
                             points: { show: this.props.points || false, size: 4, fill: "green" },
                             width: 2,
-                            fill: "rgba(1,174,144,0.2)",
-                            stroke: "rgba(1,174,144,1)",
+                            fill: "rgba(68,201,185,0.3)",
+                            stroke: "rgb(68,201,185",
                         }],
                         cursor: { show: this.props.cursor || false, drag: { x: true, y: true, uni: 50 } },
                         scales: {
@@ -70,9 +70,15 @@ class Graph extends Component {
                         axes: [
                             {
                                 grid: { show: false },
+                                font: "12px mulish",
                                 values: useDatesOnX ? (_, ticks) => ticks.map(rawValue => ddmm(rawValue)) : (_, ticks) => ticks.map(rawValue => hhmm(rawValue)),
                             }, {
-                                size: 70,
+                                grid: { stroke: "rgba(212,237,232,0.5)", width: 2 },
+                                size: 55,
+                                ticks: {
+                                    size: 0
+                                },
+                                font: "12px mulish",
                                 values: (_, ticks) => ticks.map(rawValue => localeNumber(rawValue, uh.decimals)),
                             }
                         ],

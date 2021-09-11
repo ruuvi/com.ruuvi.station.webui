@@ -61,7 +61,7 @@ const sensorName = {
 
 const sensorNameMobile = {
     fontFamily: "montserrat",
-    fontSize: "34px",
+    fontSize: "32px",
     fontWeight: 800,
     cursor: 'pointer',
 }
@@ -106,7 +106,7 @@ const accordionContent = {
 }
 
 function SensorHeader(props) {
-    const [isLargeDisplay] = useMediaQuery("(min-width: 600px)")
+    const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
     if (isLargeDisplay) {
         return <HStack alignItems="start">
             <Avatar bg="#01ae90" size="xl" name={props.sensor.name} src={props.sensor.picture} />
@@ -127,31 +127,33 @@ function SensorHeader(props) {
         </HStack>
     } else {
         return <center>
-            <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                <tr>
-                    <td width="33%" style={{ verticalAlign: "top" }}>
-                        <IconButton isRound={true} onClick={() => props.close()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
-                    </td>
-                    <td width="33%" align="center">
-                        <Avatar bg="#01ae90" size="xl" name={props.sensor.name} src={props.sensor.picture} />
-                    </td>
-                    <td width="33%" align="right" style={{ verticalAlign: "top" }}>
-                        <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
-                            {/*<IconButton isRound={true} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><EditIcon /></IconButton>*/}
-                            <IconButton isRound={true} onClick={() => props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "2px", marginRight: "5px" }}><ArrowBackIcon /></IconButton>
-                            <IconButton isRound={true} onClick={() => props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><ArrowForwardIcon /></IconButton>
-                        </span>
-                    </td>
-                </tr>
-            </table>
-            <div style={{ width: "65%", marginTop: "5px" }}>
-                <Heading style={sensorNameMobile} onClick={() => props.editName()}>
-                    {props.sensor.name}
-                </Heading>
-                <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
-                    <DurationText from={props.lastUpdateTime} t={props.t} />
+            <Box m={2}>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="33%" style={{ verticalAlign: "top" }}>
+                            <IconButton isRound={true} onClick={() => props.close()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
+                        </td>
+                        <td width="33%" align="center">
+                            <Avatar bg="#01ae90" size="xl" name={props.sensor.name} src={props.sensor.picture} />
+                        </td>
+                        <td width="33%" align="right" style={{ verticalAlign: "top" }}>
+                            <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
+                                {/*<IconButton isRound={true} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><EditIcon /></IconButton>*/}
+                                <IconButton isRound={true} onClick={() => props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "2px", marginRight: "5px" }}><ArrowBackIcon /></IconButton>
+                                <IconButton isRound={true} onClick={() => props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><ArrowForwardIcon /></IconButton>
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+                <div style={{ width: "65%", marginTop: "5px" }}>
+                    <Heading style={sensorNameMobile} onClick={() => props.editName()}>
+                        {props.sensor.name}
+                    </Heading>
+                    <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
+                        <DurationText from={props.lastUpdateTime} t={props.t} />
+                    </div>
                 </div>
-            </div>
+            </Box>
         </center>
     }
 }
@@ -232,10 +234,6 @@ class Sensor extends Component {
         var lastUpdate = this.state.data.measurements[0].timestamp
         return Math.floor(((now - lastUpdate)))
     }
-    getLastUpdateTime() {
-        if (!this.state.data || !this.state.data.measurements.length) return " - ";
-        return this.state.data.measurements[0].timestamp
-    }
     updateStateVar(key, value) {
         var state = this.state;
         state[key] = value;
@@ -312,8 +310,8 @@ class Sensor extends Component {
     render() {
         var { t } = this.props
         return (
-            <Box borderWidth="1px" borderRadius="lg" overflow="hidden" padding="35px" style={{ backgroundColor: "white" }}>
-                <SensorHeader {...this.props} lastUpdateTime={this.getLastUpdateTime()} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} />
+            <Box borderWidth="1px" borderRadius="lg" overflow="hidden" p={{ base: "5px", md: "35px" }} style={{ backgroundColor: "white" }}>
+                <SensorHeader {...this.props} lastUpdateTime={this.state.data ? this.state.data.latestTimestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} />
                 {this.state.editName !== null && <div>
                     <Input value={this.state.editName} onChange={v => this.updateStateVar("editName", v.target.value)} />
                     <Button onClick={() => this.update()}>{t("update")}</Button>
@@ -366,10 +364,12 @@ class Sensor extends Component {
                             {!this.state.data || !this.state.data.measurements.length ? (
                                 <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
                             ) : (
-                                <Graph dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                <Box ml={-5} mr={-5}>
+                                    <Graph dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                </Box>
                             )}
                             <div style={{ height: "20px" }} />
-                            <Accordion allowMultiple style={{ marginLeft: -35, marginRight: -35 }}>
+                            <Accordion allowMultiple ml={{ base: -15, md: -35 }} mr={{ base: -15, md: -35 }}>
                                 <AccordionItem>
                                     <AccordionButton>
                                         <Box flex="1" textAlign="left" style={collapseText}>
@@ -417,21 +417,15 @@ class Sensor extends Component {
                                     <AccordionPanel pb={4} style={accordionPanel}>
                                         <List>
                                             {["Temperature", "Humidity", "Pressure"].map(x => {
+                                                var uh = getUnitHelper(x.toLocaleLowerCase());
+                                                var value = uh.value(this.state.data["offset" + x], true);
                                                 return <ListItem key={x}>
                                                     <table width="100%" style={accordionContent}>
                                                         <tbody>
                                                             <tr>
                                                                 <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
                                                                 <td style={detailedText}>
-                                                                    {x === "Pressure" ? (
-                                                                        <>
-                                                                            {localeNumber((this.state.data["offset" + x] / 100), 2)} {getUnitHelper(x.toLocaleLowerCase()).unit}
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            {localeNumber(temperatureOffsetToUserFormat(this.state.data["offset" + x]), 2)} {getUnitHelper(x.toLocaleLowerCase()).unit}
-                                                                        </>
-                                                                    )}
+                                                                    {localeNumber(value, uh.decimals)} {uh.unit}
                                                                 </td>
                                                             </tr>
                                                         </tbody>
