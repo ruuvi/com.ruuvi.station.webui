@@ -33,20 +33,6 @@ function parse(d) {
             }
         }
     }
-    var settings = localStorage.getItem("settings");
-    if (settings) {
-        settings = JSON.parse(settings)
-        if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
-            d.measurements.forEach(x => {
-                x.parsed.temperature = round(((x.parsed.temperature * 1.8) + 32), 2);
-            })
-        }
-        else if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
-            d.measurements.forEach(x => {
-                x.parsed.temperature = round((x.parsed.temperature + 273.15), 2);
-            })
-        }
-    }
     return d;
 }
 
