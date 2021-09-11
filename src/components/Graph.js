@@ -5,9 +5,12 @@ import { SizeMe } from 'react-sizeme'
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 
+function paddDate(num) {
+    return ('00'+num).slice(-2);
+}
 function ddmm(ts) {
     var d = new Date(ts * 1000);
-    return d.getDate() + "/" + (d.getMonth() + 1)
+    return paddDate(d.getDate()) + "." + paddDate(d.getMonth() + 1)
 }
 
 function hhmm(ts) {
@@ -70,7 +73,7 @@ class Graph extends Component {
                         axes: [
                             {
                                 grid: { show: false },
-                                font: "12px mulish",
+                                font: "12px Arial",
                                 values: useDatesOnX ? (_, ticks) => ticks.map(rawValue => ddmm(rawValue)) : (_, ticks) => ticks.map(rawValue => hhmm(rawValue)),
                             }, {
                                 grid: { stroke: "rgba(212,237,232,0.5)", width: 2 },
@@ -78,7 +81,7 @@ class Graph extends Component {
                                 ticks: {
                                     size: 0
                                 },
-                                font: "12px mulish",
+                                font: "12px Arial",
                                 values: (_, ticks) => ticks.map(rawValue => localeNumber(rawValue, uh.decimals)),
                             }
                         ],
