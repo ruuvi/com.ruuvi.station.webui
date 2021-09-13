@@ -142,7 +142,7 @@ class SensorCard extends Component {
                     )}
                 </Box>
                 <div style={{ ...lastUpdatedText, width: "100%", textAlign: "right", marginTop: 5 }}>
-                    <DurationText from={this.state.data ? this.state.data.latestTimestamp : " - "} t={this.props.t} />
+                    <DurationText from={this.state.lastParsedReading ? this.state.lastParsedReading.timestamp : " - "} t={this.props.t} />
                 </div>
             </div>
         )
