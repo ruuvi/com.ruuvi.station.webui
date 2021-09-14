@@ -5,12 +5,9 @@ import { SizeMe } from 'react-sizeme'
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 
-function paddDate(num) {
-    return ('00'+num).slice(-2);
-}
 function ddmm(ts) {
     var d = new Date(ts * 1000);
-    return paddDate(d.getDate()) + "." + paddDate(d.getMonth() + 1)
+    return d.getDate() + "." + (d.getMonth() + 1) + "."
 }
 
 function hhmm(ts) {
