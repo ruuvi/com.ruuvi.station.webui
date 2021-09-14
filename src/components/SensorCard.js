@@ -27,7 +27,7 @@ const smallSensorValueUnit = {
 
 const lastUpdatedText = {
     fontFamily: "montserrat",
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: 500,
     color: "#85a4a3"
   }
