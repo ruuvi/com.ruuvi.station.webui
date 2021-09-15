@@ -385,6 +385,23 @@ class Sensor extends Component {
                                     <hr />
                                     <AccordionPanel style={accordionPanel}>
                                         <List>
+                                        <ListItem>
+                                                <table width="100%" style={accordionContent}>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td width="50%">
+                                                                <div style={detailedTitle}>{t("sensor_name")}</div>
+                                                            </td>
+                                                            <td style={detailedText}>
+                                                                <span style={{cursor: "pointer"}} onClick={() => this.editName(true)}>
+                                                                    {this.props.sensor.name}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </ListItem>
+                                            <hr />
                                             <ListItem>
                                                 <table style={accordionContent}>
                                                     <tbody>
