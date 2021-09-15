@@ -37,6 +37,7 @@ import { withRouter } from 'react-router-dom';
 import DurationText from "../components/DurationText";
 import Store from "../Store";
 import ShareDialog from "../components/ShareDialog";
+import EditNameDialog from "../components/EditNameDialog";
 
 var uppercaseFirst = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -58,14 +59,12 @@ const sensorName = {
     fontFamily: "montserrat",
     fontSize: "54px",
     fontWeight: 800,
-    cursor: 'pointer',
 }
 
 const sensorNameMobile = {
     fontFamily: "montserrat",
     fontSize: "32px",
     fontWeight: 800,
-    cursor: 'pointer',
 }
 
 const graphLengthText = {
@@ -113,7 +112,7 @@ function SensorHeader(props) {
         return <HStack alignItems="start">
             <Avatar bg="#01ae90" size="xl" name={props.sensor.name} src={props.sensor.picture} />
             <div style={{ width: "65%" }}>
-                <Heading style={sensorName} onClick={() => props.editName()}>
+                <Heading style={sensorName}>
                     {props.sensor.name}
                 </Heading>
                 <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
@@ -148,7 +147,7 @@ function SensorHeader(props) {
                     </tr>
                 </table>
                 <div style={{ width: "65%", marginTop: "5px" }}>
-                    <Heading style={sensorNameMobile} onClick={() => props.editName()}>
+                    <Heading style={sensorNameMobile}>
                         {props.sensor.name}
                     </Heading>
                     <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
@@ -171,8 +170,8 @@ class Sensor extends Component {
             table: "",
             resolvedMode: "",
             mode: "mixed",
-            editName: null,
             alerts: [],
+            editName: false,
             showShare: false,
         }
     }
@@ -311,15 +310,14 @@ class Sensor extends Component {
     share(state) {
         this.setState({ ...this.state, showShare: state })
     }
+    editName(state) {
+        this.setState({ ...this.state, editName: state })
+    }
     render() {
         var { t } = this.props
         return (
-            <Box borderWidth="1px" borderRadius="lg" overflow="hidden" p={{ base: "5px", md: "35px" }} style={{ backgroundColor: "white" }}>
+            <Box borderWidth="1px" borderRadius="lg" overflow="hidden" pt={{ base: "5px", md: "35px" }} pl={{ base: "5px", md: "35px" }} pr={{ base: "5px", md: "35px" }} style={{ backgroundColor: "white" }}>
                 <SensorHeader {...this.props} lastUpdateTime={this.state.data ? this.state.data.latestTimestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} />
-                {this.state.editName !== null && <div>
-                    <Input value={this.state.editName} onChange={v => this.updateStateVar("editName", v.target.value)} />
-                    <Button onClick={() => this.update()}>{t("update")}</Button>
-                </div>}
                 {this.state.loading ? (
                     <Stack style={{ marginTop: "30px" }}>
                         <Progress isIndeterminate={true} color="#e6f6f2" />
@@ -384,6 +382,23 @@ class Sensor extends Component {
                                     <hr />
                                     <AccordionPanel pb={2} style={accordionPanel}>
                                         <List>
+                                        <ListItem>
+                                                <table width="100%" style={accordionContent}>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td width="50%">
+                                                                <div style={detailedTitle}>{t("sensor_name")}</div>
+                                                            </td>
+                                                            <td style={detailedText}>
+                                                                <span style={{cursor: "pointer"}} onClick={() => this.editName(true)}>
+                                                                    {this.props.sensor.name}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </ListItem>
+                                            <hr />
                                             <ListItem>
                                                 <table width="100%" style={accordionContent}>
                                                     <tbody>
@@ -494,7 +509,7 @@ class Sensor extends Component {
                                     <hr />
                                     <AccordionPanel pb={2} style={accordionPanel}>
                                         <List>
-                                            {sensorInfoOrder.map(order => {
+                                            {sensorInfoOrder.map((order, i) => {
                                                 var x = this.getLatestReading(true).find(x => x.key === order);
                                                 if (!x) return null
                                                 let uh = getUnitHelper(x.key)
@@ -510,17 +525,30 @@ class Sensor extends Component {
                                                                 </tr>
                                                             </tbody>
                                                         </table>
-                                                        <hr />
+                                                        {i !== sensorInfoOrder.length-1 && <hr />}
                                                     </ListItem>
                                                 )
                                             })}
+                                        </List>
+                                    </AccordionPanel>
+                                </AccordionItem>
+
+                                <AccordionItem>
+                                    <AccordionButton>
+                                        <Box flex="1" textAlign="left" style={collapseText}>
+                                            {t("remove")}
+                                        </Box>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <hr />
+                                    <AccordionPanel pb={2} style={accordionPanel}>
+                                        <List>
                                             <ListItem>
                                                 <table width="100%" style={accordionContent}>
                                                     <tbody>
                                                         <tr>
                                                             <td width="50%">
-                                                                <div style={detailedTitle}>{t("remove")}</div>
-                                                                <div style={detailedSubText}>{t("remove_this_sensor")}</div>
+                                                                <div style={detailedTitle}>{t("remove_this_sensor")}</div>
                                                             </td>
                                                             <td style={detailedText}>
                                                                 <Button backgroundColor="#43c7ba" color="white" borderRadius="24" onClick={() => this.remove()}>{t("remove")}</Button>
@@ -536,6 +564,7 @@ class Sensor extends Component {
                         </div>}
                     </div>
                 )}
+                <EditNameDialog open={this.state.editName} onClose={() => this.editName(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
                 <ShareDialog open={this.state.showShare} onClose={() => this.share(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
             </Box>
         )
