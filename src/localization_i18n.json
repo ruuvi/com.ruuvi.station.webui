@@ -3,6 +3,7 @@
     "translation": {
       "remove": "Remove",
       "version": "Version",
+      "sensor_name": "Name",
       "data_format": "Data Format",
       "tx_power": "Tx Power",
       "movement_counter": "Movement Counter",
@@ -89,6 +90,7 @@
     "translation": {
       "remove": "Poista",
       "version": "Versio",
+      "sensor_name": "Anturin nimi",
       "data_format": "Dataformaatti",
       "tx_power": "Lähetysteho",
       "movement_counter": "Liikelaskuri",
@@ -175,6 +177,7 @@
     "translation": {
       "remove": "Ta bort",
       "version": "Version",
+      "sensor_name": "Sensornamn",
       "data_format": "Dataformat",
       "tx_power": "Sändningseffekten",
       "movement_counter": "Rörelseräknare",
