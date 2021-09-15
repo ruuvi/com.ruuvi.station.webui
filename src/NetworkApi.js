@@ -1,5 +1,22 @@
 import pjson from '../package.json';
 
+function sortSensors(sensors) {
+    for (var i = 0; i < sensors.length; i++) {
+        if (!sensors[i].name) {
+            let splitMac = sensors[i].sensor.split(":")
+            sensors[i].name = "Ruuvi " + splitMac[4] + splitMac[5]
+        }
+        sensors[i].name = sensors[i].name.substring(0, pjson.settings.sensorNameMaxLength);
+    }
+    // order sensors by name
+    sensors.sort(function (a, b) {
+        var textA = a.name.toUpperCase();
+        var textB = b.name.toUpperCase();
+        return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+    });
+    return sensors
+}
+
 class NetworkApi {
     constructor() {
         this.url = "https://network.ruuvi.com"
@@ -58,19 +75,23 @@ class NetworkApi {
         })
             .then(response => {
                 if (response.data && response.data.sensors.length > 0) {
-                    for (var i = 0; i < response.data.sensors.length; i++) {
-                        if (!response.data.sensors[i].name) {
-                            let splitMac = response.data.sensors[i].sensor.split(":")
-                            response.data.sensors[i].name = "Ruuvi " + splitMac[4] + splitMac[5]
-                        }
-                        response.data.sensors[i].name = response.data.sensors[i].name.substring(0, pjson.settings.sensorNameMaxLength);
+                    response.data.sensors = sortSensors(response.data.sensors)
+                }
+                success(response)
+            })
+            .catch(error => fail ? fail(error) : {});
+    };
+    sensors(success, fail) {
+        if (!this.options) return fail("Not signed in")
+        fetch(this.url + "/sensors", this.options).then(function (response) {
+            return response.json();
+        })
+            .then(response => {
+                if (response.data) {
+                    response.data.sensors = response.data.sensors.concat(response.data.sharedToMe)
+                    if (response.data.sensors.length > 0) {
+                        response.data.sensors = sortSensors(response.data.sensors)
                     }
-                    // order sensors by name
-                    response.data.sensors.sort(function (a, b) {
-                        var textA = a.name.toUpperCase();
-                        var textB = b.name.toUpperCase();
-                        return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
-                    });
                 }
                 success(response)
             })
@@ -93,6 +114,28 @@ class NetworkApi {
             })
             .catch(error => fail ? fail(error) : {});
     };
+    share(mac, email, success) {
+        fetch(this.url + "/share", {
+            ...this.options,
+            method: 'POST',
+            body: JSON.stringify({ sensor: mac, user: email }),
+        }).then(function (response) {
+            return response.json();
+        }).then(response => {
+            success(response);
+        })
+    }
+    unshare(mac, email, success) {
+        fetch(this.url + "/unshare", {
+            ...this.options,
+            method: 'POST',
+            body: JSON.stringify({ sensor: mac, user: email }),
+        }).then(function (response) {
+            return response.json();
+        }).then(response => {
+            success(response);
+        })
+    }
     update(mac, name, success) {
         fetch(this.url + "/update", {
             ...this.options,

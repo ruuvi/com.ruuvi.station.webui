@@ -30,12 +30,13 @@ import Graph from "../components/Graph";
 import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
 import { CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
-import { MdArrowDropDown } from "react-icons/md"
+import { MdArrowDropDown, MdArrowForward } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber, temperatureToUserFormat } from "../UnitHelper";
 import { withRouter } from 'react-router-dom';
 import DurationText from "../components/DurationText";
 import Store from "../Store";
+import ShareDialog from "../components/ShareDialog";
 
 var uppercaseFirst = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -172,18 +173,13 @@ class Sensor extends Component {
             mode: "mixed",
             editName: null,
             alerts: [],
+            showShare: false,
         }
     }
     componentDidMount() {
-        //this.interval = setInterval(() => this.forceUpdate(), 1000);
         if (this.props.sensor) {
             this.loadData(true)
-            //this.updateInterval = setInterval(this.loadData.bind(this), 10 * 1000);
         }
-    }
-    componentWillUnmount() {
-        //clearInterval(this.interval);
-        //clearInterval(this.updateInterval);
     }
     componentDidUpdate(prevProps) {
         document.title = "Ruuvi Sensor: " + this.props.sensor.name
@@ -312,6 +308,9 @@ class Sensor extends Component {
         this.setState({ ...this.state, from: v }, () => this.loadData(true))
         new Store().setGraphFrom(v)
     }
+    share(state) {
+        this.setState({ ...this.state, showShare: state })
+    }
     render() {
         var { t } = this.props
         return (
@@ -378,16 +377,59 @@ class Sensor extends Component {
                                 <AccordionItem>
                                     <AccordionButton>
                                         <Box flex="1" textAlign="left" style={collapseText}>
+                                            {t("general")}
+                                        </Box>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <hr />
+                                    <AccordionPanel pb={2} style={accordionPanel}>
+                                        <List>
+                                            <ListItem>
+                                                <table width="100%" style={accordionContent}>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td width="50%">
+                                                                <div style={detailedTitle}>{t("owner")}</div>
+                                                            </td>
+                                                            <td style={detailedText}>
+                                                                {this.props.sensor.owner}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </ListItem>
+                                            {this.props.sensor.canShare &&
+                                                <>
+                                                    <hr />
+                                                    <ListItem>
+                                                        <table width="100%" style={accordionContent}>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td width="50%">
+                                                                        <div style={detailedTitle}>{t("share")}</div>
+                                                                    </td>
+                                                                    <td style={detailedText}>
+                                                                        {t(this.props.sensor.sharedTo.length ? "sensor_shared" : "share")}
+                                                                        <IconButton variant="ghost" icon={<MdArrowForward />} onClick={() => this.share(true)} />
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </ListItem>
+                                                </>
+                                            }
+                                        </List>
+                                    </AccordionPanel>
+                                </AccordionItem>
+                                <AccordionItem>
+                                    <AccordionButton>
+                                        <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("alerts")}
                                         </Box>
                                         <AccordionIcon />
                                     </AccordionButton>
                                     <hr />
-                                    <AccordionPanel pb={4} style={accordionPanel}>
-                                        <div style={{ marginTop: 16, marginBottom: 8 }}>
-                                            <div style={{ detailedTitle }}>
-                                            </div>
-                                        </div>
+                                    <AccordionPanel pb={2} style={accordionPanel}>
                                         <List>
                                             {["Temperature", "Humidity", "Pressure", "Movement"].map(x => {
                                                 return <ListItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
@@ -419,7 +461,7 @@ class Sensor extends Component {
                                         <AccordionIcon />
                                     </AccordionButton>
                                     <hr />
-                                    <AccordionPanel pb={4} style={accordionPanel}>
+                                    <AccordionPanel pb={2} style={accordionPanel}>
                                         <List>
                                             {["Temperature", "Humidity", "Pressure"].map(x => {
                                                 var uh = getUnitHelper(x.toLocaleLowerCase());
@@ -450,7 +492,7 @@ class Sensor extends Component {
                                         <AccordionIcon />
                                     </AccordionButton>
                                     <hr />
-                                    <AccordionPanel pb={4} style={accordionPanel}>
+                                    <AccordionPanel pb={2} style={accordionPanel}>
                                         <List>
                                             {sensorInfoOrder.map(order => {
                                                 var x = this.getLatestReading(true).find(x => x.key === order);
@@ -494,6 +536,7 @@ class Sensor extends Component {
                         </div>}
                     </div>
                 )}
+                <ShareDialog open={this.state.showShare} onClose={() => this.share(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
             </Box>
         )
     }

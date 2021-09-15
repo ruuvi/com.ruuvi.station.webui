@@ -21,14 +21,25 @@ class Dashboard extends Component {
         document.title = "Ruuvi Station"
     }
     componentDidMount() {
-        new NetworkApi().user(resp => {
+        var api = new NetworkApi();
+        api.sensors(resp => {
             if (resp.result === "success") {
                 var d = resp.data.sensors;
-                this.setState({ ...this.state, sensors: d, loading: false })
-                new NetworkApi().getAlerts(data => {
-                    if (data.result === "success") {
-                        console.log(data.data.sensors)
-                        this.setState({ ...this.state, alerts: data.data.sensors })
+                api.user(uresp => {
+                    if (resp.result === "success") {
+                        for (var i = 0; i < d.length; i++) {
+                            var mac = d[i].sensor;
+                            var uSensor = uresp.data.sensors.find(x => x.sensor === mac)
+                            if (uSensor) d[i] = { ...d[i], ...uSensor }
+                        }
+                        this.setState({ ...this.state, sensors: d, loading: false })
+                        api.getAlerts(data => {
+                            if (data.result === "success") {
+                                this.setState({ ...this.state, alerts: data.data.sensors })
+                            }
+                        })
+                    } else if (resp.result === "error") {
+                        alert(resp.error)
                     }
                 })
             } else if (resp.result === "error") {
@@ -57,6 +68,14 @@ class Dashboard extends Component {
         this.setState({ ...this.state, sensors: this.state.sensors.filter(x => x.sensor !== current) })
         this.props.history.push('/')
     }
+    updateSensor(sensor) {
+        var idx = this.state.sensors.findIndex(x => x.sensor.sensor === sensor.sensor)
+        if (idx > -1) {
+            var sensors = this.state.sensors;
+            sensors[idx] = sensor
+            this.setState({ ...this.state, sensors: sensors })
+        }
+    }
     render() {
         return (
             <Box marginTop="36px" marginLeft={{ base: "10px", md: "50px" }} marginRight={{ base: "10px", md: "50px" }}>
@@ -72,6 +91,7 @@ class Dashboard extends Component {
                             next={() => this.nextIndex(1)}
                             prev={() => this.nextIndex(-1)}
                             remove={() => this.removeSensor()}
+                            updateSensor={(sensor) => this.updateSensor(sensor)}
                         />
                     ) : (
                         <>
