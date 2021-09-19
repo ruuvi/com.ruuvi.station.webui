@@ -38,10 +38,7 @@ import DurationText from "../components/DurationText";
 import Store from "../Store";
 import ShareDialog from "../components/ShareDialog";
 import EditNameDialog from "../components/EditNameDialog";
-
-var uppercaseFirst = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
+import { uppercaseFirst } from "../TextHelper";
 
 var timespans = [{ k: "1", t: "hour", v: 1 }, { k: "2", t: "hours", v: 2 }, { k: "8", t: "hours", v: 8 }, { k: "12", t: "hours", v: 12 }, { k: "1", t: "day", v: 24 }, { k: "2", t: "days", v: 24 * 2 }, { k: "1", t: "week", v: 24 * 7 }, { k: "2", t: "weeks", v: 24 * 7 * 2 }, { k: "1", t: "month", v: 24 * 7 * 4 }, { k: "2", t: "months", v: 24 * 7 * 4 * 2 }, { k: "3", t: "months", v: 24 * 7 * 4 * 3 }, { k: "6", t: "months", v: 24 * 7 * 4 * 6 }]
 
@@ -100,10 +97,16 @@ const detailedSubText = {
 
 const accordionPanel = {
     backgroundColor: "#f6fcfb",
+    paddingTop: 0,
+    paddingBottom: 0,
 }
 const accordionContent = {
-    marginTop: 26,
-    marginBottom: 26
+    minHeight: 72,
+    marginLeft: 8,
+    width: "calc(100% - 16px)",
+}
+const accordionButton = {
+    paddingRight: 21,
 }
 
 function SensorHeader(props) {
@@ -373,24 +376,24 @@ class Sensor extends Component {
                             <div style={{ height: "20px" }} />
                             <Accordion allowMultiple ml={{ base: -15, md: -35 }} mr={{ base: -15, md: -35 }}>
                                 <AccordionItem>
-                                    <AccordionButton>
+                                    <AccordionButton style={accordionButton}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("general")}
                                         </Box>
                                         <AccordionIcon />
                                     </AccordionButton>
                                     <hr />
-                                    <AccordionPanel pb={2} style={accordionPanel}>
+                                    <AccordionPanel style={accordionPanel}>
                                         <List>
-                                        <ListItem>
-                                                <table width="100%" style={accordionContent}>
+                                            <ListItem>
+                                                <table style={accordionContent}>
                                                     <tbody>
                                                         <tr>
                                                             <td width="50%">
                                                                 <div style={detailedTitle}>{t("sensor_name")}</div>
                                                             </td>
                                                             <td style={detailedText}>
-                                                                <span style={{cursor: "pointer"}} onClick={() => this.editName(true)}>
+                                                                <span style={{ cursor: "pointer" }} onClick={() => this.editName(true)}>
                                                                     {this.props.sensor.name}
                                                                 </span>
                                                             </td>
@@ -400,7 +403,7 @@ class Sensor extends Component {
                                             </ListItem>
                                             <hr />
                                             <ListItem>
-                                                <table width="100%" style={accordionContent}>
+                                                <table style={accordionContent}>
                                                     <tbody>
                                                         <tr>
                                                             <td width="50%">
@@ -417,7 +420,7 @@ class Sensor extends Component {
                                                 <>
                                                     <hr />
                                                     <ListItem>
-                                                        <table width="100%" style={accordionContent}>
+                                                        <table style={accordionContent}>
                                                             <tbody>
                                                                 <tr>
                                                                     <td width="50%">
@@ -437,18 +440,18 @@ class Sensor extends Component {
                                     </AccordionPanel>
                                 </AccordionItem>
                                 <AccordionItem>
-                                    <AccordionButton>
+                                    <AccordionButton style={accordionButton}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("alerts")}
                                         </Box>
                                         <AccordionIcon />
                                     </AccordionButton>
                                     <hr />
-                                    <AccordionPanel pb={2} style={accordionPanel}>
+                                    <AccordionPanel style={accordionPanel}>
                                         <List>
                                             {["Temperature", "Humidity", "Pressure", "Movement"].map(x => {
                                                 return <ListItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
-                                                    <table width="100%" style={accordionContent}>
+                                                    <table style={accordionContent}>
                                                         <tbody>
                                                             <tr>
                                                                 <td width="50%">
@@ -469,20 +472,20 @@ class Sensor extends Component {
                                 </AccordionItem>
 
                                 <AccordionItem>
-                                    <AccordionButton>
+                                    <AccordionButton style={accordionButton}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("offset_correction")}
                                         </Box>
                                         <AccordionIcon />
                                     </AccordionButton>
                                     <hr />
-                                    <AccordionPanel pb={2} style={accordionPanel}>
+                                    <AccordionPanel style={accordionPanel}>
                                         <List>
                                             {["Temperature", "Humidity", "Pressure"].map(x => {
                                                 var uh = getUnitHelper(x.toLocaleLowerCase());
                                                 var value = uh.value(this.state.data["offset" + x], true);
                                                 return <ListItem key={x}>
-                                                    <table width="100%" style={accordionContent}>
+                                                    <table style={accordionContent}>
                                                         <tbody>
                                                             <tr>
                                                                 <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
@@ -500,14 +503,14 @@ class Sensor extends Component {
                                 </AccordionItem>
 
                                 <AccordionItem>
-                                    <AccordionButton>
+                                    <AccordionButton style={accordionButton}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
-                                            {t("sensor_info")}
+                                            {uppercaseFirst(t("more_info"))}
                                         </Box>
                                         <AccordionIcon />
                                     </AccordionButton>
                                     <hr />
-                                    <AccordionPanel pb={2} style={accordionPanel}>
+                                    <AccordionPanel style={accordionPanel}>
                                         <List>
                                             {sensorInfoOrder.map((order, i) => {
                                                 var x = this.getLatestReading(true).find(x => x.key === order);
@@ -515,7 +518,7 @@ class Sensor extends Component {
                                                 let uh = getUnitHelper(x.key)
                                                 return (
                                                     <ListItem key={x.key}>
-                                                        <table width="100%" style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : console.log("Not graphable")}>
+                                                        <table style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : console.log("Not graphable")}>
                                                             <tbody>
                                                                 <tr>
                                                                     <td style={detailedTitle}> {t(uh.label || x.key)}</td>
@@ -525,7 +528,7 @@ class Sensor extends Component {
                                                                 </tr>
                                                             </tbody>
                                                         </table>
-                                                        {i !== sensorInfoOrder.length-1 && <hr />}
+                                                        {i !== sensorInfoOrder.length - 1 && <hr />}
                                                     </ListItem>
                                                 )
                                             })}
@@ -534,14 +537,14 @@ class Sensor extends Component {
                                 </AccordionItem>
 
                                 <AccordionItem>
-                                    <AccordionButton>
+                                    <AccordionButton style={accordionButton}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("remove")}
                                         </Box>
                                         <AccordionIcon />
                                     </AccordionButton>
                                     <hr />
-                                    <AccordionPanel pb={2} style={accordionPanel}>
+                                    <AccordionPanel style={accordionPanel}>
                                         <List>
                                             <ListItem>
                                                 <table width="100%" style={accordionContent}>
