@@ -30,7 +30,7 @@ const lastUpdatedText = {
     fontSize: 12,
     fontWeight: 500,
     color: "#85a4a3"
-  }
+}
 
 class SensorCard extends Component {
     constructor(props) {

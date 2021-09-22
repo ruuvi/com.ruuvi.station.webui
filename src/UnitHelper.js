@@ -60,3 +60,17 @@ export function round(number, deciamals) {
     f = +f
     return Math.round(number * f) / f
 }
+
+
+export function getAlertRange(type) {
+    switch (type) {
+        case "temperature":
+            return {max: 85, min: -40}
+        case "humidity":
+            return {max: 100, min: 0}
+        case "pressure":
+            return {max: 110000, min: 30000}
+        default:
+            return {max: 100, min: 0}
+    }
+}
