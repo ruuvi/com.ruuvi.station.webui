@@ -7,6 +7,8 @@ const valuesStyle = {
     fontFamily: "montserrat",
     fontSize: 14,
     fontWeight: 500,
+    width: 65,
+    textAlign:"center",
     color: "#85a4a3"
 }
 
@@ -17,11 +19,13 @@ class AlertSlider extends React.Component {
         this.state = { ...range }
     }
     render() {
-        var max = this.props.value.max || this.state.max
-        var min = this.props.value.min || this.state.min
-        var sliderValues = [min, max]
+        var max = this.props.value.max 
+        if (max == null) max = this.state.range.max;
+        var min = this.props.value.min
+        if (min == null) min = this.state.range.min;
+        var sliderValues = [min,max]
         return <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Box style={valuesStyle} mr="5">{sliderValues[0]}</Box>
+            <Box style={valuesStyle} alignSelf="start" mr="5">{sliderValues[0]/(this.props.type === "pressure" ? 100 : 1)}</Box>
             <Range {...this.state} values={sliderValues}
                 onChange={values => this.props.onChange(values, false)}
                 onFinalChange={values => this.props.onChange(values, true)}
@@ -55,7 +59,7 @@ class AlertSlider extends React.Component {
                     />
                 )}
             />
-            <Box style={valuesStyle} ml="5">{sliderValues[1]}</Box>
+            <Box style={valuesStyle} alignSelf="end" ml="5">{sliderValues[1]/(this.props.type === "pressure" ? 100 : 1)}</Box>
         </div>
     }
 };
