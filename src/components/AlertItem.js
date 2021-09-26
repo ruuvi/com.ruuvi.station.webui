@@ -4,9 +4,18 @@ import React, { Component } from "react";
 import { withTranslation } from 'react-i18next';
 import { getAlertRange, localeNumber, temperatureToUserFormat } from "../UnitHelper";
 import AlertSlider from "./AlertSlider";
+import CustomAlertDescriptionDialog from "./CustomAlertDescriptionDialog";
 
 var uppercaseFirst = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+const alertDescription = {
+    fontFamily: "mulish",
+    fontSize: 12,
+    marginRight: 16,
+    color: "#85a4a3",
+    cursor: "pointer",
 }
 
 class AlertItem extends Component {
@@ -14,6 +23,7 @@ class AlertItem extends Component {
         super(props)
         this.state = {
             alert: this.props.alert,
+            editDescription: false,
         }
     }
     getAlertText(alert, type) {
@@ -45,7 +55,7 @@ class AlertItem extends Component {
     setAlert(alert, type, enabled, dontUpdate) {
         type = type.toLowerCase()
         if (alert) {
-            alert.enabled = enabled;
+            if (enabled !== null) alert.enabled = enabled;
         } else {
             alert = {
                 type: type,
@@ -53,11 +63,12 @@ class AlertItem extends Component {
                 ...getAlertRange(type)
             }
         }
-        this.setState({ ...this.state, alert: alert })
+        this.setState({ ...this.state, alert: alert, editDescription: false })
         if (!dontUpdate) {
             this.props.onChange(alert)
         }
     }
+
     render() {
         var alert = this.state.alert;
         var x = this.props.type;
@@ -72,6 +83,7 @@ class AlertItem extends Component {
                                 <div style={this.props.detailedSubText}>{alert && alert.enabled && <span>{this.getAlertText(alert, x.toLocaleLowerCase())}</span>}</div>
                             </td>
                             <td style={this.props.detailedText}>
+                                {alert && alert.enabled && <span onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription}>{alert.description || t("alarm_custom_title_hint")}</span>}
                                 <Switch isChecked={alert && alert.enabled} onChange={e => this.setAlert(alert, x, e.target.checked)} />
                             </td>
                         </tr>
@@ -87,6 +99,7 @@ class AlertItem extends Component {
                     </tbody>
                 </table>
                 {x !== "Movement" && <hr />}
+                <CustomAlertDescriptionDialog open={this.state.editDescription} value={alert ? alert.description : ""} onClose={(save, description) => save ? this.setAlert({ ...alert, description: description }, x, null, false) : this.setState({ ...this.state, editDescription: false })} />
             </ListItem>
         )
     }
