@@ -2,13 +2,10 @@ import { Box, ListItem } from "@chakra-ui/layout";
 import { Switch } from "@chakra-ui/switch";
 import React, { Component } from "react";
 import { withTranslation } from 'react-i18next';
+import { uppercaseFirst } from "../TextHelper";
 import { getAlertRange, localeNumber, temperatureToUserFormat } from "../UnitHelper";
 import AlertSlider from "./AlertSlider";
-import CustomAlertDescriptionDialog from "./CustomAlertDescriptionDialog";
-
-var uppercaseFirst = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
+import InputDialog from "./InputDialog";
 
 const alertDescription = {
     fontFamily: "mulish",
@@ -63,7 +60,7 @@ class AlertItem extends Component {
                 ...getAlertRange(type)
             }
         }
-        this.setState({ ...this.state, alert: alert, editDescription: false })
+        this.setState({ ...this.state, alert: alert, editDescription: false, editMinValue: false, editMaxValue: false })
         if (!dontUpdate) {
             this.props.onChange(alert)
         }
@@ -99,7 +96,12 @@ class AlertItem extends Component {
                     </tbody>
                 </table>
                 {x !== "Movement" && <hr />}
-                <CustomAlertDescriptionDialog open={this.state.editDescription} value={alert ? alert.description : ""} onClose={(save, description) => save ? this.setAlert({ ...alert, description: description }, x, null, false) : this.setState({ ...this.state, editDescription: false })} />
+                <InputDialog open={this.state.editDescription} value={alert ? alert.description : ""}
+                    onClose={(save, description) => save ? this.setAlert({ ...alert, description: description }, x, null, false) : this.setState({ ...this.state, editDescription: false })}
+                    title={t("alarm_custom_title_hint")}
+                    buttonText={t("update")}
+                />
+                
             </ListItem>
         )
     }
