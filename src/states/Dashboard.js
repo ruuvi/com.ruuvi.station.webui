@@ -79,7 +79,7 @@ class Dashboard extends Component {
     render() {
         return (
             <Box marginTop="36px" marginLeft={{ base: "10px", md: "50px" }} marginRight={{ base: "10px", md: "50px" }}>
-                <SimpleGrid minChildWidth="310px" spacing="8px" alignItems="center">
+                <SimpleGrid minChildWidth="310px" spacing="16px" alignItems="center">
                     {this.state.loading &&
                         <center>
                             <Spinner size="xl" />
