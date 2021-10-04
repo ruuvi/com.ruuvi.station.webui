@@ -78,34 +78,60 @@ class Dashboard extends Component {
     }
     render() {
         return (
-            <Box marginTop="36px" marginLeft={{ base: "10px", md: "50px" }} marginRight={{ base: "10px", md: "50px" }}>
-                <SimpleGrid minChildWidth="310px" spacing="16px" alignItems="center">
-                    {this.state.loading &&
-                        <center>
-                            <Spinner size="xl" />
-                        </center>
-                    }
-                    {this.getCurrentSensor() ? (
-                        <Sensor sensor={this.getCurrentSensor()}
-                            close={() => this.props.history.push('/')}
-                            next={() => this.nextIndex(1)}
-                            prev={() => this.nextIndex(-1)}
-                            remove={() => this.removeSensor()}
-                            updateSensor={(sensor) => this.updateSensor(sensor)}
-                        />
-                    ) : (
-                        <>
-                            {this.state.sensors.map(x => {
-                                return <a key={x.sensor} href={"#/" + x.sensor} style={{ alignItems: "center" }}>
+            <Box marginTop="36px" marginLeft={{ base: "10px", md: "20px", lg: "50px" }} marginRight={{ base: "10px", md: "20px", lg: "50px" }}>
+                {this.state.loading &&
+                    <center>
+                        <Spinner size="xl" />
+                    </center>
+                }
+                {this.getCurrentSensor() ? (
+                    <Sensor sensor={this.getCurrentSensor()}
+                        close={() => this.props.history.push('/')}
+                        next={() => this.nextIndex(1)}
+                        prev={() => this.nextIndex(-1)}
+                        remove={() => this.removeSensor()}
+                        updateSensor={(sensor) => this.updateSensor(sensor)}
+                    />
+                ) : (
+                    
+                    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", flexGrow: 2, justifyContent: "space-evenly" }}>
+                    <>
+                        {this.state.sensors.map(x => {
+                            return <span style={{ width:"400px", maxWidth: "400px", margin: 16 }}>
+                                <a key={x.sensor} href={"#/" + x.sensor}>
                                     <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
-                                </a>
-                            })}
-                        </>
-                    )}
-                </SimpleGrid>
+                                </a></span>
+                        })}
+                    </>
+                </div>
+                )}
             </Box>
         )
     }
 }
 
 export default Dashboard;
+/*
+                    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "start" }}>
+                        <>
+                            {this.state.sensors.map(x => {
+                                return <span style={{ width:"400px", maxWidth: "400px", margin: 16 }}>
+                                    <a key={x.sensor} href={"#/" + x.sensor}>
+                                        <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
+                                    </a></span>
+                            })}
+                        </>
+                    </div>
+
+
+                    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-evenly" }}>
+                    <>
+                        {this.state.sensors.map(x => {
+                            return <span style={{ width:"400px", maxWidth: "400px", margin: 16 }}>
+                                <a key={x.sensor} href={"#/" + x.sensor}>
+                                    <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
+                                </a></span>
+                        })}
+                    </>
+                </div>
+*/
