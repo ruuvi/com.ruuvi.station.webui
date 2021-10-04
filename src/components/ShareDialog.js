@@ -85,7 +85,7 @@ class ShareDialog extends Component {
                             {t("share_sensor_description").split("\\n").map((x, i) => <div key={i}>{x}<br /></div>)}
                             <br />
                             <div style={{ fontWeight: "bold" }}>{t("share_sensor_add_friend")}</div>
-                            <Input placeholder={t("email")} value={this.state.email} onChange={this.emailHandler.bind(this)} />
+                            <Input placeholder={t("email")} type="email" value={this.state.email} onChange={this.emailHandler.bind(this)} />
                             <div style={{ textAlign: "right" }}>
                                 <Button backgroundColor={this.state.successfullInvite ? "green.300" : undefined} disabled={this.state.loading || this.props.sensor.sharedTo.length >= maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)} onClick={this.share.bind(this)} mt="2">{this.state.successfullInvite ? t("successfully_shared") : t("share")}</Button>
                             </div>
