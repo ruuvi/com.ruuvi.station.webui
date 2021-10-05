@@ -1,0 +1,59 @@
+import React, { Component } from "react";
+import {
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalCloseButton,
+    Button,
+    Input,
+} from "@chakra-ui/react"
+
+class InputDialog extends Component {
+    constructor(props) {
+        super(props)
+        this.state = { value: "" }
+        if (props.value) this.state.value = props.value;
+    }
+    componentDidUpdate(prevProps) {
+        if (this.props.value && (prevProps.value !== this.props.value)) {
+            this.setState({ ...this.state, value: this.props.value })
+        }
+    }
+    update() {
+        var value = this.state.value;
+        if (this.props.number) {
+            value = parseFloat(value);
+            if (isNaN(value)) {
+                this.props.onClose(false)
+                return
+            }
+        }
+        this.props.onClose(true, value)
+    }
+    getNumber() {
+        return parseFloat(this.state.value)
+    }
+    render() {
+        return (
+            <>
+                <Modal isOpen={this.props.open} onClose={() => this.props.onClose(false)} size="xl">
+                    <ModalOverlay />
+                    <ModalContent>
+                        <ModalHeader>{this.props.title}</ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody mb="3">
+                            <Input value={this.state.value} type={this.props.number ? "number" : ""} onChange={e => this.setState({ ...this.state, value: e.target.value })} />
+                            <div style={{ textAlign: "right" }}>
+                                <Button onClick={this.update.bind(this)} mt="2" disabled={this.props.number && isNaN(this.getNumber())}>{this.props.buttonText}</Button>
+                            </div>
+                        </ModalBody>
+                    </ModalContent>
+                </Modal>
+            </>
+        )
+    }
+}
+
+export default InputDialog;

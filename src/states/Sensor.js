@@ -9,7 +9,6 @@ import {
     Heading,
     Stack,
     Button,
-    Input,
     IconButton,
     Box,
     Avatar,
@@ -22,7 +21,6 @@ import {
     AccordionButton,
     AccordionPanel,
     AccordionIcon,
-    Switch,
     useMediaQuery,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
@@ -30,15 +28,16 @@ import Graph from "../components/Graph";
 import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
 import { CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
-import { MdArrowDropDown, MdArrowForward } from "react-icons/md"
+import { MdArrowDropDown, MdChevronRight } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
-import { getUnitHelper, localeNumber, temperatureToUserFormat } from "../UnitHelper";
+import { getUnitHelper, localeNumber } from "../UnitHelper";
 import { withRouter } from 'react-router-dom';
 import DurationText from "../components/DurationText";
 import Store from "../Store";
 import ShareDialog from "../components/ShareDialog";
 import EditNameDialog from "../components/EditNameDialog";
 import { uppercaseFirst } from "../TextHelper";
+import AlertItem from "../components/AlertItem";
 
 var timespans = [{ k: "1", t: "hour", v: 1 }, { k: "2", t: "hours", v: 2 }, { k: "8", t: "hours", v: 8 }, { k: "12", t: "hours", v: 12 }, { k: "1", t: "day", v: 24 }, { k: "2", t: "days", v: 24 * 2 }, { k: "1", t: "week", v: 24 * 7 }, { k: "2", t: "weeks", v: 24 * 7 * 2 }, { k: "1", t: "month", v: 24 * 7 * 4 }, { k: "2", t: "months", v: 24 * 7 * 4 * 2 }, { k: "3", t: "months", v: 24 * 7 * 4 * 3 }, { k: "6", t: "months", v: 24 * 7 * 4 * 6 }]
 
@@ -253,33 +252,6 @@ class Sensor extends Component {
         }
         return null
     }
-    getAlertText(type) {
-        var idx = this.state.alerts.findIndex(x => x.type === type)
-        if (idx !== -1) {
-            if (type === "movement") {
-                return this.props.t("alert_movement_description")
-            }
-            var min = this.state.alerts[idx].min
-            var max = this.state.alerts[idx].max
-            if (type === "temperature") {
-                min = temperatureToUserFormat(min)
-                max = temperatureToUserFormat(max)
-            } else if (type === "pressure") {
-                min /= 100;
-                max /= 100;
-            }
-            min = localeNumber(min, 2)
-            max = localeNumber(max, 2)
-            let regx = "{(.*?)}"
-            var alertText = this.props.t("alert_description")
-            var match = alertText.match(regx)
-            alertText = alertText.replace(match[0], min)
-            match = alertText.match(regx)
-            alertText = alertText.replace(match[0], max)
-            return alertText;
-        }
-        return uppercaseFirst(type)
-    }
     isAlertTriggerd(type) {
         if (type === "movementCounter") type = "movement";
         var alert = this.getAlert(type.toLocaleLowerCase())
@@ -315,6 +287,17 @@ class Sensor extends Component {
     }
     editName(state) {
         this.setState({ ...this.state, editName: state })
+    }
+    updateAlert(alert) {
+        var alerts = this.state.alerts;
+        var alertIdx = alerts.find(x => x.sensor === alert.sensor && x.type === alert.type)
+        if (alertIdx !== -1) {
+            alerts[alertIdx] = alert
+            this.setState({ ...this.state, alerts: alerts });
+        }
+        new NetworkApi().setAlert({ ...alert, sensor: this.props.sensor.sensor }, result => {
+            console.log(result);
+        })
     }
     render() {
         var { t } = this.props
@@ -428,7 +411,7 @@ class Sensor extends Component {
                                                                     </td>
                                                                     <td style={detailedText}>
                                                                         {t(this.props.sensor.sharedTo.length ? "sensor_shared" : "share")}
-                                                                        <IconButton variant="ghost" icon={<MdArrowForward />} onClick={() => this.share(true)} />
+                                                                        <IconButton variant="ghost" icon={<MdChevronRight />} onClick={() => this.share(true)} />
                                                                     </td>
                                                                 </tr>
                                                             </tbody>
@@ -450,27 +433,15 @@ class Sensor extends Component {
                                     <AccordionPanel style={accordionPanel}>
                                         <List>
                                             {["Temperature", "Humidity", "Pressure", "Movement"].map(x => {
-                                                return <ListItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
-                                                    <table style={accordionContent}>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td width="50%">
-                                                                    <div style={detailedTitle}>{t(x.toLocaleLowerCase())}</div>
-                                                                    <div style={detailedSubText}>{this.getAlert(x.toLocaleLowerCase()) && this.getAlert(x.toLocaleLowerCase()).enabled && <span>{this.getAlertText(x.toLocaleLowerCase())}</span>}</div>
-                                                                </td>
-                                                                <td style={detailedText}>
-                                                                    <Switch isDisabled isChecked={this.getAlert(x.toLocaleLowerCase()) && this.getAlert(x.toLocaleLowerCase()).enabled} />
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                    {x !== "Movement" && <hr />}
-                                                </ListItem>
+                                                var alert = this.getAlert(x.toLowerCase())
+                                                return <AlertItem key={x} alerts={this.state.alerts} alert={alert}
+                                                    accordionContent={accordionContent} detailedTitle={detailedTitle}
+                                                    detailedText={detailedText} detailedSubText={detailedSubText}
+                                                    type={x} onChange={a => this.updateAlert(a)} />
                                             })}
                                         </List>
                                     </AccordionPanel>
                                 </AccordionItem>
-
                                 <AccordionItem>
                                     <AccordionButton style={accordionButton}>
                                         <Box flex="1" textAlign="left" style={collapseText}>

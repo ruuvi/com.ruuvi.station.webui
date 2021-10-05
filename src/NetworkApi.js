@@ -180,6 +180,16 @@ class NetworkApi {
         })
             .then(response => success(response))
     }
+    setAlert(data, success) {
+        fetch(this.url + "/alerts", {
+            ...this.options,
+            method: 'POST',
+            body: JSON.stringify(data)
+        }).then(function (response) {
+            return response.json();
+        })
+            .then(response => success(response))
+    }
 }
 
 export default NetworkApi;

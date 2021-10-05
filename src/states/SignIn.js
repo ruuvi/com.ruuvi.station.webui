@@ -83,6 +83,21 @@ class SignIn extends Component {
             this.setState({ ...this.state, pageState: 0, loading: false })
         })
     }
+    updateValidationCode(code) {
+        this.setState({ ...this.state, validationCode: code.toUpperCase() }, () => {
+            if (this.state.validationCode.length === 4) {
+                this.validate();
+            }
+        })
+    }
+    emailIsValid() {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)
+    }
+    emailKeyDown = (e) => {
+        if (e.key === 'Enter' && this.emailIsValid()) {
+            this.register();
+        }
+    }
     render() {
         const { t } = this.props;
         return (
@@ -111,8 +126,8 @@ class SignIn extends Component {
                                                 <Text style={infoText}>
                                                     {t("type_your_email")}
                                                 </Text>
-                                                <Input placeholder={t("email")} value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} autoFocus />
-                                                <Button colorScheme="teal" isDisabled={!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)} onClick={this.register.bind(this)} style={buttonText}>{t("login")}</Button>
+                                                <Input placeholder={t("email")} value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} autoFocus onKeyDown={this.emailKeyDown.bind(this)} />
+                                                <Button colorScheme="teal" isDisabled={!this.emailIsValid()} onClick={this.register.bind(this)} style={buttonText}>{t("login")}</Button>
                                             </Stack>
                                         </SlideFade>
                                     }
@@ -122,15 +137,16 @@ class SignIn extends Component {
                                                 <Text>
                                                     {t("sign_in_check_email")}
                                                 </Text>
-                                                <HStack style={{ marginLeft: "50px" }}>
-                                                    <PinInput type="alphanumeric" value={this.state.validationCode} onChange={e => this.setState({ ...this.state, validationCode: e })} autoFocus>
-                                                        <PinInputField />
-                                                        <PinInputField />
-                                                        <PinInputField />
-                                                        <PinInputField />
-                                                    </PinInput>
+                                                <HStack>
+                                                    <div style={{ textAlign: "center", width: "100%" }}>
+                                                        <PinInput type="alphanumeric" value={this.state.validationCode} onChange={code => this.updateValidationCode(code)} autoFocus>
+                                                            {Array(4).fill().map(() => {
+                                                                return <PinInputField style={{ margin: 5 }} />
+                                                            })}
+                                                        </PinInput>
+                                                    </div>
                                                 </HStack>
-                                                <Button colorScheme="teal" onClick={this.validate.bind(this)} style={buttonText}>{t("submit")}</Button>
+                                                {/*<Button colorScheme="teal" onClick={this.validate.bind(this)} style={buttonText}>{t("submit")}</Button>*/}
                                             </Stack>
                                         </SlideFade>
                                     }
