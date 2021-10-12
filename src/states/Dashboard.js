@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box, SimpleGrid } from "@chakra-ui/react"
+import { Spinner, Box } from "@chakra-ui/react"
 
 class Dashboard extends Component {
     constructor(props) {
@@ -111,27 +111,3 @@ class Dashboard extends Component {
 }
 
 export default Dashboard;
-/*
-                    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "start" }}>
-                        <>
-                            {this.state.sensors.map(x => {
-                                return <span style={{ width:"400px", maxWidth: "400px", margin: 16 }}>
-                                    <a key={x.sensor} href={"#/" + x.sensor}>
-                                        <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
-                                    </a></span>
-                            })}
-                        </>
-                    </div>
-
-
-                    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-evenly" }}>
-                    <>
-                        {this.state.sensors.map(x => {
-                            return <span style={{ width:"400px", maxWidth: "400px", margin: 16 }}>
-                                <a key={x.sensor} href={"#/" + x.sensor}>
-                                    <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
-                                </a></span>
-                        })}
-                    </>
-                </div>
-*/

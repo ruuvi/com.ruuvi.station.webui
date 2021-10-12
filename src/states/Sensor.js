@@ -22,6 +22,8 @@ import {
     AccordionPanel,
     AccordionIcon,
     useMediaQuery,
+    Image,
+    Icon,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
@@ -38,6 +40,7 @@ import ShareDialog from "../components/ShareDialog";
 import EditNameDialog from "../components/EditNameDialog";
 import { uppercaseFirst } from "../TextHelper";
 import AlertItem from "../components/AlertItem";
+import EditableText from "../components/EditableText";
 
 var timespans = [{ k: "1", t: "hour", v: 1 }, { k: "2", t: "hours", v: 2 }, { k: "8", t: "hours", v: 8 }, { k: "12", t: "hours", v: 12 }, { k: "1", t: "day", v: 24 }, { k: "2", t: "days", v: 24 * 2 }, { k: "1", t: "week", v: 24 * 7 }, { k: "2", t: "weeks", v: 24 * 7 * 2 }, { k: "1", t: "month", v: 24 * 7 * 4 }, { k: "2", t: "months", v: 24 * 7 * 4 * 2 }, { k: "3", t: "months", v: 24 * 7 * 4 * 3 }, { k: "6", t: "months", v: 24 * 7 * 4 * 6 }]
 
@@ -392,9 +395,7 @@ class Sensor extends Component {
                                                                 <div style={detailedTitle}>{t("sensor_name")}</div>
                                                             </td>
                                                             <td style={detailedText}>
-                                                                <span style={{ cursor: "pointer" }} onClick={() => this.editName(true)}>
-                                                                    {this.props.sensor.name}
-                                                                </span>
+                                                                <EditableText text={this.props.sensor.name} onClick={() => this.editName(true)} />
                                                             </td>
                                                         </tr>
                                                     </tbody>

@@ -5,6 +5,7 @@ import { withTranslation } from 'react-i18next';
 import { uppercaseFirst } from "../TextHelper";
 import { getAlertRange, localeNumber, temperatureToUserFormat } from "../UnitHelper";
 import AlertSlider from "./AlertSlider";
+import EditableText from "./EditableText";
 import InputDialog from "./InputDialog";
 
 const alertDescription = {
@@ -80,7 +81,7 @@ class AlertItem extends Component {
                                 <div style={this.props.detailedSubText}>{alert && alert.enabled && <span>{this.getAlertText(alert, x.toLocaleLowerCase())}</span>}</div>
                             </td>
                             <td style={this.props.detailedText}>
-                                {alert && alert.enabled && <span onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription}>{alert.description || t("alarm_custom_title_hint")}</span>}
+                                {alert && alert.enabled && <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert.description || t("alarm_custom_title_hint")} />}
                                 <Switch isChecked={alert && alert.enabled} onChange={e => this.setAlert(alert, x, e.target.checked)} />
                             </td>
                         </tr>
