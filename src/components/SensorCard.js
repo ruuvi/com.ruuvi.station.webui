@@ -45,6 +45,31 @@ class SensorCard extends Component {
     }
     componentDidMount() {
         this.loadData(true)
+        this.latestDataUpdate = setInterval(() => {
+            new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 2), { mode: "dense", limit: 1, sort: "desc" }, resp => {
+                if (resp.result === "success") {
+                    var parsed = parse(resp.data);
+                    if (parsed.measurements.length !== 1) return
+                    this.setState({ ...this.state, lastParsedReading: parsed.measurements[0] })
+                }
+            });
+        }, 60 * 1000);
+        this.graphDataUpdate = setInterval(() => {
+            new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 15), { mode: "sparse", limit: 1, sort: "desc" }, resp => {
+                if (resp.result === "success") {
+                    let d = parse(resp.data);
+                    if (d.measurements.length !== 1) return
+                    var state = this.state;
+                    if (state.data.measurements) state.data.measurements.unshift(d.measurements[0]);
+                    else state.data.measurements = d;
+                    this.setState(state);
+                }
+            });
+        }, 15 * 60 * 1000);
+    }
+    componentWillUnmount() {
+        clearInterval(this.latestDataUpdate);
+        clearInterval(this.graphDataUpdate);
     }
     loadData() {
         new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: "dense", limit: 1, sort: "desc" }, resp => {
@@ -57,16 +82,15 @@ class SensorCard extends Component {
                         if (lastParsedReading === null && d.measurements.length > 0) lastParsedReading = d.measurements[0]
                         this.setState({ data: d, lastParsedReading: lastParsedReading, loading: false, table: d.table, resolvedMode: d.resolvedMode })
                     } else if (resp.result === "error") {
-                        alert(resp.error)
+                        console.error(resp.error)
                         this.setState({ ...this.state, loading: false })
                     }
                 }, (e) => {
-                    alert("LoadData error: " + e.toString())
-                    console.log("err", e)
+                    console.error(e)
                     this.setState({ data: null, loading: false })
                 })
             } else if (resp.result === "error") {
-                alert(resp.error)
+                console.error(resp.error)
                 this.setState({ ...this.state, loading: false })
             }
         }, (e) => {

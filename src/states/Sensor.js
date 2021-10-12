@@ -180,7 +180,23 @@ class Sensor extends Component {
     componentDidMount() {
         if (this.props.sensor) {
             this.loadData(true)
+            this.latestDataUpdate = setInterval(() => {
+                new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 2), { mode: "dense", limit: 1, sort: "desc" }, resp => {
+                    if (resp.result === "success") {
+                        let d = parse(resp.data);
+                        if (d.measurements.length !== 1) return
+                        var state = this.state;
+                        if (state.data.measurements) state.data.measurements.unshift(d.measurements[0]);
+                        else state.data.measurements = d;
+                        state.data.latestTimestamp = d.measurements[0].timestamp;
+                        this.setState(state);
+                    }
+                });
+            }, 60 * 1000);
         }
+    }
+    componentWillUnmount() {
+        clearInterval(this.latestDataUpdate);
     }
     componentDidUpdate(prevProps) {
         document.title = "Ruuvi Sensor: " + this.props.sensor.name
@@ -353,7 +369,7 @@ class Sensor extends Component {
                                 <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
                             ) : (
                                 <Box ml={-5} mr={-5}>
-                                    <Graph dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                    <Graph key={this.state.data.measurements} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
                                 </Box>
                             )}
                             <div style={{ height: "20px" }} />
