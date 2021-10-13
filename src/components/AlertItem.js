@@ -73,36 +73,37 @@ class AlertItem extends Component {
         var t = this.props.t
         return (
             <ListItem key={x} style={{ color: alert && alert.triggered ? "#f27575" : undefined }}>
-                <table width="100%" style={this.props.accordionContent}>
-                    <tbody>
-                        <tr>
-                            <td width="50%">
-                                <div style={this.props.detailedTitle}>{t(x.toLocaleLowerCase())}</div>
-                                <div style={this.props.detailedSubText}>{alert && alert.enabled && <span>{this.getAlertText(alert, x.toLocaleLowerCase())}</span>}</div>
-                            </td>
-                            <td style={this.props.detailedText}>
-                                {alert && alert.enabled && <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert.description || t("alarm_custom_title_hint")} />}
-                                <Switch isChecked={alert && alert.enabled} onChange={e => this.setAlert(alert, x, e.target.checked)} />
-                            </td>
-                        </tr>
-                        {x !== "Movement" && (alert && alert.enabled) &&
+                <div style={{ paddingTop: 10, paddingBottom: 10 }}>
+                    <table width="100%" style={this.props.accordionContent}>
+                        <tbody>
                             <tr>
-                                <td colSpan="2">
-                                    <Box mt="5">
-                                        <AlertSlider type={x.toLowerCase()} value={alert} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, x, true, !final)} />
-                                    </Box>
+                                <td width="50%">
+                                    <div style={this.props.detailedTitle}>{t(x.toLocaleLowerCase())}</div>
+                                    <div style={this.props.detailedSubText}>{alert && alert.enabled && <span>{this.getAlertText(alert, x.toLocaleLowerCase())}</span>}</div>
+                                </td>
+                                <td style={this.props.detailedText}>
+                                    {alert && alert.enabled && <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert.description || t("alarm_custom_title_hint")} />}
+                                    <Switch isChecked={alert && alert.enabled} onChange={e => this.setAlert(alert, x, e.target.checked)} />
                                 </td>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                            {x !== "Movement" && (alert && alert.enabled) &&
+                                <tr>
+                                    <td colSpan="2">
+                                        <Box mt="5">
+                                            <AlertSlider type={x.toLowerCase()} value={alert} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, x, true, !final)} />
+                                        </Box>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
                 {x !== "Movement" && <hr />}
                 <InputDialog open={this.state.editDescription} value={alert ? alert.description : ""}
                     onClose={(save, description) => save ? this.setAlert({ ...alert, description: description }, x, null, false) : this.setState({ ...this.state, editDescription: false })}
                     title={t("alarm_custom_title_hint")}
                     buttonText={t("update")}
                 />
-                
             </ListItem>
         )
     }
