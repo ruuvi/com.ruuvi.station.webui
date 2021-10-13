@@ -4,6 +4,7 @@ import 'uplot/dist/uPlot.min.css';
 import { SizeMe } from 'react-sizeme'
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
+import UplotTouchZoomPlugin from "./UplotTouchZoomPlugin";
 
 function ddmm(ts) {
     var d = new Date(ts * 1000);
@@ -14,6 +15,7 @@ function hhmm(ts) {
     var d = new Date(ts * 1000);
     return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2)
 }
+
 
 class Graph extends Component {
     getGraphData() {
@@ -34,6 +36,8 @@ class Graph extends Component {
                 if (dataXSpan > 60 * 60 * 24 * 2) useDatesOnX = true;
             }
         }
+        var plugins = [];
+        if (!this.props.cardView) plugins.push(UplotTouchZoomPlugin())
         return (
             <SizeMe>{({ size }) =>
                 <UplotReact
@@ -41,6 +45,7 @@ class Graph extends Component {
                         title: this.props.title,
                         width: size.width,
                         height: this.props.height || 300,
+                        plugins: plugins,
                         legend: {
                             show: this.props.legend === undefined ? true : this.props.legend,
                         },
