@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import NetworkApi from "../NetworkApi";
+import pjson from "../../package.json";
 
 class EditNameDialog extends Component {
     constructor(props) {
@@ -20,8 +21,8 @@ class EditNameDialog extends Component {
         if (props.sensor) this.state.name = props.sensor.name
     }
     componentDidUpdate(prevProps) {
-        if (this.props.sensor && (!prevProps.sensor || prevProps.sensor.name !== this.props.sensor.name)) {
-            this.setState({...this.state, name: this.props.sensor.name})
+        if (this.props.sensor && (!prevProps.sensor || prevProps.sensor.name !== this.props.sensor.name)) {
+            this.setState({ ...this.state, name: this.props.sensor.name })
         }
     }
     update() {
@@ -43,6 +44,10 @@ class EditNameDialog extends Component {
             this.props.onClose()
         })
     }
+    updateName(name) {
+        var limit = pjson.settings.sensorNameMaxLength
+        this.setState({ ...this.state, name: name.substring(0, limit) })
+    }
     render() {
         if (!this.props.sensor) return <></>
         var { t } = this.props;
@@ -54,9 +59,9 @@ class EditNameDialog extends Component {
                         <ModalHeader>{t("sensor_name")}</ModalHeader>
                         <ModalCloseButton />
                         <ModalBody mb="3">
-                            <Input placeholder={t("sensor_name")} value={this.state.name} onChange={e => this.setState({ ...this.state, name: e.target.value })} />
+                            <Input placeholder={t("sensor_name")} value={this.state.name} onChange={e => this.updateName(e.target.value)} />
                             <div style={{ textAlign: "right" }}>
-                                <Button disabled={this.state.loading || !this.state.name} onClick={this.update.bind(this)} mt="2">{t("update")}</Button>
+                                <Button disabled={this.state.loading || !this.state.name} onClick={this.update.bind(this)} mt="2">{t("update")}</Button>
                             </div>
                             {this.state.loading && <Progress isIndeterminate={true} color="#e6f6f2" />}
                         </ModalBody>
