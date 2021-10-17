@@ -94,7 +94,7 @@ class Dashboard extends Component {
                     />
                 ) : (
                     
-                    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: this.state.sensors.length > 2 ? "space-evenly" : "start" }}>
+                    <Box justifyContent={{ base: "space-evenly", lg: this.state.sensors.length > 2 ? "space-evenly" : "start" }} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
                     <>
                         {this.state.sensors.map(x => {
                             return <span style={{ margin: 16, minWidth: "350px", maxWidth: "450px", flexGrow: 2, flex: "1 1 0px" }}>
@@ -103,7 +103,7 @@ class Dashboard extends Component {
                                 </a></span>
                         })}
                     </>
-                </div>
+                </Box>
                 )}
             </Box>
         )

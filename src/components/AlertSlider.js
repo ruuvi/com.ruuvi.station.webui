@@ -17,6 +17,9 @@ const valuesStyle = {
     cursor: "pointer",
 }
 
+function getColor(gray) {
+    return `rgba(67,199,186,${gray ? 0.2 : 1})`
+}
 class AlertSlider extends React.Component {
     constructor(props) {
         super(props)
@@ -50,8 +53,8 @@ class AlertSlider extends React.Component {
         minFormatted = localeNumber(minFormatted)
         maxFormatted = localeNumber(maxFormatted)
         return <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Box style={valuesStyle} alignSelf="start" onClick={() => this.setState({ ...this.state, editMinValue: true })}><EditableText text={minFormatted} /></Box>
             <Range {...this.state} values={sliderValues}
+                disabled={this.props.disabled}
                 onChange={values => this.props.onChange(values, false)}
                 onFinalChange={values => this.props.onChange(values, true)}
                 renderTrack={({ props, children }) => (
@@ -62,7 +65,7 @@ class AlertSlider extends React.Component {
                             height: '2px',
                             width: '100%',
                             background: getTrackBackground({
-                                colors: ['#cccccc', '#43c7ba', '#cccccc'],
+                                colors: [getColor(true), getColor(this.props.disabled), getColor(true)],
                                 ...this.state,
                                 values: sliderValues
                             }),
@@ -79,12 +82,11 @@ class AlertSlider extends React.Component {
                             borderRadius: '6px',
                             height: '12px',
                             width: '12px',
-                            backgroundColor: '#43c7ba'
+                            backgroundColor: getColor(this.props.disabled)
                         }}
                     />
                 )}
             />
-            <Box style={valuesStyle} alignSelf="end" onClick={() => this.setState({ ...this.state, editMaxValue: true })}><EditableText text={maxFormatted} /></Box>
             <InputDialog open={this.state.editMinValue} value={min}
                 onClose={(save, value) => save && value <= max && this.props.onChange([value, max], true) || this.setState({ ...this.state, editMinValue: false })}
                 title={uppercaseFirst(this.props.t("min"))}

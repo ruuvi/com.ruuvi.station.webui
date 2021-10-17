@@ -22,8 +22,6 @@ import {
     AccordionPanel,
     AccordionIcon,
     useMediaQuery,
-    Image,
-    Icon,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
