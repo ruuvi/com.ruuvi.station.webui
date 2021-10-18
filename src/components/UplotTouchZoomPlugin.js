@@ -90,6 +90,7 @@ export default function UplotTouchZoomPlugin(opts) {
         }
 
         over.addEventListener("touchstart", function (e) {
+            if(e.touches.length < 2) return;
             rect = over.getBoundingClientRect();
 
             storePos(fr, e);
@@ -103,8 +104,8 @@ export default function UplotTouchZoomPlugin(opts) {
             xVal = u.posToVal(left, "x");
             yVal = u.posToVal(top, "y");
 
-            document.addEventListener("touchmove", touchmove, { passive: true });
             e.preventDefault()
+            document.addEventListener("touchmove", touchmove, { passive: true });
         });
 
         over.addEventListener("touchend", function (e) {
