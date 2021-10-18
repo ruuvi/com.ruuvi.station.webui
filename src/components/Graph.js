@@ -17,6 +17,8 @@ function hhmm(ts) {
 }
 
 
+var lastDataPoints = -1;
+var zoomHasChanged = false;
 class Graph extends Component {
     getGraphData() {
         if (!this.props.data) return [[], []];
@@ -67,10 +69,15 @@ class Graph extends Component {
                         scales: {
                             x: {
                                 time: true, auto: this.props.from === undefined, range: (_, fromMin, fromMax) => {
-                                    if (!this.props.data || this.props.data.length === 1 || (this.props.data.length && fromMax === this.props.data[0].timestamp && fromMin === this.props.data[this.props.data.length - 1].timestamp)) {
+                                    let dataHasChanged = lastDataPoints !== this.props.data.length;
+                                    lastDataPoints = this.props.data.length;
+                                    if ((dataHasChanged && !zoomHasChanged) || this.props.data.length === 1 || (this.props.data.length && fromMax === this.props.data[0].timestamp && fromMin === this.props.data[this.props.data.length - 1].timestamp)) {
                                         let range = this.getXRange();
                                         fromMin = range[0]
                                         fromMax = range[1]
+                                        zoomHasChanged = false
+                                    } else {
+                                        zoomHasChanged = true
                                     }
                                     return [fromMin, fromMax]
                                 }
