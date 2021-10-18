@@ -1,5 +1,5 @@
 
-export default function UplotTouchZoomPlugin(opts) {
+export default function UplotTouchZoomPlugin(xRange) {
     function init(u, opts, data) {
         let over = u.over;
         let rect, oxRange, oyRange, xVal, yVal;
@@ -48,9 +48,9 @@ export default function UplotTouchZoomPlugin(opts) {
             let left = to.x;
             let top = to.y;
 
-            // non-uniform scaling
-            //	let xFactor = fr.dx / to.dx;
-            //	let yFactor = fr.dy / to.dy;
+            // non-uniform scaling, needs some work
+            //let xFactor = fr.dx / to.dx;
+            //let yFactor = fr.dy / to.dy;
 
             // uniform x/y scaling
             let xFactor = fr.d / to.d;
@@ -66,6 +66,13 @@ export default function UplotTouchZoomPlugin(opts) {
             let nyRange = oyRange * yFactor;
             let nyMin = yVal - btmPct * nyRange;
             let nyMax = nyMin + nyRange;
+
+            if (nxMin < xRange[0]) {
+                nxMin = xRange[0]
+            }
+            if (nxMax > xRange[1]) {
+                nxMax = xRange[1]
+            }
 
             u.batch(() => {
                 u.setScale("x", {
@@ -90,7 +97,7 @@ export default function UplotTouchZoomPlugin(opts) {
         }
 
         over.addEventListener("touchstart", function (e) {
-            if(e.touches.length < 2) return;
+            if (e.touches.length < 2) return;
             rect = over.getBoundingClientRect();
 
             storePos(fr, e);

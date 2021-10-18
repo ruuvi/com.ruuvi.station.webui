@@ -25,6 +25,9 @@ class Graph extends Component {
         return [d.map(x => x.timestamp),
         d.map(x => getUnitHelper(this.props.dataKey).value(x.parsed[this.props.dataKey]))]
     }
+    getXRange() {
+        return [this.props.from / 1000, new Date().getTime() / 1000]
+    }
     render() {
         var uh = getUnitHelper(this.props.dataKey)
         var useDatesOnX = false;
@@ -37,7 +40,7 @@ class Graph extends Component {
             }
         }
         var plugins = [];
-        if (!this.props.cardView) plugins.push(UplotTouchZoomPlugin())
+        if (!this.props.cardView) plugins.push(UplotTouchZoomPlugin(this.getXRange()))
         return (
             <SizeMe>{({ size }) =>
                 <UplotReact
@@ -65,8 +68,9 @@ class Graph extends Component {
                             x: {
                                 time: true, auto: this.props.from === undefined, range: (_, fromMin, fromMax) => {
                                     if (!this.props.data || this.props.data.length === 1 || (this.props.data.length && fromMax === this.props.data[0].timestamp && fromMin === this.props.data[this.props.data.length - 1].timestamp)) {
-                                        fromMin = this.props.from / 1000
-                                        fromMax = new Date().getTime() / 1000
+                                        let range = this.getXRange();
+                                        fromMin = range[0]
+                                        fromMax = range[1]
                                     }
                                     return [fromMin, fromMax]
                                 }
