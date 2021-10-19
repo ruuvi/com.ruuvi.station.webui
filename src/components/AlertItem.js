@@ -89,7 +89,7 @@ class AlertItem extends Component {
                                 </td>
                                 <td style={this.props.detailedText}>
                                     {alert && alert.enabled && <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert.description || t("alarm_custom_title_hint")} />}
-                                    <Switch isChecked={alert && alert.enabled} onChange={e => this.setAlert(alert, x, e.target.checked)} />
+                                    <Switch isChecked={alert && alert.enabled} colorScheme="primaryScheme" onChange={e => this.setAlert(alert, x, e.target.checked)} />
                                 </td>
                             </tr>
                             {x !== "Movement" && alert &&
