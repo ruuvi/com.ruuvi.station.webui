@@ -5,6 +5,7 @@ export const ruuviTheme = extendTheme({
         global: {
             body: {
                 bg: "#e6f6f2",
+                color: "#1b4847 !important",
             },
         }
     },

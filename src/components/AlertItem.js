@@ -13,7 +13,6 @@ const alertDescription = {
     fontFamily: "mulish",
     fontSize: 12,
     marginRight: 16,
-    color: "#85a4a3",
     cursor: "pointer",
 }
 
@@ -45,9 +44,9 @@ class AlertItem extends Component {
             let regx = "{(.*?)}"
             var alertText = this.props.t("alert_description")
             var match = alertText.match(regx)
-            alertText = alertText.replace(match[0], min)
+            alertText = alertText.replace(match[0], `<b>${min}</b>`)
             match = alertText.match(regx)
-            alertText = alertText.replace(match[0], max)
+            alertText = alertText.replace(match[0], `<b>${max}</b>`)
             return alertText;
         }
         return uppercaseFirst(type)
@@ -88,8 +87,8 @@ class AlertItem extends Component {
                                     <div style={this.props.detailedSubText}>{alert && alert.enabled && <EditableText text={this.getAlertText(alert, x.toLocaleLowerCase())} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</div>
                                 </td>
                                 <td style={this.props.detailedText}>
-                                    {alert && alert.enabled && <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert.description || t("alarm_custom_title_hint")} />}
-                                    <Switch isChecked={alert && alert.enabled} colorScheme="primaryScheme" onChange={e => this.setAlert(alert, x, e.target.checked)} />
+                                    <b>{alert && alert.enabled && <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert.description || t("alarm_custom_title_hint")} />}</b>
+                                    <b style={{marginRight: 4}}>{alert && alert.enabled ? t("on") : t("off")}</b> <Switch isChecked={alert && alert.enabled} colorScheme="primaryScheme" onChange={e => this.setAlert(alert, x, e.target.checked)} />
                                 </td>
                             </tr>
                             {x !== "Movement" && alert &&
