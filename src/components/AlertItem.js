@@ -76,6 +76,7 @@ class AlertItem extends Component {
         var alert = this.state.alert;
         var x = this.props.type;
         var t = this.props.t
+        var enabled = alert && alert.enabled;
         return (
             <ListItem key={x} style={{ color: alert && alert.triggered ? "#f27575" : undefined }}>
                 <div style={{ paddingTop: x !== "Movement" ? 10 : 0, paddingBottom: 10 }}>
@@ -84,11 +85,11 @@ class AlertItem extends Component {
                             <tr>
                                 <td width="50%">
                                     <div style={this.props.detailedTitle}>{t(x.toLocaleLowerCase())}</div>
-                                    <div style={this.props.detailedSubText}>{alert && alert.enabled && <EditableText text={this.getAlertText(alert, x.toLocaleLowerCase())} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</div>
+                                    <div style={this.props.detailedSubText}>{enabled ? <EditableText text={this.getAlertText(alert, x.toLocaleLowerCase())} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} /> : <span></span>}</div>
                                 </td>
                                 <td style={this.props.detailedText}>
-                                    <b>{alert && alert.enabled && <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert.description || t("alarm_custom_title_hint")} />}</b>
-                                    <b style={{marginRight: 4}}>{alert && alert.enabled ? t("on") : t("off")}</b> <Switch isChecked={alert && alert.enabled} colorScheme="primaryScheme" onChange={e => this.setAlert(alert, x, e.target.checked)} />
+                                    <b>{enabled ? <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert.description || t("alarm_custom_title_hint")} /> : ""}</b>
+                                    <b style={{ marginRight: 4 }}>{enabled ? t("on") : t("off")}</b> <Switch isChecked={alert && alert.enabled} colorScheme="primaryScheme" onChange={e => this.setAlert(alert, x, e.target.checked)} />
                                 </td>
                             </tr>
                             {x !== "Movement" && alert &&
