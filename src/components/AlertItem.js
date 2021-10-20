@@ -79,7 +79,7 @@ class AlertItem extends Component {
         var enabled = alert && alert.enabled;
         return (
             <ListItem key={x} style={{ color: alert && alert.triggered ? "#f27575" : undefined }}>
-                <div style={{ paddingTop: x !== "Movement" ? 10 : 0, paddingBottom: 10 }}>
+                <div style={{ paddingTop: x !== "Movement" ? 30 : 5, paddingBottom: 10 }}>
                     <table width="100%" style={this.props.accordionContent}>
                         <tbody>
                             <tr>
@@ -88,14 +88,14 @@ class AlertItem extends Component {
                                     <div style={this.props.detailedSubText}>{enabled ? <EditableText text={this.getAlertText(alert, x.toLocaleLowerCase())} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} /> : <span></span>}</div>
                                 </td>
                                 <td style={this.props.detailedText}>
-                                    <b>{enabled ? <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert.description || t("alarm_custom_title_hint")} /> : ""}</b>
-                                    <b style={{ marginRight: 4 }}>{enabled ? t("on") : t("off")}</b> <Switch isChecked={alert && alert.enabled} colorScheme="primaryScheme" onChange={e => this.setAlert(alert, x, e.target.checked)} />
+                                    {enabled ? <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert.description || t("alarm_custom_title_hint")} /> : ""}
+                                    <span style={{ ...this.props.detailedText, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="primaryScheme" onChange={e => this.setAlert(alert, x, e.target.checked)} />
                                 </td>
                             </tr>
                             {x !== "Movement" && alert &&
                                 <tr>
                                     <td colSpan="2">
-                                        <Box mt="5">
+                                        <Box mt="8">
                                             <AlertSlider disabled={!alert.enabled} type={x.toLowerCase()} value={alert} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, x, true, !final)} />
                                         </Box>
                                     </td>

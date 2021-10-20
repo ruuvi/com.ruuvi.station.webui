@@ -86,7 +86,9 @@
       "months": "Months",
       "hour": "Hour",
       "no_data": "No data.\nThe sensor need to be in range of a gateway.",
-      "no_data_in_range": "No data for this time range"
+      "no_data_in_range": "No data for this time range",
+      "on": "On",
+      "off": "Off"
     }
   },
   "fi": {
@@ -176,7 +178,9 @@
       "months": "kuukautta",
       "hour": "tunti",
       "no_data": "Ei tallennettuja mittauksia.\nAnturin tulee olla reitittimen kuuluvuusalueella.",
-      "no_data_in_range": "Tältä ajalta ei ole tietoja"
+      "no_data_in_range": "Tältä ajalta ei ole tietoja",
+      "on": "Päällä",
+      "off": "Pois"
     }
   },
   "sv": {
@@ -266,7 +270,9 @@
       "months": "Månader",
       "hour": "Timme",
       "no_data": "Ingen data.\nSensors måste vara inom räckhåll av en gateway.",
-      "no_data_in_range": "Ingen data för detta tidsintervall"
+      "no_data_in_range": "Ingen data för detta tidsintervall",
+      "on": "På",
+      "off": "Av"
     }
   }
 }
