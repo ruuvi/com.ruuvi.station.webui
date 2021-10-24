@@ -54,6 +54,7 @@ class AlertSlider extends React.Component {
         maxFormatted = localeNumber(maxFormatted)
         return <div style={{ display: 'flex', alignItems: 'center' }}>
             <Range {...this.state} values={sliderValues}
+                step={this.props.type === "pressure" ? 100 : 1}
                 disabled={this.props.disabled}
                 onChange={values => this.props.onChange(values, false)}
                 onFinalChange={values => this.props.onChange(values, true)}
