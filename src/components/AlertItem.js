@@ -26,30 +26,30 @@ class AlertItem extends Component {
         }
     }
     getAlertText(alert, type) {
-        if (alert) {
-            if (type === "movement") {
-                return this.props.t("alert_movement_description")
-            }
-            var min = alert.min
-            var max = alert.max
-            if (type === "temperature") {
-                min = temperatureToUserFormat(min)
-                max = temperatureToUserFormat(max)
-            } else if (type === "pressure") {
-                min /= 100;
-                max /= 100;
-            }
-            min = localeNumber(min, 2)
-            max = localeNumber(max, 2)
-            let regx = "{(.*?)}"
-            var alertText = this.props.t("alert_description")
-            var match = alertText.match(regx)
-            alertText = alertText.replace(match[0], `<b>${min}</b>`)
-            match = alertText.match(regx)
-            alertText = alertText.replace(match[0], `<b>${max}</b>`)
-            return alertText;
+        if (type === "movement") {
+            return this.props.t("alert_movement_description")
         }
-        return uppercaseFirst(type)
+        var { min, max } = getAlertRange(type)
+        if (alert) {
+            min = alert.min
+            max = alert.max
+        }
+        if (type === "temperature") {
+            min = temperatureToUserFormat(min)
+            max = temperatureToUserFormat(max)
+        } else if (type === "pressure") {
+            min /= 100;
+            max /= 100;
+        }
+        min = localeNumber(min, 2)
+        max = localeNumber(max, 2)
+        let regx = "{(.*?)}"
+        var alertText = this.props.t("alert_description")
+        var match = alertText.match(regx)
+        alertText = alertText.replace(match[0], `<b>${min}</b>`)
+        match = alertText.match(regx)
+        alertText = alertText.replace(match[0], `<b>${max}</b>`)
+        return alertText;
     }
     setAlert(alert, type, enabled, dontUpdate) {
         type = type.toLowerCase()
@@ -85,18 +85,18 @@ class AlertItem extends Component {
                             <tr>
                                 <td width="50%">
                                     <div style={this.props.detailedTitle}>{t(x.toLocaleLowerCase())}</div>
-                                    <div style={this.props.detailedSubText}>{enabled ? <EditableText text={this.getAlertText(alert, x.toLocaleLowerCase())} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} /> : <span></span>}</div>
+                                    <div style={this.props.detailedSubText}>{this.props.type === "Movement" ? <span>{this.getAlertText(alert, x.toLocaleLowerCase())}</span> : <EditableText text={this.getAlertText(alert, x.toLocaleLowerCase())} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</div>
                                 </td>
                                 <td style={this.props.detailedText}>
-                                    {enabled ? <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert.description || t("alarm_custom_title_hint")} /> : ""}
+                                    <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
                                     <span style={{ ...this.props.detailedText, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="primaryScheme" onChange={e => this.setAlert(alert, x, e.target.checked)} />
                                 </td>
                             </tr>
-                            {x !== "Movement" && alert &&
+                            {x !== "Movement" &&
                                 <tr>
                                     <td colSpan="2">
                                         <Box mt="8">
-                                            <AlertSlider disabled={!alert.enabled} type={x.toLowerCase()} value={alert} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, x, true, !final)} />
+                                            <AlertSlider disabled={!alert || !alert.enabled} type={x.toLowerCase()} value={alert || {...getAlertRange(this.props.type)}} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, x, true, !final)} />
                                         </Box>
                                     </td>
                                 </tr>
