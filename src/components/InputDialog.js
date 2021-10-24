@@ -8,6 +8,7 @@ import {
     ModalCloseButton,
     Button,
     Input,
+    Box,
 } from "@chakra-ui/react"
 
 class InputDialog extends Component {
@@ -44,6 +45,7 @@ class InputDialog extends Component {
                         <ModalHeader>{this.props.title}</ModalHeader>
                         <ModalCloseButton />
                         <ModalBody mb="3">
+                            {this.props.description && <Box mb="2">{this.props.description}</Box>}
                             <Input value={this.state.value} type={this.props.number ? "number" : ""} onChange={e => this.setState({ ...this.state, value: e.target.value })} />
                             <div style={{ textAlign: "right" }}>
                                 <Button onClick={this.update.bind(this)} mt="2" disabled={this.props.number && isNaN(this.getNumber())}>{this.props.buttonText}</Button>
