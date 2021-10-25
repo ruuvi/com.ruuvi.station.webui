@@ -96,7 +96,7 @@ class Graph extends Component {
                                     size: 0
                                 },
                                 font: "12px Arial",
-                                values: (_, ticks) => ticks.map(rawValue => localeNumber(rawValue, uh.decimals)),
+                                values: (_, ticks) => ticks.map(rawValue => rawValue),//localeNumber(rawValue, uh.decimals)),
                             }
                         ],
                     }}
