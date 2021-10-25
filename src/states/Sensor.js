@@ -379,7 +379,7 @@ class Sensor extends Component {
                             <div style={{ height: "20px" }} />
                             <Accordion allowMultiple ml={{ base: -15, md: -35 }} mr={{ base: -15, md: -35 }}>
                                 <AccordionItem>
-                                    <AccordionButton style={accordionButton}>
+                                    <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("general")}
                                         </Box>
@@ -441,7 +441,7 @@ class Sensor extends Component {
                                     </AccordionPanel>
                                 </AccordionItem>
                                 <AccordionItem>
-                                    <AccordionButton style={accordionButton}>
+                                    <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("alerts")}
                                         </Box>
@@ -461,7 +461,7 @@ class Sensor extends Component {
                                     </AccordionPanel>
                                 </AccordionItem>
                                 <AccordionItem>
-                                    <AccordionButton style={accordionButton}>
+                                    <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("offset_correction")}
                                         </Box>
@@ -492,7 +492,7 @@ class Sensor extends Component {
                                 </AccordionItem>
 
                                 <AccordionItem>
-                                    <AccordionButton style={accordionButton}>
+                                    <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {uppercaseFirst(t("more_info"))}
                                         </Box>
@@ -526,7 +526,7 @@ class Sensor extends Component {
                                 </AccordionItem>
 
                                 <AccordionItem>
-                                    <AccordionButton style={accordionButton}>
+                                    <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("remove")}
                                         </Box>
