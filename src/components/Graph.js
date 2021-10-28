@@ -5,6 +5,7 @@ import { SizeMe } from 'react-sizeme'
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 import UplotTouchZoomPlugin from "./UplotTouchZoomPlugin";
+import { ruuviTheme } from "../themes";
 
 function ddmm(ts) {
     var d = new Date(ts * 1000);
@@ -62,8 +63,8 @@ class Graph extends Component {
                             spanGaps: true,
                             points: { show: this.props.points || false, size: 4, fill: "green" },
                             width: 2,
-                            fill: "rgba(68,201,185,0.3)",
-                            stroke: "rgb(68,201,185",
+                            fill: ruuviTheme.colors.primaryLight,
+                            stroke: ruuviTheme.colors.primary,
                         }],
                         cursor: { show: this.props.cursor || false, drag: { x: true, y: true, uni: 50 } },
                         scales: {
@@ -89,13 +90,13 @@ class Graph extends Component {
                                 font: "12px Arial",
                                 values: useDatesOnX ? (_, ticks) => ticks.map(rawValue => ddmm(rawValue)) : (_, ticks) => ticks.map(rawValue => hhmm(rawValue)),
                             }, {
-                                grid: { stroke: "rgba(212,237,232,0.5)", width: 2 },
+                                grid: { stroke: ruuviTheme.colors.graphGrid, width: 2 },
                                 size: 55,
                                 ticks: {
                                     size: 0
                                 },
                                 font: "12px Arial",
-                                values: (_, ticks) => ticks.map(rawValue => localeNumber(rawValue, uh.decimals)),
+                                values: (_, ticks) => ticks.map(rawValue => rawValue),//localeNumber(rawValue, uh.decimals)),
                             }
                         ],
                     }}

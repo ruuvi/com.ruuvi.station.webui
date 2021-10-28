@@ -10,26 +10,10 @@ import logo from './img/ruuvi-vector-logo.svg'
 
 import { ChakraProvider, Text, HStack, Image } from "@chakra-ui/react"
 import Dashboard from "./states/Dashboard";
-import { extendTheme } from "@chakra-ui/react"
 import UserMenu from "./components/UserMenu";
 import SensorMenu from "./components/SensorMenu";
 import LanguageMenu from "./components/LanguageMenu";
-
-const theme = extendTheme({
-  styles: {
-    global: {
-      body: {
-        bg: "#e6f6f2",
-      },
-    }
-  },
-  colors: {
-    brand: {
-      100: "#f7fafc",
-      900: "#1a202c",
-    },
-  },
-})
+import { ruuviTheme } from "./themes";
 
 const bottomText = {
   width: "100%",
@@ -52,7 +36,7 @@ export default function App() {
   var user = new NetworkApi().getUser()
   var sensors = [];
   if (!user) {
-    return <ChakraProvider theme={theme} style={{ minHeight: "100%" }}>
+    return <ChakraProvider theme={ruuviTheme} style={{ minHeight: "100%" }}>
       <HashRouter>
         <SignIn loginSuccessful={data => {
           forceUpdate()
@@ -65,7 +49,7 @@ export default function App() {
       localStorage.setItem("settings", JSON.stringify(settings.data.settings))
   })
   return (
-    <ChakraProvider theme={theme}>
+    <ChakraProvider theme={ruuviTheme}>
       <HashRouter>
         <HStack style={{ backgroundColor: "white", boxShadow: "0px 1px 2px #dddddd", paddingLeft: "25px", paddingRight: "25px" }} height="60px">
           <a href="/#">

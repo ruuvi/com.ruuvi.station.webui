@@ -152,6 +152,22 @@ class NetworkApi {
                 success(response);
             })
     }
+    updateSensorData(mac, data, success) {
+        fetch(this.url + "/update", {
+            ...this.options,
+            method: 'POST',
+            body: JSON.stringify({ ...data, sensor: mac }),
+        })
+            .then(function (response) {
+                //if (response.status === 200) {
+                return response.json();
+                //}
+                //throw (response)
+            })
+            .then(response => {
+                success(response);
+            })
+    }
     unclaim(mac, success) {
         fetch(this.url + "/unclaim", {
             ...this.options,

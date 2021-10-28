@@ -39,6 +39,7 @@ import EditNameDialog from "../components/EditNameDialog";
 import { uppercaseFirst } from "../TextHelper";
 import AlertItem from "../components/AlertItem";
 import EditableText from "../components/EditableText";
+import OffsetDialog from "../components/OffsetDialog";
 
 var timespans = [{ k: "1", t: "hour", v: 1 }, { k: "2", t: "hours", v: 2 }, { k: "8", t: "hours", v: 8 }, { k: "12", t: "hours", v: 12 }, { k: "1", t: "day", v: 24 }, { k: "2", t: "days", v: 24 * 2 }, { k: "1", t: "week", v: 24 * 7 }, { k: "2", t: "weeks", v: 24 * 7 * 2 }, { k: "1", t: "month", v: 24 * 7 * 4 }, { k: "2", t: "months", v: 24 * 7 * 4 * 2 }, { k: "3", t: "months", v: 24 * 7 * 4 * 3 }, { k: "6", t: "months", v: 24 * 7 * 4 * 6 }]
 
@@ -93,6 +94,7 @@ const detailedText = {
 const detailedSubText = {
     fontFamily: "mulish",
     fontSize: "14px",
+    height: "18px",
 }
 
 const accordionPanel = {
@@ -176,6 +178,7 @@ class Sensor extends Component {
             alerts: [],
             editName: false,
             showShare: false,
+            offsetDialog: null,
         }
     }
     componentDidMount() {
@@ -376,7 +379,7 @@ class Sensor extends Component {
                             <div style={{ height: "20px" }} />
                             <Accordion allowMultiple ml={{ base: -15, md: -35 }} mr={{ base: -15, md: -35 }}>
                                 <AccordionItem>
-                                    <AccordionButton style={accordionButton}>
+                                    <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("general")}
                                         </Box>
@@ -417,7 +420,7 @@ class Sensor extends Component {
                                             {this.props.sensor.canShare &&
                                                 <>
                                                     <hr />
-                                                    <ListItem>
+                                                    <ListItem style={{ cursor: "pointer" }} onClick={() => this.share(true)}>
                                                         <table style={accordionContent}>
                                                             <tbody>
                                                                 <tr>
@@ -426,7 +429,7 @@ class Sensor extends Component {
                                                                     </td>
                                                                     <td style={detailedText}>
                                                                         {t(this.props.sensor.sharedTo.length ? "sensor_shared" : "share")}
-                                                                        <IconButton variant="ghost" icon={<MdChevronRight />} onClick={() => this.share(true)} />
+                                                                        <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
                                                                     </td>
                                                                 </tr>
                                                             </tbody>
@@ -438,7 +441,7 @@ class Sensor extends Component {
                                     </AccordionPanel>
                                 </AccordionItem>
                                 <AccordionItem>
-                                    <AccordionButton style={accordionButton}>
+                                    <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("alerts")}
                                         </Box>
@@ -458,7 +461,7 @@ class Sensor extends Component {
                                     </AccordionPanel>
                                 </AccordionItem>
                                 <AccordionItem>
-                                    <AccordionButton style={accordionButton}>
+                                    <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("offset_correction")}
                                         </Box>
@@ -470,13 +473,13 @@ class Sensor extends Component {
                                             {["Temperature", "Humidity", "Pressure"].map(x => {
                                                 var uh = getUnitHelper(x.toLocaleLowerCase());
                                                 var value = uh.value(this.state.data["offset" + x], true);
-                                                return <ListItem key={x}>
+                                                return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, offsetDialog: x })}>
                                                     <table style={accordionContent}>
                                                         <tbody>
                                                             <tr>
                                                                 <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
                                                                 <td style={detailedText}>
-                                                                    {localeNumber(value, uh.decimals)} {uh.unit}
+                                                                    {localeNumber(value, uh.decimals)} {uh.unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
                                                                 </td>
                                                             </tr>
                                                         </tbody>
@@ -489,7 +492,7 @@ class Sensor extends Component {
                                 </AccordionItem>
 
                                 <AccordionItem>
-                                    <AccordionButton style={accordionButton}>
+                                    <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {uppercaseFirst(t("more_info"))}
                                         </Box>
@@ -523,7 +526,7 @@ class Sensor extends Component {
                                 </AccordionItem>
 
                                 <AccordionItem>
-                                    <AccordionButton style={accordionButton}>
+                                    <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("remove")}
                                         </Box>
@@ -555,6 +558,7 @@ class Sensor extends Component {
                 )}
                 <EditNameDialog open={this.state.editName} onClose={() => this.editName(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
                 <ShareDialog open={this.state.showShare} onClose={() => this.share(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
+                {this.state.data && <OffsetDialog open={this.state.offsetDialog} onClose={() => this.setState({ ...this.state, offsetDialog: null })} sensor={this.props.sensor} offsets={{ "Humidity": this.state.data.offsetHumidity, "Pressure": this.state.data.offsetPressure, "Temperature": this.state.data.offsetTemperature }} lastReading={this.getLatestReading()} updateSensor={this.props.updateSensor} />}
             </Box>
         )
     }
