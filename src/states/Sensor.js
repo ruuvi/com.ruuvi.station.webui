@@ -278,11 +278,14 @@ class Sensor extends Component {
         if (!alert) return false
         return alert.triggered;
     }
-    remove() {
+    isSharedSensor() {
         var user = new NetworkApi().getUser().email
         var owner = this.props.sensor.owner
+        return user !== owner;
+    }
+    remove() {
         var confirmText = this.props.t("remove_claimed_sensor")
-        if (user !== owner) {
+        if (this.isSharedSensor()) {
             confirmText = this.props.t("remove_shared_sensor")
         }
         var mac = this.props.sensor.sensor
@@ -460,6 +463,7 @@ class Sensor extends Component {
                                         </List>
                                     </AccordionPanel>
                                 </AccordionItem>
+                                {!this.isSharedSensor() &&
                                 <AccordionItem>
                                     <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
@@ -490,7 +494,7 @@ class Sensor extends Component {
                                         </List>
                                     </AccordionPanel>
                                 </AccordionItem>
-
+                                }
                                 <AccordionItem>
                                     <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>

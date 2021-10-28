@@ -12,7 +12,7 @@ import {
     Spinner,
 } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
-import { getUnitHelper } from "../UnitHelper";
+import { getUnitHelper, localeNumber } from "../UnitHelper";
 import InputDialog from "./InputDialog";
 import NetworkApi from "../NetworkApi";
 
@@ -39,8 +39,8 @@ class OffsetDialog extends Component {
         return getUnitHelper(this.props.open.toLowerCase()).unit
     }
     calibrate(value, save, clear) {
-        this.setState({ ...this.state, correctionInput: false, saving: true })
         if (save) {
+            this.setState({ ...this.state, correctionInput: false, saving: true })
             if (!clear) {
                 value = value - this.getLastReading() + this.getOffset()
                 if (this.props.open === "Pressure")
@@ -58,12 +58,18 @@ class OffsetDialog extends Component {
                     this.setState({ ...this.state, saving: false })
                 }
             })
+        } else {
+            this.setState({ ...this.state, correctionInput: false})
         }
     }
     clearCalibration() {
         if (window.confirm(this.props.t("calibration_clear_confirm"))) {
             this.calibrate(0, true, true)
         }
+    }
+    format(number) {
+        if (!this.props.open) return number;
+        return localeNumber(number,getUnitHelper(this.props.open.toLowerCase()).decimals);
     }
     render() {
         var { t } = this.props;
@@ -81,13 +87,13 @@ class OffsetDialog extends Component {
                             <div>
                                 <b>{t("calibration_original_value")}</b>
                             </div>
-                            {this.getLastReading() - this.getOffset()} {this.getUnit()}
+                            {this.format(this.getLastReading() - this.getOffset())} {this.getUnit()}
                             {this.getOffset() != 0 && <Box>
                                 <hr />
                                 <div>
                                     <b>{t("calibration_corrected_value")}</b>
                                 </div>
-                                {this.getLastReading()} {this.getUnit()} {t("calibration_offset").replace("{%@^%1$s}", this.getOffset() + " " + this.getUnit())}
+                                {this.format(this.getLastReading())} {this.getUnit()} {t("calibration_offset").replace("{%@^%1$s}", this.format(this.getOffset()) + " " + this.getUnit())}
                             </Box>
                             }
                         </ModalBody>
