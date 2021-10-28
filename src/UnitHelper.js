@@ -37,6 +37,7 @@ export function getUnitHelper(key) {
 
 export function localeNumber(value, decimals) {
     if (typeof (value) !== "number") return value
+    if (decimals === undefined) return value.toLocaleString("fi-FI")
     return value.toLocaleString("fi-FI", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 }
 
