@@ -38,6 +38,7 @@ import ShareDialog from "../components/ShareDialog";
 import EditNameDialog from "../components/EditNameDialog";
 import { uppercaseFirst } from "../TextHelper";
 import AlertItem from "../components/AlertItem";
+import EditableText from "../components/EditableText";
 
 var timespans = [{ k: "1", t: "hour", v: 1 }, { k: "2", t: "hours", v: 2 }, { k: "8", t: "hours", v: 8 }, { k: "12", t: "hours", v: 12 }, { k: "1", t: "day", v: 24 }, { k: "2", t: "days", v: 24 * 2 }, { k: "1", t: "week", v: 24 * 7 }, { k: "2", t: "weeks", v: 24 * 7 * 2 }, { k: "1", t: "month", v: 24 * 7 * 4 }, { k: "2", t: "months", v: 24 * 7 * 4 * 2 }, { k: "3", t: "months", v: 24 * 7 * 4 * 3 }, { k: "6", t: "months", v: 24 * 7 * 4 * 6 }]
 
@@ -369,7 +370,7 @@ class Sensor extends Component {
                                 <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
                             ) : (
                                 <Box ml={-5} mr={-5}>
-                                    <Graph key={this.state.data.measurements} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                    <Graph dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
                                 </Box>
                             )}
                             <div style={{ height: "20px" }} />
@@ -392,9 +393,7 @@ class Sensor extends Component {
                                                                 <div style={detailedTitle}>{t("sensor_name")}</div>
                                                             </td>
                                                             <td style={detailedText}>
-                                                                <span style={{ cursor: "pointer" }} onClick={() => this.editName(true)}>
-                                                                    {this.props.sensor.name}
-                                                                </span>
+                                                                <EditableText text={this.props.sensor.name} onClick={() => this.editName(true)} />
                                                             </td>
                                                         </tr>
                                                     </tbody>

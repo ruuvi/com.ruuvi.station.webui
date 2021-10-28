@@ -30,7 +30,7 @@ class SensorMenu extends Component {
         const { t } = this.props;
         return (
             <Menu>
-                <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }}>
+                <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold", paddingRight: 0 }}>
                     {t("sensors")}
                 </MenuButton>
                 <MenuList>

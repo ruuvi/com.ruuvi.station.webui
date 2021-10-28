@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box, SimpleGrid } from "@chakra-ui/react"
+import { Spinner, Box } from "@chakra-ui/react"
 
 class Dashboard extends Component {
     constructor(props) {
@@ -78,31 +78,33 @@ class Dashboard extends Component {
     }
     render() {
         return (
-            <Box marginTop="36px" marginLeft={{ base: "10px", md: "50px" }} marginRight={{ base: "10px", md: "50px" }}>
-                <SimpleGrid minChildWidth="310px" spacing="8px" alignItems="center">
-                    {this.state.loading &&
-                        <center>
-                            <Spinner size="xl" />
-                        </center>
-                    }
-                    {this.getCurrentSensor() ? (
-                        <Sensor sensor={this.getCurrentSensor()}
-                            close={() => this.props.history.push('/')}
-                            next={() => this.nextIndex(1)}
-                            prev={() => this.nextIndex(-1)}
-                            remove={() => this.removeSensor()}
-                            updateSensor={(sensor) => this.updateSensor(sensor)}
-                        />
-                    ) : (
-                        <>
-                            {this.state.sensors.map(x => {
-                                return <a key={x.sensor} href={"#/" + x.sensor} style={{ alignItems: "center" }}>
+            <Box marginTop="36px" marginLeft={{ base: "10px", md: "20px", lg: "50px" }} marginRight={{ base: "10px", md: "20px", lg: "50px" }}>
+                {this.state.loading &&
+                    <center>
+                        <Spinner size="xl" />
+                    </center>
+                }
+                {this.getCurrentSensor() ? (
+                    <Sensor sensor={this.getCurrentSensor()}
+                        close={() => this.props.history.push('/')}
+                        next={() => this.nextIndex(1)}
+                        prev={() => this.nextIndex(-1)}
+                        remove={() => this.removeSensor()}
+                        updateSensor={(sensor) => this.updateSensor(sensor)}
+                    />
+                ) : (
+                    
+                    <Box justifyContent={{ base: "space-evenly", lg: this.state.sensors.length > 2 ? "space-evenly" : "start" }} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
+                    <>
+                        {this.state.sensors.map(x => {
+                            return <span style={{ margin: 16, minWidth: "350px", maxWidth: "450px", flexGrow: 2, flex: "1 1 0px" }}>
+                                <a key={x.sensor} href={"#/" + x.sensor}>
                                     <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
-                                </a>
-                            })}
-                        </>
-                    )}
-                </SimpleGrid>
+                                </a></span>
+                        })}
+                    </>
+                </Box>
+                )}
             </Box>
         )
     }

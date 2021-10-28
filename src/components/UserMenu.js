@@ -27,7 +27,7 @@ class UserMenu extends Component {
         var { t } = this.props
         return (
             <Menu>
-                <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent" }}>
+                <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", paddingRight: 0 }}>
                     <FaUserAlt />
                 </MenuButton>
                 <MenuList >

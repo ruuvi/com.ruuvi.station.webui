@@ -21,15 +21,16 @@ const smallSensorValue = {
 }
 
 const smallSensorValueUnit = {
-    fontFamily: "montserrat",
-    fontSize: 12,
+    fontFamily: "mulish",
+    fontWeight: 600,
+    fontSize: 14,
 }
 
 const lastUpdatedText = {
-    fontFamily: "montserrat",
-    fontSize: 12,
-    fontWeight: 500,
-    color: "#85a4a3"
+    fontFamily: "mulish",
+    fontWeight: 600,
+    fontSize: 14,
+    color: "rgba(27, 72, 71, 0.5)"
 }
 
 class SensorCard extends Component {

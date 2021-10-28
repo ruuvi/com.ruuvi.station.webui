@@ -4,6 +4,7 @@ import 'uplot/dist/uPlot.min.css';
 import { SizeMe } from 'react-sizeme'
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
+import UplotTouchZoomPlugin from "./UplotTouchZoomPlugin";
 
 function ddmm(ts) {
     var d = new Date(ts * 1000);
@@ -15,6 +16,9 @@ function hhmm(ts) {
     return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2)
 }
 
+
+var lastDataPoints = -1;
+var zoomHasChanged = false;
 class Graph extends Component {
     getGraphData() {
         if (!this.props.data) return [[], []];
@@ -22,6 +26,9 @@ class Graph extends Component {
         d = d.reverse();
         return [d.map(x => x.timestamp),
         d.map(x => getUnitHelper(this.props.dataKey).value(x.parsed[this.props.dataKey]))]
+    }
+    getXRange() {
+        return [this.props.from / 1000, new Date().getTime() / 1000]
     }
     render() {
         var uh = getUnitHelper(this.props.dataKey)
@@ -34,6 +41,8 @@ class Graph extends Component {
                 if (dataXSpan > 60 * 60 * 24 * 2) useDatesOnX = true;
             }
         }
+        var plugins = [];
+        if (!this.props.cardView) plugins.push(UplotTouchZoomPlugin(this.getXRange()))
         return (
             <SizeMe>{({ size }) =>
                 <UplotReact
@@ -41,6 +50,7 @@ class Graph extends Component {
                         title: this.props.title,
                         width: size.width,
                         height: this.props.height || 300,
+                        plugins: plugins,
                         legend: {
                             show: this.props.legend === undefined ? true : this.props.legend,
                         },
@@ -59,9 +69,15 @@ class Graph extends Component {
                         scales: {
                             x: {
                                 time: true, auto: this.props.from === undefined, range: (_, fromMin, fromMax) => {
-                                    if (!this.props.data || this.props.data.length === 1 || (this.props.data.length && fromMax === this.props.data[0].timestamp && fromMin === this.props.data[this.props.data.length - 1].timestamp)) {
-                                        fromMin = this.props.from / 1000
-                                        fromMax = new Date().getTime() / 1000
+                                    let dataHasChanged = lastDataPoints !== this.props.data.length;
+                                    lastDataPoints = this.props.data.length;
+                                    if ((dataHasChanged && !zoomHasChanged) || this.props.data.length === 1 || (this.props.data.length && fromMax === this.props.data[0].timestamp && fromMin === this.props.data[this.props.data.length - 1].timestamp)) {
+                                        let range = this.getXRange();
+                                        fromMin = range[0]
+                                        fromMax = range[1]
+                                        zoomHasChanged = false
+                                    } else {
+                                        zoomHasChanged = true
                                     }
                                     return [fromMin, fromMax]
                                 }

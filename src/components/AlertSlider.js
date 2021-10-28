@@ -5,17 +5,21 @@ import { getAlertRange, localeNumber, temperatureToUserFormat } from '../UnitHel
 import InputDialog from "./InputDialog";
 import { withTranslation } from "react-i18next";
 import { uppercaseFirst } from "../TextHelper";
+import EditableText from "./EditableText";
 
 const valuesStyle = {
     fontFamily: "montserrat",
     fontSize: 14,
     fontWeight: 500,
-    width: 65,
+    width: 125,
     textAlign: "center",
     color: "#85a4a3",
     cursor: "pointer",
 }
 
+function getColor(gray) {
+    return `rgba(67,199,186,${gray ? 0.2 : 1})`
+}
 class AlertSlider extends React.Component {
     constructor(props) {
         super(props)
@@ -28,9 +32,14 @@ class AlertSlider extends React.Component {
     }
     render() {
         var max = this.props.value.max
-        if (max == null) max = this.state.range.max;
+        if (max == null) max = this.state.max;
         var min = this.props.value.min
-        if (min == null) min = this.state.range.min;
+        if (min == null) min = this.state.min;
+        if (max > this.state.max || min < this.state.min || min > max) {
+            // revert to default if values are fishy
+            max = this.state.max;
+            min = this.state.min;
+        }
         var sliderValues = [min, max]
         var minFormatted = min;
         var maxFormatted = max;
@@ -44,8 +53,8 @@ class AlertSlider extends React.Component {
         minFormatted = localeNumber(minFormatted)
         maxFormatted = localeNumber(maxFormatted)
         return <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Box style={valuesStyle} alignSelf="start" mr="5" onClick={() => this.setState({...this.state, editMinValue: true})}>{minFormatted}</Box>
             <Range {...this.state} values={sliderValues}
+                disabled={this.props.disabled}
                 onChange={values => this.props.onChange(values, false)}
                 onFinalChange={values => this.props.onChange(values, true)}
                 renderTrack={({ props, children }) => (
@@ -56,7 +65,7 @@ class AlertSlider extends React.Component {
                             height: '2px',
                             width: '100%',
                             background: getTrackBackground({
-                                colors: ['#cccccc', '#43c7ba', '#cccccc'],
+                                colors: [getColor(true), getColor(this.props.disabled), getColor(true)],
                                 ...this.state,
                                 values: sliderValues
                             }),
@@ -73,20 +82,19 @@ class AlertSlider extends React.Component {
                             borderRadius: '6px',
                             height: '12px',
                             width: '12px',
-                            backgroundColor: '#43c7ba'
+                            backgroundColor: getColor(this.props.disabled)
                         }}
                     />
                 )}
             />
-            <Box style={valuesStyle} alignSelf="end" ml="5" onClick={() => this.setState({...this.state, editMaxValue: true})}>{maxFormatted}</Box>
             <InputDialog open={this.state.editMinValue} value={min}
-                onClose={(save, value) => save && value <= max && this.props.onChange([value,max], true) || this.setState({ ...this.state, editMinValue: false })}
+                onClose={(save, value) => save && value <= max && this.props.onChange([value, max], true) || this.setState({ ...this.state, editMinValue: false })}
                 title={uppercaseFirst(this.props.t("min"))}
                 number={true}
                 buttonText={this.props.t("update")}
             />
             <InputDialog open={this.state.editMaxValue} value={max}
-                onClose={(save, value) => save && value >= min && this.props.onChange([min,value], true) || this.setState({ ...this.state, editMaxValue: false })}
+                onClose={(save, value) => save && value >= min && this.props.onChange([min, value], true) || this.setState({ ...this.state, editMaxValue: false })}
                 title={uppercaseFirst(this.props.t("max"))}
                 number={true}
                 buttonText={this.props.t("update")}
