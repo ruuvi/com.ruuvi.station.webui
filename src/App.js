@@ -7,22 +7,32 @@ import {
 import NetworkApi from "./NetworkApi";
 import SignIn from "./states/SignIn";
 import logo from './img/ruuvi-vector-logo.svg'
-
 import { ChakraProvider, Text, HStack, Image } from "@chakra-ui/react"
 import Dashboard from "./states/Dashboard";
 import UserMenu from "./components/UserMenu";
 import SensorMenu from "./components/SensorMenu";
 import LanguageMenu from "./components/LanguageMenu";
 import { ruuviTheme } from "./themes";
+import pjson from "./../package.json"
 
 const bottomText = {
   width: "100%",
   textAlign: "center",
-  padding: "20px",
   fontFamily: "mulish",
   fontSize: 18,
   fontWeight: 800,
   color: "#c8dbd9",
+}
+
+const versionText = {
+  width: "100%",
+  textAlign: "center",
+  fontFamily: "mulish",
+  fontSize: 16,
+  fontWeight: 600,
+  color: "#c8dbd9",
+  marginTop: -4,
+  paddingBottom: 20 ,
 }
 
 export default function App() {
@@ -70,6 +80,7 @@ export default function App() {
             <Route path="/" component={Dashboard} />
           </Switch>
           <div style={bottomText}><a href="https://ruuvi.com/" target="_blank" rel="noreferrer">ruuvi.com</a></div>
+          <div style={versionText}>v{pjson.version}</div>
         </div>
       </HashRouter>
     </ChakraProvider>
