@@ -1,4 +1,5 @@
 import pjson from '../package.json';
+import DataCache from './DataCache';
 
 function sortSensors(sensors) {
     for (var i = 0; i < sensors.length; i++) {
@@ -99,8 +100,18 @@ class NetworkApi {
     };
     get(mac, from, settings, success, fail) {
         if (!this.options) if (fail) return fail("Not signed in"); else return
+        var mode = settings.mode || "mixed";
+        var cachedData = DataCache.getData(mac, mode)
+        if (cachedData) {
+            console.log(cachedData[0].timestamp)
+            console.log(from)
+            from = cachedData[0].timestamp
+            console.log(from)
+            console.log("=====")
+        }
+        
         var q = "?sensor=" + encodeURIComponent(mac)
-        q += "&mode=" + encodeURIComponent(settings.mode || "mixed")
+        q += "&mode=" + encodeURIComponent(mode)
         q += "&since=" + from
         q += "&until=" + parseInt(new Date().getTime() / 1000)
         q += "&limit=" + (settings.limit || 100000)
@@ -110,6 +121,13 @@ class NetworkApi {
         })
             .then(response => {
                 // do parsing here?
+                console.log("count", response.data.measurements.length)
+                if (cachedData && response.result === "success") {
+                    response.data.measurements.push(...cachedData)
+                    DataCache.setData(mac, mode, response.data.measurements)
+                } else if (!cachedData) {
+                    DataCache.setData(mac, mode, response.data.measurements)
+                }
                 success(response)
             })
             .catch(error => fail ? fail(error) : {});
