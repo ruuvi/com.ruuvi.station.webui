@@ -3,11 +3,11 @@ import pen from "../img/pen.svg";
 function getStyledText(text) {
     var startB = text.split("<b>")
     if (startB.length === 1) return startB;
-    var output = [<span>{startB[0]}</span>];
+    var output = [<span key={"s"+0}>{startB[0]}</span>];
     for (var i = 1; i < startB.length; i++) {
         var boldSplit = startB[i].split("</b>")
-        output.push(<b>{boldSplit[0]}</b>)
-        if (boldSplit.length > 0) output.push(<span>{boldSplit[1]}</span>)
+        output.push(<b key={"b"+i}>{boldSplit[0]}</b>)
+        if (boldSplit.length > 0) output.push(<span key={"s"+i}>{boldSplit[1]}</span>)
     }
     return output;
 }

@@ -185,7 +185,7 @@ class Sensor extends Component {
         if (this.props.sensor) {
             this.loadData(true)
             this.latestDataUpdate = setInterval(() => {
-                new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 2), { mode: "dense", limit: 1, sort: "desc" }, resp => {
+                new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: "dense", limit: 1, sort: "desc" }, resp => {
                     if (resp.result === "success") {
                         let d = parse(resp.data);
                         if (d.measurements.length !== 1) return

@@ -56,7 +56,7 @@ class SensorCard extends Component {
             });
         }, 60 * 1000);
         this.graphDataUpdate = setInterval(() => {
-            new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 15), { mode: "sparse", limit: 1, sort: "desc" }, resp => {
+            new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: "sparse", limit: 1, sort: "desc" }, resp => {
                 if (resp.result === "success") {
                     let d = parse(resp.data);
                     if (d.measurements.length !== 1) return

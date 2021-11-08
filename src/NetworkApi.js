@@ -98,16 +98,20 @@ class NetworkApi {
             })
             .catch(error => fail ? fail(error) : {});
     };
-    get(mac, from, settings, success, fail) {
+    async get(mac, from, settings, success, fail) {
         if (!this.options) if (fail) return fail("Not signed in"); else return
         var mode = settings.mode || "mixed";
-        var cachedData = DataCache.getData(mac, mode)
-        if (cachedData) {
-            console.log(cachedData[0].timestamp)
-            console.log(from)
-            from = cachedData[0].timestamp
-            console.log(from)
-            console.log("=====")
+        var cachedData = await DataCache.getData(mac, mode)
+        var useCache = false;
+        if (cachedData && cachedData.length) {
+            let newest = cachedData[0].timestamp;
+            let oldest = cachedData[cachedData.length-1].timestamp;
+            if (from > newest || from < oldest-60*15) {
+                //console.log("Will not use cache")
+            } else {
+                from = newest
+                useCache = true
+            }
         }
         
         var q = "?sensor=" + encodeURIComponent(mac)
@@ -120,12 +124,10 @@ class NetworkApi {
             return response.json();
         })
             .then(response => {
-                // do parsing here?
-                console.log("count", response.data.measurements.length)
-                if (cachedData && response.result === "success") {
+                if (cachedData && response.result === "success" && useCache) {
                     response.data.measurements.push(...cachedData)
                     DataCache.setData(mac, mode, response.data.measurements)
-                } else if (!cachedData) {
+                } else if (response.result === "success") {
                     DataCache.setData(mac, mode, response.data.measurements)
                 }
                 success(response)

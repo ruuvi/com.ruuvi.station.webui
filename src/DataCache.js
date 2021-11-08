@@ -1,3 +1,4 @@
+import * as localForage from "localforage";
 import pjson from '../package.json';
 
 function getKey(sensor, mode) {
@@ -5,16 +6,32 @@ function getKey(sensor, mode) {
 }
 
 var cache = {
-    getData: (sensor, mode) => {
-        var data = localStorage.getItem(getKey(sensor, mode))
-        console.log("DATA",getKey(sensor, mode))
-        if (!data) return null;
-        return JSON.parse(data)
+    getData: async (sensor, mode) => {
+        try {
+            var data = localForage.getItem(getKey(sensor, mode))
+            if (!data) return null;
+            return data
+        } catch (e) {
+            console.log(e);
+        }
+        return null;
     },
-    setData: (sensor, mode, data) => {
-        console.log("SET DATA")
-        console.log(getKey(sensor, mode), JSON.stringify(data))
-        localStorage.setItem(getKey(sensor, mode), JSON.stringify(data));
+    setData: async (sensor, mode, data) => {
+        try {
+            function compare(a, b) {
+                if (a.timestamp > b.timestamp) {
+                    return -1;
+                }
+                if (a.timestamp < b.timestamp) {
+                    return 1;
+                }
+                return 0;
+            }
+            data.sort(compare);
+            localForage.setItem(getKey(sensor, mode), data);
+        } catch (e) {
+            console.log(e);
+        }
     }
 }
 

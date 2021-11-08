@@ -15,6 +15,7 @@ import LanguageMenu from "./components/LanguageMenu";
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 
+
 const bottomText = {
   width: "100%",
   textAlign: "center",
