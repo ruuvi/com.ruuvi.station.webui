@@ -84,7 +84,7 @@ class AlertItem extends Component {
                         <tbody>
                             <tr>
                                 <td width="50%">
-                                    <div style={this.props.detailedTitle}>{t(x.toLocaleLowerCase())}</div>
+                                    <div style={{...this.props.detailedTitle, width: undefined}}>{t(x.toLocaleLowerCase())}</div>
                                     <div style={this.props.detailedSubText}>{this.props.type === "Movement" ? <span>{this.getAlertText(alert, x.toLocaleLowerCase())}</span> : <EditableText text={this.getAlertText(alert, x.toLocaleLowerCase())} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</div>
                                 </td>
                                 <td style={this.props.detailedText}>

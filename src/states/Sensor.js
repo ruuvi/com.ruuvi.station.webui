@@ -94,7 +94,6 @@ const detailedText = {
 const detailedSubText = {
     fontFamily: "mulish",
     fontSize: "14px",
-    height: "18px",
 }
 
 const accordionPanel = {
