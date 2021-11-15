@@ -155,7 +155,7 @@ class SensorCard extends Component {
                                 <SimpleGrid columns={2} style={{ width: "100%" }}>
                                     {["humidity", "battery", "pressure", "movementCounter"].map(x => {
                                         return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
-                                            <span style={smallSensorValue}>{this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x]), getUnitHelper(x).decimals)}</span>
+                                            <span style={smallSensorValue}>{this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}</span>
                                             <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
                                         </GridItem>
                                     })}

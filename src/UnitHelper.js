@@ -1,7 +1,9 @@
+import { relativeToAbsolute, relativeToDewpoint } from "./utils/humidity";
+
 const unitHelper = {
     "temperature": { label: "temperature", unit: "°C", value: (value, offset) => temperatureToUserFormat(value, offset), decimals: 2, graphable: true },
-    "humidity": { label: "humidity", unit: "%", value: (value) => value, decimals: 2, graphable: true },
-    "pressure": { label: "pressure", unit: "hPa", value: (value) => value / 100, decimals: 2, graphable: true },
+    "humidity": { label: "humidity", unit: "%", value: (value, temperature) => humidityToUserFormat(value, temperature), decimals: 2, graphable: true },
+    "pressure": { label: "pressure", unit: "hPa", value: (value) => pressureToUserFormat(value), decimals: 2, graphable: true },
     "movementCounter": { label: "movement_counter", unit: "times", value: (value) => value, decimals: 0, graphable: true },
     "battery": { label: "battery_voltage", unit: "V", value: (value) => value / 1000, decimals: 3, graphable: true },
     "accelerationX": { label: "acceleration_x", unit: "g", value: (value) => value / 1000, decimals: 3, graphable: true },
@@ -26,6 +28,43 @@ export function getUnitHelper(key) {
             }
             else if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
                 thing.unit = "K";
+                return thing;
+            }
+        }
+    }
+    if (key === "humidity") {
+        var settings = localStorage.getItem("settings");
+        var thing = unitHelper[key];
+        if (settings) {
+            settings = JSON.parse(settings)
+            if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "1") {
+                thing.unit = "g/m^3"
+                return thing;
+            } else if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "2") {
+                thing.unit = "°C"
+                if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
+                    thing.unit = "°F";
+                }
+                else if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
+                    thing.unit = "K";
+                }
+                return thing;
+            }
+        }
+    }
+    if (key === "pressure") {
+        var settings = localStorage.getItem("settings");
+        var thing = unitHelper[key];
+        if (settings) {
+            settings = JSON.parse(settings)
+            if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "0") {
+                thing.unit = "Pa"
+                return thing;
+            } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
+                thing.unit = "mmHg"
+                return thing;
+            } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "3") {
+                thing.unit = "inHg"
                 return thing;
             }
         }
@@ -62,16 +101,58 @@ export function round(number, deciamals) {
     return Math.round(number * f) / f
 }
 
-
 export function getAlertRange(type) {
     switch (type) {
         case "temperature":
-            return {max: 85, min: -40}
+            return { max: 85, min: -40 }
         case "humidity":
-            return {max: 100, min: 0}
+            return { max: 100, min: 0 }
         case "pressure":
-            return {max: 110000, min: 30000}
+            return { max: 110000, min: 30000 }
         default:
-            return {max: 100, min: 0}
+            return { max: 100, min: 0 }
     }
 }
+
+// 0 = Relative (%)
+// 1 = Absolute (g/m^3)
+// 2 = Dew point (°)
+export function humidityToUserFormat(humidity, temperature) {
+    var settings = localStorage.getItem("settings");
+    if (settings) {
+        settings = JSON.parse(settings)
+        if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "1") {
+            humidity = relativeToAbsolute(humidity, temperature)
+        } else if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "2") {
+            humidity = relativeToDewpoint(humidity, temperature, settings.UNIT_TEMPERATURE)
+        }
+    }
+    return round(humidity, 2)
+}
+
+// 0 = Pascal (Pa)
+// 1 = Hectopascal (hPa)
+// 2 = Millimeter of mercury (mmHg)
+// 3 = Inch of mercury (inHg)
+export function pressureToUserFormat(pressure, offset) {
+    var settings = localStorage.getItem("settings");
+    if (settings) {
+        settings = JSON.parse(settings)
+        if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "0") {
+        }
+        else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
+            pressure /= mmMercuryMultiplier
+        } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "3") {
+            pressure /= inchMercuryMultiplier
+        } else {
+            pressure /= 100;
+        }
+    } else {
+        pressure /= 100;
+    }
+    return round(pressure, 2)
+}
+
+// pressure constants
+const mmMercuryMultiplier = 133.322368;
+const inchMercuryMultiplier = 3386.388666;
