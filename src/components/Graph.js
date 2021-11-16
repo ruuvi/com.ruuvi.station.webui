@@ -33,15 +33,6 @@ class Graph extends Component {
     }
     render() {
         var uh = getUnitHelper(this.props.dataKey)
-        var useDatesOnX = false;
-        if (this.props.from) {
-            if ((new Date().getTime() - this.props.from) / 1000 > 60 * 60 * 24 * 2) useDatesOnX = true;
-        } else {
-            if (this.props.data && this.props.data.length) {
-                var dataXSpan = this.props.data[0].timestamp - this.props.data[this.props.data.length - 1].timestamp;
-                if (dataXSpan > 60 * 60 * 24 * 2) useDatesOnX = true;
-            }
-        }
         var plugins = [];
         if (!this.props.cardView) plugins.push(UplotTouchZoomPlugin(this.getXRange()))
         return (
@@ -88,7 +79,21 @@ class Graph extends Component {
                             {
                                 grid: { show: false },
                                 font: "12px Arial",
-                                values: useDatesOnX ? (_, ticks) => ticks.map(rawValue => ddmm(rawValue)) : (_, ticks) => ticks.map(rawValue => hhmm(rawValue)),
+                                ticks: {
+                                    size: 0
+                                },
+                                values: (_, ticks) => {
+                                    var xRange = ticks[ticks.length - 1] - ticks[0]
+                                    var xRangeHours = xRange / 60 / 60
+                                    var prevRaw = null;
+                                    var useDates = xRangeHours > 55;
+                                    return ticks.map(raw => {
+                                        var out = useDates ? ddmm(raw) : hhmm(raw);
+                                        if (prevRaw === out) return null;
+                                        prevRaw = out;
+                                        return out;
+                                    })
+                                }
                             }, {
                                 grid: { stroke: ruuviTheme.colors.graphGrid, width: 2 },
                                 size: 55,
