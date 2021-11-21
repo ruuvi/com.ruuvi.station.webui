@@ -10,6 +10,7 @@ import { MdArrowDropDown } from "react-icons/md"
 import NetworkApi from "../NetworkApi";
 import { withTranslation } from 'react-i18next';
 import { uppercaseFirst } from "../TextHelper";
+import { ruuviTheme } from "../themes";
 
 class LanguageMenu extends Component {
     seeSettings = () => {
@@ -38,13 +39,13 @@ class LanguageMenu extends Component {
             )
         }
         return (
-            <Menu>
+            <Menu autoSelect={false}>
                 <MenuButton disabled={false} as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold", paddingRight: 0  }}>
                     {uppercaseFirst(i18n.language || "en")}
                 </MenuButton>
                 <MenuList>
                     {["en", "fi", "sv"].map(x => {
-                        return <MenuItem key={x} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold"}} onClick={() => this.langChange(x)}>{uppercaseFirst(x)}</MenuItem>
+                        return <MenuItem key={x} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", backgroundColor: i18n.language === x ? ruuviTheme.colors.primaryLight : undefined }}_hover={{ bg: "primaryLighter" }} onClick={() => this.langChange(x)}>{uppercaseFirst(x)}</MenuItem>
                     })}
                 </MenuList>
             </Menu>

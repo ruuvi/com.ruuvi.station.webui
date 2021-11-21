@@ -12,6 +12,7 @@ export const ruuviTheme = extendTheme({
     colors: {
         primary: "#44c9b9",
         primaryLight: "rgba(68, 201, 185, 0.3)",
+        primaryLighter: "rgba(68, 201, 185, 0.1)",
         inactive: "#d4ede8",
         graphGrid: "rgba(212,237,232,0.5)",
         gray: {
