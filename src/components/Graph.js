@@ -14,6 +14,7 @@ function ddmm(ts) {
 
 function hhmm(ts) {
     var d = new Date(ts * 1000);
+    if (d.getHours() === 0 && d.getMinutes() === 0) return ddmm(ts)
     return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2)
 }
 
@@ -79,17 +80,17 @@ class Graph extends Component {
                             {
                                 grid: { show: false },
                                 font: "12px Arial",
-                                ticks: {
-                                    size: 0
-                                },
                                 values: (_, ticks) => {
                                     var xRange = ticks[ticks.length - 1] - ticks[0]
                                     var xRangeHours = xRange / 60 / 60
                                     var prevRaw = null;
-                                    var useDates = xRangeHours > 55;
+                                    var useDates = xRangeHours >= 72;
                                     return ticks.map(raw => {
                                         var out = useDates ? ddmm(raw) : hhmm(raw);
-                                        if (prevRaw === out) return null;
+                                        if (prevRaw === out) {
+                                            if (useDates) return hhmm(raw);
+                                            return null;
+                                        }
                                         prevRaw = out;
                                         return out;
                                     })
