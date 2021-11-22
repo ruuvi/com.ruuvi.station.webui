@@ -30,7 +30,7 @@ class UserMenu extends Component {
                 <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", paddingRight: 0 }}>
                     <FaUserAlt />
                 </MenuButton>
-                <MenuList>
+                <MenuList mt="2">
                     <MenuItem isDisabled={true} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", cursor:"unset" }}>{this.props.email}</MenuItem>
                     {/**
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
