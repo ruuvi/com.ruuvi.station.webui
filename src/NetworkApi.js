@@ -105,15 +105,15 @@ class NetworkApi {
         var useCache = false;
         if (cachedData && cachedData.length) {
             let newest = cachedData[0].timestamp;
-            let oldest = cachedData[cachedData.length-1].timestamp;
-            if (from > newest || from < oldest-60*15) {
+            let oldest = cachedData[cachedData.length - 1].timestamp;
+            if (from > newest || from < oldest - 60 * 15) {
                 //console.log("Will not use cache")
             } else {
                 from = newest
                 useCache = true
             }
         }
-        
+
         var q = "?sensor=" + encodeURIComponent(mac)
         q += "&mode=" + encodeURIComponent(mode)
         q += "&since=" + from
@@ -209,6 +209,22 @@ class NetworkApi {
             return response.json();
         })
             .then(response => success(response))
+    }
+    setSetting(name, value, success) {
+        fetch(this.url + "/settings", {
+            ...this.options,
+            method: 'POST',
+            body: JSON.stringify({ name, value }),
+        })
+            .then(function (response) {
+                if (response.status === 200) {
+                    return response.json() 
+                }
+                throw (response)
+            })
+            .then(response => {
+                success(response);
+            })
     }
     getAlerts(success) {
         fetch(this.url + "/alerts", this.options).then(function (response) {

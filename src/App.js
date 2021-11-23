@@ -14,6 +14,7 @@ import SensorMenu from "./components/SensorMenu";
 import LanguageMenu from "./components/LanguageMenu";
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
+import Settings from "./states/Settings";
 
 
 const bottomText = {
@@ -77,6 +78,7 @@ export default function App() {
         </HStack>
         <div style={{ marginTop: "20px" }}>
           <Switch>
+            <Route path="/settings" component={Settings} />
             <Route path="/:id" component={Dashboard} />
             <Route path="/" component={Dashboard} />
           </Switch>

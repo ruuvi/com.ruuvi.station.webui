@@ -10,7 +10,6 @@ import { FaUserAlt } from "react-icons/fa"
 import { MdArrowDropDown } from "react-icons/md"
 import NetworkApi from "../NetworkApi";
 import { withTranslation } from 'react-i18next';
-import { ruuviTheme } from "../themes";
 
 class UserMenu extends Component {
     seeSettings = () => {
@@ -22,6 +21,9 @@ class UserMenu extends Component {
         new NetworkApi().getAlerts(alerts => {
             alert(JSON.stringify(alerts))
         })
+    }
+    settings() {
+        window.location.replace("/#/settings")
     }
     render() {
         var { t } = this.props
@@ -36,6 +38,7 @@ class UserMenu extends Component {
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
                     */}
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} _hover={{ bg: "#edfbf7" }} onClick={() => this.settings()}>{t("settings")}</MenuItem>
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} _hover={{ bg: "#edfbf7" }} onClick={() => this.props.logout()}>{t("sign_out")}</MenuItem>
                 </MenuList>
             </Menu>
