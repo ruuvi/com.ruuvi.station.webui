@@ -64,7 +64,7 @@ class Settings extends Component {
         console.log(this.state)
         return (
             <Box marginTop="36px" marginLeft={{ base: "10px", md: "20px", lg: "50px" }} marginRight={{ base: "10px", md: "20px", lg: "50px" }}>
-                <Box borderWidth="1px" borderRadius="lg" overflow="hidden" pb={{ base: "5px", md: "35px" }} pt={{ base: "5px", md: "35px" }} pl={{ base: "5px", md: "35px" }} pr={{ base: "5px", md: "35px" }} style={{ backgroundColor: "white" }}>
+                <Box borderWidth="1px" borderRadius="lg" overflow="hidden" pb={{ base: "15px", md: "35px" }} pt={{ base: "15px", md: "35px" }} pl={{ base: "15px", md: "35px" }} pr={{ base: "15px", md: "35px" }} style={{ backgroundColor: "white" }}>
                 <HStack alignItems="start">
                     <span style={{ ...header, width: "65%" }}>
                         {this.props.t("settings")}
