@@ -58,6 +58,12 @@ class Settings extends Component {
         this.setState({ ...this.state, settings: settings });
         new NetworkApi().setSetting(key, value, b => {
             console.log("success")
+
+            // reload settings in the safest way possible, will be improved in another issue
+            new NetworkApi().getSettings(settings => {
+                if (settings.result === "success")
+                    localStorage.setItem("settings", JSON.stringify(settings.data.settings))
+            })
         })
     }
     render() {
@@ -65,13 +71,13 @@ class Settings extends Component {
         return (
             <Box marginTop="36px" marginLeft={{ base: "10px", md: "20px", lg: "50px" }} marginRight={{ base: "10px", md: "20px", lg: "50px" }}>
                 <Box borderWidth="1px" borderRadius="lg" overflow="hidden" pb={{ base: "15px", md: "35px" }} pt={{ base: "15px", md: "35px" }} pl={{ base: "15px", md: "35px" }} pr={{ base: "15px", md: "35px" }} style={{ backgroundColor: "white" }}>
-                <HStack alignItems="start">
-                    <span style={{ ...header, width: "65%" }}>
-                        {this.props.t("settings")}
-                    </span>
-                    <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
-                        <IconButton isRound={true} onClick={() => this.props.history.push('/')} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
-                    </span>
+                    <HStack alignItems="start">
+                        <span style={{ ...header, width: "65%" }}>
+                            {this.props.t("settings")}
+                        </span>
+                        <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
+                            <IconButton isRound={true} onClick={() => this.props.history.push('/')} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
+                        </span>
                     </HStack>
                     <hr style={{ marginBottom: 20, marginTop: 15 }} />
                     {this.state.loading ? (
