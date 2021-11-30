@@ -28,9 +28,10 @@ import Graph from "../components/Graph";
 import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
 import { CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
-import { MdArrowDropDown, MdChevronRight } from "react-icons/md"
+import { MdArrowDropDown, MdChevronRight, MdFileDownload, MdImportExport } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
+import { exportCSV } from "../utils/export";
 import { withRouter } from 'react-router-dom';
 import DurationText from "../components/DurationText";
 import Store from "../Store";
@@ -321,6 +322,9 @@ class Sensor extends Component {
             console.log(result);
         })
     }
+    export() {
+        exportCSV(this.state.data, this.props.sensor.name)
+    }
     render() {
         var { t } = this.props
         return (
@@ -335,7 +339,7 @@ class Sensor extends Component {
                         {this.state.data && <div>
                             <StatGroup style={{ marginTop: "30px", marginBottom: "30px" }}>
                                 {bigCardFields.map(x => {
-                                    return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x],this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
+                                    return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
                                         alertTriggered={this.isAlertTriggerd(x)}
                                         label={t(getUnitHelper(x).label)}
                                         unit={t(getUnitHelper(x).unit)}
@@ -350,6 +354,7 @@ class Sensor extends Component {
                                             <td>
                                                 <div style={graphLengthText}>
                                                     {t("last")} {timespans.find(x => x.v === this.state.from).k} {t(timespans.find(x => x.v === this.state.from).t)}
+                                                    <IconButton onClick={() => this.export()} isRound={true} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginLeft: "5px" }}><MdFileDownload/></IconButton>
                                                 </div>
                                                 <div style={graphInfo}>
                                                     {t(getUnitHelper(this.state.graphKey).label)} ({getUnitHelper(this.state.graphKey).unit})
@@ -463,36 +468,36 @@ class Sensor extends Component {
                                     </AccordionPanel>
                                 </AccordionItem>
                                 {!this.isSharedSensor() &&
-                                <AccordionItem>
-                                    <AccordionButton style={accordionButton} _hover={{}}>
-                                        <Box flex="1" textAlign="left" style={collapseText}>
-                                            {t("offset_correction")}
-                                        </Box>
-                                        <AccordionIcon />
-                                    </AccordionButton>
-                                    <hr />
-                                    <AccordionPanel style={accordionPanel}>
-                                        <List>
-                                            {["Temperature", "Humidity", "Pressure"].map(x => {
-                                                var uh = getUnitHelper(x.toLocaleLowerCase());
-                                                var value = uh.value(this.state.data["offset" + x], true);
-                                                return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, offsetDialog: x })}>
-                                                    <table style={accordionContent}>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
-                                                                <td style={detailedText}>
-                                                                    {localeNumber(value, uh.decimals)} {uh.unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                    {x !== "Pressure" && <hr />}
-                                                </ListItem>
-                                            })}
-                                        </List>
-                                    </AccordionPanel>
-                                </AccordionItem>
+                                    <AccordionItem>
+                                        <AccordionButton style={accordionButton} _hover={{}}>
+                                            <Box flex="1" textAlign="left" style={collapseText}>
+                                                {t("offset_correction")}
+                                            </Box>
+                                            <AccordionIcon />
+                                        </AccordionButton>
+                                        <hr />
+                                        <AccordionPanel style={accordionPanel}>
+                                            <List>
+                                                {["Temperature", "Humidity", "Pressure"].map(x => {
+                                                    var uh = getUnitHelper(x.toLocaleLowerCase());
+                                                    var value = uh.value(this.state.data["offset" + x], true);
+                                                    return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, offsetDialog: x })}>
+                                                        <table style={accordionContent}>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
+                                                                    <td style={detailedText}>
+                                                                        {localeNumber(value, uh.decimals)} {uh.unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        {x !== "Pressure" && <hr />}
+                                                    </ListItem>
+                                                })}
+                                            </List>
+                                        </AccordionPanel>
+                                    </AccordionItem>
                                 }
                                 <AccordionItem>
                                     <AccordionButton style={accordionButton} _hover={{}}>
