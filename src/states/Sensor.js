@@ -357,8 +357,8 @@ class Sensor extends Component {
                                                     <IconButton onClick={() => this.export()} isRound={true} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginLeft: "5px" }}><MdFileDownload/></IconButton>
                                                 </div>
                                                 <div style={graphInfo}>
-                                                    {t(getUnitHelper(this.state.graphKey).label)} ({getUnitHelper(this.state.graphKey).unit})
-                                    </div>
+                                                    {t(getUnitHelper(this.state.graphKey).label)} {`(${getUnitHelper(this.state.graphKey).unit})`.replace("()", "")}
+                                                </div>
                                             </td>
                                             <td style={{ textAlign: "right" }}>
                                                 <Menu>
