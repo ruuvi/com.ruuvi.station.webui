@@ -37,7 +37,8 @@ class Settings extends Component {
                 UNIT_HUMIDITY: "0",
                 UNIT_TEMPERATURE: "C",
                 UNIT_PRESSURE: "1",
-            }
+            },
+            savingSettings: [],
         }
     }
     componentDidMount() {
@@ -55,9 +56,13 @@ class Settings extends Component {
     updateSetting(key, value) {
         var settings = this.state.settings;
         settings[key] = value;
-        this.setState({ ...this.state, settings: settings });
+        var saving = this.state.savingSettings;
+        saving.push(key)
+        this.setState({ ...this.state, settings: settings, savingSettings: saving });
         new NetworkApi().setSetting(key, value, b => {
-            console.log("success")
+            var saving = this.state.savingSettings;
+            saving = saving.filter(x => x !== key)
+            this.setState({ ...this.state, savingSettings: saving });
 
             // reload settings in the safest way possible, will be improved in another issue
             new NetworkApi().getSettings(settings => {
@@ -86,11 +91,11 @@ class Settings extends Component {
                         </>
                     ) : (
                         <>
-                            <RadioInput label={"settings_temperature_unit"} value={this.state.settings.UNIT_TEMPERATURE} options={temperatureOptions} onChange={v => this.updateSetting("UNIT_TEMPERATURE", v)} />
+                            <RadioInput label={"settings_temperature_unit"} value={this.state.settings.UNIT_TEMPERATURE} options={temperatureOptions} onChange={v => this.updateSetting("UNIT_TEMPERATURE", v)} loading={this.state.savingSettings.indexOf("UNIT_TEMPERATURE") !== -1} />
                             <br />
-                            <RadioInput label={"settings_humidity_unit"} value={this.state.settings.UNIT_HUMIDITY} options={humidityOptions} onChange={v => this.updateSetting("UNIT_HUMIDITY", v)} />
+                            <RadioInput label={"settings_humidity_unit"} value={this.state.settings.UNIT_HUMIDITY} options={humidityOptions} onChange={v => this.updateSetting("UNIT_HUMIDITY", v)} loading={this.state.savingSettings.indexOf("UNIT_HUMIDITY") !== -1} />
                             <br />
-                            <RadioInput label={"settings_pressure_unit"} value={this.state.settings.UNIT_PRESSURE} options={pressureOptions} onChange={v => this.updateSetting("UNIT_PRESSURE", v)} />
+                            <RadioInput label={"settings_pressure_unit"} value={this.state.settings.UNIT_PRESSURE} options={pressureOptions} onChange={v => this.updateSetting("UNIT_PRESSURE", v)} loading={this.state.savingSettings.indexOf("UNIT_PRESSURE") !== -1} />
                         </>
                     )}
                 </Box>
