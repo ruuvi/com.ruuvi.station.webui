@@ -5,9 +5,9 @@ export function exportCSV(data, sensorName) {
     var data = data.measurements.map(x => [toISOString(new Date(x.timestamp * 1000)), x.parsed.temperature, x.parsed.humidity, x.parsed.pressure, x.parsed.rssi, x.parsed.accelerationX, x.parsed.accelerationY, x.parsed.accelerationZ, x.parsed.battery, x.parsed.movementCounter, x.parsed.measurementSequenceNumber])
 
     var csv = csvHeader.toString() + "\n"
-    data.forEach(row => {
-        csv += row.toString() + "\n"
-    });
+    for (var i = data.length - 1; i >= 0; i--) {
+        csv += data[i].toString() + "\n"
+    }
 
     var now = toISOString(new Date(), true);
     var exportedFilename = `${sensorName}_${now}.csv`
