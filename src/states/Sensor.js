@@ -354,15 +354,15 @@ class Sensor extends Component {
                                             <td>
                                                 <div style={graphLengthText}>
                                                     {t("last")} {timespans.find(x => x.v === this.state.from).k} {t(timespans.find(x => x.v === this.state.from).t)}
-                                                    <IconButton onClick={() => this.export()} isRound={true} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginLeft: "5px" }}><MdFileDownload/></IconButton>
                                                 </div>
                                                 <div style={graphInfo}>
                                                     {t(getUnitHelper(this.state.graphKey).label)} {`(${getUnitHelper(this.state.graphKey).unit})`.replace("()", "")}
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: "right" }}>
+                                                <Button variant='ghost' color="primary" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                 <Menu>
-                                                    <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 14 }}>
+                                                    <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", ...detailedSubText }}>
                                                         {timespans.find(x => x.v === this.state.from).k} {t(timespans.find(x => x.v === this.state.from).t)}
                                                     </MenuButton>
                                                     <MenuList>
