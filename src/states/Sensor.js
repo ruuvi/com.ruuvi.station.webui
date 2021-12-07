@@ -185,17 +185,7 @@ class Sensor extends Component {
         if (this.props.sensor) {
             this.loadData(true)
             this.latestDataUpdate = setInterval(() => {
-                new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: "dense", limit: 1, sort: "desc" }, resp => {
-                    if (resp.result === "success") {
-                        let d = parse(resp.data);
-                        if (d.measurements.length !== 1) return
-                        var state = this.state;
-                        if (state.data.measurements) state.data.measurements.unshift(d.measurements[0]);
-                        else state.data.measurements = d;
-                        state.data.latestTimestamp = d.measurements[0].timestamp;
-                        this.setState(state);
-                    }
-                });
+                this.loadData()
             }, 60 * 1000);
         }
     }
@@ -218,7 +208,9 @@ class Sensor extends Component {
         new NetworkApi().getAlerts(data => {
             if (data.result === "success") {
                 var alerts = data.data.sensors.find(x => x.sensor === this.props.sensor.sensor)
-                if (alerts) this.setState({ ...this.state, alerts: alerts.alerts })
+                if (alerts) this.setState({ ...this.state, alerts: alerts.alerts }, () => {
+                    this.forceUpdate()
+                })
             }
         })
         new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: this.state.mode }, resp => {

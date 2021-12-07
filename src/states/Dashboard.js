@@ -20,8 +20,23 @@ class Dashboard extends Component {
     componentDidUpdate() {
         document.title = "Ruuvi Station"
     }
+    componentWillUnmount() {
+        clearInterval(this.alertUpdateLoop);
+    }
+    loadAlerts() {
+        new NetworkApi().getAlerts(data => {
+            if (data.result === "success") {
+                this.setState({ ...this.state, alerts: data.data.sensors })
+            }
+        })
+    }
     componentDidMount() {
         var api = new NetworkApi();
+        this.alertUpdateLoop = setInterval(() => {
+            if (!this.getCurrentSensor()) {
+                this.loadAlerts();
+            }
+        }, 60 * 1000);
         api.sensors(resp => {
             if (resp.result === "success") {
                 var d = resp.data.sensors;
@@ -33,11 +48,7 @@ class Dashboard extends Component {
                             if (uSensor) d[i] = { ...d[i], ...uSensor }
                         }
                         this.setState({ ...this.state, sensors: d, loading: false })
-                        api.getAlerts(data => {
-                            if (data.result === "success") {
-                                this.setState({ ...this.state, alerts: data.data.sensors })
-                            }
-                        })
+                        this.loadAlerts();
                     } else if (resp.result === "error") {
                         alert(resp.error)
                     }
@@ -51,7 +62,6 @@ class Dashboard extends Component {
             console.log("err", e)
             //new NetworkApi().removeToken()
         })
-
     }
     nextIndex(direction) {
         var current = this.getCurrentSensor().sensor;
@@ -93,17 +103,16 @@ class Dashboard extends Component {
                         updateSensor={(sensor) => this.updateSensor(sensor)}
                     />
                 ) : (
-                    
                     <Box justifyContent={{ base: "space-evenly", lg: this.state.sensors.length > 2 ? "space-evenly" : "start" }} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
-                    <>
-                        {this.state.sensors.map(x => {
-                            return <span style={{ margin: 16, minWidth: "350px", maxWidth: "450px", flexGrow: 2, flex: "1 1 0px" }}>
-                                <a key={x.sensor} href={"#/" + x.sensor}>
-                                    <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
-                                </a></span>
-                        })}
-                    </>
-                </Box>
+                        <>
+                            {this.state.sensors.map(x => {
+                                return <span style={{ margin: 16, minWidth: "350px", maxWidth: "450px", flexGrow: 2, flex: "1 1 0px" }}>
+                                    <a key={x.sensor} href={"#/" + x.sensor}>
+                                        <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
+                                    </a></span>
+                            })}
+                        </>
+                    </Box>
                 )}
             </Box>
         )
