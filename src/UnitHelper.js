@@ -81,6 +81,7 @@ export function localeNumber(value, decimals) {
 }
 
 export function temperatureToUserFormat(temperature, offset) {
+    offset = offset === true;
     var settings = localStorage.getItem("settings");
     if (settings) {
         settings = JSON.parse(settings)
