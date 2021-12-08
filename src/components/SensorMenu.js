@@ -29,21 +29,25 @@ class SensorMenu extends Component {
     }
     getCurrentSensor() {
         var path = this.props.location.pathname
-        return path.substring(path.indexOf("/")+1, path.length)
+        return path.substring(path.indexOf("/") + 1, path.length)
     }
     render() {
         const { t } = this.props;
         return (
-            <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
-                <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold", paddingRight: 0 }}>
-                    {t("sensors")}
-                </MenuButton>
-                <MenuList mt="2">
-                    {this.state.sensors.map(x => {
-                        return <MenuItem key={x.sensor} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", backgroundColor: this.getCurrentSensor() === x.sensor ? ruuviTheme.colors.primaryLight : undefined }} _hover={{ bg: "#edfbf7" }} onClick={() => this.props.history.push('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
-                    })}
-                </MenuList>
-            </Menu>
+            <>
+                {this.state.sensors.length > 0 &&
+                    <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
+                        <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold", paddingRight: 0 }}>
+                            {t("sensors")}
+                        </MenuButton>
+                        <MenuList mt="2">
+                            {this.state.sensors.map(x => {
+                                return <MenuItem key={x.sensor} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", backgroundColor: this.getCurrentSensor() === x.sensor ? ruuviTheme.colors.primaryLight : undefined }} _hover={{ bg: "#edfbf7" }} onClick={() => this.props.history.push('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
+                            })}
+                        </MenuList>
+                    </Menu>
+                }
+            </>
         )
     }
 }
