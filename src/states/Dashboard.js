@@ -2,7 +2,13 @@ import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box } from "@chakra-ui/react"
+import { Spinner, Box, Link } from "@chakra-ui/react"
+import { withTranslation } from 'react-i18next';
+
+const infoText = {
+    fontFamily: "mulish",
+    fontSize: 16,
+}
 
 class Dashboard extends Component {
     constructor(props) {
@@ -86,12 +92,27 @@ class Dashboard extends Component {
             this.setState({ ...this.state, sensors: sensors })
         }
     }
+    addRuuviLink(text) {
+        var splitted = text.split("ruuvi.com")
+        if (splitted.length === 1) return text;
+        var out = [<span>{splitted[0]}</span>]
+        for (var i = 1; i < splitted.length; i++) {
+            out.push(<Link href="https://ruuvi.com" isExternal color="primary">ruuvi.com</Link>)
+            out.push(<span>{splitted[i]}</span>);
+        }
+        return out;
+    }
     render() {
         return (
             <Box marginTop="36px" marginLeft={{ base: "10px", md: "20px", lg: "50px" }} marginRight={{ base: "10px", md: "20px", lg: "50px" }}>
                 {this.state.loading &&
                     <center>
                         <Spinner size="xl" />
+                    </center>
+                }
+                {!this.state.loading && !this.state.sensors.length &&
+                    <center style={{ margin: 32, ...infoText }}>
+                        {this.props.t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{this.addRuuviLink(x)}<br /></div>)}
                     </center>
                 }
                 {this.getCurrentSensor() ? (
@@ -119,4 +140,4 @@ class Dashboard extends Component {
     }
 }
 
-export default Dashboard;
+export default withTranslation()(Dashboard);
