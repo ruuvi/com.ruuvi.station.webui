@@ -242,7 +242,7 @@
       "no_data_in_range": "Tältä ajalta ei ole tietoja",
       "on": "Päällä",
       "off": "Pois",
-      "dashboard_no_sensors": "Vaikuttaa siltä, että tämä on uusi käyttäjätili ilman antureita. Kirjaudu sisään mobiilisovelluksessa samalla sähköpostiosoitteella ja vahvista Ruuvi-anturiesi omistajuus\\n\\nHuom: Anturien etäseuranta pilven kautta vaatii Ruuvi Gateway -reitittimen. Tilaa lisää Ruuvin antureita ja Gateway osoitteessa ruuvi.com"
+      "dashboard_no_sensors": "Vaikuttaa siltä, että tämä on uusi käyttäjätili ilman antureita. Kirjaudu sisään mobiilisovelluksessa samalla sähköpostiosoitteella ja vahvista Ruuvi-anturiesi omistajuus.\\n\\nHuom: Anturien etäseuranta pilven kautta vaatii Ruuvi Gateway -reitittimen. Tilaa lisää Ruuvin antureita ja Gateway osoitteessa ruuvi.com"
     }
   },
   "sv": {
@@ -365,7 +365,7 @@
       "no_data_in_range": "Ingen data för detta tidsintervall",
       "on": "På",
       "off": "Av",
-      "dashboard_no_sensors": "Det ser ut som att detta är ett nytt användarkonto utan sensorer. Logga in på mobilappen med samma e-postadress och bekräfta äganderätten till dina Ruuvi Sensorer.\\n\\nObs: För att se data från sensorer via molnet kräver en Ruuviw Gateway-router. Beställ fler Ruuvi sensorer och Gateway på ruuvi.com"
+      "dashboard_no_sensors": "Det ser ut som att detta är ett nytt användarkonto utan sensorer. Logga in på mobilappen med samma e-postadress och bekräfta äganderätten till dina Ruuvi sensorer.\\n\\nObs: För att se data från sensorer via molnet kräver en Ruuvi Gateway-router. Beställ fler Ruuvi sensorer och Gateway på ruuvi.com"
     }
   }
 }
