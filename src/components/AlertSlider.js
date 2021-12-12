@@ -41,17 +41,6 @@ class AlertSlider extends React.Component {
             min = this.state.min;
         }
         var sliderValues = [min, max]
-        var minFormatted = min;
-        var maxFormatted = max;
-        if (this.props.type === "temperature") {
-            minFormatted = temperatureToUserFormat(minFormatted)
-            maxFormatted = temperatureToUserFormat(maxFormatted)
-        } else if (this.props.type === "pressure") {
-            minFormatted /= 100;
-            maxFormatted /= 100;
-        }
-        minFormatted = localeNumber(minFormatted)
-        maxFormatted = localeNumber(maxFormatted)
         return <div style={{ display: 'flex', alignItems: 'center' }}>
             <Range {...this.state} values={sliderValues}
                 step={this.props.type === "pressure" ? 100 : 1}

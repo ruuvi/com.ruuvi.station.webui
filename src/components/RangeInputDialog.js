@@ -48,6 +48,7 @@ class RangeInputDialog extends Component {
         return true;
     }
     render() {
+        var unit = this.props.unit();
         return (
             <>
                 <Modal isOpen={this.props.open} onClose={() => this.props.onClose(false)} size="xl">
@@ -57,8 +58,8 @@ class RangeInputDialog extends Component {
                         <ModalCloseButton />
                         <ModalBody mb="3">
                             <SimpleGrid columns={2} spacing={4}>
-                                <span>{this.props.t("min")}</span>
-                                <span>{this.props.t("max")}</span>
+                                <span>{this.props.t("min") + (unit ? ` (${unit})` : "")}</span>
+                                <span>{this.props.t("max") + (unit ? ` (${unit})` : "")}</span>
                             </SimpleGrid>
                             <SimpleGrid columns={2} spacing={4}>
                             <Input value={this.state.value[0]} type={"number"} onChange={e => this.setState({ ...this.state, value: [e.target.value, this.state.value[1]] })} />

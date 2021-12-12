@@ -1,19 +1,19 @@
 import { relativeToAbsolute, relativeToDewpoint } from "./utils/humidity";
 
 const unitHelper = {
-    "temperature": { label: "temperature", unit: "°C", value: (value, offset) => temperatureToUserFormat(value, offset), decimals: 2, graphable: true },
-    "humidity": { label: "humidity", unit: "%", value: (value, temperature) => humidityToUserFormat(value, temperature), decimals: 2, graphable: true },
-    "pressure": { label: "pressure", unit: "hPa", value: (value) => pressureToUserFormat(value), decimals: 2, graphable: true },
-    "movementCounter": { label: "movement_counter", unit: "times", value: (value) => value, decimals: 0, graphable: true },
-    "battery": { label: "battery_voltage", unit: "V", value: (value) => value / 1000, decimals: 3, graphable: true },
-    "accelerationX": { label: "acceleration_x", unit: "g", value: (value) => value / 1000, decimals: 3, graphable: true },
-    "accelerationY": { label: "acceleration_y", unit: "g", value: (value) => value / 1000, decimals: 3, graphable: true },
-    "accelerationZ": { label: "acceleration_z", unit: "g", value: (value) => value / 1000, decimals: 3, graphable: true },
-    "rssi": { label: "signal_strength", unit: "dBm", value: (value) => value, decimals: 0, graphable: true },
-    "txPower": { label: "tx_power", unit: "dBm", value: (value) => value, decimals: 0, graphable: false },
-    "mac": { label: "mac_address", unit: "", value: (value) => value, decimals: 0, graphable: false },
-    "dataFormat": { label: "data_format", unit: "", value: (value) => value, decimals: 0, graphable: false },
-    "measurementSequenceNumber": { label: "measurement_sequence_number", unit: "", value: (value) => value, decimals: 0, graphable: true },
+    "temperature": { label: "temperature", unit: "°C", value: (value, offset) => temperatureToUserFormat(value, offset), fromUser: (value) => temperatureFromUserFormat(value), decimals: 2, graphable: true },
+    "humidity": { label: "humidity", unit: "%", value: (value, temperature) => humidityToUserFormat(value, temperature), fromUser: (value) => value, decimals: 2, graphable: true },
+    "pressure": { label: "pressure", unit: "hPa", value: (value) => pressureToUserFormat(value), decimals: 2, fromUser: (value) => pressureFromUserFormat(value), graphable: true },
+    "movementCounter": { label: "movement_counter", unit: "times", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: true },
+    "battery": { label: "battery_voltage", unit: "V", value: (value) => value / 1000, fromUser: (value) => value, decimals: 3, graphable: true },
+    "accelerationX": { label: "acceleration_x", unit: "g", value: (value) => value / 1000, fromUser: (value) => value, decimals: 3, graphable: true },
+    "accelerationY": { label: "acceleration_y", unit: "g", value: (value) => value / 1000, fromUser: (value) => value, decimals: 3, graphable: true },
+    "accelerationZ": { label: "acceleration_z", unit: "g", value: (value) => value / 1000, fromUser: (value) => value, decimals: 3, graphable: true },
+    "rssi": { label: "signal_strength", unit: "dBm", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: true },
+    "txPower": { label: "tx_power", unit: "dBm", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: false },
+    "mac": { label: "mac_address", unit: "", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: false },
+    "dataFormat": { label: "data_format", unit: "", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: false },
+    "measurementSequenceNumber": { label: "measurement_sequence_number", unit: "", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: true },
 }
 
 export function getUnitHelper(key) {
@@ -95,6 +95,20 @@ export function temperatureToUserFormat(temperature, offset) {
     return round(temperature, 2)
 }
 
+export function temperatureFromUserFormat(temperature) {
+    var settings = localStorage.getItem("settings");
+    if (settings) {
+        settings = JSON.parse(settings)
+        if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
+            temperature = (temperature - 32) / 1.8;
+        }
+        else if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
+            temperature = temperature - 273.15;
+        }
+    }
+    return round(temperature, 2)
+}
+
 export function round(number, deciamals) {
     var f = 1;
     for (var i = 0; i < deciamals; i++) f += "0"
@@ -154,6 +168,24 @@ export function pressureToUserFormat(pressure, offset) {
     return round(pressure, 2)
 }
 
+export function pressureFromUserFormat(pressure, offset) {
+    var settings = localStorage.getItem("settings");
+    if (settings) {
+        settings = JSON.parse(settings)
+        if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "0") {
+        }
+        else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
+            pressure *= mmMercuryMultiplier
+        } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "3") {
+            pressure *= inchMercuryMultiplier
+        } else {
+            pressure *= 100;
+        }
+    } else {
+        pressure *= 100;
+    }
+    return round(pressure, 2)
+}
 // pressure constants
 const mmMercuryMultiplier = 133.322368;
 const inchMercuryMultiplier = 3386.388666;

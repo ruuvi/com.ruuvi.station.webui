@@ -3,7 +3,7 @@ import { Switch } from "@chakra-ui/switch";
 import React, { Component } from "react";
 import { withTranslation } from 'react-i18next';
 import { uppercaseFirst } from "../TextHelper";
-import { getAlertRange, localeNumber, temperatureToUserFormat } from "../UnitHelper";
+import { getAlertRange, getUnitHelper, localeNumber, temperatureToUserFormat } from "../UnitHelper";
 import AlertSlider from "./AlertSlider";
 import EditableText from "./EditableText";
 import InputDialog from "./InputDialog";
@@ -34,12 +34,10 @@ class AlertItem extends Component {
             min = alert.min
             max = alert.max
         }
-        if (type === "temperature") {
-            min = temperatureToUserFormat(min)
-            max = temperatureToUserFormat(max)
-        } else if (type === "pressure") {
-            min /= 100;
-            max /= 100;
+        var uh = getUnitHelper(type)
+        if (type !== "humidity") {
+            min = uh.value(min)
+            max = uh.value(max)
         }
         min = localeNumber(min, 2)
         max = localeNumber(max, 2)
@@ -69,13 +67,14 @@ class AlertItem extends Component {
     }
     getMinMaxArr() {
         var alert = this.state.alert;
-        if (this.props.type === "Pressure") return [alert.min / 100, alert.max / 100]
-        return [alert.min, alert.max]
+        var uh = getUnitHelper(this.props.type.toLowerCase())
+        return [uh.value(alert.min), uh.value(alert.max)]
     }
     render() {
         var alert = this.state.alert;
         var x = this.props.type;
         var t = this.props.t
+        var uh = getUnitHelper(x.toLowerCase())
         var enabled = alert && alert.enabled;
         return (
             <ListItem key={x} style={{ color: alert && alert.triggered ? "#f27575" : undefined }}>
@@ -110,8 +109,12 @@ class AlertItem extends Component {
                     buttonText={t("update")}
                 />
                 <RangeInputDialog open={this.state.rangeInputDialog} value={alert ? this.getMinMaxArr() : null}
-                    onClose={(save, value) => save ? this.setAlert({ ...alert, min: value[0] * (x === "Pressure" ? 100 : 1), max: value[1] * (x === "Pressure" ? 100 : 1), }, x, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}
+                    onClose={(save, value) => save ? this.setAlert({ ...alert, min: uh.fromUser(value[0]), max: uh.fromUser(value[1])}, x, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}
                     buttonText={t("update")}
+                    unit={() => {
+                        if (x === "Humidity") return "%";
+                        return uh.unit;
+                    }}
                 />
             </ListItem>
         )
