@@ -29,6 +29,9 @@ export function getUnitHelper(key) {
             else if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
                 thing.unit = "K";
                 return thing;
+            } else {
+                thing.unit = "°C";
+                return thing;
             }
         }
     }
@@ -49,6 +52,9 @@ export function getUnitHelper(key) {
                     thing.unit = "K";
                 }
                 return thing;
+            } else {
+                thing.unit = "%"
+                return thing; 
             }
         }
     }
@@ -66,6 +72,9 @@ export function getUnitHelper(key) {
             } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "3") {
                 thing.unit = "inHg"
                 return thing;
+            } else {
+                thing.unit = "hPa"
+                return thing; 
             }
         }
     }
