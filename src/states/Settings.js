@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import RadioInput from "../components/RadioInput";
-import { Box, Progress, IconButton, HStack } from "@chakra-ui/react"
+import { Box, Progress, HStack } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
-import { CloseIcon } from "@chakra-ui/icons";
+import NavClose from "../components/NavClose";
 
 const header = {
     fontFamily: "montserrat",
@@ -72,7 +72,6 @@ class Settings extends Component {
         })
     }
     render() {
-        console.log(this.state)
         return (
             <Box marginTop="36px" marginLeft={{ base: "10px", md: "20px", lg: "50px" }} marginRight={{ base: "10px", md: "20px", lg: "50px" }}>
                 <Box borderWidth="1px" borderRadius="lg" overflow="hidden" pb={{ base: "15px", md: "35px" }} pt={{ base: "15px", md: "35px" }} pl={{ base: "15px", md: "35px" }} pr={{ base: "15px", md: "35px" }} style={{ backgroundColor: "white" }}>
@@ -81,7 +80,7 @@ class Settings extends Component {
                             {this.props.t("settings")}
                         </span>
                         <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
-                            <IconButton isRound={true} onClick={() => this.props.history.push('/')} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
+                            <NavClose />
                         </span>
                     </HStack>
                     <hr style={{ marginBottom: 20, marginTop: 15 }} />

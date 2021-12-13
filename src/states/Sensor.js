@@ -27,8 +27,7 @@ import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
 import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
-import { CloseIcon, ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
-import { MdArrowDropDown, MdChevronRight, MdFileDownload, MdImportExport } from "react-icons/md"
+import { MdArrowDropDown, MdChevronRight } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 import { exportCSV } from "../utils/export";
@@ -41,6 +40,8 @@ import { uppercaseFirst } from "../TextHelper";
 import AlertItem from "../components/AlertItem";
 import EditableText from "../components/EditableText";
 import OffsetDialog from "../components/OffsetDialog";
+import NavClose from "../components/NavClose";
+import NavPrevNext from "../components/NavPrevNext";
 
 var timespans = [{ k: "1", t: "hour", v: 1 }, { k: "2", t: "hours", v: 2 }, { k: "8", t: "hours", v: 8 }, { k: "12", t: "hours", v: 12 }, { k: "1", t: "day", v: 24 }, { k: "2", t: "days", v: 24 * 2 }, { k: "1", t: "week", v: 24 * 7 }, { k: "2", t: "weeks", v: 24 * 7 * 2 }, { k: "1", t: "month", v: 24 * 7 * 4 }, { k: "2", t: "months", v: 24 * 7 * 4 * 2 }, { k: "3", t: "months", v: 24 * 7 * 4 * 3 }, { k: "6", t: "months", v: 24 * 7 * 4 * 6 }]
 
@@ -125,10 +126,8 @@ function SensorHeader(props) {
                 </div>
             </div>
             <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
-                {/*<IconButton isRound={true} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><EditIcon /></IconButton>*/}
-                <IconButton isRound={true} onClick={() => props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "2px", marginRight: "5px" }}><ArrowBackIcon /></IconButton>
-                <IconButton isRound={true} onClick={() => props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><ArrowForwardIcon /></IconButton>
-                <IconButton isRound={true} onClick={() => props.close()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
+                <NavPrevNext prev={props.prev} next={props.next} />
+                <NavClose />
             </span>
         </HStack>
     } else {
@@ -137,16 +136,14 @@ function SensorHeader(props) {
                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                     <tr>
                         <td width="33%" style={{ verticalAlign: "top" }}>
-                            <IconButton isRound={true} onClick={() => props.close()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
+                            <NavClose />
                         </td>
                         <td width="33%" align="center">
                             <Avatar bg="#01ae90" size="xl" name={props.sensor.name} src={props.sensor.picture} />
                         </td>
                         <td width="33%" align="right" style={{ verticalAlign: "top" }}>
                             <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
-                                {/*<IconButton isRound={true} onClick={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><EditIcon /></IconButton>*/}
-                                <IconButton isRound={true} onClick={() => props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "2px", marginRight: "5px" }}><ArrowBackIcon /></IconButton>
-                                <IconButton isRound={true} onClick={() => props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><ArrowForwardIcon /></IconButton>
+                                <NavPrevNext prev={props.prev} next={props.next} />
                             </span>
                         </td>
                     </tr>
