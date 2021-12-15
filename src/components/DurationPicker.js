@@ -20,13 +20,13 @@ const detailedSubText = {
 export default function DurationPicker(props) {
     const { t } = useTranslation();
     return (
-        <Menu>
+        <Menu strategy="fixed" placement="bottom-end">
             <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", ...detailedSubText }}>
-                {timespans.find(x => x.v === props.value).k} {t(timespans.find(x => x.v === props.value).t)}
+                {timespans.find(x => x.v === props.value).k} {t(timespans.find(x => x.v === props.value).t).toLowerCase()}
             </MenuButton>
             <MenuList>
                 {timespans.map(x => {
-                    return <MenuItem key={x.v} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => props.onChange(x.v)}>{x.k} {t(x.t)}</MenuItem>
+                    return <MenuItem key={x.v} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => props.onChange(x.v)}>{x.k} {t(x.t).toLowerCase()}</MenuItem>
                 })}
             </MenuList>
         </Menu>
