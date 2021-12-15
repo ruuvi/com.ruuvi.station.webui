@@ -4,6 +4,8 @@ import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
 import { Spinner, Box, Link } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
+import DurationPicker from "../components/DurationPicker";
+import Store from "../Store";
 
 const infoText = {
     fontFamily: "mulish",
@@ -17,7 +19,10 @@ class Dashboard extends Component {
             loading: true,
             sensors: [],
             alerts: [],
+            from: 24 * 3,
         }
+        var from = new Store().getDashboardFrom();
+        if (from) this.state.from = from;
     }
     getCurrentSensor() {
         let id = this.props.match.params.id;
@@ -35,6 +40,10 @@ class Dashboard extends Component {
                 this.setState({ ...this.state, alerts: data.data.sensors })
             }
         })
+    }
+    updateFrom(v) {
+        this.setState({ ...this.state, from: v })
+        new Store().setDashboardFrom(v)
     }
     componentDidMount() {
         var api = new NetworkApi();
@@ -104,38 +113,45 @@ class Dashboard extends Component {
     }
     render() {
         return (
-            <Box marginTop="36px" marginLeft={{ base: "10px", md: "20px", lg: "50px" }} marginRight={{ base: "10px", md: "20px", lg: "50px" }}>
-                {this.state.loading &&
-                    <center>
-                        <Spinner size="xl" />
-                    </center>
+            <>
+                {!this.getCurrentSensor() &&
+                    <div style={{ textAlign: "end", marginTop: -10, marginBottom: -40 }} >
+                        <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
+                    </div>
                 }
-                {!this.state.loading && !this.state.sensors.length &&
-                    <center style={{ margin: 32, ...infoText }}>
-                        {this.props.t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{this.addRuuviLink(x)}<br /></div>)}
-                    </center>
-                }
-                {this.getCurrentSensor() ? (
-                    <Sensor sensor={this.getCurrentSensor()}
-                        close={() => this.props.history.push('/')}
-                        next={() => this.nextIndex(1)}
-                        prev={() => this.nextIndex(-1)}
-                        remove={() => this.removeSensor()}
-                        updateSensor={(sensor) => this.updateSensor(sensor)}
-                    />
-                ) : (
-                    <Box justifyContent={{ base: "space-evenly", lg: this.state.sensors.length > 2 ? "space-evenly" : "start" }} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
-                        <>
-                            {this.state.sensors.map(x => {
-                                return <span style={{ margin: 16, minWidth: "350px", maxWidth: "450px", flexGrow: 2, flex: "1 1 0px" }}>
-                                    <a key={x.sensor} href={"#/" + x.sensor}>
-                                        <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} />
-                                    </a></span>
-                            })}
-                        </>
-                    </Box>
-                )}
-            </Box>
+                <Box marginTop="36px" marginLeft={{ base: "10px", md: "20px", lg: "50px" }} marginRight={{ base: "10px", md: "20px", lg: "50px" }}>
+                    {this.state.loading &&
+                        <center>
+                            <Spinner size="xl" />
+                        </center>
+                    }
+                    {!this.state.loading && !this.state.sensors.length &&
+                        <center style={{ margin: 32, ...infoText }}>
+                            {this.props.t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{this.addRuuviLink(x)}<br /></div>)}
+                        </center>
+                    }
+                    {this.getCurrentSensor() ? (
+                        <Sensor sensor={this.getCurrentSensor()}
+                            close={() => this.props.history.push('/')}
+                            next={() => this.nextIndex(1)}
+                            prev={() => this.nextIndex(-1)}
+                            remove={() => this.removeSensor()}
+                            updateSensor={(sensor) => this.updateSensor(sensor)}
+                        />
+                    ) : (
+                        <Box justifyContent={{ base: "space-evenly", lg: this.state.sensors.length > 2 ? "space-evenly" : "start" }} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
+                            <>
+                                {this.state.sensors.map(x => {
+                                    return <span style={{ margin: 16, minWidth: "350px", maxWidth: "450px", flexGrow: 2, flex: "1 1 0px" }}>
+                                        <a key={x.sensor + this.state.from} href={"#/" + x.sensor}>
+                                            <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} dataFrom={this.state.from} />
+                                        </a></span>
+                                })}
+                            </>
+                        </Box>
+                    )}
+                </Box>
+            </>
         )
     }
 }

@@ -1,10 +1,6 @@
 import React, { Component } from "react";
 import NetworkApi from '../NetworkApi'
 import {
-    Menu,
-    MenuButton,
-    MenuList,
-    MenuItem,
     StatGroup,
     Heading,
     Stack,
@@ -27,7 +23,7 @@ import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
 import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
-import { MdArrowDropDown, MdChevronRight } from "react-icons/md"
+import { MdChevronRight } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 import { exportCSV } from "../utils/export";
@@ -42,8 +38,7 @@ import EditableText from "../components/EditableText";
 import OffsetDialog from "../components/OffsetDialog";
 import NavClose from "../components/NavClose";
 import NavPrevNext from "../components/NavPrevNext";
-
-var timespans = [{ k: "1", t: "hour", v: 1 }, { k: "2", t: "hours", v: 2 }, { k: "8", t: "hours", v: 8 }, { k: "12", t: "hours", v: 12 }, { k: "1", t: "day", v: 24 }, { k: "2", t: "days", v: 24 * 2 }, { k: "1", t: "week", v: 24 * 7 }, { k: "2", t: "weeks", v: 24 * 7 * 2 }, { k: "1", t: "month", v: 24 * 7 * 4 }, { k: "2", t: "months", v: 24 * 7 * 4 * 2 }, { k: "3", t: "months", v: 24 * 7 * 4 * 3 }, { k: "6", t: "months", v: 24 * 7 * 4 * 6 }]
+import DurationPicker, { getTimespans } from "../components/DurationPicker";
 
 var bigCardFields = ["temperature", "humidity", "pressure", "movementCounter"];
 var sensorInfoOrder = ["mac", "dataFormat", "battery", "accelerationX", "accelerationY", "accelerationZ", "txPower", "rssi", "measurementSequenceNumber"];
@@ -342,7 +337,7 @@ class Sensor extends Component {
                                         <tr>
                                             <td>
                                                 <div style={graphLengthText}>
-                                                    {t("last")} {timespans.find(x => x.v === this.state.from).k} {t(timespans.find(x => x.v === this.state.from).t)}
+                                                    {t("last")} {getTimespans().find(x => x.v === this.state.from).k} {t(getTimespans().find(x => x.v === this.state.from).t)}
                                                 </div>
                                                 <div style={graphInfo}>
                                                     {t(getUnitHelper(this.state.graphKey).label)} {`(${getUnitHelper(this.state.graphKey).unit})`.replace("()", "")}
@@ -350,16 +345,7 @@ class Sensor extends Component {
                                             </td>
                                             <td style={{ textAlign: "right" }}>
                                                 <Button variant='ghost' color="primary" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
-                                                <Menu>
-                                                    <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", ...detailedSubText }}>
-                                                        {timespans.find(x => x.v === this.state.from).k} {t(timespans.find(x => x.v === this.state.from).t)}
-                                                    </MenuButton>
-                                                    <MenuList>
-                                                        {timespans.map(x => {
-                                                            return <MenuItem key={x.v} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.updateFrom(x.v)}>{x.k} {t(x.t)}</MenuItem>
-                                                        })}
-                                                    </MenuList>
-                                                </Menu>
+                                                <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
                                             </td>
                                         </tr>
                                     </tbody>

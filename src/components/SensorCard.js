@@ -40,7 +40,6 @@ class SensorCard extends Component {
             data: null,
             lastParsedReading: null,
             loading: true,
-            from: 24 * 3,
             graphDataKey: "temperature",
         }
     }
@@ -56,7 +55,7 @@ class SensorCard extends Component {
             });
         }, 60 * 1000);
         this.graphDataUpdate = setInterval(() => {
-            new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: "sparse", limit: 1, sort: "desc" }, resp => {
+            new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: "sparse", limit: 1, sort: "desc" }, resp => {
                 if (resp.result === "success") {
                     let d = parse(resp.data);
                     if (d.measurements.length !== 1) return
@@ -73,11 +72,11 @@ class SensorCard extends Component {
         clearInterval(this.graphDataUpdate);
     }
     loadData() {
-        new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: "dense", limit: 1, sort: "desc" }, resp => {
+        new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: "dense", limit: 1, sort: "desc" }, resp => {
             if (resp.result === "success") {
                 let oneDenseData = parse(resp.data);
                 var lastParsedReading = oneDenseData.measurements.length === 1 ? oneDenseData.measurements[0] : null
-                new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: "sparse" }, resp => {
+                new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: "sparse" }, resp => {
                     if (resp.result === "success") {
                         let d = parse(resp.data);
                         if (lastParsedReading === null && d.measurements.length > 0) lastParsedReading = d.measurements[0]
@@ -149,7 +148,7 @@ class SensorCard extends Component {
                                     </span>
                                 </div>
                                 <div style={{ marginLeft: -30, marginRight: -30, marginTop: -10, marginBottom: -10 }}>
-                                    <Graph title="" dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.state.from} />
+                                    <Graph title="" dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
                                 </div>
                                 <hr style={{ margin: "0px 0 10px 0" }} />
                                 <SimpleGrid columns={2} style={{ width: "100%" }}>

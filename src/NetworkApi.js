@@ -101,7 +101,7 @@ class NetworkApi {
     async get(mac, from, settings, success, fail) {
         if (!this.options) if (fail) return fail("Not signed in"); else return
         var mode = settings.mode || "mixed";
-        var cachedData = await DataCache.getData(mac, mode)
+        var cachedData = await DataCache.getData(mac, mode, from)
         var useCache = false;
         if (cachedData && cachedData.length) {
             let newest = cachedData[0].timestamp;
