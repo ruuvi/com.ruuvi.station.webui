@@ -6,6 +6,7 @@ import { Spinner, Box, Link } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
+import SessionStore from "../SessionStore";
 
 const infoText = {
     fontFamily: "mulish",
@@ -112,6 +113,8 @@ class Dashboard extends Component {
         return out;
     }
     render() {
+        if (this.props.match.params.id) SessionStore.setBackRoute(`/${this.props.match.params.id}`)
+        else SessionStore.setBackRoute("/")
         return (
             <>
                 {!this.getCurrentSensor() &&

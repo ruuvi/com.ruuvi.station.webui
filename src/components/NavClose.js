@@ -5,6 +5,7 @@ import {
 import { CloseIcon } from "@chakra-ui/icons";
 import { withRouter } from "react-router";
 import { addListener, removeListener } from "../utils/shortcuts";
+import SessionStore from "../SessionStore";
 
 class NavClose extends Component {
     constructor(props) {
@@ -18,7 +19,11 @@ class NavClose extends Component {
         removeListener("Escape")
     }
     clicked() {
-        this.props.history.push('/')
+        if (this.props.match.params.id) {
+            this.props.history.push('/')
+        } else {
+            this.props.history.push(SessionStore.getBackRoute())
+        }
     }
     render() {
         return (
