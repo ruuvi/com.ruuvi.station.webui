@@ -38,7 +38,7 @@ import EditableText from "../components/EditableText";
 import OffsetDialog from "../components/OffsetDialog";
 import NavClose from "../components/NavClose";
 import NavPrevNext from "../components/NavPrevNext";
-import DurationPicker, { getTimespans } from "../components/DurationPicker";
+import DurationPicker, { getTimespan } from "../components/DurationPicker";
 
 var bigCardFields = ["temperature", "humidity", "pressure", "movementCounter"];
 var sensorInfoOrder = ["mac", "dataFormat", "battery", "accelerationX", "accelerationY", "accelerationZ", "txPower", "rssi", "measurementSequenceNumber"];
@@ -337,7 +337,7 @@ class Sensor extends Component {
                                         <tr>
                                             <td>
                                                 <div style={graphLengthText}>
-                                                    {t("last")} {getTimespans().find(x => x.v === this.state.from).k} {t(getTimespans().find(x => x.v === this.state.from).t)}
+                                                    {t("last")} {getTimespan(this.state.from).k} {t(getTimespan(this.state.from).t)}
                                                 </div>
                                                 <div style={graphInfo}>
                                                     {t(getUnitHelper(this.state.graphKey).label)} {`(${getUnitHelper(this.state.graphKey).unit})`.replace("()", "")}
