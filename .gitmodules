@@ -1,0 +1,4 @@
+[submodule "station.localization"]
+	path = station.localization
+	url = https://github.com/ruuvi/station.localization
+    branch = dev
