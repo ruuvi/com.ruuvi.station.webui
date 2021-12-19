@@ -44,39 +44,20 @@ class SensorCard extends Component {
         }
     }
     componentDidMount() {
-        this.loadData(true)
-        this.latestDataUpdate = setInterval(() => {
-            new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 2), { mode: "dense", limit: 1, sort: "desc" }, resp => {
-                if (resp.result === "success") {
-                    var parsed = parse(resp.data);
-                    if (parsed.measurements.length !== 1) return
-                    this.setState({ ...this.state, lastParsedReading: parsed.measurements[0] })
-                }
-            });
-        }, 60 * 1000);
-        this.graphDataUpdate = setInterval(() => {
-            new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: "sparse", limit: 1, sort: "desc" }, resp => {
-                if (resp.result === "success") {
-                    let d = parse(resp.data);
-                    if (d.measurements.length !== 1) return
-                    var state = this.state;
-                    if (state.data.measurements) state.data.measurements.unshift(d.measurements[0]);
-                    else state.data.measurements = d;
-                    this.setState(state);
-                }
-            });
-        }, 15 * 60 * 1000);
+        this.loadData()
+        this.fetchDataLoop = setInterval(() => {
+            this.loadData()
+        }, 60 * 1000)
     }
     componentWillUnmount() {
-        clearInterval(this.latestDataUpdate);
-        clearInterval(this.graphDataUpdate);
+        clearInterval(this.fetchDataLoop);
     }
     loadData() {
         new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: "dense", limit: 1, sort: "desc" }, resp => {
             if (resp.result === "success") {
                 let oneDenseData = parse(resp.data);
                 var lastParsedReading = oneDenseData.measurements.length === 1 ? oneDenseData.measurements[0] : null
-                new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: "sparse" }, resp => {
+                new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: this.props.dataFrom <= 24 ? "mixed" : "sparse" }, resp => {
                     if (resp.result === "success") {
                         let d = parse(resp.data);
                         if (lastParsedReading === null && d.measurements.length > 0) lastParsedReading = d.measurements[0]
