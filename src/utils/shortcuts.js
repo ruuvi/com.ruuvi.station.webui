@@ -1,8 +1,8 @@
 var cbs = [];
 
 var listener = function (event) {
-    var key = event.key;
-    var idx = cbs.findIndex(x => x[0] === key)
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    var idx = cbs.findIndex(x => x[0] === event.key)
     if (idx !== -1) cbs[idx][1]()
 }
 
