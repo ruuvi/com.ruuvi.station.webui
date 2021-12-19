@@ -9,10 +9,24 @@ import { MdArrowDropDown } from "react-icons/md"
 import { useTranslation } from 'react-i18next';
 import { ruuviTheme } from "../themes";
 
-var timespans = [{ k: "3", t: "hours", v: 3 }, { k: "1", t: "day", v: 24 }, { k: "3", t: "days", v: 24 * 3 }, { k: "1", t: "week", v: 24 * 7 }, { k: "1", t: "month", v: 24 * 7 * 4 }, { k: "3", t: "months", v: 24 * 7 * 4 * 3 }, { k: "1", t: "year", v: 24 * 7 * 4 * 12 }, { k: "2", t: "years", v: 24 * 7 * 4 * 12 * 2 }]
+var timespans = [
+    { k: "1", t: "hour", v: 1 },
+    { k: "2", t: "hours", v: 2 },
+    { k: "3", t: "hours", v: 3 },
+    { k: "12", t: "hours", v: 12 },
+    { k: "1", t: "day", v: 24 },
+    { k: "2", t: "days", v: 24 * 2 },
+    { k: "3", t: "days", v: 24 * 3 },
+    { k: "1", t: "week", v: 24 * 7 },
+    { k: "1", t: "month", v: 24 * 7 * 4 },
+    { k: "3", t: "months", v: 24 * 7 * 4 * 3 },
+    { k: "6", t: "months", v: 24 * 7 * 4 * 6 },
+    { k: "1", t: "year", v: 24 * 7 * 4 * 12 },
+    { k: "2", t: "years", v: 24 * 7 * 4 * 12 * 2 }
+]
 
 export function getTimespans() { return timespans };
-export function getTimespan(value) { 
+export function getTimespan(value) {
     var ts = timespans.find(x => x.v === value)
     if (!ts) ts = timespans[2];
     return ts;
