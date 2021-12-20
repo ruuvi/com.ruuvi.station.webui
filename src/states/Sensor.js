@@ -315,7 +315,7 @@ class Sensor extends Component {
             <Box borderWidth="1px" borderRadius="lg" overflow="hidden" pt={{ base: "5px", md: "35px" }} pl={{ base: "5px", md: "35px" }} pr={{ base: "5px", md: "35px" }} style={{ backgroundColor: "white" }}>
                 <SensorHeader {...this.props} lastUpdateTime={this.state.data ? this.state.data.latestTimestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} />
                 {this.state.loading ? (
-                    <Stack style={{ marginTop: "30px" }}>
+                    <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
                         <Progress isIndeterminate={true} color="#e6f6f2" />
                     </Stack>
                 ) : (
