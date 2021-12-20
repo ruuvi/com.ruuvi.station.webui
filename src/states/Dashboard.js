@@ -59,7 +59,7 @@ class Dashboard extends Component {
                 api.user(uresp => {
                     if (resp.result === "success") {
                         for (var i = 0; i < d.length; i++) {
-                            var mac = d[i].sensor;
+                            let mac = d[i].sensor;
                             var uSensor = uresp.data.sensors.find(x => x.sensor === mac)
                             if (uSensor) d[i] = { ...d[i], ...uSensor }
                         }
