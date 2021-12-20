@@ -41,6 +41,7 @@ class ShareDialog extends Component {
                 case "error":
                     alert(this.props.t(`UserApiError.${resp.code}`))
                     break;
+                default:
             }
             newState.loading = false;
             this.setState(newState)
@@ -62,6 +63,7 @@ class ShareDialog extends Component {
                     case "error":
                         alert(this.props.t(`UserApiError.${resp.code}`))
                         break;
+                    default:
                 }
                 newState.loading = false;
                 this.setState(newState)

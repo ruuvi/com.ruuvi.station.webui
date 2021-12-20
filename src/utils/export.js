@@ -2,7 +2,7 @@ import { getUnitHelper } from "../UnitHelper";
 
 export function exportCSV(data, sensorName) {
     var csvHeader = ['Timestamp', `Temperature (${getUnitHelper("temperature").unit})`, `Humidity (${getUnitHelper("humidity").unit})`, `Pressure (${getUnitHelper("pressure").unit})`, 'RSSI', 'Acceleration X', 'Acceleration Y', 'Acceleration Z', 'Voltage', 'Movement counter', 'Measurement sequence number']
-    var data = data.measurements.map(x => [toISOString(new Date(x.timestamp * 1000)), x.parsed.temperature, x.parsed.humidity, x.parsed.pressure, x.parsed.rssi, x.parsed.accelerationX, x.parsed.accelerationY, x.parsed.accelerationZ, x.parsed.battery, x.parsed.movementCounter, x.parsed.measurementSequenceNumber])
+    data = data.measurements.map(x => [toISOString(new Date(x.timestamp * 1000)), x.parsed.temperature, x.parsed.humidity, x.parsed.pressure, x.parsed.rssi, x.parsed.accelerationX, x.parsed.accelerationY, x.parsed.accelerationZ, x.parsed.battery, x.parsed.movementCounter, x.parsed.measurementSequenceNumber])
 
     var csv = csvHeader.toString() + "\n"
     for (var i = data.length - 1; i >= 0; i--) {

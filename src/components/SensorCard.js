@@ -141,7 +141,7 @@ class SensorCard extends Component {
                                     })}
                                 </SimpleGrid>
                             </div> : <div>
-                                <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>{t("no_data").split("\n").map(x => <div>{x}</div>)}</center>
+                                <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
                             </div>}
                         </div>
                     )}

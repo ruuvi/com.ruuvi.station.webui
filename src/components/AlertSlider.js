@@ -1,21 +1,9 @@
 import React from "react";
-import { Box } from '@chakra-ui/layout';
 import { Range, getTrackBackground } from 'react-range';
-import { getAlertRange, localeNumber, temperatureToUserFormat } from '../UnitHelper';
+import { getAlertRange } from '../UnitHelper';
 import InputDialog from "./InputDialog";
 import { withTranslation } from "react-i18next";
 import { uppercaseFirst } from "../TextHelper";
-import EditableText from "./EditableText";
-
-const valuesStyle = {
-    fontFamily: "montserrat",
-    fontSize: 14,
-    fontWeight: 500,
-    width: 125,
-    textAlign: "center",
-    color: "#85a4a3",
-    cursor: "pointer",
-}
 
 function getColor(gray) {
     return `rgba(67,199,186,${gray ? 0.2 : 1})`
@@ -78,13 +66,13 @@ class AlertSlider extends React.Component {
                 )}
             />
             <InputDialog open={this.state.editMinValue} value={min}
-                onClose={(save, value) => save && value <= max && this.props.onChange([value, max], true) || this.setState({ ...this.state, editMinValue: false })}
+                onClose={(save, value) => (save && value <= max && this.props.onChange([value, max], true)) || this.setState({ ...this.state, editMinValue: false })}
                 title={uppercaseFirst(this.props.t("min"))}
                 number={true}
                 buttonText={this.props.t("update")}
             />
             <InputDialog open={this.state.editMaxValue} value={max}
-                onClose={(save, value) => save && value >= min && this.props.onChange([min, value], true) || this.setState({ ...this.state, editMaxValue: false })}
+                onClose={(save, value) => (save && value >= min && this.props.onChange([min, value], true)) || this.setState({ ...this.state, editMaxValue: false })}
                 title={uppercaseFirst(this.props.t("max"))}
                 number={true}
                 buttonText={this.props.t("update")}

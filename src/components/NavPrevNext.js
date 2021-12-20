@@ -6,9 +6,6 @@ import { ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 import { addListener, removeListener } from "../utils/shortcuts";
 
 class NavPrevNext extends Component {
-    constructor(props) {
-        super(props)
-    }
     componentDidMount() {
         addListener("ArrowLeft", this.props.prev);
         addListener("ArrowRight", this.props.next);

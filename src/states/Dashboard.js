@@ -145,8 +145,8 @@ class Dashboard extends Component {
                         <Box justifyContent={{ base: "space-evenly", lg: this.state.sensors.length > 2 ? "space-evenly" : "start" }} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
                             <>
                                 {this.state.sensors.map(x => {
-                                    return <span style={{ margin: 16, minWidth: "350px", maxWidth: "450px", flexGrow: 2, flex: "1 1 0px" }}>
-                                        <a key={x.sensor + this.state.from} href={"#/" + x.sensor}>
+                                    return <span key={x.sensor + this.state.from} style={{ margin: 16, minWidth: "350px", maxWidth: "450px", flexGrow: 2, flex: "1 1 0px" }}>
+                                        <a href={"#/" + x.sensor}>
                                             <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} dataFrom={this.state.from} />
                                         </a></span>
                                 })}

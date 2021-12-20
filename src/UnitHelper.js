@@ -18,7 +18,7 @@ const unitHelper = {
 
 export function getUnitHelper(key) {
     if (key === "temperature") {
-        var settings = localStorage.getItem("settings");
+        let settings = localStorage.getItem("settings");
         if (settings) {
             settings = JSON.parse(settings);
             var thing = unitHelper[key];
@@ -36,8 +36,8 @@ export function getUnitHelper(key) {
         }
     }
     if (key === "humidity") {
-        var settings = localStorage.getItem("settings");
-        var thing = unitHelper[key];
+        let settings = localStorage.getItem("settings");
+        let thing = unitHelper[key];
         if (settings) {
             settings = JSON.parse(settings)
             if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "1") {
@@ -59,8 +59,8 @@ export function getUnitHelper(key) {
         }
     }
     if (key === "pressure") {
-        var settings = localStorage.getItem("settings");
-        var thing = unitHelper[key];
+        let settings = localStorage.getItem("settings");
+        let thing = unitHelper[key];
         if (settings) {
             settings = JSON.parse(settings)
             if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "0") {

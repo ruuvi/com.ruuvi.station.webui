@@ -27,14 +27,14 @@ export function relativeToDewpoint(humidity, temperature, cFormat) {
 
 function pws(celsiusTemperature, kelvinTemperature) {
     if (celsiusTemperature > 0.01) { // estimate for 0°C-373°C
-        var n = 1 - (kelvinTemperature / tc)
-        var p = tc / kelvinTemperature * (c1 * n + c2 * Math.pow(n, 1.5) + c3 * Math.pow(n, 3) + c4 * Math.pow(n, 3.5) + c5 * Math.pow(n, 4) + c6 * Math.pow(n, 7.5))
-        var l = Math.pow(Math.E, p)
+        let n = 1 - (kelvinTemperature / tc)
+        let p = tc / kelvinTemperature * (c1 * n + c2 * Math.pow(n, 1.5) + c3 * Math.pow(n, 3) + c4 * Math.pow(n, 3.5) + c5 * Math.pow(n, 4) + c6 * Math.pow(n, 7.5))
+        let l = Math.pow(Math.E, p)
         return pc * l
     } else { // estimate for -100°C-0.01°C
-        var n = kelvinTemperature / tn
-        var p = a0 * (1 - Math.pow(n, -1.5)) + a1 * (1 - Math.pow(n, -1.25))
-        var l = Math.pow(Math.E, p)
+        let n = kelvinTemperature / tn
+        let p = a0 * (1 - Math.pow(n, -1.5)) + a1 * (1 - Math.pow(n, -1.25))
+        let l = Math.pow(Math.E, p)
         return pn * l
     }
 }

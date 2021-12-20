@@ -33,7 +33,6 @@ class Graph extends Component {
         return [this.props.from / 1000, new Date().getTime() / 1000]
     }
     render() {
-        var uh = getUnitHelper(this.props.dataKey)
         var plugins = [];
         if (!this.props.cardView) plugins.push(UplotTouchZoomPlugin(this.getXRange()))
         return (

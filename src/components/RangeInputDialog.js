@@ -9,7 +9,6 @@ import {
     Button,
     Input,
     SimpleGrid,
-    Box,
 } from "@chakra-ui/react"
 import { withTranslation } from "react-i18next";
 

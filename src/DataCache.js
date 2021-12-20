@@ -1,5 +1,4 @@
 import * as localForage from "localforage";
-import pjson from '../package.json';
 
 function getKey(sensor, mode) {
     return `cache_${sensor}_${mode}`

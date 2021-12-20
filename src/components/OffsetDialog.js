@@ -88,7 +88,7 @@ class OffsetDialog extends Component {
                                 <b>{t("calibration_original_value")}</b>
                             </div>
                             {this.format(this.getLastReading() - this.getOffset())} {this.getUnit()}
-                            {this.getOffset() != 0 && <Box>
+                            {this.getOffset() !== 0 && <Box>
                                 <hr />
                                 <div>
                                     <b>{t("calibration_corrected_value")}</b>
@@ -100,7 +100,7 @@ class OffsetDialog extends Component {
                         {this.state.saving ? <ModalFooter style={{ margin: "auto" }}><Spinner /></ModalFooter> :
                             <ModalFooter style={{ margin: "auto" }}>
                                 <Button mr="2" colorScheme="teal" onClick={() => this.setState({ ...this.state, correctionInput: true })}>Calibrate</Button>
-                                {this.getOffset() != 0 && <Button ml="2" colorScheme="teal" onClick={() => this.clearCalibration()}>Clear</Button>}
+                                {this.getOffset() !== 0 && <Button ml="2" colorScheme="teal" onClick={() => this.clearCalibration()}>Clear</Button>}
                             </ModalFooter>
                         }
                     </ModalContent>
