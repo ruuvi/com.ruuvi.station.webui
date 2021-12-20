@@ -344,7 +344,7 @@ class Sensor extends Component {
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: "right" }}>
-                                                <Button variant='ghost' color="primary" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
+                                                <Button variant='ghost' color="primary" _hover={{textDecoration: "underline"}} style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                 <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
                                             </td>
                                         </tr>
