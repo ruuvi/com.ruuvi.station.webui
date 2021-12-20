@@ -42,7 +42,11 @@ export default function DurationPicker(props) {
     var ts = getTimespan(props.value)
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
-            <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", ...detailedSubText }}>
+            <MenuButton as={Button}
+                rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />}
+                style={{ backgroundColor: "transparent", ...detailedSubText }}
+                borderRadius='4px'
+                borderWidth="1px">
                 {ts.k} {t(ts.t).toLowerCase()}
             </MenuButton>
             <MenuList>
