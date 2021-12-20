@@ -54,7 +54,7 @@ class EditNameDialog extends Component {
         var { t } = this.props;
         return (
             <>
-                <Modal isOpen={this.props.open} onClose={this.props.onClose} size="xl">
+                <Modal isOpen={this.props.open} onClose={this.props.onClose} size="xl" isCentered>
                     <ModalOverlay />
                     <ModalContent>
                         <ModalHeader>{t("sensor_name")}</ModalHeader>

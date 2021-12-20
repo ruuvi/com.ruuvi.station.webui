@@ -50,7 +50,7 @@ class RangeInputDialog extends Component {
         var unit = this.props.unit();
         return (
             <>
-                <Modal isOpen={this.props.open} onClose={() => this.props.onClose(false)} size="xl">
+                <Modal isOpen={this.props.open} onClose={() => this.props.onClose(false)} size="xl" isCentered>
                     <ModalOverlay />
                     <ModalContent>
                         <ModalHeader>{this.props.title}</ModalHeader>

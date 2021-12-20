@@ -75,7 +75,7 @@ class OffsetDialog extends Component {
         var { t } = this.props;
         return (
             <>
-                <Modal isOpen={this.props.open} onClose={this.props.onClose} size="xl">
+                <Modal isOpen={this.props.open} onClose={this.props.onClose} size="xl" isCentered>
                     <ModalOverlay />
                     <ModalContent>
                         <ModalHeader>{t((this.props.open || "").toLowerCase() + "_offset")}</ModalHeader>
