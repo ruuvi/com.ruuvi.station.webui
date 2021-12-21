@@ -27,6 +27,7 @@ var cache = {
                 }
                 return 0;
             }
+            if (!data) return
             data.sort(compare);
 
             // store max 1 month of data in cache

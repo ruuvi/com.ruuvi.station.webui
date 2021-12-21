@@ -195,7 +195,7 @@ class Sensor extends Component {
             this.loadData(true);
         })
     }
-    loadData(showLoading) {
+    async loadData(showLoading) {
         this.setState({ ...this.state, loading: showLoading !== undefined, ...(showLoading ? { data: null } : {}) })
         new NetworkApi().getAlerts(data => {
             if (data.result === "success") {
@@ -205,7 +205,8 @@ class Sensor extends Component {
                 })
             }
         })
-        new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: this.state.mode }, resp => {
+        try {
+            var resp = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: this.state.mode });
             if (resp.result === "success") {
                 let d = parse(resp.data);
                 this.setState({ data: d, loading: false, table: d.table, resolvedMode: d.resolvedMode })
@@ -213,11 +214,11 @@ class Sensor extends Component {
                 alert(resp.error)
                 this.setState({ ...this.state, loading: false })
             }
-        }, (e) => {
+        } catch (e) {
             alert("LoadData error: " + e.toString())
             console.log("err", e)
             this.setState({ data: null, loading: false })
-        })
+        }
     }
     getLatestReading(kv) {
         if (!this.state.data || !this.state.data.measurements.length) return [];
@@ -344,7 +345,7 @@ class Sensor extends Component {
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: "right" }}>
-                                                <Button variant='ghost' color="primary" _hover={{textDecoration: "underline"}} style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
+                                                <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                 <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
                                             </td>
                                         </tr>

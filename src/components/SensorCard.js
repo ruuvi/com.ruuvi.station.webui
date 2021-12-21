@@ -52,33 +52,38 @@ class SensorCard extends Component {
     componentWillUnmount() {
         clearInterval(this.fetchDataLoop);
     }
-    loadData() {
-        new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: "dense", limit: 1, sort: "desc" }, resp => {
-            if (resp.result === "success") {
-                let oneDenseData = parse(resp.data);
+    async loadGraphData(graphDataMode, lastDataPoint) {
+        var graphData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: graphDataMode })
+        if (graphData.result === "success") {
+            let d = parse(graphData.data);
+            if (lastDataPoint == null && d.measurements.length > 0) lastDataPoint = d.measurements[0]
+            this.setState({ data: d, lastParsedReading: lastDataPoint, loading: false, table: d.table, resolvedMode: d.resolvedMode })
+        } else if (graphData.result === "error") {
+            console.error(graphData.error)
+            this.setState({ ...this.state, loading: false })
+        }
+    }
+    async loadData() {
+        var graphDataMode = this.props.dataFrom <= 24 ? "mixed" : "sparse";
+        try {
+            if (graphDataMode === "mixed") {
+                this.loadGraphData(graphDataMode)
+                return
+            }
+            var singleData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: "dense", limit: 1, sort: "desc" });
+            if (singleData.result === "success") {
+                let oneDenseData = parse(singleData.data);
                 var lastParsedReading = oneDenseData.measurements.length === 1 ? oneDenseData.measurements[0] : null
-                new NetworkApi().get(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: this.props.dataFrom <= 24 ? "mixed" : "sparse" }, resp => {
-                    if (resp.result === "success") {
-                        let d = parse(resp.data);
-                        if (lastParsedReading === null && d.measurements.length > 0) lastParsedReading = d.measurements[0]
-                        this.setState({ data: d, lastParsedReading: lastParsedReading, loading: false, table: d.table, resolvedMode: d.resolvedMode })
-                    } else if (resp.result === "error") {
-                        console.error(resp.error)
-                        this.setState({ ...this.state, loading: false })
-                    }
-                }, (e) => {
-                    console.error(e)
-                    this.setState({ data: null, loading: false })
-                })
-            } else if (resp.result === "error") {
-                console.error(resp.error)
+                this.loadGraphData(graphDataMode, lastParsedReading);
+            } else if (singleData.result === "error") {
+                console.error(singleData.error)
                 this.setState({ ...this.state, loading: false })
             }
-        }, (e) => {
+        } catch (e) {
             //alert("LoadData error: " + e.toString())
             console.log("err", e)
             this.setState({ data: null, loading: false })
-        })
+        }
 
     }
     getLatestReading() {

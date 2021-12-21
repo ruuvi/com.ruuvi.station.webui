@@ -98,8 +98,8 @@ class NetworkApi {
             })
             .catch(error => fail ? fail(error) : {});
     };
-    async get(mac, from, settings, success, fail) {
-        if (!this.options) if (fail) return fail("Not signed in"); else return
+    async getAsync(mac, from, settings) {
+        if (!this.options) return null;
         var mode = settings.mode || "mixed";
         var cachedData = await DataCache.getData(mac, mode, from)
         var useCache = false;
@@ -120,19 +120,15 @@ class NetworkApi {
         q += "&until=" + parseInt(new Date().getTime() / 1000)
         q += "&limit=" + (settings.limit || 100000)
         if (settings.sort) q += "&sort=" + settings.sort
-        fetch(this.url + "/get" + q, this.options).then(function (response) {
-            return response.json();
-        })
-            .then(response => {
-                if (cachedData && response.result === "success" && useCache) {
-                    response.data.measurements.push(...cachedData)
-                    DataCache.setData(mac, mode, response.data.measurements)
-                } else if (response.result === "success") {
-                    DataCache.setData(mac, mode, response.data.measurements)
-                }
-                success(response)
-            })
-            .catch(error => fail ? fail(error) : {});
+        const resp = await fetch(this.url + "/get" + q, this.options)
+        const respData = await resp.json()
+        if (cachedData && respData.result === "success" && useCache) {
+            respData.data.measurements.push(...cachedData)
+            DataCache.setData(mac, mode, respData.data.measurements)
+        } else if (respData.result === "success") {
+            DataCache.setData(mac, mode, respData.data.measurements)
+        }
+        return respData;
     };
     share(mac, email, success) {
         fetch(this.url + "/share", {
@@ -218,7 +214,7 @@ class NetworkApi {
         })
             .then(function (response) {
                 if (response.status === 200) {
-                    return response.json() 
+                    return response.json()
                 }
                 throw (response)
             })
