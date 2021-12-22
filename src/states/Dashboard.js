@@ -33,9 +33,13 @@ class Dashboard extends Component {
         document.title = "Ruuvi Station"
     }
     componentWillUnmount() {
-        clearInterval(this.alertUpdateLoop);
+        clearTimeout(this.alertUpdateLoop);
     }
     loadAlerts() {
+        clearTimeout(this.alertUpdateLoop);
+        this.alertUpdateLoop = setTimeout(() => {
+            this.loadAlerts()
+        }, 60 * 1000);
         new NetworkApi().getAlerts(data => {
             if (data.result === "success") {
                 this.setState({ ...this.state, alerts: data.data.sensors })
@@ -48,11 +52,6 @@ class Dashboard extends Component {
     }
     componentDidMount() {
         var api = new NetworkApi();
-        this.alertUpdateLoop = setInterval(() => {
-            if (!this.getCurrentSensor()) {
-                this.loadAlerts();
-            }
-        }, 60 * 1000);
         api.sensors(resp => {
             if (resp.result === "success") {
                 var d = resp.data.sensors;
