@@ -176,13 +176,10 @@ class Sensor extends Component {
     componentDidMount() {
         if (this.props.sensor) {
             this.loadData(true)
-            this.latestDataUpdate = setInterval(() => {
-                this.loadData()
-            }, 60 * 1000);
         }
     }
     componentWillUnmount() {
-        clearInterval(this.latestDataUpdate);
+        clearTimeout(this.latestDataUpdate);
     }
     componentDidUpdate(prevProps) {
         document.title = "Ruuvi Sensor: " + this.props.sensor.name
@@ -196,6 +193,10 @@ class Sensor extends Component {
         })
     }
     async loadData(showLoading) {
+        clearTimeout(this.latestDataUpdate);
+        this.latestDataUpdate = setTimeout(() => {
+            this.loadData()
+        }, 60 * 1000);
         this.setState({ ...this.state, loading: showLoading !== undefined, ...(showLoading ? { data: null } : {}) })
         new NetworkApi().getAlerts(data => {
             if (data.result === "success") {
@@ -361,7 +362,7 @@ class Sensor extends Component {
                             )}
                             <div style={{ height: "20px" }} />
                             <Accordion allowMultiple ml={{ base: -15, md: -35 }} mr={{ base: -15, md: -35 }}>
-                                <AccordionItem>
+                                <AccordionItem onChange={v => console.log(v)}>
                                     <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
                                             {t("general")}

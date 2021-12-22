@@ -45,12 +45,9 @@ class SensorCard extends Component {
     }
     componentDidMount() {
         this.loadData()
-        this.fetchDataLoop = setInterval(() => {
-            this.loadData()
-        }, 60 * 1000)
     }
     componentWillUnmount() {
-        clearInterval(this.fetchDataLoop);
+        clearTimeout(this.fetchDataLoop);
     }
     async loadGraphData(graphDataMode, lastDataPoint) {
         var graphData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: graphDataMode })
@@ -64,6 +61,10 @@ class SensorCard extends Component {
         }
     }
     async loadData() {
+        clearTimeout(this.fetchDataLoop);
+        this.fetchDataLoop = setTimeout(() => {
+            this.loadData()
+        }, 60 * 1000);
         var graphDataMode = this.props.dataFrom <= 24 ? "mixed" : "sparse";
         try {
             if (graphDataMode === "mixed") {
@@ -80,7 +81,6 @@ class SensorCard extends Component {
                 this.setState({ ...this.state, loading: false })
             }
         } catch (e) {
-            //alert("LoadData error: " + e.toString())
             console.log("err", e)
             this.setState({ data: null, loading: false })
         }
