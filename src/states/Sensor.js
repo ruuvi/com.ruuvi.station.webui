@@ -23,7 +23,7 @@ import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
 import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
-import { MdChevronRight } from "react-icons/md"
+import { MdChevronRight, MdInfo } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 import { exportCSV } from "../utils/export";
@@ -171,6 +171,7 @@ class Sensor extends Component {
             editName: false,
             showShare: false,
             offsetDialog: null,
+            graphRenderKey: 0,
         }
         this.applyAccordionSetting()
     }
@@ -319,6 +320,9 @@ class Sensor extends Component {
     setOpenAccordion(open) {
         new Store().setOpenAccordions(open)
     }
+    resetZoom() {
+        this.setState({...this.state, graphRenderKey: Math.random()})
+    }
     render() {
         var { t } = this.props
         return (
@@ -354,6 +358,7 @@ class Sensor extends Component {
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: "right" }}>
+                                                <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.resetZoom()}>{`${uppercaseFirst(t("Zoom"))}`} <MdInfo size={18} style={{marginLeft: 4}} /></Button>
                                                 <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                 <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
                                             </td>
@@ -365,7 +370,7 @@ class Sensor extends Component {
                                 <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
                             ) : (
                                 <Box ml={-5} mr={-5}>
-                                    <Graph dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                    <Graph key={`graphkey${this.state.graphRenderKey}`} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
                                 </Box>
                             )}
                             <div style={{ height: "20px" }} />
