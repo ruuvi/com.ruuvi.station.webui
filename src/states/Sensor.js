@@ -172,6 +172,10 @@ class Sensor extends Component {
             showShare: false,
             offsetDialog: null,
         }
+        this.applyAccordionSetting()
+    }
+    applyAccordionSetting() {
+        this.openAccodrions = new Store().getOpenAccordions() || [0, 1, 2, 3, 4];
     }
     componentDidMount() {
         if (this.props.sensor) {
@@ -184,6 +188,7 @@ class Sensor extends Component {
     componentDidUpdate(prevProps) {
         document.title = "Ruuvi Sensor: " + this.props.sensor.name
         if (this.props.sensor !== prevProps.sensor) {
+            this.applyAccordionSetting()
             this.loadData(true)
         }
     }
@@ -311,6 +316,9 @@ class Sensor extends Component {
     export() {
         exportCSV(this.state.data, this.props.sensor.name)
     }
+    setOpenAccordion(open) {
+        new Store().setOpenAccordions(open)
+    }
     render() {
         var { t } = this.props
         return (
@@ -361,7 +369,7 @@ class Sensor extends Component {
                                 </Box>
                             )}
                             <div style={{ height: "20px" }} />
-                            <Accordion allowMultiple ml={{ base: -15, md: -35 }} mr={{ base: -15, md: -35 }}>
+                            <Accordion allowMultiple ml={{ base: -15, md: -35 }} mr={{ base: -15, md: -35 }} defaultIndex={this.openAccodrions} onChange={v => this.setOpenAccordion(v)}>
                                 <AccordionItem onChange={v => console.log(v)}>
                                     <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
@@ -444,38 +452,36 @@ class Sensor extends Component {
                                         </List>
                                     </AccordionPanel>
                                 </AccordionItem>
-                                {!this.isSharedSensor() &&
-                                    <AccordionItem>
-                                        <AccordionButton style={accordionButton} _hover={{}}>
-                                            <Box flex="1" textAlign="left" style={collapseText}>
-                                                {t("offset_correction")}
-                                            </Box>
-                                            <AccordionIcon />
-                                        </AccordionButton>
-                                        <hr />
-                                        <AccordionPanel style={accordionPanel}>
-                                            <List>
-                                                {["Temperature", "Humidity", "Pressure"].map(x => {
-                                                    var uh = getUnitHelper(x.toLocaleLowerCase());
-                                                    var value = uh.value(this.state.data["offset" + x], true);
-                                                    return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, offsetDialog: x })}>
-                                                        <table style={accordionContent}>
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
-                                                                    <td style={detailedText}>
-                                                                        {localeNumber(value, uh.decimals)} {uh.unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                        {x !== "Pressure" && <hr />}
-                                                    </ListItem>
-                                                })}
-                                            </List>
-                                        </AccordionPanel>
-                                    </AccordionItem>
-                                }
+                                <AccordionItem hidden={this.isSharedSensor()}>
+                                    <AccordionButton style={accordionButton} _hover={{}}>
+                                        <Box flex="1" textAlign="left" style={collapseText}>
+                                            {t("offset_correction")}
+                                        </Box>
+                                        <AccordionIcon />
+                                    </AccordionButton>
+                                    <hr />
+                                    <AccordionPanel style={accordionPanel}>
+                                        <List>
+                                            {["Temperature", "Humidity", "Pressure"].map(x => {
+                                                var uh = getUnitHelper(x.toLocaleLowerCase());
+                                                var value = uh.value(this.state.data["offset" + x], true);
+                                                return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, offsetDialog: x })}>
+                                                    <table style={accordionContent}>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
+                                                                <td style={detailedText}>
+                                                                    {localeNumber(value, uh.decimals)} {uh.unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    {x !== "Pressure" && <hr />}
+                                                </ListItem>
+                                            })}
+                                        </List>
+                                    </AccordionPanel>
+                                </AccordionItem>
                                 <AccordionItem>
                                     <AccordionButton style={accordionButton} _hover={{}}>
                                         <Box flex="1" textAlign="left" style={collapseText}>
