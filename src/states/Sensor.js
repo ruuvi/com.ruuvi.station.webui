@@ -32,13 +32,15 @@ import DurationText from "../components/DurationText";
 import Store from "../Store";
 import ShareDialog from "../components/ShareDialog";
 import EditNameDialog from "../components/EditNameDialog";
-import { uppercaseFirst } from "../TextHelper";
+import { addNewlines, uppercaseFirst } from "../TextHelper";
 import AlertItem from "../components/AlertItem";
 import EditableText from "../components/EditableText";
 import OffsetDialog from "../components/OffsetDialog";
 import NavClose from "../components/NavClose";
 import NavPrevNext from "../components/NavPrevNext";
 import DurationPicker, { getTimespan } from "../components/DurationPicker";
+import notify from "../utils/notify"
+import { ruuviTheme } from "../themes";
 
 var bigCardFields = ["temperature", "humidity", "pressure", "movementCounter"];
 var sensorInfoOrder = ["mac", "dataFormat", "battery", "accelerationX", "accelerationY", "accelerationZ", "txPower", "rssi", "measurementSequenceNumber"];
@@ -323,6 +325,9 @@ class Sensor extends Component {
     resetZoom() {
         this.setState({...this.state, graphRenderKey: Math.random()})
     }
+    zoomInfo() {
+        notify.info(addNewlines(this.props.t("zoom_info")))
+    }
     render() {
         var { t } = this.props
         return (
@@ -358,7 +363,7 @@ class Sensor extends Component {
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: "right" }}>
-                                                <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.resetZoom()}>{`${uppercaseFirst(t("Zoom"))}`} <MdInfo size={18} style={{marginLeft: 4}} /></Button>
+                                                <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.zoomInfo()}>{`${uppercaseFirst(t("Zoom"))}`} <MdInfo size={18} style={{marginLeft: 4}} color={ruuviTheme.colors.primaryLight} /></Button>
                                                 <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                 <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
                                             </td>
