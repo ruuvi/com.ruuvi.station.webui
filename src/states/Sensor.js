@@ -220,13 +220,13 @@ class Sensor extends Component {
                 let d = parse(resp.data);
                 this.setState({ data: d, loading: false, table: d.table, resolvedMode: d.resolvedMode })
             } else if (resp.result === "error") {
-                alert(resp.error)
+                notify.error(this.props.t(`UserApiError.${resp.code}`))
                 this.setState({ ...this.state, loading: false })
             }
         } catch (e) {
-            alert("LoadData error: " + e.toString())
+            notify.error(this.props.t("internet_connection_problem"))
             console.log("err", e)
-            this.setState({ data: null, loading: false })
+            this.setState({ ...this.state, loading: false })
         }
     }
     getLatestReading(kv) {
@@ -288,10 +288,11 @@ class Sensor extends Component {
                 if (resp.result === "success") {
                     this.props.remove();
                 } else {
-                    alert(resp.result)
+                    notify.error(`UserApiError.${this.props.t(resp.code)}`)
                 }
             }, fail => {
-                alert(fail)
+                notify.error(this.props.t("internet_connection_problem"))
+                console.log(fail)
             })
         }
     }
@@ -323,7 +324,7 @@ class Sensor extends Component {
         new Store().setOpenAccordions(open)
     }
     resetZoom() {
-        this.setState({...this.state, graphRenderKey: Math.random()})
+        this.setState({ ...this.state, graphRenderKey: Math.random() })
     }
     zoomInfo() {
         notify.info(addNewlines(this.props.t("zoom_info")))
@@ -363,7 +364,7 @@ class Sensor extends Component {
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: "right" }}>
-                                                <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.zoomInfo()}>{`${uppercaseFirst(t("Zoom"))}`} <MdInfo size={18} style={{marginLeft: 4}} color={ruuviTheme.colors.primaryLight} /></Button>
+                                                <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.zoomInfo()}>{`${uppercaseFirst(t("Zoom"))}`} <MdInfo size={18} style={{ marginLeft: 4 }} color={ruuviTheme.colors.primaryLight} /></Button>
                                                 <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                 <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
                                             </td>

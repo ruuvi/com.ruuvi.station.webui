@@ -124,7 +124,8 @@
       "off": "Off",
       "dashboard_no_sensors": "Seems that this is a new user account with no sensors. Login on your mobile application with the same email address and claim ownerships of your Ruuvi sensors.\\n\\nNote: Cloud access to your sensors requires a Ruuvi Gateway router. Order more Ruuvi sensors and a Gateway on ruuvi.com",
       "zoom_info": "Desktop browser: Zoom in by selecting a desired timespan with cursor.\n\nMobile browser: Zoom in and out with two fingers.\n\nReset zoom level to original by double clicking/tapping the graph.",
-      "successfully_saved": "Successfully saved"
+      "successfully_saved": "Successfully saved",
+      "internet_connection_problem": "Internet connection problem"
     }
   },
   "fi": {
@@ -252,7 +253,8 @@
       "off": "Pois",
       "dashboard_no_sensors": "Vaikuttaa siltä, että tämä on uusi käyttäjätili ilman antureita. Kirjaudu sisään mobiilisovelluksessa samalla sähköpostiosoitteella ja vahvista Ruuvi-anturiesi omistajuus.\\n\\nHuom: Anturien etäseuranta pilven kautta vaatii Ruuvi Gateway -reitittimen. Tilaa lisää Ruuvin antureita ja Gateway osoitteessa ruuvi.com",
       "zoom_info": "Työpöytäselain: Lähennä valitsemalla haluttu alue hiirellä.\n\nMobiiliselain: Lähennä ja loitonna kahdella sormella.\n\nPalauta näkymä alkuperäiseen klikkaamalla/napauttamalla kuvaajaa kaksi kertaa.",
-      "successfully_saved": "Tallennettu onnistuneesti"
+      "successfully_saved": "Tallennettu onnistuneesti",
+      "internet_connection_problem": "Ongelma internet-yhteydessä"
     }
   },
   "sv": {
@@ -380,7 +382,8 @@
       "off": "Av",
       "dashboard_no_sensors": "Det ser ut som att detta är ett nytt användarkonto utan sensorer. Logga in på mobilappen med samma e-postadress och bekräfta äganderätten till dina Ruuvi sensorer.\\n\\nObs: För att se data från sensorer via molnet kräver en Ruuvi Gateway-router. Beställ fler Ruuvi sensorer och Gateway på ruuvi.com",
       "zoom_info": "Desktop webbläsare: Markera önskat område med musen för att zooma in.\n\nMobil webbläsare: Zooma in och ut med två fingrar.\n\nDubbelklicka på grafen för att återställá.",
-      "successfully_saved": "Sparat"
+      "successfully_saved": "Sparat",
+      "internet_connection_problem": "Internetanslutningsproblem"
     }
   }
 }
