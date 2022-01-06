@@ -38,6 +38,7 @@
       "settings_humidity_unit": "Humidity Unit",
       "settings_pressure_unit": "Pressure Unit",
       "settings_temperature_unit": "Temperature Unit",
+      "something_went_wrong": "Something went wrong",
       "temperature_celsius_name": "Celsius (℃)",
       "temperature_fahrenheit_name": "Fahrenheit (℉)",
       "temperature_kelvin_name": "Kelvin (K)",
@@ -122,7 +123,8 @@
       "on": "On",
       "off": "Off",
       "dashboard_no_sensors": "Seems that this is a new user account with no sensors. Login on your mobile application with the same email address and claim ownerships of your Ruuvi sensors.\\n\\nNote: Cloud access to your sensors requires a Ruuvi Gateway router. Order more Ruuvi sensors and a Gateway on ruuvi.com",
-      "zoom_info": "Desktop browser: Zoom in by selecting a desired timespan with cursor.\n\nMobile browser: Zoom in and out with two fingers.\n\nReset zoom level to original by double clicking/tapping the graph."
+      "zoom_info": "Desktop browser: Zoom in by selecting a desired timespan with cursor.\n\nMobile browser: Zoom in and out with two fingers.\n\nReset zoom level to original by double clicking/tapping the graph.",
+      "successfully_saved": "Successfully saved"
     }
   },
   "fi": {
@@ -164,6 +166,7 @@
       "settings_humidity_unit": "Kosteusyksikkö",
       "settings_pressure_unit": "Paineyksikkö",
       "settings_temperature_unit": "Lämpötilayksikkö",
+      "something_went_wrong": "Tapahtui virhe",
       "temperature_celsius_name": "Celsius (℃)",
       "temperature_fahrenheit_name": "Fahrenheit (℉)",
       "temperature_kelvin_name": "Kelvin (K)",
@@ -248,7 +251,8 @@
       "on": "Päällä",
       "off": "Pois",
       "dashboard_no_sensors": "Vaikuttaa siltä, että tämä on uusi käyttäjätili ilman antureita. Kirjaudu sisään mobiilisovelluksessa samalla sähköpostiosoitteella ja vahvista Ruuvi-anturiesi omistajuus.\\n\\nHuom: Anturien etäseuranta pilven kautta vaatii Ruuvi Gateway -reitittimen. Tilaa lisää Ruuvin antureita ja Gateway osoitteessa ruuvi.com",
-      "zoom_info": "Työpöytäselain: Lähennä valitsemalla haluttu alue hiirellä.\n\nMobiiliselain: Lähennä ja loitonna kahdella sormella.\n\nPalauta näkymä alkuperäiseen klikkaamalla/napauttamalla kuvaajaa kaksi kertaa."
+      "zoom_info": "Työpöytäselain: Lähennä valitsemalla haluttu alue hiirellä.\n\nMobiiliselain: Lähennä ja loitonna kahdella sormella.\n\nPalauta näkymä alkuperäiseen klikkaamalla/napauttamalla kuvaajaa kaksi kertaa.",
+      "successfully_saved": "Tallennettu onnistuneesti"
     }
   },
   "sv": {
@@ -290,6 +294,7 @@
       "settings_humidity_unit": "Luftfuktighetsenhet",
       "settings_pressure_unit": "Tryckenhet",
       "settings_temperature_unit": "Temperaturenhet",
+      "something_went_wrong": "Något gick fel",
       "temperature_celsius_name": "Celsius (℃)",
       "temperature_fahrenheit_name": "Fahrenheit (℉)",
       "temperature_kelvin_name": "Kelvin (K)",
@@ -374,7 +379,8 @@
       "on": "På",
       "off": "Av",
       "dashboard_no_sensors": "Det ser ut som att detta är ett nytt användarkonto utan sensorer. Logga in på mobilappen med samma e-postadress och bekräfta äganderätten till dina Ruuvi sensorer.\\n\\nObs: För att se data från sensorer via molnet kräver en Ruuvi Gateway-router. Beställ fler Ruuvi sensorer och Gateway på ruuvi.com",
-      "zoom_info": "Desktop webbläsare: Markera önskat område med musen för att zooma in.\n\nMobil webbläsare: Zooma in och ut med två fingrar.\n\nDubbelklicka på grafen för att återställá."
+      "zoom_info": "Desktop webbläsare: Markera önskat område med musen för att zooma in.\n\nMobil webbläsare: Zooma in och ut med två fingrar.\n\nDubbelklicka på grafen för att återställá.",
+      "successfully_saved": "Sparat"
     }
   }
 }

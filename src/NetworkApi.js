@@ -206,7 +206,7 @@ class NetworkApi {
         })
             .then(response => success(response))
     }
-    setSetting(name, value, success) {
+    setSetting(name, value, success, error) {
         fetch(this.url + "/settings", {
             ...this.options,
             method: 'POST',
@@ -220,7 +220,9 @@ class NetworkApi {
             })
             .then(response => {
                 success(response);
-            })
+            }).catch(e => {
+                error(e);
+            });
     }
     getAlerts(success) {
         fetch(this.url + "/alerts", this.options).then(function (response) {

@@ -4,6 +4,7 @@ import RadioInput from "../components/RadioInput";
 import { Box, Progress, HStack } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import NavClose from "../components/NavClose";
+import notify from "../utils/notify";
 
 const header = {
     fontFamily: "montserrat",
@@ -43,7 +44,6 @@ class Settings extends Component {
     }
     componentDidMount() {
         new NetworkApi().getSettings(data => {
-            console.log(data);
             if (data.result === "success") {
                 var settings = this.state.settings;
                 settings = { ...settings, ...data.data.settings };
@@ -60,15 +60,22 @@ class Settings extends Component {
         saving.push(key)
         this.setState({ ...this.state, settings: settings, savingSettings: saving });
         new NetworkApi().setSetting(key, value, b => {
-            var saving = this.state.savingSettings;
-            saving = saving.filter(x => x !== key)
-            this.setState({ ...this.state, savingSettings: saving });
-
-            // reload settings in the safest way possible, will be improved in another issue
-            new NetworkApi().getSettings(settings => {
-                if (settings.result === "success")
-                    localStorage.setItem("settings", JSON.stringify(settings.data.settings))
-            })
+            if (b.result === "success") {
+                notify.success(this.props.t("successfully_saved"))
+                var saving = this.state.savingSettings;
+                saving = saving.filter(x => x !== key)
+                this.setState({ ...this.state, savingSettings: saving });
+                // reload settings in the safest way possible, will be improved in another issue
+                new NetworkApi().getSettings(settings => {
+                    if (settings.result === "success")
+                        localStorage.setItem("settings", JSON.stringify(settings.data.settings))
+                })
+            } else if (b.result === "error") {
+                notify.error(`UserApiError.${this.props.t(b.code)}`)
+            }
+        }, error => {
+            console.log(error);
+            notify.error(this.props.t("something_went_wrong"))
         })
     }
     render() {
