@@ -23,7 +23,11 @@ class Dashboard extends Component {
             from: 24 * 3,
         }
         var from = new Store().getDashboardFrom();
-        if (from) this.state.from = from;
+        if (from) {
+            // apply new dashboard history length limit to old stored value
+            if (from > 24 * 7) from = 24 * 7;
+            this.state.from = from;
+        }
     }
     getCurrentSensor() {
         let id = this.props.match.params.id;
@@ -118,7 +122,7 @@ class Dashboard extends Component {
             <>
                 {!this.getCurrentSensor() &&
                     <div style={{ textAlign: "end", marginTop: -10, marginBottom: -40 }} >
-                        <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
+                        <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
                     </div>
                 }
                 <Box marginTop="36px" marginLeft={{ base: "10px", md: "20px", lg: "50px" }} marginRight={{ base: "10px", md: "20px", lg: "50px" }}>

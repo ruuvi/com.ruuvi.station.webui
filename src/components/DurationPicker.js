@@ -40,6 +40,8 @@ const detailedSubText = {
 export default function DurationPicker(props) {
     const { t } = useTranslation();
     var ts = getTimespan(props.value)
+    var renderTimespans = timespans;
+    if (props.dashboard) renderTimespans = renderTimespans.filter(x => x.v <= 24 * 7)
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
             <MenuButton as={Button}
@@ -50,7 +52,7 @@ export default function DurationPicker(props) {
                 {ts.k} {t(ts.t).toLowerCase()}
             </MenuButton>
             <MenuList>
-                {timespans.map(x => {
+                {renderTimespans.map(x => {
                     return <MenuItem key={x.v} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", backgroundColor: ts.v === x.v ? ruuviTheme.colors.primaryLight : undefined }} onClick={() => props.onChange(x.v)}>{x.k} {t(x.t).toLowerCase()}</MenuItem>
                 })}
             </MenuList>
