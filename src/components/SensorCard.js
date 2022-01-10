@@ -50,7 +50,7 @@ class SensorCard extends Component {
         clearTimeout(this.fetchDataLoop);
     }
     async loadGraphData(graphDataMode, lastDataPoint) {
-        var graphData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: graphDataMode })
+        var graphData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), null, { mode: graphDataMode })
         if (graphData.result === "success") {
             let d = parse(graphData.data);
             if (lastDataPoint == null && d.measurements.length > 0) lastDataPoint = d.measurements[0]
@@ -71,7 +71,7 @@ class SensorCard extends Component {
                 this.loadGraphData(graphDataMode)
                 return
             }
-            var singleData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), { mode: "dense", limit: 1, sort: "desc" });
+            var singleData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), null, { mode: "dense", limit: 1, sort: "desc" });
             if (singleData.result === "success") {
                 let oneDenseData = parse(singleData.data);
                 var lastParsedReading = oneDenseData.measurements.length === 1 ? oneDenseData.measurements[0] : null

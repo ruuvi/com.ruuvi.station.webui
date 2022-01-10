@@ -2,7 +2,8 @@
   "name": "ruuvi_web_ui",
   "version": "0.2.6",
   "settings": {
-    "sensorNameMaxLength": 32
+    "sensorNameMaxLength": 32,
+    "dataFetchPaginationSize": 1000
   },
   "private": true,
   "dependencies": {

@@ -41,6 +41,7 @@ import NavPrevNext from "../components/NavPrevNext";
 import DurationPicker, { getTimespan } from "../components/DurationPicker";
 import notify from "../utils/notify"
 import { ruuviTheme } from "../themes";
+import pjson from '../../package.json';
 
 var bigCardFields = ["temperature", "humidity", "pressure", "movementCounter"];
 var sensorInfoOrder = ["mac", "dataFormat", "battery", "accelerationX", "accelerationY", "accelerationZ", "txPower", "rssi", "measurementSequenceNumber"];
@@ -215,14 +216,35 @@ class Sensor extends Component {
             }
         })
         try {
-            var resp = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.state.from), { mode: this.state.mode });
-            if (resp.result === "success") {
-                let d = parse(resp.data);
-                this.setState({ data: d, loading: false, table: d.table, resolvedMode: d.resolvedMode })
-            } else if (resp.result === "error") {
-                notify.error(this.props.t(`UserApiError.${resp.code}`))
-                this.setState({ ...this.state, loading: false })
+            var that = this;
+            async function load(until, initialLoad) {
+                var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
+                if (!until) until = Math.floor(new Date().getTime() / 1000);
+                if (!initialLoad) since = that.state.data.measurements[0].timestamp + 1;
+                if (until <= since) return;
+                var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: that.state.mode, limit: pjson.settings.dataFetchPaginationSize });
+                if (resp.result === "success") {
+                    let d = parse(resp.data);
+                    // looks like timerange has changed, stop
+                    if (d.measurements[d.measurements.length - 1].timestamp < since) return;
+                    var stateData = that.state.data;
+                    if (!stateData || (stateData && stateData.measurements[stateData.measurements.length - 1].timestamp < since)) stateData = d;
+                    else if (initialLoad) stateData.measurements = stateData.measurements.concat(d.measurements)
+                    else {
+                        // data refresh, add new once to the beginning of the array
+                        stateData.measurements = [...d.measurements, ...stateData.measurements]
+                        stateData.latestTimestamp = stateData.measurements[0].timestamp
+                    }
+                    that.setState({ ...that.state, data: stateData, loading: false, table: d.table, resolvedMode: d.resolvedMode })
+                    // stop fetching data if sensor page has changed
+                    if (that.props.sensor.sensor !== resp.data.sensor) return;
+                    if (initialLoad && d.measurements.length >= pjson.settings.dataFetchPaginationSize) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
+                } else if (resp.result === "error") {
+                    notify.error(that.props.t(`UserApiError.${resp.code}`))
+                    that.setState({ ...that.state, loading: false })
+                }
             }
+            load(null, this.state.data === null || showLoading)
         } catch (e) {
             notify.error(this.props.t("internet_connection_problem"))
             console.log("err", e)

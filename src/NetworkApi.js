@@ -98,26 +98,26 @@ class NetworkApi {
             })
             .catch(error => fail ? fail(error) : {});
     };
-    async getAsync(mac, from, settings) {
+    async getAsync(mac, since, until, settings) {
         if (!this.options) return null;
         var mode = settings.mode || "mixed";
-        var cachedData = await DataCache.getData(mac, mode, from)
+        var cachedData = await DataCache.getData(mac, mode, since)
         var useCache = false;
-        if (cachedData && cachedData.length) {
+        if (!until && cachedData && cachedData.length) {
             let newest = cachedData[0].timestamp;
             let oldest = cachedData[cachedData.length - 1].timestamp;
-            if (from > newest || from < oldest - 60 * 15) {
+            if (since > newest || since < oldest - 60 * 15) {
                 //console.log("Will not use cache")
             } else {
-                from = newest
+                since = newest
                 useCache = true
             }
         }
-
         var q = "?sensor=" + encodeURIComponent(mac)
         q += "&mode=" + encodeURIComponent(mode)
-        q += "&since=" + from
-        q += "&until=" + parseInt(new Date().getTime() / 1000)
+        if (since) q += "&since=" + since
+        if (until) q += "&until=" + until
+        else q += "&until=" + parseInt(new Date().getTime() / 1000)
         q += "&limit=" + (settings.limit || 100000)
         if (settings.sort) q += "&sort=" + settings.sort
         const resp = await fetch(this.url + "/get" + q, this.options)
