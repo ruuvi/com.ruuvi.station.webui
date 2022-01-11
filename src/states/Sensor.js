@@ -228,7 +228,7 @@ class Sensor extends Component {
                     // looks like timerange has changed, stop
                     if (d.measurements[d.measurements.length - 1].timestamp < since) return;
                     var stateData = that.state.data;
-                    if (!stateData || (stateData && stateData.measurements[stateData.measurements.length - 1].timestamp < since)) stateData = d;
+                    if (!stateData) stateData = d;
                     else if (initialLoad) stateData.measurements = stateData.measurements.concat(d.measurements)
                     else {
                         // data refresh, add new once to the beginning of the array
@@ -319,7 +319,7 @@ class Sensor extends Component {
         }
     }
     updateFrom(v) {
-        this.setState({ ...this.state, from: v }, () => this.loadData(true))
+        this.setState({ ...this.state, data: null, from: v }, () => this.loadData(true))
         new Store().setGraphFrom(v)
     }
     share(state) {
