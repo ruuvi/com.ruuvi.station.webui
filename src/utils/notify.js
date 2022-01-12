@@ -10,7 +10,7 @@ function toastIt(title, status, duration) {
     })
 }
 
-export default {
+var notify = {
     success: (title) => {
         toastIt(title, "success")
     },
@@ -21,3 +21,5 @@ export default {
         toastIt(title, "info", 7 * 1000)
     }
 }
+
+export default notify
