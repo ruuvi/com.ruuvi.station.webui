@@ -313,7 +313,7 @@ class Sensor extends Component {
                     notify.error(`UserApiError.${this.props.t(resp.code)}`)
                 }
             }, fail => {
-                notify.error(this.props.t("internet_connection_problem"))
+                notify.error(this.props.t("something_went_wrong"))
                 console.log(fail)
             })
         }

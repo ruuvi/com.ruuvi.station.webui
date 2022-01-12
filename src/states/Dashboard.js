@@ -77,7 +77,7 @@ class Dashboard extends Component {
                 notify.error(this.props.t(`UserApiError.${resp.code}`))
             }
         }, (e) => {
-            notify.error(this.props.t(`internet_connection_problem`))
+            notify.error(this.props.t(`something_went_wrong`))
         })
     }
     nextIndex(direction) {
