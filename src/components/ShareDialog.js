@@ -16,6 +16,7 @@ import {
 import { withTranslation } from 'react-i18next';
 import { MdClear } from "react-icons/md";
 import NetworkApi from "../NetworkApi";
+import notify from "../utils/notify";
 
 const maxSharesPerSensor = 10;
 
@@ -36,10 +37,11 @@ class ShareDialog extends Component {
                         sensor.sharedTo.push(this.state.email);
                         this.props.updateSensor(sensor)
                     }
+                    notify.success(this.props.t("successfully_shared"))
                     newState.email = "";
                     break
                 case "error":
-                    alert(this.props.t(`UserApiError.${resp.code}`))
+                    notify.error(this.props.t(`UserApiError.${resp.code}`))
                     break;
                 default:
             }
@@ -61,7 +63,7 @@ class ShareDialog extends Component {
                         this.props.updateSensor(sensor)
                         break
                     case "error":
-                        alert(this.props.t(`UserApiError.${resp.code}`))
+                        notify.error(this.props.t(`UserApiError.${resp.code}`))
                         break;
                     default:
                 }

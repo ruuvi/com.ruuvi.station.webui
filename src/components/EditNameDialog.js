@@ -13,6 +13,7 @@ import {
 import { withTranslation } from 'react-i18next';
 import NetworkApi from "../NetworkApi";
 import pjson from "../../package.json";
+import notify from "../utils/notify";
 
 class EditNameDialog extends Component {
     constructor(props) {
@@ -33,10 +34,11 @@ class EditNameDialog extends Component {
                 case "success":
                     var sensor = this.props.sensor;
                     sensor.name = this.state.name;
+                    notify.success(this.props.t("successfully_saved"))
                     this.props.updateSensor(sensor)
                     break
                 case "error":
-                    alert(this.props.t(`UserApiError.${resp.code}`))
+                    notify.error(this.props.t(`UserApiError.${resp.code}`))
                     break;
                 default:
             }

@@ -49,7 +49,7 @@ class Settings extends Component {
                 settings = { ...settings, ...data.data.settings };
                 this.setState({ ...this.state, settings: settings, loading: false });
             } else {
-                alert(this.props.t("error") + ": " + this.props.t(`UserApiError.${data.result.code}`))
+                notify.error(this.props.t(`UserApiError.${data.result.code}`))
             }
         })
     }

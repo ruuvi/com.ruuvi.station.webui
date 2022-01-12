@@ -7,6 +7,7 @@ import { withTranslation } from 'react-i18next';
 import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
 import SessionStore from "../SessionStore";
+import notify from "../utils/notify";
 
 const infoText = {
     fontFamily: "mulish",
@@ -69,17 +70,14 @@ class Dashboard extends Component {
                         this.setState({ ...this.state, sensors: d, loading: false })
                         this.loadAlerts();
                     } else if (resp.result === "error") {
-                        alert(resp.error)
+                        notify.error(this.props.t(`UserApiError.${resp.code}`))
                     }
                 })
             } else if (resp.result === "error") {
-                alert(resp.error)
-                //new NetworkApi().removeToken()
+                notify.error(this.props.t(`UserApiError.${resp.code}`))
             }
         }, (e) => {
-            alert("Network error")
-            console.log("err", e)
-            //new NetworkApi().removeToken()
+            notify.error(this.props.t(`internet_connection_problem`))
         })
     }
     nextIndex(direction) {

@@ -335,8 +335,16 @@ class Sensor extends Component {
             alerts[alertIdx] = alert
             this.setState({ ...this.state, alerts: alerts });
         }
-        new NetworkApi().setAlert({ ...alert, sensor: this.props.sensor.sensor }, result => {
-            console.log(result);
+        new NetworkApi().setAlert({ ...alert, sensor: this.props.sensor.sensor }, resp => {
+            switch (resp.result) {
+                case "success":
+                    notify.success(this.props.t("successfully_saved"))
+                    break
+                case "error":
+                    notify.error(this.props.t(`UserApiError.${resp.code}`))
+                    break;
+                default:
+            }
         })
     }
     export() {

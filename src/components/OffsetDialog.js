@@ -15,6 +15,7 @@ import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 import InputDialog from "./InputDialog";
 import NetworkApi from "../NetworkApi";
+import notify from "../utils/notify";
 
 
 class OffsetDialog extends Component {
@@ -49,17 +50,23 @@ class OffsetDialog extends Component {
             var data = {};
             var key = "offset" + this.props.open;
             data[key] = value;
-            new NetworkApi().updateSensorData(this.props.sensor.sensor, data, result => {
-                if (result.result === "success") {
-                    window.location.reload();
-                    //this.props.updateSensor({...this.props.sensor, ...data});
-                } else {
-                    alert(this.props.t("error") + ": " + this.props.t(`UserApiError.${result.code}`))
-                    this.setState({ ...this.state, saving: false })
+            new NetworkApi().updateSensorData(this.props.sensor.sensor, data, resp => {
+                switch (resp.result) {
+                    case "success":
+                        notify.success(this.props.t("successfully_saved"))
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000)
+                        break
+                    case "error":
+                        notify.error(this.props.t(`UserApiError.${resp.code}`))
+                        this.setState({ ...this.state, saving: false })
+                        break;
+                    default:
                 }
             })
         } else {
-            this.setState({ ...this.state, correctionInput: false})
+            this.setState({ ...this.state, correctionInput: false })
         }
     }
     clearCalibration() {
@@ -69,7 +76,7 @@ class OffsetDialog extends Component {
     }
     format(number) {
         if (!this.props.open) return number;
-        return localeNumber(number,getUnitHelper(this.props.open.toLowerCase()).decimals);
+        return localeNumber(number, getUnitHelper(this.props.open.toLowerCase()).decimals);
     }
     render() {
         var { t } = this.props;
