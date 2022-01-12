@@ -38,8 +38,8 @@ class AlertItem extends Component {
             min = uh.value(min)
             max = uh.value(max)
         }
-        min = localeNumber(min, 2)
-        max = localeNumber(max, 2)
+        min = localeNumber(min)
+        max = localeNumber(max)
         let regx = "{(.*?)}"
         var alertText = this.props.t("alert_description")
         var match = alertText.match(regx)
@@ -82,7 +82,7 @@ class AlertItem extends Component {
                         <tbody>
                             <tr>
                                 <td width="50%">
-                                    <div style={{...this.props.detailedTitle, width: undefined}}>{t(x.toLocaleLowerCase())}</div>
+                                    <div style={{...this.props.detailedTitle, width: undefined}}>{t(x.toLocaleLowerCase()) + (x !== "Movement" ? ` (${uh.unit})` : "")}</div>
                                     <div style={this.props.detailedSubText}>{this.props.type === "Movement" ? <span>{this.getAlertText(alert, x.toLocaleLowerCase())}</span> : <EditableText text={this.getAlertText(alert, x.toLocaleLowerCase())} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</div>
                                 </td>
                                 <td style={this.props.detailedText}>
