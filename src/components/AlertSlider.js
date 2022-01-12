@@ -1,6 +1,6 @@
 import React from "react";
 import { Range, getTrackBackground } from 'react-range';
-import { getAlertRange } from '../UnitHelper';
+import { getAlertRange, getUnitHelper, pressureFromUserFormat, temperatureFromUserFormat } from '../UnitHelper';
 import InputDialog from "./InputDialog";
 import { withTranslation } from "react-i18next";
 import { uppercaseFirst } from "../TextHelper";
@@ -12,29 +12,48 @@ class AlertSlider extends React.Component {
     constructor(props) {
         super(props)
         var range = getAlertRange(props.type)
+        if (this.props.type === "temperature" || this.props.type === "pressure") {
+            var uh = getUnitHelper(this.props.type)
+            range.max = uh.value(range.max)
+            range.min = uh.value(range.min)
+        }
         this.state = {
             ...range,
             editMinValue: false,
             editMaxValue: false,
         }
     }
+    onChange(values, final) {
+        if (this.props.type === "temperature") {
+            values = [temperatureFromUserFormat(values[0]), temperatureFromUserFormat(values[1])]
+        } else if (this.props.type === "pressure") {
+            values = [pressureFromUserFormat(values[0]), pressureFromUserFormat(values[1])]
+        }
+        this.props.onChange(values, final)
+    }
     render() {
+        var range = getAlertRange(this.props.type)
         var max = this.props.value.max
-        if (max == null) max = this.state.max;
+        if (max == null) max = range.max;
         var min = this.props.value.min
-        if (min == null) min = this.state.min;
-        if (max > this.state.max || min < this.state.min || min > max) {
+        if (min == null) min = range.min;
+        if (max > range.max || min < range.min || min > max) {
             // revert to default if values are fishy
-            max = this.state.max;
-            min = this.state.min;
+            max = range.max;
+            min = range.min;
+        }
+        var uh = getUnitHelper(this.props.type)
+        if (this.props.type === "temperature" || this.props.type === "pressure") {
+            max = uh.value(max)
+            min = uh.value(min)
         }
         var sliderValues = [min, max]
         return <div style={{ display: 'flex', alignItems: 'center' }}>
             <Range {...this.state} values={sliderValues}
-                step={this.props.type === "pressure" ? 100 : 1}
+                step={this.props.type === "pressure" && uh.unit === "Pa" ? 100 : 1}
                 disabled={this.props.disabled}
-                onChange={values => this.props.onChange(values, false)}
-                onFinalChange={values => this.props.onChange(values, true)}
+                onChange={values => this.onChange(values, false)}
+                onFinalChange={values => this.onChange(values, true)}
                 renderTrack={({ props, children }) => (
                     <div
                         {...props}
