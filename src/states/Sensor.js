@@ -169,7 +169,6 @@ class Sensor extends Component {
             from: new Store().getGraphFrom() || 24,
             table: "",
             resolvedMode: "",
-            mode: "mixed",
             alerts: [],
             editName: false,
             showShare: false,
@@ -196,11 +195,6 @@ class Sensor extends Component {
             this.loadData(true)
         }
     }
-    setMode(mode) {
-        this.setState({ ...this.state, mode: mode }, () => {
-            this.loadData(true);
-        })
-    }
     async loadData(showLoading) {
         clearTimeout(this.latestDataUpdate);
         this.latestDataUpdate = setTimeout(() => {
@@ -216,13 +210,15 @@ class Sensor extends Component {
             }
         })
         try {
+            let dataMode = this.state.from > 24 ? "sparse" : "dense";
+            console.log(dataMode)
             var that = this;
             async function load(until, initialLoad) {
                 var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
                 if (!until) until = Math.floor(new Date().getTime() / 1000);
                 if (!initialLoad) since = that.state.data.measurements[0].timestamp + 1;
                 if (until <= since) return;
-                var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: that.state.mode, limit: pjson.settings.dataFetchPaginationSize });
+                var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
                 if (resp.result === "success") {
                     let d = parse(resp.data);
                     // looks like timerange has changed, stop
