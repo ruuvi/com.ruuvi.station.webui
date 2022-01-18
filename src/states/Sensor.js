@@ -394,7 +394,7 @@ class Sensor extends Component {
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: "right" }}>
-                                                <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.zoomInfo()}>{`${uppercaseFirst(t("Zoom"))}`} <MdInfo size={18} style={{ marginLeft: 4 }} color={ruuviTheme.colors.primaryLight} /></Button>
+                                                <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.zoomInfo()}>{`${uppercaseFirst(t("zoom"))}`} <MdInfo size={18} style={{ marginLeft: 4 }} color={ruuviTheme.colors.primaryLight} /></Button>
                                                 <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                 <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
                                             </td>

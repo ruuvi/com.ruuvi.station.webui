@@ -126,7 +126,8 @@
       "zoom_info": "Desktop browser: Zoom in by selecting a desired timespan with cursor.\n\nMobile browser: Zoom in and out with two fingers.\n\nReset zoom level to original by double clicking/tapping the graph.",
       "successfully_saved": "Successfully saved",
       "internet_connection_problem": "Internet connection problem",
-      "successfully_unshared": "Successfully unshared"
+      "successfully_unshared": "Successfully unshared",
+      "zoom": "Zoom"
     }
   },
   "fi": {
@@ -256,7 +257,8 @@
       "zoom_info": "Työpöytäselain: Lähennä valitsemalla haluttu alue hiirellä.\n\nMobiiliselain: Lähennä ja loitonna kahdella sormella.\n\nPalauta näkymä alkuperäiseen klikkaamalla/napauttamalla kuvaajaa kaksi kertaa.",
       "successfully_saved": "Tallennettu onnistuneesti",
       "internet_connection_problem": "Ongelma internet-yhteydessä",
-      "successfully_unshared": "Jakamisen peruutus onnistui"
+      "successfully_unshared": "Jakamisen peruutus onnistui",
+      "zoom": "Zoomaa"
     }
   },
   "sv": {
@@ -386,7 +388,8 @@
       "zoom_info": "Desktop webbläsare: Markera önskat område med musen för att zooma in.\n\nMobil webbläsare: Zooma in och ut med två fingrar.\n\nDubbelklicka på grafen för att återställá.",
       "successfully_saved": "Sparat",
       "internet_connection_problem": "Internetanslutningsproblem",
-      "successfully_unshared": "Delningen har tagits bort"
+      "successfully_unshared": "Delningen har tagits bort",
+      "zoom": "Zoom"
     }
   }
 }
