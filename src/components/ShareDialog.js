@@ -23,7 +23,7 @@ const maxSharesPerSensor = 10;
 class ShareDialog extends Component {
     constructor(props) {
         super(props)
-        this.state = { email: "", loading: false, successfullInvite: false }
+        this.state = { email: "", loading: false }
     }
     share() {
         this.setState({ ...this.state, loading: true })
@@ -31,7 +31,6 @@ class ShareDialog extends Component {
             var newState = this.state;
             switch (resp.result) {
                 case "success":
-                    newState.successfullInvite = true;
                     if (!resp.data.invited) {
                         var sensor = this.props.sensor;
                         sensor.sharedTo.push(this.state.email);
@@ -53,13 +52,14 @@ class ShareDialog extends Component {
         if (this.state.loading) return;
         var confirmMessage = this.props.t("share_sensor_unshare_confirm").replace("{%@^%1$s}", email)
         if (window.confirm(confirmMessage)) {
-            this.setState({ ...this.state, loading: true, successfullInvite: false })
+            this.setState({ ...this.state, loading: true })
             new NetworkApi().unshare(this.props.sensor.sensor, email, resp => {
                 var newState = this.state;
                 switch (resp.result) {
                     case "success":
                         var sensor = this.props.sensor;
                         sensor.sharedTo = sensor.sharedTo.filter(x => x !== email)
+                        notify.success(this.props.t(`successfully_unshared`))
                         this.props.updateSensor(sensor)
                         break
                     case "error":
@@ -73,7 +73,7 @@ class ShareDialog extends Component {
         }
     }
     emailHandler(evt) {
-        this.setState({ ...this.state, email: evt.target.value, successfullInvite: false });
+        this.setState({ ...this.state, email: evt.target.value });
     }
     render() {
         if (!this.props.sensor || !this.props.sensor.canShare) return <></>
@@ -91,7 +91,7 @@ class ShareDialog extends Component {
                             <div style={{ fontWeight: "bold" }}>{t("share_sensor_add_friend")}</div>
                             <Input placeholder={t("email")} type="email" value={this.state.email} onChange={this.emailHandler.bind(this)} />
                             <div style={{ textAlign: "right" }}>
-                                <Button backgroundColor={this.state.successfullInvite ? "green.300" : undefined} disabled={this.state.loading || this.props.sensor.sharedTo.length >= maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)} onClick={this.share.bind(this)} mt="2">{this.state.successfullInvite ? t("successfully_shared") : t("share")}</Button>
+                                <Button disabled={this.state.loading || this.props.sensor.sharedTo.length >= maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)} onClick={this.share.bind(this)} mt="2">{t("share")}</Button>
                             </div>
                             {this.props.sensor.sharedTo.length > 0 && <>
                                 <div style={{ fontWeight: "bold" }}>{t("share_sensor_already_shared")} {this.props.sensor.sharedTo.length}/{maxSharesPerSensor}</div>
