@@ -211,7 +211,6 @@ class Sensor extends Component {
         })
         try {
             let dataMode = this.state.from > 24 ? "sparse" : "dense";
-            console.log(dataMode)
             var that = this;
             async function load(until, initialLoad) {
                 var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
@@ -221,6 +220,11 @@ class Sensor extends Component {
                 var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
                 if (resp.result === "success") {
                     let d = parse(resp.data);
+                    // no data
+                    if (!stateData && d.measurements.length === 0) {
+                        that.setState({ ...that.state, data: d, loading: false })
+                        return
+                    }
                     // looks like timerange has changed, stop
                     if (d.measurements[d.measurements.length - 1].timestamp < since) return;
                     var stateData = that.state.data;
