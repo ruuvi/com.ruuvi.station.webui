@@ -220,6 +220,7 @@ class Sensor extends Component {
                 var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
                 if (resp.result === "success") {
                     let d = parse(resp.data);
+                    var stateData = that.state.data;
                     // no data
                     if (!stateData && d.measurements.length === 0) {
                         that.setState({ ...that.state, data: d, loading: false })
@@ -227,7 +228,6 @@ class Sensor extends Component {
                     }
                     // looks like timerange has changed, stop
                     if (d.measurements[d.measurements.length - 1].timestamp < since) return;
-                    var stateData = that.state.data;
                     if (!stateData) stateData = d;
                     else if (initialLoad) stateData.measurements = stateData.measurements.concat(d.measurements)
                     else {
