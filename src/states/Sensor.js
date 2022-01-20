@@ -212,6 +212,7 @@ class Sensor extends Component {
         try {
             let dataMode = this.state.from > 24 ? "sparse" : "dense";
             var that = this;
+            var thisFrom = this.state.from;
             async function load(until, initialLoad, onlyOneDense) {
                 var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
                 if (!until) until = Math.floor(new Date().getTime() / 1000);
@@ -225,6 +226,9 @@ class Sensor extends Component {
                 } else {
                     resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
                 }
+                // stop fetching data if sensor page has changed
+                if (that.props.sensor.sensor !== resp.data.sensor) return;
+                if (that.state.from !== thisFrom) return;
                 if (resp.result === "success") {
                     let d = parse(resp.data);
                     var stateData = that.state.data;
@@ -243,8 +247,6 @@ class Sensor extends Component {
                         stateData.latestTimestamp = stateData.measurements[0].timestamp
                     }
                     that.setState({ ...that.state, data: stateData, loading: false, table: d.table, resolvedMode: d.resolvedMode })
-                    // stop fetching data if sensor page has changed
-                    if (that.props.sensor.sensor !== resp.data.sensor) return;
                     if (initialLoad && (firstPoint || d.measurements.length >= pjson.settings.dataFetchPaginationSize)) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
                     else if (!onlyOneDense) load(null, false, true)
                 } else if (resp.result === "error") {
