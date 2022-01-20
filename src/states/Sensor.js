@@ -212,12 +212,19 @@ class Sensor extends Component {
         try {
             let dataMode = this.state.from > 24 ? "sparse" : "dense";
             var that = this;
-            async function load(until, initialLoad) {
+            async function load(until, initialLoad, onlyOneDense) {
                 var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
                 if (!until) until = Math.floor(new Date().getTime() / 1000);
                 if (!initialLoad) since = that.state.data.measurements[0].timestamp + 1;
                 if (until <= since) return;
-                var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
+                var firstPoint = false;
+                var resp;
+                if (!that.state.data || onlyOneDense) {
+                    firstPoint = true;
+                    resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: "dense", limit: 1 });
+                } else {
+                    resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
+                }
                 if (resp.result === "success") {
                     let d = parse(resp.data);
                     var stateData = that.state.data;
@@ -227,7 +234,7 @@ class Sensor extends Component {
                         return
                     }
                     // looks like timerange has changed, stop
-                    if (d.measurements[d.measurements.length - 1].timestamp < since) return;
+                    if (!d.measurements && d.measurements[d.measurements.length - 1].timestamp < since) return;
                     if (!stateData) stateData = d;
                     else if (initialLoad) stateData.measurements = stateData.measurements.concat(d.measurements)
                     else {
@@ -238,7 +245,8 @@ class Sensor extends Component {
                     that.setState({ ...that.state, data: stateData, loading: false, table: d.table, resolvedMode: d.resolvedMode })
                     // stop fetching data if sensor page has changed
                     if (that.props.sensor.sensor !== resp.data.sensor) return;
-                    if (initialLoad && d.measurements.length >= pjson.settings.dataFetchPaginationSize) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
+                    if (initialLoad && (firstPoint || d.measurements.length >= pjson.settings.dataFetchPaginationSize)) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
+                    else if (!onlyOneDense) load(null, false, true)
                 } else if (resp.result === "error") {
                     notify.error(that.props.t(`UserApiError.${resp.code}`))
                     that.setState({ ...that.state, loading: false })
