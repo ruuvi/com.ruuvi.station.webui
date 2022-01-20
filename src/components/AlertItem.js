@@ -7,6 +7,7 @@ import AlertSlider from "./AlertSlider";
 import EditableText from "./EditableText";
 import InputDialog from "./InputDialog";
 import RangeInputDialog from "./RangeInputDialog";
+import pjson from '../../package.json';
 
 const alertDescription = {
     fontFamily: "mulish",
@@ -110,6 +111,7 @@ class AlertItem extends Component {
                     onClose={(save, description) => save ? this.setAlert({ ...alert, description: description }, type, null, false) : this.setState({ ...this.state, editDescription: false })}
                     title={t("alarm_custom_title_hint")}
                     buttonText={t("update")}
+                    maxLength={pjson.settings.alertDescriptionMaxLength}
                 />
                 <RangeInputDialog open={this.state.rangeInputDialog} value={alert ? this.getMinMaxArr() : null}
                     onClose={(save, value) => save ? this.setAlert({ ...alert, min: uh.fromUser(value[0]), max: uh.fromUser(value[1])}, type, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}

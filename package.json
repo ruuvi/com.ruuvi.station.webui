@@ -3,6 +3,7 @@
   "version": "0.2.10",
   "settings": {
     "sensorNameMaxLength": 32,
+    "alertDescriptionMaxLength": 64,
     "dataFetchPaginationSize": 1000
   },
   "private": true,
