@@ -50,12 +50,12 @@ class AlertItem extends Component {
         return alertText;
     }
     setAlert(alert, type, enabled, dontUpdate) {
-        if (alert) {
+        if (alert && alert.type) {
             if (enabled !== null) alert.enabled = enabled;
         } else {
             alert = {
                 type: type,
-                enabled: true,
+                enabled: enabled === true,
                 ...getAlertRange(type)
             }
         }
