@@ -87,7 +87,7 @@ class AlertItem extends Component {
                         <tbody>
                             <tr>
                                 <td width="50%">
-                                    <div style={{...this.props.detailedTitle, width: undefined}}>{t(type) + (type !== "movement" ? ` (${uh.unit})` : "")}</div>
+                                    <div style={{ ...this.props.detailedTitle, width: undefined }}>{t(type) + (type !== "movement" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}</div>
                                     <div style={this.props.detailedSubText}>{type === "movement" ? <span>{this.getAlertText(alert, type)}</span> : <EditableText text={this.getAlertText(alert, type)} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</div>
                                 </td>
                                 <td style={this.props.detailedText}>
@@ -99,7 +99,7 @@ class AlertItem extends Component {
                                 <tr>
                                     <td colSpan="2">
                                         <Box mt="8">
-                                            <AlertSlider disabled={!alert || !alert.enabled} type={type} value={alert || {...getAlertRange(this.props.type)}} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, type, true, !final)} />
+                                            <AlertSlider disabled={!alert || !alert.enabled} type={type} value={alert || { ...getAlertRange(this.props.type) }} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, type, true, !final)} />
                                         </Box>
                                     </td>
                                 </tr>
@@ -114,7 +114,7 @@ class AlertItem extends Component {
                     maxLength={pjson.settings.alertDescriptionMaxLength}
                 />
                 <RangeInputDialog open={this.state.rangeInputDialog} value={alert ? this.getMinMaxArr() : null}
-                    onClose={(save, value) => save ? this.setAlert({ ...alert, min: uh.fromUser(value[0]), max: uh.fromUser(value[1])}, type, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}
+                    onClose={(save, value) => save ? this.setAlert({ ...alert, min: uh.fromUser(value[0]), max: uh.fromUser(value[1]) }, type, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}
                     range={validRange}
                     buttonText={t("update")}
                     unit={() => {
