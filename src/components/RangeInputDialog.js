@@ -19,13 +19,8 @@ import { withTranslation } from "react-i18next";
 class RangeInputDialog extends Component {
     constructor(props) {
         super(props)
-        this.state = { value: [0, 100] };
+        this.state = { value: [props.range.min, props.range.max] };
         if (props.value) this.state.value = props.value;
-    }
-    componentDidUpdate(prevProps) {
-        if (this.props.value && (prevProps.value !== this.props.value)) {
-            this.setState({ ...this.state, value: this.props.value })
-        }
     }
     update() {
         var value = this.state.value;

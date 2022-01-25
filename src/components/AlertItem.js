@@ -66,7 +66,10 @@ class AlertItem extends Component {
     }
     getMinMaxArr() {
         var alert = this.state.alert;
+        if (!alert) return null;
         var uh = getUnitHelper(this.props.type.toLowerCase())
+        if (this.props.type.toLowerCase() === "humidity")
+            return [alert.min, alert.max]
         return [uh.value(alert.min), uh.value(alert.max)]
     }
     render() {
@@ -113,15 +116,17 @@ class AlertItem extends Component {
                     buttonText={t("update")}
                     maxLength={pjson.settings.alertDescriptionMaxLength}
                 />
-                <RangeInputDialog open={this.state.rangeInputDialog} value={alert ? this.getMinMaxArr() : null}
-                    onClose={(save, value) => save ? this.setAlert({ ...alert, min: uh.fromUser(value[0]), max: uh.fromUser(value[1]) }, type, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}
-                    range={validRange}
-                    buttonText={t("update")}
-                    unit={() => {
-                        if (type === "humidity") return "%";
-                        return uh.unit;
-                    }}
-                />
+                {this.state.rangeInputDialog &&
+                    <RangeInputDialog open={this.state.rangeInputDialog} value={this.getMinMaxArr()}
+                        onClose={(save, value) => save ? this.setAlert({ ...alert, min: uh.fromUser(value[0]), max: uh.fromUser(value[1]) }, type, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}
+                        range={validRange}
+                        buttonText={t("update")}
+                        unit={() => {
+                            if (type === "humidity") return "%";
+                            return uh.unit;
+                        }}
+                    />
+                }
             </ListItem>
         )
     }
