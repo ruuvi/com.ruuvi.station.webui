@@ -112,7 +112,7 @@ class OffsetDialog extends Component {
                         }
                     </ModalContent>
                 </Modal>
-                {this.props.open && <InputDialog open={this.state.correctionInput} value={this.getLastReading()}
+                {this.props.open && this.state.correctionInput && <InputDialog open={this.state.correctionInput} value={this.getLastReading()}
                     onClose={(save, value) => this.calibrate(value, save)}
                     title={t("calibration_setup")}
                     description={t(`calibration_enter_${this.props.open.toLowerCase()}`).replace("{%@^%1$s}", this.getUnit())}

@@ -17,11 +17,6 @@ class InputDialog extends Component {
         this.state = { value: "" }
         if (props.value) this.state.value = props.value;
     }
-    componentDidUpdate(prevProps) {
-        if (this.props.value && (prevProps.value !== this.props.value)) {
-            this.setState({ ...this.state, value: this.props.value })
-        }
-    }
     update() {
         var value = this.state.value;
         if (this.props.number) {
