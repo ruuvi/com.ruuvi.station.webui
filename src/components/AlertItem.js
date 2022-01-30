@@ -103,7 +103,7 @@ class AlertItem extends Component {
                                 <tr>
                                     <td colSpan="2">
                                         <Box mt="8">
-                                            <AlertSlider disabled={!alert || !alert.enabled} type={type} value={alert || { ...getAlertRange(this.props.type) }} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, type, true, !final)} />
+                                            <AlertSlider type={type} value={alert || { ...getAlertRange(this.props.type) }} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, type, alert ? alert.enabled : false, !final)} />
                                         </Box>
                                     </td>
                                 </tr>
