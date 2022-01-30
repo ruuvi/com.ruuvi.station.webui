@@ -516,13 +516,19 @@ class Sensor extends Component {
                                             {["Temperature", "Humidity", "Pressure"].map(x => {
                                                 var uh = getUnitHelper(x.toLocaleLowerCase());
                                                 var value = uh.value(this.state.data["offset" + x], true);
+                                                var unit = uh.unit;
+                                                if (x === "Humidity") {
+                                                    // humidity offset is always %
+                                                    value = this.state.data["offset" + x]
+                                                    unit = "%"
+                                                }
                                                 return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, offsetDialog: x })}>
                                                     <table style={accordionContent}>
                                                         <tbody>
                                                             <tr>
                                                                 <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
                                                                 <td style={detailedText}>
-                                                                    {localeNumber(value, uh.decimals)} {uh.unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
+                                                                    {localeNumber(value, uh.decimals)} {unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
                                                                 </td>
                                                             </tr>
                                                         </tbody>

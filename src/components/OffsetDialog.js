@@ -26,7 +26,8 @@ class OffsetDialog extends Component {
     getLastReading() {
         if (!this.props.open) return "";
         var value = this.props.lastReading[this.props.open.toLowerCase()];
-        value = getUnitHelper(this.props.open.toLowerCase()).value(value);
+        if (this.props.open !== "Humidity")
+            value = getUnitHelper(this.props.open.toLowerCase()).value(value);
         return value;
     }
     getOffset() {
@@ -37,6 +38,7 @@ class OffsetDialog extends Component {
     }
     getUnit() {
         if (!this.props.open) return ""
+        if (this.props.open === "Humidity") return "%"
         return getUnitHelper(this.props.open.toLowerCase()).unit
     }
     calibrate(value, save, clear) {
