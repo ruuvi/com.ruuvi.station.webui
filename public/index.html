@@ -33,10 +33,28 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Ruuvi Station</title>
+    <style>
+      #init_loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -50px;
+        margin-left: -50px;
+        width: 100px;
+        height: 100px;
+      }
+    </style>
   </head>
+  
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <div id="root">
+      <div id="init_loading">
+        <center>
+          <img width="50px" src="%PUBLIC_URL%/android-chrome-192x192.png" />
+        </center>
+      </div>
+    </div>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
