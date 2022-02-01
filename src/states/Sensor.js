@@ -213,15 +213,13 @@ class Sensor extends Component {
             let dataMode = this.state.from > 24 ? "sparse" : "dense";
             var that = this;
             var thisFrom = this.state.from;
-            async function load(until, initialLoad, onlyOneDense) {
+            async function load(until, initialLoad, firstDatapoint) {
                 var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
                 if (!until) until = Math.floor(new Date().getTime() / 1000);
-                if (!initialLoad) since = that.state.data.measurements[0].timestamp + 1;
+                if (!initialLoad && that.state.data.measurements.length) since = that.state.data.measurements[0].timestamp + 1;
                 if (until <= since) return;
-                var firstPoint = false;
                 var resp;
-                if (!that.state.data || onlyOneDense) {
-                    firstPoint = true;
+                if (firstDatapoint) {
                     resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: "dense", limit: 1 });
                 } else {
                     resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
@@ -233,28 +231,30 @@ class Sensor extends Component {
                     let d = parse(resp.data);
                     var stateData = that.state.data;
                     // no data
-                    if (!stateData && d.measurements.length === 0) {
+                    if (!firstDatapoint && !stateData && d.measurements.length === 0) {
                         that.setState({ ...that.state, data: d, loading: false })
                         return
                     }
                     // looks like timerange has changed, stop
                     if (!d.measurements && d.measurements[d.measurements.length - 1].timestamp < since) return;
                     if (!stateData) stateData = d;
-                    else if (initialLoad) stateData.measurements = stateData.measurements.concat(d.measurements)
+                    else if (initialLoad && stateData.measurements.length) {
+                        stateData.measurements = stateData.measurements.concat(d.measurements)
+                    }
                     else {
                         // data refresh, add new once to the beginning of the array
                         stateData.measurements = [...d.measurements, ...stateData.measurements]
                         stateData.latestTimestamp = stateData.measurements[0].timestamp
                     }
                     that.setState({ ...that.state, data: stateData, loading: false, table: d.table, resolvedMode: d.resolvedMode })
-                    if (initialLoad && (firstPoint || d.measurements.length >= pjson.settings.dataFetchPaginationSize)) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
-                    else if (!onlyOneDense) load(null, false, true)
+                    if (initialLoad && d.measurements.length >= pjson.settings.dataFetchPaginationSize) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
+                    else if (firstDatapoint) load(null, initialLoad, false)
                 } else if (resp.result === "error") {
                     notify.error(that.props.t(`UserApiError.${resp.code}`))
                     that.setState({ ...that.state, loading: false })
                 }
             }
-            load(null, this.state.data === null || showLoading)
+            load(null, this.state.data === null || showLoading, true)
         } catch (e) {
             notify.error(this.props.t("internet_connection_problem"))
             console.log("err", e)
