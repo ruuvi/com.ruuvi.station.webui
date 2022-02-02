@@ -127,7 +127,8 @@
       "successfully_saved": "Successfully saved",
       "internet_connection_problem": "Internet connection problem",
       "successfully_unshared": "Successfully unshared",
-      "zoom": "Zoom"
+      "zoom": "Zoom",
+      "alert_enabled": "Email and browser alerts successfully enabled"
     }
   },
   "fi": {
@@ -258,7 +259,8 @@
       "successfully_saved": "Tallennettu onnistuneesti",
       "internet_connection_problem": "Ongelma internet-yhteydessä",
       "successfully_unshared": "Jakamisen peruutus onnistui",
-      "zoom": "Zoomaa"
+      "zoom": "Zoomaa",
+      "alert_enabled": "Sähköposti- ja selainhälytykset käynnistetty onnistuneesti"
     }
   },
   "sv": {
@@ -389,7 +391,8 @@
       "successfully_saved": "Sparat",
       "internet_connection_problem": "Internetanslutningsproblem",
       "successfully_unshared": "Delningen har tagits bort",
-      "zoom": "Zoom"
+      "zoom": "Zoom",
+      "alert_enabled": "E-post- och webbläsaralarm har aktiverats"
     }
   }
 }

@@ -50,6 +50,7 @@ class AlertItem extends Component {
         return alertText;
     }
     setAlert(alert, type, enabled, dontUpdate) {
+        var wasEnabled = alert && alert.enabled
         if (alert && alert.type) {
             if (enabled !== null) alert.enabled = enabled;
         } else {
@@ -62,7 +63,7 @@ class AlertItem extends Component {
         }
         this.setState({ ...this.state, alert: alert, editDescription: false, editMinValue: false, editMaxValue: false, rangeInputDialog: false })
         if (!dontUpdate) {
-            this.props.onChange(alert)
+            this.props.onChange(alert, wasEnabled)
         }
     }
     getMinMaxArr() {

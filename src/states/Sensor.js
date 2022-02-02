@@ -336,17 +336,19 @@ class Sensor extends Component {
     editName(state) {
         this.setState({ ...this.state, editName: state })
     }
-    updateAlert(alert) {
+    updateAlert(alert, prevEnabled) {
+        var offToOn = true;
         var alerts = this.state.alerts;
-        var alertIdx = alerts.find(x => x.sensor === alert.sensor && x.type === alert.type)
+        var alertIdx = alerts.findIndex(x => x.sensor === alert.sensor && x.type === alert.type)
         if (alertIdx !== -1) {
+            offToOn = !prevEnabled && alert.enabled
             alerts[alertIdx] = alert
             this.setState({ ...this.state, alerts: alerts });
         }
         new NetworkApi().setAlert({ ...alert, sensor: this.props.sensor.sensor }, resp => {
             switch (resp.result) {
                 case "success":
-                    notify.success(this.props.t("successfully_saved"))
+                    notify.success(this.props.t(offToOn ? "alert_enabled" : "successfully_saved"))
                     break
                 case "error":
                     notify.error(this.props.t(`UserApiError.${resp.code}`))
@@ -496,7 +498,7 @@ class Sensor extends Component {
                                                 return <AlertItem key={x} alerts={this.state.alerts} alert={alert}
                                                     accordionContent={accordionContent} detailedTitle={detailedTitle}
                                                     detailedText={detailedText} detailedSubText={detailedSubText}
-                                                    type={x} onChange={a => this.updateAlert(a)} />
+                                                    type={x} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />
                                             })}
                                         </List>
                                     </AccordionPanel>
