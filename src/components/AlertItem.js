@@ -85,7 +85,7 @@ class AlertItem extends Component {
             validRange.max = uh.value(validRange.max)
         }
         return (
-            <ListItem key={type} style={{ color: alert && alert.triggered ? "#f27575" : undefined }}>
+            <ListItem key={type} style={{ color: alert && alert.enabled && alert.triggered ? "#f27575" : undefined }}>
                 <div style={{ paddingTop: type !== "movement" ? 30 : 5, paddingBottom: 10 }}>
                     <table width="100%" style={this.props.accordionContent}>
                         <tbody>

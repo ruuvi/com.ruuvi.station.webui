@@ -302,7 +302,7 @@ class Sensor extends Component {
         if (type === "movementCounter") type = "movement";
         var alert = this.getAlert(type.toLocaleLowerCase())
         if (!alert) return false
-        return alert.triggered;
+        return alert.enabled && alert.triggered;
     }
     isSharedSensor() {
         var user = new NetworkApi().getUser().email
