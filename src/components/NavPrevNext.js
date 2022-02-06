@@ -3,16 +3,11 @@ import {
     IconButton
 } from "@chakra-ui/react"
 import { ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
-import { addListener, removeListener } from "../utils/shortcuts";
 
 class NavPrevNext extends Component {
     componentDidMount() {
-        addListener("ArrowLeft", this.props.prev);
-        addListener("ArrowRight", this.props.next);
     }
     componentWillUnmount() {
-        removeListener("ArrowLeft")
-        removeListener("ArrowRight")
     }
     clicked() {
         this.props.history.push('/')
