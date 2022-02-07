@@ -164,6 +164,7 @@ class Sensor extends Component {
         super(props)
         this.state = {
             data: null,
+            lastestDatapoint: null,
             loading: true,
             graphKey: "temperature",
             from: new Store().getGraphFrom() || 24,
@@ -207,20 +208,21 @@ class Sensor extends Component {
                 if (sensor) this.setState({ ...this.state, alerts: sensor.alerts })
             }
             try {
+                (async () => {
+                    let lastestDatapoint = await new NetworkApi().getLastestDataAsync(this.props.sensor.sensor)
+                    if (lastestDatapoint.result === "success") {
+                        this.setState({ ...this.state, lastestDatapoint: lastestDatapoint.data })
+                    }
+                })()
                 let dataMode = this.state.from > 24 ? "sparse" : "dense";
-                var that = this;
                 var thisFrom = this.state.from;
-                async function load(until, initialLoad, firstDatapoint) {
+                var that = this;
+                async function load(until, initialLoad) {
                     var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
                     if (!until) until = Math.floor(new Date().getTime() / 1000);
                     if (!initialLoad && that.state.data.measurements.length) since = that.state.data.measurements[0].timestamp + 1;
                     if (until <= since) return;
-                    var resp;
-                    if (firstDatapoint) {
-                        resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: "dense", limit: 1 });
-                    } else {
-                        resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
-                    }
+                    var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
                     // stop fetching data if sensor page has changed
                     if (that.props.sensor.sensor !== resp.data.sensor) return;
                     if (that.state.from !== thisFrom) return;
@@ -228,7 +230,7 @@ class Sensor extends Component {
                         let d = parse(resp.data);
                         var stateData = that.state.data;
                         // no data
-                        if (!firstDatapoint && !stateData && d.measurements.length === 0) {
+                        if (!stateData && d.measurements.length === 0) {
                             that.setState({ ...that.state, data: d, loading: false })
                             return
                         }
@@ -245,7 +247,6 @@ class Sensor extends Component {
                         }
                         that.setState({ ...that.state, data: stateData, loading: false, table: d.table, resolvedMode: d.resolvedMode })
                         if (initialLoad && d.measurements.length >= pjson.settings.dataFetchPaginationSize) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
-                        else if (firstDatapoint) load(null, initialLoad, false)
                     } else if (resp.result === "error") {
                         notify.error(that.props.t(`UserApiError.${resp.code}`))
                         that.setState({ ...that.state, loading: false })
@@ -260,8 +261,8 @@ class Sensor extends Component {
         })
     }
     getLatestReading(kv) {
-        if (!this.state.data || !this.state.data.measurements.length) return [];
-        var ms = this.state.data.measurements;
+        if (!this.state.lastestDatapoint) return [];
+        var ms = this.state.lastestDatapoint.measurements;
         if (!ms || !ms.length) return [];
         ms = ms[0].parsed;
         if (!kv) return ms;
@@ -373,7 +374,7 @@ class Sensor extends Component {
         var { t } = this.props
         return (
             <Box borderWidth="1px" borderRadius="lg" overflow="hidden" pt={{ base: "5px", md: "35px" }} pl={{ base: "5px", md: "35px" }} pr={{ base: "5px", md: "35px" }} style={{ backgroundColor: "white" }}>
-                <SensorHeader {...this.props} lastUpdateTime={this.state.data ? this.state.data.latestTimestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} />
+                <SensorHeader {...this.props} lastUpdateTime={this.state.lastestDatapoint && this.state.lastestDatapoint.measurements.length ? this.state.lastestDatapoint.measurements[0].timestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} />
                 {this.state.loading ? (
                     <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
                         <Progress isIndeterminate={true} color="#e6f6f2" />

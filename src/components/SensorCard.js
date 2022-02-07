@@ -53,7 +53,6 @@ class SensorCard extends Component {
         var graphData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), null, { mode: graphDataMode })
         if (graphData.result === "success") {
             let d = parse(graphData.data);
-            if (lastDataPoint == null && d.measurements.length > 0) lastDataPoint = d.measurements[0]
             this.setState({ data: d, lastParsedReading: lastDataPoint, loading: false, table: d.table, resolvedMode: d.resolvedMode })
         } else if (graphData.result === "error") {
             console.error(graphData.error)
@@ -67,13 +66,9 @@ class SensorCard extends Component {
         }, 60 * 1000);
         var graphDataMode = this.props.dataFrom <= 24 ? "mixed" : "sparse";
         try {
-            if (graphDataMode === "mixed") {
-                this.loadGraphData(graphDataMode)
-                return
-            }
-            var singleData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), null, { mode: "dense", limit: 1, sort: "desc" });
+            let singleData = await new NetworkApi().getLastestDataAsync(this.props.sensor.sensor)
             if (singleData.result === "success") {
-                let oneDenseData = parse(singleData.data);
+                let oneDenseData = singleData.data;
                 var lastParsedReading = oneDenseData.measurements.length === 1 ? oneDenseData.measurements[0] : null
                 this.loadGraphData(graphDataMode, lastParsedReading);
             } else if (singleData.result === "error") {
@@ -119,12 +114,12 @@ class SensorCard extends Component {
                         {this.props.sensor.name}
                     </Heading>
                     {this.state.loading ? (
-                        <center>
+                        <center style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>
                             <Spinner size="xl" />
                         </center>
                     ) : (
                         <div>
-                            {this.state.data && this.state.data.measurements.length ? <div>
+                            {this.state.lastParsedReading ? <div>
                                 <div style={{ color: this.isAlertTriggerd("temperature") ? "#f27575" : undefined }}>
                                     <span className="main-stat">
                                         {localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals)}
@@ -134,7 +129,11 @@ class SensorCard extends Component {
                                     </span>
                                 </div>
                                 <div style={{ marginLeft: -30, marginRight: -30, marginTop: -10, marginBottom: -10 }}>
-                                    <Graph title="" dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
+                                    {this.state.data && this.state.data.measurements.length ? (
+                                        <Graph title="" dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
+                                    ) : (
+                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: 200 }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{t("no_data_in_range").split("\n").map(x => <div key={x}>{x}</div>)}</div></center>
+                                    )}
                                 </div>
                                 <hr style={{ margin: "0px 0 10px 0" }} />
                                 <SimpleGrid columns={2} style={{ width: "100%" }}>

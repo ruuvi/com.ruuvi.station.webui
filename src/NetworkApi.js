@@ -1,5 +1,6 @@
 import pjson from '../package.json';
 import DataCache from './DataCache';
+import parse from './decoder/parser';
 
 function sortSensors(sensors) {
     for (var i = 0; i < sensors.length; i++) {
@@ -98,6 +99,14 @@ class NetworkApi {
             })
             .catch(error => fail ? fail(error) : {});
     };
+    async getLastestDataAsync(mac) {
+        let data = await this.getAsync(mac, null, null, { limit: 1 })
+        if (data.result === "success") {
+            if (data.data.measurements.length > 1) data.data.measurements = [data.data.measurements[0]];
+            data.data = parse(data.data);
+        }
+        return data;
+    }
     async getAsync(mac, since, until, settings) {
         if (!this.options) return null;
         var mode = settings.mode || "mixed";
