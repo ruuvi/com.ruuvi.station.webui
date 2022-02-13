@@ -8,13 +8,7 @@ import EditableText from "./EditableText";
 import InputDialog from "./InputDialog";
 import RangeInputDialog from "./RangeInputDialog";
 import pjson from '../../package.json';
-
-const alertDescription = {
-    fontFamily: "mulish",
-    fontSize: 12,
-    marginRight: 16,
-    cursor: "pointer",
-}
+import ScreenSizeWrapper from "./ScreenSizeWrapper";
 
 class AlertItem extends Component {
     constructor(props) {
@@ -85,32 +79,39 @@ class AlertItem extends Component {
             validRange.min = uh.value(validRange.min)
             validRange.max = uh.value(validRange.max)
         }
+        var editItemMargins = { marginRight: 12, marginTop: 12, marginBottom: 12 }
         return (
             <ListItem key={type} style={{ color: alert && alert.enabled && alert.triggered ? "#f27575" : undefined }}>
-                <div style={{ paddingTop: type !== "movement" ? 30 : 5, paddingBottom: 10 }}>
-                    <table width="100%" style={this.props.accordionContent}>
-                        <tbody>
-                            <tr>
-                                <td width="50%">
-                                    <div style={{ ...this.props.detailedTitle, width: undefined }}>{t(type) + (type !== "movement" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}</div>
-                                    <div style={this.props.detailedSubText}>{type === "movement" ? <span>{this.getAlertText(alert, type)}</span> : <EditableText text={this.getAlertText(alert, type)} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</div>
-                                </td>
-                                <td style={this.props.detailedText}>
-                                    <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={alertDescription} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
-                                    <span style={{ ...this.props.detailedText, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="primaryScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
-                                </td>
-                            </tr>
-                            {type !== "movement" &&
-                                <tr>
-                                    <td colSpan="2">
-                                        <Box mt="8">
-                                            <AlertSlider type={type} value={alert || { ...getAlertRange(this.props.type) }} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, type, alert ? alert.enabled : false, !final)} />
-                                        </Box>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                <div style={{ paddingTop: 30, paddingBottom: 20 }}>
+                    <div style={{ ...this.props.detailedTitle, width: undefined, display: "flex", justifyContent: "space-between" }}>
+                        <span>
+                            {t(type) + (type !== "movement" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}
+                        </span>
+                        <span>
+                            <span style={{ ...this.props.detailedText, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="primaryScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
+                        </span>
+                    </div>
+                    <ScreenSizeWrapper isMobile>
+                        <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
+                            <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText, opacity: alert && alert.description ? null : 0.5 }} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
+                        </div>
+                        <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
+                            <span style={this.props.detailedSubText}>{type === "movement" ? <span>{this.getAlertText(alert, type)}</span> : <EditableText text={this.getAlertText(alert, type)} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</span>
+                        </div>
+                    </ScreenSizeWrapper>
+                    <ScreenSizeWrapper>
+                        <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
+                            <EditableText spread onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText, opacity: alert && alert.description ? null : 0.5 }} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
+                        </div>
+                        <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
+                            <span style={{ ...this.props.detailedSubText, width: "100%" }}>{type === "movement" ? <span>{this.getAlertText(alert, type)}</span> : <EditableText spread text={this.getAlertText(alert, type)} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</span>
+                        </div>
+                    </ScreenSizeWrapper>
+                    {type !== "movement" &&
+                        <Box mt="4">
+                            <AlertSlider type={type} value={alert || { ...getAlertRange(this.props.type) }} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, type, alert ? alert.enabled : false, !final)} />
+                        </Box>
+                    }
                 </div>
                 <InputDialog open={this.state.editDescription} value={alert ? alert.description : ""}
                     onClose={(save, description) => save ? this.setAlert({ ...alert, description: description }, type, null, false) : this.setState({ ...this.state, editDescription: false })}
