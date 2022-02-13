@@ -60,7 +60,7 @@ class RangeInputDialog extends Component {
                                 <SimpleGrid columns={2} spacing={4}>
                                     <span>
                                         <FormLabel>{this.props.t("min") + (unit ? ` (${this.props.range.min} ${unit})` : "")}</FormLabel>
-                                        <Input _focus={{boxShadow: "none"}} value={this.state.value[0]} type={"number"} onChange={e => this.setState({ ...this.state, value: [e.target.value, this.state.value[1]] })} />
+                                        <Input autoFocus _focus={{boxShadow: "none"}} value={this.state.value[0]} type={"number"} onChange={e => this.setState({ ...this.state, value: [e.target.value, this.state.value[1]] })} />
                                     </span>
                                     <span>
                                         <FormLabel>{this.props.t("max") + (unit ? ` (${this.props.range.max} ${unit})` : "")}</FormLabel>

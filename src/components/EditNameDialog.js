@@ -62,7 +62,7 @@ class EditNameDialog extends Component {
                         <ModalHeader>{t("sensor_name")}</ModalHeader>
                         <ModalCloseButton />
                         <ModalBody mb="3">
-                            <Input placeholder={t("sensor_name")} value={this.state.name} onChange={e => this.updateName(e.target.value)} />
+                            <Input autoFocus placeholder={t("sensor_name")} value={this.state.name} onChange={e => this.updateName(e.target.value)} />
                             <div style={{ textAlign: "right" }}>
                                 <Button disabled={this.state.loading || !this.state.name} onClick={this.update.bind(this)} mt="2">{t("update")}</Button>
                             </div>
