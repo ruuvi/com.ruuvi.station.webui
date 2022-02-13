@@ -45,6 +45,8 @@ class Dashboard extends Component {
         this.alertUpdateLoop = setTimeout(() => {
             this.loadAlerts()
         }, 60 * 1000);
+        // dont load alerts if sensor view is open
+        if (this.getCurrentSensor()) return
         new NetworkApi().getAlerts(data => {
             if (data.result === "success") {
                 this.setState({ ...this.state, alerts: data.data.sensors })
@@ -140,6 +142,7 @@ class Dashboard extends Component {
                             next={() => this.nextIndex(1)}
                             prev={() => this.nextIndex(-1)}
                             remove={() => this.removeSensor()}
+                            setAlerts={alerts => this.setState({...this.state, alerts: alerts})}
                             updateSensor={(sensor) => this.updateSensor(sensor)}
                         />
                     ) : (

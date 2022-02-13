@@ -345,6 +345,7 @@ class Sensor extends Component {
             offToOn = !prevEnabled && alert.enabled
             alerts[alertIdx] = alert
             this.setState({ ...this.state, alerts: alerts });
+            this.props.setAlerts(alerts)
         }
         new NetworkApi().setAlert({ ...alert, sensor: this.props.sensor.sensor }, resp => {
             switch (resp.result) {
