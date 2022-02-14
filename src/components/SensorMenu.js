@@ -37,7 +37,7 @@ class SensorMenu extends Component {
             <>
                 {this.state.sensors.length > 0 &&
                     <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
-                        <MenuButton as={Button} rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold", paddingRight: 0 }}>
+                        <MenuButton as={Button} variant="ddl"  rightIcon={<MdArrowDropDown size={20} color="#77cdc2" style={{ margin: -4 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 16, fontWeight: "bold", paddingRight: 0 }}>
                             {t("sensors")}
                         </MenuButton>
                         <MenuList mt="2">

@@ -593,7 +593,7 @@ class Sensor extends Component {
                                                                 <div style={detailedTitle}>{t("remove_this_sensor")}</div>
                                                             </td>
                                                             <td style={detailedText}>
-                                                                <Button backgroundColor="#43c7ba" color="white" borderRadius="24" onClick={() => this.remove()}>{t("remove")}</Button>
+                                                                <Button onClick={() => this.remove()}>{t("remove")}</Button>
                                                             </td>
                                                         </tr>
                                                     </tbody>

@@ -11,6 +11,7 @@ export const ruuviTheme = extendTheme({
     },
     colors: {
         primary: "#44c9b9",
+        primaryDark: "#34ad9f",
         primaryLight: "rgba(68, 201, 185, 0.3)",
         primaryLighter: "rgba(68, 201, 185, 0.1)",
         inactive: "#d4ede8",
@@ -29,6 +30,26 @@ export const ruuviTheme = extendTheme({
         },
         primaryScheme: {
             500: '#44c9b9',
-        }
+        },
+        text: "#1b4847",
     },
+    components: {
+        Button: {
+            baseStyle: {
+                borderRadius: 30,
+            },
+            variants: {
+                solid: (props) => ({
+                    bg: "primary",
+                    color: "white",
+                    _hover: { bg: "primaryDark" },
+                    fontFamily: "Montserrat",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    paddingLeft: 25,
+                    paddingRight: 25,
+                }),
+            },
+        }
+    }
 })
