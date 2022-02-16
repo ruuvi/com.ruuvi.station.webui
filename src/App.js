@@ -14,7 +14,6 @@ import SensorMenu from "./components/SensorMenu";
 import LanguageMenu from "./components/LanguageMenu";
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
-import Settings from "./states/Settings";
 
 
 const bottomText = {
@@ -34,7 +33,7 @@ const versionText = {
   fontWeight: 600,
   color: "#c8dbd9",
   marginTop: -4,
-  paddingBottom: 20 ,
+  paddingBottom: 20,
 }
 
 export default function App() {
@@ -73,12 +72,11 @@ export default function App() {
           <span style={{ width: "100%", textAlign: "right" }}>
             <SensorMenu sensors={sensors} />
             <LanguageMenu />
-            <UserMenu logout={logout} email={user.email} />
+            <UserMenu logout={logout} settings={() => window.location.href += "?settings"} email={user.email} />
           </span>
         </HStack>
         <div style={{ marginTop: "20px" }}>
           <Switch>
-            <Route path="/settings" component={Settings} />
             <Route path="/:id" component={Dashboard} />
             <Route path="/" component={Dashboard} />
           </Switch>

@@ -8,6 +8,7 @@ import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
 import SessionStore from "../SessionStore";
 import notify from "../utils/notify";
+import SettingsModal from "../components/SettingsModal";
 
 const infoText = {
     fontFamily: "mulish",
@@ -115,6 +116,12 @@ class Dashboard extends Component {
         }
         return out;
     }
+    showSettings() {
+        return this.props.location.search.indexOf("settings") !== -1;
+    }
+    closeSettings() {
+        window.location.href = window.location.href.split("?")[0]
+    }
     render() {
         if (this.props.match.params.id) SessionStore.setBackRoute(`/${this.props.match.params.id}`)
         else SessionStore.setBackRoute("/")
@@ -142,7 +149,7 @@ class Dashboard extends Component {
                             next={() => this.nextIndex(1)}
                             prev={() => this.nextIndex(-1)}
                             remove={() => this.removeSensor()}
-                            setAlerts={alerts => this.setState({...this.state, alerts: alerts})}
+                            setAlerts={alerts => this.setState({ ...this.state, alerts: alerts })}
                             updateSensor={(sensor) => this.updateSensor(sensor)}
                         />
                     ) : (
@@ -158,6 +165,7 @@ class Dashboard extends Component {
                         </Box>
                     )}
                 </Box>
+                <SettingsModal open={this.showSettings()} onClose={() => this.closeSettings()} />
             </>
         )
     }

@@ -23,7 +23,7 @@ class UserMenu extends Component {
         })
     }
     settings() {
-        window.location.replace("/#/settings")
+        this.props.settings();
     }
     render() {
         var { t } = this.props
@@ -33,7 +33,7 @@ class UserMenu extends Component {
                     <FaUserAlt />
                 </MenuButton>
                 <MenuList mt="2">
-                    <MenuItem isDisabled={true} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", cursor:"unset" }}>{this.props.email}</MenuItem>
+                    <MenuItem isDisabled={true} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", cursor: "unset" }}>{this.props.email}</MenuItem>
                     {/**
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>

@@ -79,6 +79,24 @@ class Settings extends Component {
         })
     }
     render() {
+        var content = <>
+            {this.state.loading ? (
+                <>
+                    <Progress isIndeterminate={true} colorScheme="primaryScheme" />
+                </>
+            ) : (
+                <>
+                    <RadioInput label={"settings_temperature_unit"} value={this.state.settings.UNIT_TEMPERATURE} options={temperatureOptions} onChange={v => this.updateSetting("UNIT_TEMPERATURE", v)} loading={this.state.savingSettings.indexOf("UNIT_TEMPERATURE") !== -1} />
+                    <br />
+                    <RadioInput label={"settings_humidity_unit"} value={this.state.settings.UNIT_HUMIDITY} options={humidityOptions} onChange={v => this.updateSetting("UNIT_HUMIDITY", v)} loading={this.state.savingSettings.indexOf("UNIT_HUMIDITY") !== -1} />
+                    <br />
+                    <RadioInput label={"settings_pressure_unit"} value={this.state.settings.UNIT_PRESSURE} options={pressureOptions} onChange={v => this.updateSetting("UNIT_PRESSURE", v)} loading={this.state.savingSettings.indexOf("UNIT_PRESSURE") !== -1} />
+                </>
+            )}
+        </>
+
+        if (this.props.isModal) return content
+
         return (
             <Box marginTop="36px" marginLeft={{ base: "10px", md: "20px", lg: "50px" }} marginRight={{ base: "10px", md: "20px", lg: "50px" }}>
                 <Box borderWidth="1px" borderRadius="lg" overflow="hidden" pb={{ base: "15px", md: "35px" }} pt={{ base: "15px", md: "35px" }} pl={{ base: "15px", md: "35px" }} pr={{ base: "15px", md: "35px" }} style={{ backgroundColor: "white" }}>
@@ -91,19 +109,7 @@ class Settings extends Component {
                         </span>
                     </HStack>
                     <hr style={{ marginBottom: 20, marginTop: 15 }} />
-                    {this.state.loading ? (
-                        <>
-                            <Progress isIndeterminate={true} colorScheme="primaryScheme" />
-                        </>
-                    ) : (
-                        <>
-                            <RadioInput label={"settings_temperature_unit"} value={this.state.settings.UNIT_TEMPERATURE} options={temperatureOptions} onChange={v => this.updateSetting("UNIT_TEMPERATURE", v)} loading={this.state.savingSettings.indexOf("UNIT_TEMPERATURE") !== -1} />
-                            <br />
-                            <RadioInput label={"settings_humidity_unit"} value={this.state.settings.UNIT_HUMIDITY} options={humidityOptions} onChange={v => this.updateSetting("UNIT_HUMIDITY", v)} loading={this.state.savingSettings.indexOf("UNIT_HUMIDITY") !== -1} />
-                            <br />
-                            <RadioInput label={"settings_pressure_unit"} value={this.state.settings.UNIT_PRESSURE} options={pressureOptions} onChange={v => this.updateSetting("UNIT_PRESSURE", v)} loading={this.state.savingSettings.indexOf("UNIT_PRESSURE") !== -1} />
-                        </>
-                    )}
+                    {content}
                 </Box>
             </Box>
         )
