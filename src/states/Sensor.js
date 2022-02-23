@@ -38,7 +38,7 @@ import EditableText from "../components/EditableText";
 import OffsetDialog from "../components/OffsetDialog";
 import NavClose from "../components/NavClose";
 import NavPrevNext from "../components/NavPrevNext";
-import DurationPicker from "../components/DurationPicker";
+import DurationPicker, { getTimespan } from "../components/DurationPicker";
 import notify from "../utils/notify"
 import { ruuviTheme } from "../themes";
 import pjson from '../../package.json';
