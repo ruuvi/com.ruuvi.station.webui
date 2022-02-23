@@ -18,6 +18,20 @@ function hhmm(ts) {
     return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2)
 }
 
+const legendHider = ({
+    hooks: {
+        init(u, opts) {
+            document.getElementsByClassName("u-legend")[0].style.visibility = 'hidden';
+            u.over.addEventListener("mouseleave", () => {
+                document.getElementsByClassName("u-legend")[0].style.visibility = 'hidden';
+            });
+            u.over.addEventListener("mouseenter", () => {
+                document.getElementsByClassName("u-legend")[0].style.visibility = '';
+            });
+        }
+    }
+});
+
 
 var lastDataPoints = -1;
 var zoomHasChanged = false;
@@ -34,7 +48,10 @@ class Graph extends Component {
     }
     render() {
         var plugins = [];
-        if (!this.props.cardView) plugins.push(UplotTouchZoomPlugin(this.getXRange()))
+        if (!this.props.cardView) {
+            plugins.push(UplotTouchZoomPlugin(this.getXRange()))
+            plugins.push(legendHider)
+        }
         return (
             <SizeMe>{({ size }) =>
                 <UplotReact
