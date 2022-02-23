@@ -196,6 +196,9 @@ class Sensor extends Component {
             this.loadData(true)
         }
     }
+    getDataMode() {
+        return this.state.from > 24 ? "sparse" : "dense";
+    }
     async loadData(showLoading) {
         clearTimeout(this.latestDataUpdate);
         this.latestDataUpdate = setTimeout(() => {
@@ -214,7 +217,7 @@ class Sensor extends Component {
                         this.setState({ ...this.state, lastestDatapoint: lastestDatapoint.data })
                     }
                 })()
-                let dataMode = this.state.from > 24 ? "sparse" : "dense";
+                let dataMode = this.getDataMode();
                 var thisFrom = this.state.from;
                 var that = this;
                 async function load(until, initialLoad) {
@@ -371,6 +374,13 @@ class Sensor extends Component {
     zoomInfo() {
         notify.info(addNewlines(this.props.t("zoom_info")))
     }
+    getGraphData() {
+        let data = this.state.data.measurements;
+        if (this.getDataMode() === "dense") return data;
+        let latestDP = this.state.lastestDatapoint;
+        if (latestDP && latestDP.measurements.length) data.unshift(latestDP.measurements[0])
+        return data;
+    }
     render() {
         var { t } = this.props
         return (
@@ -418,7 +428,7 @@ class Sensor extends Component {
                                 <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
                             ) : (
                                 <Box ml={-5} mr={-5}>
-                                    <Graph key={`graphkey${this.state.graphRenderKey}`} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.state.data.measurements} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                    <Graph key={`graphkey${this.state.graphRenderKey}`} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
                                 </Box>
                             )}
                             <div style={{ height: "20px" }} />
