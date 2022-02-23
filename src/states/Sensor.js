@@ -381,6 +381,12 @@ class Sensor extends Component {
         if (latestDP && latestDP.measurements.length) data.unshift(latestDP.measurements[0])
         return data;
     }
+    getSelectedUnit() {
+        if (this.state.graphKey === "measurementSequenceNumber") return "";
+        let unit = getUnitHelper(this.state.graphKey).unit
+        if (this.state.graphKey === "movementCounter") return `(${this.props.t(unit)})`;
+        return <>({unit})</>
+    }
     render() {
         var { t } = this.props
         return (
@@ -412,7 +418,7 @@ class Sensor extends Component {
                                                     {t("last")} {getTimespan(this.state.from).k} {t(getTimespan(this.state.from).t)}
                                                 </div>
                                                 <div style={graphInfo}>
-                                                    {t(getUnitHelper(this.state.graphKey).label)} {`(${getUnitHelper(this.state.graphKey).unit})`.replace("()", "")}
+                                                    {t("selected")}: {t(getUnitHelper(this.state.graphKey).label)} {this.getSelectedUnit()}
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: "right" }}>

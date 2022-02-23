@@ -41,7 +41,7 @@ export function getUnitHelper(key) {
         if (settings) {
             settings = JSON.parse(settings)
             if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "1") {
-                thing.unit = "g/m^3"
+                thing.unit = <span>g/m<sup>3</sup></span>
                 return thing;
             } else if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "2") {
                 thing.unit = "°C"
