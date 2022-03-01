@@ -50,6 +50,23 @@ export const ruuviTheme = extendTheme({
                     paddingRight: 25,
                 }),
             },
+        },
+        Input: {
+            defaultProps: {
+                focusBorderColor: "rgba(1,174,144,0.3)",
+            }
+        },
+        Modal: {
+            parts: ['header'],
+            baseStyle: {
+                header: {
+                    fontFamily: "Montserrat",
+                    fontWeight: 800,
+                },
+                dialog: {
+                    fontFamily: "Mulish"
+                }
+            },
         }
     }
 })

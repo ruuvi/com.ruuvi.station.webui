@@ -141,7 +141,7 @@ class SignIn extends Component {
                                                     <div style={{ textAlign: "center", width: "100%" }}>
                                                         <PinInput type="alphanumeric" value={this.state.validationCode} onChange={code => this.updateValidationCode(code)} autoFocus>
                                                             {Array(4).fill().map(() => {
-                                                                return <PinInputField bg="white" style={{ margin: 5 }} />
+                                                                return <PinInputField bg="white" _focus="none" style={{ margin: 5 }} />
                                                             })}
                                                         </PinInput>
                                                     </div>

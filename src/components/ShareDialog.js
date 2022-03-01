@@ -12,11 +12,13 @@ import {
     ListItem,
     ListIcon,
     Progress,
+    IconButton,
 } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import { MdClear } from "react-icons/md";
 import NetworkApi from "../NetworkApi";
 import notify from "../utils/notify";
+import { CloseIcon } from "@chakra-ui/icons";
 
 const maxSharesPerSensor = 10;
 
@@ -83,13 +85,15 @@ class ShareDialog extends Component {
                 <Modal isOpen={this.props.open} onClose={this.props.onClose} size="xl" isCentered>
                     <ModalOverlay />
                     <ModalContent>
-                        <ModalHeader>{t("share_sensor_title")}</ModalHeader>
-                        <ModalCloseButton />
+                        <ModalHeader style={{ marginTop: 15 }}>{t("share_sensor_title")}</ModalHeader>
+                        <ModalCloseButton style={{ margin: 15 }}>
+                            <IconButton isRound={true} style={{ backgroundColor: "#f0faf9", color: "#26ccc0" }}><CloseIcon /></IconButton>
+                        </ModalCloseButton>
                         <ModalBody mb="3">
                             {t("share_sensor_description").split("\\n").map((x, i) => <div key={i}>{x}<br /></div>)}
                             <br />
-                            <div style={{ fontWeight: "bold" }}>{t("share_sensor_add_friend")}</div>
-                            <Input autoFocus placeholder={t("email")} type="email" value={this.state.email} onChange={this.emailHandler.bind(this)} />
+                            <div style={{ fontFamily: "Montserrat", fontWeight: 800 }}>{t("share_sensor_add_friend")}</div>
+                            <Input autoFocus placeholder={t("email")} type="email" value={this.state.email} onChange={this.emailHandler.bind(this)} mt="10px" mb="10px" />
                             <div style={{ textAlign: "right" }}>
                                 <Button disabled={this.state.loading || this.props.sensor.sharedTo.length >= maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)} onClick={this.share.bind(this)} mt="2">{t("share")}</Button>
                             </div>
