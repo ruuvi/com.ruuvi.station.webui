@@ -8,7 +8,6 @@ import {
     IconButton,
     Box,
     Avatar,
-    HStack,
     Progress,
     List,
     ListItem,
@@ -113,21 +112,21 @@ const accordionButton = {
 function SensorHeader(props) {
     const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
     if (isLargeDisplay) {
-        return <HStack alignItems="start">
+        return <div style={{display: "flex", justifyContent: "space-between"}}>
             <Avatar bg="primary" size="xl" name={props.sensor.name} src={props.sensor.picture} />
-            <div style={{ width: "65%" }}>
+            <span style={{width: "100%", marginLeft: 8}}>
                 <Heading style={sensorName}>
                     {props.sensor.name}
                 </Heading>
                 <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
                     <DurationText from={props.lastUpdateTime} t={props.t} />
                 </div>
-            </div>
-            <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
+            </span>
+            <span style={{ minWidth: 135, justifyContent: "flex-end" }}>
                 <NavPrevNext prev={props.prev} next={props.next} />
                 <NavClose />
             </span>
-        </HStack>
+        </div>
     } else {
         return <center>
             <Box m={2}>
