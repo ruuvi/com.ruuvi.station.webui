@@ -2,10 +2,10 @@ import React, { Component } from "react";
 import {
     IconButton
 } from "@chakra-ui/react"
-import { CloseIcon } from "@chakra-ui/icons";
 import { withRouter } from "react-router";
 import { addListener, removeListener } from "../utils/shortcuts";
 import SessionStore from "../SessionStore";
+import { MdClose } from "react-icons/md";
 
 class NavClose extends Component {
     constructor(props) {
@@ -28,7 +28,7 @@ class NavClose extends Component {
     render() {
         return (
             <>
-                <IconButton isRound={true} onClick={this.clicked} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><CloseIcon /></IconButton>
+                <IconButton isRound={true} onClick={this.clicked} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><MdClose /></IconButton>
             </>
         )
     }

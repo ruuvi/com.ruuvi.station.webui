@@ -103,7 +103,7 @@ const accordionPanel = {
 }
 const accordionContent = {
     minHeight: 72,
-    marginLeft: 8,
+    marginLeft: 10,
     width: "calc(100% - 16px)",
 }
 const accordionButton = {
@@ -114,7 +114,7 @@ function SensorHeader(props) {
     const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
     if (isLargeDisplay) {
         return <HStack alignItems="start">
-            <Avatar bg="#01ae90" size="xl" name={props.sensor.name} src={props.sensor.picture} />
+            <Avatar bg="primary" size="xl" name={props.sensor.name} src={props.sensor.picture} />
             <div style={{ width: "65%" }}>
                 <Heading style={sensorName}>
                     {props.sensor.name}
@@ -137,7 +137,7 @@ function SensorHeader(props) {
                             <NavClose />
                         </td>
                         <td width="33%" align="center">
-                            <Avatar bg="#01ae90" size="xl" name={props.sensor.name} src={props.sensor.picture} />
+                            <Avatar bg="primary" size="lg" name={props.sensor.name} src={props.sensor.picture} />
                         </td>
                         <td width="33%" align="right" style={{ verticalAlign: "top" }}>
                             <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
@@ -422,8 +422,11 @@ class Sensor extends Component {
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: "right" }}>
-                                                <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.zoomInfo()}>{`${uppercaseFirst(t("zoom"))}`} <MdInfo size={18} style={{ marginLeft: 4 }} color={ruuviTheme.colors.primaryLight} /></Button>
-                                                <Button variant='ghost' color="primary" _hover={{ textDecoration: "underline" }} style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
+                                                <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
+                                                <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
+                                                    <MdInfo size="16" color={ruuviTheme.colors.primaryLight} />
+                                                </IconButton>
+                                                <Button variant='link' color="primary" ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                 <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
                                             </td>
                                         </tr>
@@ -510,11 +513,11 @@ class Sensor extends Component {
                                     </AccordionButton>
                                     <hr />
                                     <AccordionPanel style={accordionPanel}>
-                                        <List>
+                                        <List style={accordionContent}>
                                             {["Temperature", "Humidity", "Pressure", "Movement"].map(x => {
                                                 var alert = this.getAlert(x.toLowerCase())
                                                 return <AlertItem key={x} alerts={this.state.alerts} alert={alert}
-                                                    accordionContent={accordionContent} detailedTitle={detailedTitle}
+                                                    detailedTitle={detailedTitle}
                                                     detailedText={detailedText} detailedSubText={detailedSubText}
                                                     type={x} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />
                                             })}

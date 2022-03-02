@@ -56,6 +56,10 @@ export const ruuviTheme = extendTheme({
                     paddingLeft: 25,
                     paddingRight: 25,
                 }),
+                link: (props) => ({
+                    textDecoration: "underline",
+                    _hover: "none",
+                })
             },
         },
         Input: {

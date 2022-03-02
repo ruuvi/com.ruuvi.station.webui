@@ -23,6 +23,7 @@ const bottomText = {
   fontSize: 18,
   fontWeight: 800,
   color: "#c8dbd9",
+  marginTop: 20,
 }
 
 const versionText = {

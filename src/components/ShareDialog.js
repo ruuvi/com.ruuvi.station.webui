@@ -15,10 +15,9 @@ import {
     IconButton,
 } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
-import { MdClear } from "react-icons/md";
+import { MdClear, MdClose } from "react-icons/md";
 import NetworkApi from "../NetworkApi";
 import notify from "../utils/notify";
-import { CloseIcon } from "@chakra-ui/icons";
 
 const maxSharesPerSensor = 10;
 
@@ -87,7 +86,7 @@ class ShareDialog extends Component {
                     <ModalContent>
                         <ModalHeader style={{ marginTop: 15 }}>{t("share_sensor_title")}</ModalHeader>
                         <ModalCloseButton style={{ margin: 15 }}>
-                            <IconButton isRound={true} style={{ backgroundColor: "#f0faf9", color: "#26ccc0" }}><CloseIcon /></IconButton>
+                            <IconButton isRound={true} style={{ backgroundColor: "#f0faf9", color: "#26ccc0" }}><MdClose /></IconButton>
                         </ModalCloseButton>
                         <ModalBody mb="3">
                             {t("share_sensor_description").split("\\n").map((x, i) => <div key={i}>{x}<br /></div>)}
