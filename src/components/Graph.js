@@ -73,6 +73,7 @@ class Graph extends Component {
                             width: 2,
                             fill: ruuviTheme.colors.primaryLight,
                             stroke: ruuviTheme.colors.primary,
+                            value: (self, rawValue) => localeNumber(rawValue)
                         }],
                         cursor: { show: this.props.cursor || false, drag: { x: true, y: true, uni: 50 } },
                         scales: {
