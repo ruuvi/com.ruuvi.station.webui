@@ -4,5 +4,5 @@ export function uppercaseFirst(string) {
 }
 
 export function addNewlines(str) {
-    return str.split("\n").map(x => <span key={x}>{x}<br /></span>)
+    return str.split("\n").map(x => <span key={Math.random()}>{x}<br /></span>)
 }

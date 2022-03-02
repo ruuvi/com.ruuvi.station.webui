@@ -1,12 +1,27 @@
-import { createStandaloneToast } from '@chakra-ui/react'
+import { Alert, Text, createStandaloneToast } from '@chakra-ui/react'
+import { ruuviTheme } from '../themes'
 
 function toastIt(title, status, duration) {
     const toast = createStandaloneToast()
     toast({
-        title,
-        status,
         duration: duration || 4000,
-        isClosable: true,
+        render: (props) => (
+            <Alert
+                {...props}
+                alignItems="start"
+                borderRadius="md"
+                boxShadow="lg"
+                paddingEnd={8}
+                textAlign="start"
+                width="auto"
+                bg={ruuviTheme.colors.toast[status]}
+                color={status !== "info" ? "white" : undefined}
+            >
+                <Text fontWeight={status !== "info" ? 600 : undefined}>
+                    {title}
+                </Text>
+            </Alert>
+        ),
     })
 }
 

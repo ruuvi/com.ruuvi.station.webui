@@ -9,6 +9,7 @@ import InputDialog from "./InputDialog";
 import RangeInputDialog from "./RangeInputDialog";
 import pjson from '../../package.json';
 import ScreenSizeWrapper from "./ScreenSizeWrapper";
+import { ruuviTheme } from "../themes";
 
 class AlertItem extends Component {
     constructor(props) {
@@ -81,7 +82,7 @@ class AlertItem extends Component {
         }
         var editItemMargins = { marginRight: 12, marginTop: 12, marginBottom: 12 }
         return (
-            <ListItem key={type} style={{ color: alert && alert.enabled && alert.triggered ? "#f27575" : undefined }}>
+            <ListItem key={type} style={{ color: alert && alert.enabled && alert.triggered ? ruuviTheme.colors.error : undefined }}>
                 <div style={{ paddingTop: 30, paddingBottom: 20 }}>
                     <div style={{ ...this.props.detailedTitle, width: undefined, display: "flex", justifyContent: "space-between" }}>
                         <span>
