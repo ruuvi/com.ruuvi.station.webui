@@ -403,7 +403,7 @@ class Sensor extends Component {
                                     return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
                                         alertTriggered={this.isAlertTriggerd(x)}
                                         label={t(getUnitHelper(x).label)}
-                                        unit={t(getUnitHelper(x).unit)}
+                                        unit={x === "movement" ? t(getUnitHelper(x).unit) : getUnitHelper(x).unit}
                                         selected={this.state.graphKey === x}
                                         onClick={() => this.setGraphKey(x)} />
                                 })}
