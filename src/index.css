@@ -34,3 +34,11 @@ code {
   font-size: 14px;
   margin-left: 2px;
 }
+
+*:focus {
+  box-shadow: none !important;
+}
+
+*[data-focus] {
+  box-shadow: none !important;
+}
