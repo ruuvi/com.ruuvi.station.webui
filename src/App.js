@@ -20,7 +20,7 @@ const bottomText = {
   width: "100%",
   textAlign: "center",
   fontFamily: "mulish",
-  fontSize: 18,
+  fontSize: 16,
   fontWeight: 800,
   color: "#c8dbd9",
   marginTop: 20,
