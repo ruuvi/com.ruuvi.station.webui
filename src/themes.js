@@ -36,7 +36,7 @@ export const ruuviTheme = extendTheme({
         text: "#1b4847",
         toast: {
             error: "#f15a24",
-            info: "#c4ede7",
+            info: "#e6f6f2",
             success: "#44c9b9",
         }
     },
