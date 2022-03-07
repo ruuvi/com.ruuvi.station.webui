@@ -1,11 +1,5 @@
 import React, { Component } from "react";
 import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalCloseButton,
     Button,
     Input,
     Progress,
@@ -14,6 +8,7 @@ import { withTranslation } from 'react-i18next';
 import NetworkApi from "../NetworkApi";
 import pjson from "../../package.json";
 import notify from "../utils/notify";
+import RDialog from "./RDialog";
 
 class EditNameDialog extends Component {
     constructor(props) {
@@ -55,22 +50,13 @@ class EditNameDialog extends Component {
         if (!this.props.sensor) return <></>
         var { t } = this.props;
         return (
-            <>
-                <Modal isOpen={this.props.open} onClose={this.props.onClose} size="xl" isCentered>
-                    <ModalOverlay />
-                    <ModalContent>
-                        <ModalHeader>{t("sensor_name")}</ModalHeader>
-                        <ModalCloseButton />
-                        <ModalBody mb="3">
-                            <Input autoFocus placeholder={t("sensor_name")} value={this.state.name} onChange={e => this.updateName(e.target.value)} />
-                            <div style={{ textAlign: "right" }}>
-                                <Button disabled={this.state.loading || !this.state.name} onClick={this.update.bind(this)} mt="2">{t("update")}</Button>
-                            </div>
-                            {this.state.loading && <Progress isIndeterminate={true} color="#e6f6f2" />}
-                        </ModalBody>
-                    </ModalContent>
-                </Modal>
-            </>
+            <RDialog title={t("sensor_name")} isOpen={this.props.open} onClose={this.props.onClose}>
+                <Input autoFocus placeholder={t("sensor_name")} value={this.state.name} onChange={e => this.updateName(e.target.value)} />
+                <div style={{ textAlign: "right" }}>
+                    <Button disabled={this.state.loading || !this.state.name} onClick={this.update.bind(this)} mt="2">{t("update")}</Button>
+                </div>
+                {this.state.loading && <Progress isIndeterminate={true} color="#e6f6f2" />}
+            </RDialog>
         )
     }
 }

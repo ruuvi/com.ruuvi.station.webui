@@ -1,11 +1,5 @@
 import React, { Component } from "react";
 import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalCloseButton,
     Button,
     Input,
     SimpleGrid,
@@ -13,6 +7,7 @@ import {
     FormLabel,
 } from "@chakra-ui/react"
 import { withTranslation } from "react-i18next";
+import RDialog from "./RDialog";
 
 class RangeInputDialog extends Component {
     constructor(props) {
@@ -49,32 +44,23 @@ class RangeInputDialog extends Component {
     render() {
         var unit = this.props.unit();
         return (
-            <>
-                <Modal isOpen={this.props.open} onClose={() => this.props.onClose(false)} size="xl" isCentered>
-                    <ModalOverlay />
-                    <ModalContent>
-                        <ModalHeader>{this.props.title}</ModalHeader>
-                        <ModalCloseButton />
-                        <ModalBody mb="3">
-                            <FormControl isInvalid={!this.isValid()}>
-                                <SimpleGrid columns={2} spacing={4}>
-                                    <span>
-                                        <FormLabel>{this.props.t("min") + (unit ? ` (${this.props.range.min} ${unit})` : "")}</FormLabel>
-                                        <Input autoFocus value={this.state.value[0]} type={"number"} onChange={e => this.setState({ ...this.state, value: [e.target.value, this.state.value[1]] })} />
-                                    </span>
-                                    <span>
-                                        <FormLabel>{this.props.t("max") + (unit ? ` (${this.props.range.max} ${unit})` : "")}</FormLabel>
-                                        <Input value={this.state.value[1]} type={"number"} onChange={e => this.setState({ ...this.state, value: [this.state.value[0], e.target.value] })} />
-                                    </span>
-                                </SimpleGrid>
-                            </FormControl>
-                            <div style={{ textAlign: "right" }}>
-                                <Button onClick={this.update.bind(this)} mt="2" disabled={!this.isValid()}>{this.props.buttonText}</Button>
-                            </div>
-                        </ModalBody>
-                    </ModalContent>
-                </Modal>
-            </>
+            <RDialog title={this.props.title} isOpen={this.props.open} onClose={() => this.props.onClose(false)}>
+                <FormControl isInvalid={!this.isValid()}>
+                    <SimpleGrid columns={2} spacing={4}>
+                        <span>
+                            <FormLabel>{this.props.t("min") + (unit ? ` (${this.props.range.min} ${unit})` : "")}</FormLabel>
+                            <Input autoFocus value={this.state.value[0]} type={"number"} onChange={e => this.setState({ ...this.state, value: [e.target.value, this.state.value[1]] })} />
+                        </span>
+                        <span>
+                            <FormLabel>{this.props.t("max") + (unit ? ` (${this.props.range.max} ${unit})` : "")}</FormLabel>
+                            <Input value={this.state.value[1]} type={"number"} onChange={e => this.setState({ ...this.state, value: [this.state.value[0], e.target.value] })} />
+                        </span>
+                    </SimpleGrid>
+                </FormControl>
+                <div style={{ textAlign: "right" }}>
+                    <Button onClick={this.update.bind(this)} mt="2" disabled={!this.isValid()}>{this.props.buttonText}</Button>
+                </div>
+            </RDialog>
         )
     }
 }

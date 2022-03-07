@@ -1,11 +1,5 @@
 import React, { Component } from "react";
 import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalCloseButton,
     Button,
     ModalFooter,
     Box,
@@ -16,6 +10,7 @@ import { getUnitHelper, localeNumber } from "../UnitHelper";
 import InputDialog from "./InputDialog";
 import NetworkApi from "../NetworkApi";
 import notify from "../utils/notify";
+import RDialog from "./RDialog";
 
 
 class OffsetDialog extends Component {
@@ -84,43 +79,37 @@ class OffsetDialog extends Component {
         var { t } = this.props;
         return (
             <>
-                <Modal isOpen={this.props.open} onClose={this.props.onClose} size="xl" isCentered>
-                    <ModalOverlay />
-                    <ModalContent>
-                        <ModalHeader>{t((this.props.open || "").toLowerCase() + "_offset")}</ModalHeader>
-                        <ModalCloseButton />
-                        <ModalBody mb="3">
-                            <Box mb="8">
-                                {t("calibration_description").replace(t("calibration_description_link"), "").split("\\n").map((x, i) => <div key={i}>{x}<br /></div>)} <a style={{ color: "teal" }} href={t("calibration_description_link_url")}>{t("calibration_description_link")}</a>
-                            </Box>
-                            <div>
-                                <b>{t("calibration_original_value")}</b>
-                            </div>
-                            {this.format(this.getLastReading() - this.getOffset())} {this.getUnit()}
-                            {this.getOffset() !== 0 && <Box>
-                                <hr />
-                                <div>
-                                    <b>{t("calibration_corrected_value")}</b>
-                                </div>
-                                {this.format(this.getLastReading())} {this.getUnit()} {t("calibration_offset").replace("{%@^%1$s}", this.format(this.getOffset()) + " " + this.getUnit())}
-                            </Box>
-                            }
-                        </ModalBody>
-                        {this.state.saving ? <ModalFooter style={{ margin: "auto" }}><Spinner /></ModalFooter> :
-                            <ModalFooter style={{ margin: "auto" }}>
-                                <Button mr="2" colorScheme="teal" onClick={() => this.setState({ ...this.state, correctionInput: true })}>Calibrate</Button>
-                                {this.getOffset() !== 0 && <Button ml="2" colorScheme="teal" onClick={() => this.clearCalibration()}>Clear</Button>}
-                            </ModalFooter>
-                        }
-                    </ModalContent>
-                </Modal>
-                {this.props.open && this.state.correctionInput && <InputDialog open={this.state.correctionInput} value={this.getLastReading()}
-                    onClose={(save, value) => this.calibrate(value, save)}
-                    title={t("calibration_setup")}
-                    description={t(`calibration_enter_${this.props.open.toLowerCase()}`).replace("{%@^%1$s}", this.getUnit())}
-                    number={true}
-                    buttonText={t("ok")}
-                />
+                <RDialog title={t((this.props.open || "").toLowerCase() + "_offset")} isOpen={this.props.open} onClose={this.props.onClose}>
+                    <Box mb="8">
+                        {t("calibration_description").replace(t("calibration_description_link"), "").split("\\n").map((x, i) => <div key={i}>{x}<br /></div>)} <a style={{ color: "teal" }} href={t("calibration_description_link_url")}>{t("calibration_description_link")}</a>
+                    </Box>
+                    <div>
+                        <b>{t("calibration_original_value")}</b>
+                    </div>
+                    {this.format(this.getLastReading() - this.getOffset())} {this.getUnit()}
+                    {this.getOffset() !== 0 && <Box>
+                        <hr />
+                        <div>
+                            <b>{t("calibration_corrected_value")}</b>
+                        </div>
+                        {this.format(this.getLastReading())} {this.getUnit()} {t("calibration_offset").replace("{%@^%1$s}", this.format(this.getOffset()) + " " + this.getUnit())}
+                    </Box>
+                    }
+                    <ModalFooter display="flex" justifyContent="center">
+                        {this.state.saving ? <Spinner /> : <>
+                            <Button mr="2" colorScheme="teal" onClick={() => this.setState({ ...this.state, correctionInput: true })}>Calibrate</Button>
+                            {this.getOffset() !== 0 && <Button ml="2" colorScheme="teal" onClick={() => this.clearCalibration()}>Clear</Button>}
+                        </>}
+                    </ModalFooter>
+                </RDialog>
+                {
+                    this.props.open && this.state.correctionInput && <InputDialog open={this.state.correctionInput} value={this.getLastReading()}
+                        onClose={(save, value) => this.calibrate(value, save)}
+                        title={t("calibration_setup")}
+                        description={t(`calibration_enter_${this.props.open.toLowerCase()}`).replace("{%@^%1$s}", this.getUnit())}
+                        number={true}
+                        buttonText={t("ok")}
+                    />
                 }
             </>
         )

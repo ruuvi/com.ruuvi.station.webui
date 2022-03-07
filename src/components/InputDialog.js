@@ -1,15 +1,10 @@
 import React, { Component } from "react";
 import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalCloseButton,
     Button,
     Input,
     Box,
 } from "@chakra-ui/react"
+import RDialog from "./RDialog";
 
 class InputDialog extends Component {
     constructor(props) {
@@ -40,22 +35,13 @@ class InputDialog extends Component {
     }
     render() {
         return (
-            <>
-                <Modal isOpen={this.props.open} onClose={() => this.props.onClose(false)} size="xl" isCentered>
-                    <ModalOverlay />
-                    <ModalContent>
-                        <ModalHeader>{this.props.title}</ModalHeader>
-                        <ModalCloseButton />
-                        <ModalBody mb="3">
-                            {this.props.description && <Box mb="2">{this.props.description}</Box>}
-                            <Input autoFocus value={this.state.value} type={this.props.number ? "number" : ""} onChange={e => this.updateInput(e)} />
-                            <div style={{ textAlign: "right" }}>
-                                <Button onClick={this.update.bind(this)} mt="2" disabled={this.props.number && isNaN(this.getNumber())}>{this.props.buttonText}</Button>
-                            </div>
-                        </ModalBody>
-                    </ModalContent>
-                </Modal>
-            </>
+            <RDialog title={this.props.title} isOpen={this.props.open} onClose={() => this.props.onClose(false)}>
+                {this.props.description && <Box mb="2">{this.props.description}</Box>}
+                <Input autoFocus value={this.state.value} type={this.props.number ? "number" : ""} onChange={e => this.updateInput(e)} />
+                <div style={{ textAlign: "right" }}>
+                    <Button onClick={this.update.bind(this)} mt="2" disabled={this.props.number && isNaN(this.getNumber())}>{this.props.buttonText}</Button>
+                </div>
+            </RDialog>
         )
     }
 }

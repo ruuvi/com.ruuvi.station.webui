@@ -1,23 +1,17 @@
 import React, { Component } from "react";
 import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalCloseButton,
     Button,
     Input,
     List,
     ListItem,
     ListIcon,
     Progress,
-    IconButton,
 } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
-import { MdClear, MdClose } from "react-icons/md";
+import { MdClear } from "react-icons/md";
 import NetworkApi from "../NetworkApi";
 import notify from "../utils/notify";
+import RDialog from "./RDialog";
 
 const maxSharesPerSensor = 10;
 
@@ -80,39 +74,28 @@ class ShareDialog extends Component {
         if (!this.props.sensor || !this.props.sensor.canShare) return <></>
         var { t } = this.props;
         return (
-            <>
-                <Modal isOpen={this.props.open} onClose={this.props.onClose} size="xl" isCentered>
-                    <ModalOverlay />
-                    <ModalContent>
-                        <ModalHeader style={{ marginTop: 15 }}>{t("share_sensor_title")}</ModalHeader>
-                        <ModalCloseButton style={{ margin: 15 }}>
-                            <IconButton isRound={true} style={{ backgroundColor: "#f0faf9", color: "#26ccc0" }}><MdClose /></IconButton>
-                        </ModalCloseButton>
-                        <ModalBody mb="3">
-                            {t("share_sensor_description").split("\\n").map((x, i) => <div key={i}>{x}<br /></div>)}
-                            <br />
-                            <div style={{ fontFamily: "Montserrat", fontWeight: 800 }}>{t("share_sensor_add_friend")}</div>
-                            <Input autoFocus placeholder={t("email")} type="email" value={this.state.email} onChange={this.emailHandler.bind(this)} mt="10px" mb="10px" />
-                            <div style={{ textAlign: "right" }}>
-                                <Button disabled={this.state.loading || this.props.sensor.sharedTo.length >= maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)} onClick={this.share.bind(this)} mt="2">{t("share")}</Button>
-                            </div>
-                            {this.props.sensor.sharedTo.length > 0 && <>
-                                <div style={{ fontWeight: "bold" }}>{t("share_sensor_already_shared")} {this.props.sensor.sharedTo.length}/{maxSharesPerSensor}</div>
-                                <List spacing={3}>
-                                    {this.props.sensor.sharedTo.map(x => {
-                                        return <ListItem key={x}>
-                                            <ListIcon as={MdClear} color="gray" style={{ cursor: "pointer" }} onClick={() => this.unshare(x)} />
-                                            {x}
-                                        </ListItem>
-                                    })}
-                                </List>
-                            </>
-                            }
-                            {this.state.loading && <Progress isIndeterminate={true} color="#e6f6f2" />}
-                        </ModalBody>
-                    </ModalContent>
-                </Modal>
-            </>
+            <RDialog title={t("share_sensor_title")} isOpen={this.props.open} onClose={this.props.onClose}>
+                {t("share_sensor_description").split("\\n").map((x, i) => <div key={i}>{x}<br /></div>)}
+                <br />
+                <div style={{ fontFamily: "Montserrat", fontWeight: 800 }}>{t("share_sensor_add_friend")}</div>
+                <Input autoFocus placeholder={t("email")} type="email" value={this.state.email} onChange={this.emailHandler.bind(this)} mt="10px" mb="10px" />
+                <div style={{ textAlign: "right" }}>
+                    <Button disabled={this.state.loading || this.props.sensor.sharedTo.length >= maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)} onClick={this.share.bind(this)} mt="2">{t("share")}</Button>
+                </div>
+                {this.props.sensor.sharedTo.length > 0 && <>
+                    <div style={{ fontWeight: "bold" }}>{t("share_sensor_already_shared")} {this.props.sensor.sharedTo.length}/{maxSharesPerSensor}</div>
+                    <List spacing={3}>
+                        {this.props.sensor.sharedTo.map(x => {
+                            return <ListItem key={x}>
+                                <ListIcon as={MdClear} color="gray" style={{ cursor: "pointer" }} onClick={() => this.unshare(x)} />
+                                {x}
+                            </ListItem>
+                        })}
+                    </List>
+                </>
+                }
+                {this.state.loading && <Progress isIndeterminate={true} color="#e6f6f2" />}
+            </RDialog>
         )
     }
 }
