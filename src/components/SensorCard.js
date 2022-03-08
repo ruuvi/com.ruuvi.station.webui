@@ -109,7 +109,7 @@ class SensorCard extends Component {
         var { t } = this.props;
         return (
             <div>
-                <Box height="360px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}>
+                <Box height="360px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}  _hover={{shadow: "0px 0px 0px 2px rgba(1,174,144,0.3)"}}>
                     <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
                         {this.props.sensor.name}
                     </Heading>
