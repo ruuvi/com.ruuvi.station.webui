@@ -118,7 +118,7 @@
       "hour": "Hour",
       "year": "year",
       "years": "years",
-      "no_data": "No data.\nThe sensor need to be in range of a gateway.",
+      "no_data": "No data.\nThe sensor needs to be in range of a Ruuvi Gateway.",
       "no_data_in_range": "No data for this time range",
       "on": "On",
       "off": "Off",
@@ -128,7 +128,11 @@
       "internet_connection_problem": "Internet connection problem",
       "successfully_unshared": "Successfully unshared",
       "zoom": "Zoom",
-      "alert_enabled": "Email and browser alerts successfully enabled"
+      "alert_enabled": "Email and browser alerts successfully enabled",
+      "history": "History",
+      "selected": "Selected",
+      "hide": "Hide",
+      "show": "Show"
     }
   },
   "fi": {
@@ -260,7 +264,11 @@
       "internet_connection_problem": "Ongelma internet-yhteydessä",
       "successfully_unshared": "Jakamisen peruutus onnistui",
       "zoom": "Zoomaa",
-      "alert_enabled": "Sähköposti- ja selainhälytykset käynnistetty onnistuneesti"
+      "alert_enabled": "Sähköposti- ja selainhälytykset käynnistetty onnistuneesti",
+      "history": "Historia",
+      "selected": "Valittu",
+      "hide": "Piilota",
+      "show": "Näytä"
     }
   },
   "sv": {
@@ -392,7 +400,11 @@
       "internet_connection_problem": "Internetanslutningsproblem",
       "successfully_unshared": "Delningen har tagits bort",
       "zoom": "Zoom",
-      "alert_enabled": "E-post- och webbläsaralarm har aktiverats"
+      "alert_enabled": "E-post- och webbläsaralarm har aktiverats",
+      "history": "Historik",
+      "selected": "Vald",
+      "hide": "Dölj",
+      "show": "Visa"
     }
   }
 }
