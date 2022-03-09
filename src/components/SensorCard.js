@@ -13,6 +13,7 @@ import { Spinner } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 import DurationText from "./DurationText";
+import BigValue from "./BigValue";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -120,14 +121,11 @@ class SensorCard extends Component {
                     ) : (
                         <div>
                             {this.state.lastParsedReading ? <div>
-                                <div style={{ color: this.isAlertTriggerd("temperature") ? "#f27575" : undefined }}>
-                                    <span className="main-stat">
-                                        {localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals)}
-                                    </span>
-                                    <span className="main-stat-unit">
-                                        {getUnitHelper("temperature").unit}
-                                    </span>
-                                </div>
+                                <BigValue
+                                    value={localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals)}
+                                    unit={getUnitHelper("temperature").unit}
+                                    alertActive={this.isAlertTriggerd("temperature")}
+                                />
                                 <div style={{ marginLeft: -30, marginRight: -30, marginTop: -10, marginBottom: -10 }}>
                                     {this.state.data && this.state.data.measurements.length ? (
                                         <Graph title="" dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />

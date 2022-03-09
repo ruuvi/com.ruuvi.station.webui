@@ -46,3 +46,8 @@ code {
 #chakra-toast-manager-bottom {
   bottom: 30px !important;
 }
+
+:focus {
+  outline: none; 
+  box-shadow: none !important;
+}

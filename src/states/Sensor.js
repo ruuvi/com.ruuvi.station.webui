@@ -38,13 +38,13 @@ import EditableText from "../components/EditableText";
 import OffsetDialog from "../components/OffsetDialog";
 import NavClose from "../components/NavClose";
 import NavPrevNext from "../components/NavPrevNext";
-import DurationPicker, { getTimespan } from "../components/DurationPicker";
+import DurationPicker from "../components/DurationPicker";
 import notify from "../utils/notify"
 import { ruuviTheme } from "../themes";
 import pjson from '../../package.json';
 
-var bigCardFields = ["temperature", "humidity", "pressure", "movementCounter"];
-var sensorInfoOrder = ["mac", "dataFormat", "battery", "accelerationX", "accelerationY", "accelerationZ", "txPower", "rssi", "measurementSequenceNumber"];
+var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"];
+var sensorInfoOrder = ["mac", "dataFormat"];
 
 const graphInfo = {
     fontFamily: "mulish",
@@ -52,26 +52,22 @@ const graphInfo = {
     marginLeft: "30px",
     marginBottom: "-20px",
 }
-
 const sensorName = {
     fontFamily: "montserrat",
     fontSize: "54px",
     fontWeight: 800,
 }
-
 const sensorNameMobile = {
     fontFamily: "montserrat",
     fontSize: "32px",
     fontWeight: 800,
 }
-
 const graphLengthText = {
     fontFamily: "montserrat",
     fontSize: "24px",
     fontWeight: 800,
     marginLeft: "30px"
 }
-
 const collapseText = {
     fontFamily: "montserrat",
     fontSize: "24px",
@@ -463,25 +459,25 @@ class Sensor extends Component {
                 ) : (
                     <div>
                         {this.state.data && <div>
-                            <StatGroup style={{ marginTop: "30px", marginBottom: "30px" }}>
-                                {bigCardFields.map(x => {
+                            <StatGroup style={{ marginBottom: 30, marginTop: 30 }} justifyContent="start">
+                                {mainSensorFields.map(x => {
                                     let value = this.getLatestReading()[x];
                                     if (value === undefined) return null;
-                                    return <SensorReading key={x} value={value == null ? "-" : localeNumber(getUnitHelper(x).value(value, this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
+                                    return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
                                         alertTriggered={this.isAlertTriggerd(x)}
-                                        label={t(getUnitHelper(x).label)}
-                                        unit={x === "movement" ? t(getUnitHelper(x).unit) : getUnitHelper(x).unit}
+                                        label={getUnitHelper(x).label}
+                                        unit={getUnitHelper(x).unit}
                                         selected={this.state.graphKey === x}
                                         onClick={() => this.setGraphKey(x)} />
                                 })}
                             </StatGroup>
-                            <div style={{ marginBottom: "20px" }}>
+                            <div style={{ marginTop: 30, marginBottom: 20 }}>
                                 <table width="100%">
                                     <tbody>
                                         <tr>
                                             <td>
                                                 <div style={graphLengthText}>
-                                                    {t("last")} {getTimespan(this.state.from).k} {t(getTimespan(this.state.from).t)}
+                                                    {t("history")}
                                                 </div>
                                                 <div style={graphInfo}>
                                                     {t("selected")}: {t(getUnitHelper(this.state.graphKey).label)} {this.getSelectedUnit()}
