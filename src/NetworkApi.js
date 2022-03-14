@@ -102,7 +102,12 @@ class NetworkApi {
     async getLastestDataAsync(mac) {
         let data = await this.getAsync(mac, null, null, { limit: 1 })
         if (data.result === "success") {
-            if (data.data.measurements.length > 1) data.data.measurements = [data.data.measurements[0]];
+            if (data.data.measurements.length > 1) {
+                data.data.measurements = [data.data.measurements.reduce((prev, curr) => {
+                    return prev.timestamp > curr.timestamp ? prev : curr;
+                })]
+                //data.data.measurements = [Math.max.apply(Math, data.data.measurements.map(function(o) { return o.timestamp; }))]
+            }
             data.data = parse(data.data);
         }
         return data;
@@ -110,16 +115,35 @@ class NetworkApi {
     async getAsync(mac, since, until, settings) {
         if (!this.options) return null;
         var mode = settings.mode || "mixed";
-        var cachedData = await DataCache.getData(mac, mode, since)
         var useCache = false;
-        if (!until && cachedData && cachedData.length) {
-            let newest = cachedData[0].timestamp;
-            let oldest = cachedData[cachedData.length - 1].timestamp;
-            if (since > newest || since < oldest - 60 * 15) {
-                //console.log("Will not use cache")
-            } else {
-                since = newest
-                useCache = true
+        var cachedData;
+        var saveCache = false;
+        if (!settings || settings.limit !== 1) {
+            saveCache = true;
+            cachedData = await DataCache.getData(mac, mode)
+            if (cachedData && cachedData.length) {
+                let newest = cachedData[0].timestamp;
+                let oldest = cachedData[cachedData.length - 1].timestamp;
+                if (until && (since >= oldest || (since <= oldest)) && until <= newest) {
+                    let dataToBe = cachedData.filter(x => x.timestamp <= until && x.timestamp >= since)
+                    if (dataToBe.length > 1) {
+                        var d = await this.getLastestDataAsync(mac)
+                        if (d.result === "success") {
+                            d.data.measurements = dataToBe
+                            d.data.fromCache = true;
+                            return d;
+                        }
+                    }
+                }
+                if (!until) {
+                    if (since > newest || since < oldest - 60 * 15) {
+                        //console.log("Will not use cache")
+                    } else {
+                        cachedData = cachedData.filter(x => x.timestamp >= since)
+                        since = newest
+                        useCache = true
+                    }
+                }
             }
         }
         var q = "?sensor=" + encodeURIComponent(mac)
@@ -133,9 +157,9 @@ class NetworkApi {
         const respData = await resp.json()
         if (cachedData && respData.result === "success" && useCache) {
             respData.data.measurements.push(...cachedData)
-            DataCache.setData(mac, mode, respData.data.measurements)
+            if (saveCache) DataCache.setData(mac, mode, respData.data.measurements)
         } else if (respData.result === "success") {
-            DataCache.setData(mac, mode, respData.data.measurements)
+            if (saveCache) DataCache.setData(mac, mode, respData.data.measurements)
         }
         return respData;
     };

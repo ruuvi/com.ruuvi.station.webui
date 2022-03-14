@@ -245,10 +245,9 @@ class Sensor extends Component {
                         else {
                             // data refresh, add new once to the beginning of the array
                             stateData.measurements = [...d.measurements, ...stateData.measurements]
-                            stateData.latestTimestamp = stateData.measurements[0].timestamp
                         }
                         that.setState({ ...that.state, data: stateData, loading: false, table: d.table, resolvedMode: d.resolvedMode })
-                        if (initialLoad && d.measurements.length >= pjson.settings.dataFetchPaginationSize) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
+                        if (initialLoad && (d.fromCache || d.measurements.length >= pjson.settings.dataFetchPaginationSize)) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
                     } else if (resp.result === "error") {
                         notify.error(that.props.t(`UserApiError.${resp.code}`))
                         that.setState({ ...that.state, loading: false })
