@@ -14,6 +14,7 @@ export const ruuviTheme = extendTheme({
         primaryDark: "#34ad9f",
         primaryLight: "rgba(68, 201, 185, 0.3)",
         primaryLighter: "rgba(68, 201, 185, 0.1)",
+        infoIcon: "rgba(68, 201, 185, 0.6)",
         error: "#f15a24",
         errorBackground: "rgb(241,90,36,0.3)",
         inactive: "#d4ede8",

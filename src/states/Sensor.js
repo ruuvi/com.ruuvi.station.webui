@@ -136,7 +136,7 @@ function SensorHeader(props) {
                             <NavClose />
                         </td>
                         <td width="33%" align="center">
-                            <Avatar bg="primary" size="lg" name={props.sensor.name} src={props.sensor.picture} />
+                            <Avatar mt="3" bg="primary" size="lg" name={props.sensor.name} src={props.sensor.picture} />
                         </td>
                         <td width="33%" align="right" style={{ verticalAlign: "top" }}>
                             <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
@@ -149,7 +149,7 @@ function SensorHeader(props) {
                     <Heading style={sensorNameMobile}>
                         {props.sensor.name}
                     </Heading>
-                    <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
+                    <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic" }}>
                         <DurationText from={props.lastUpdateTime} t={props.t} />
                     </div>
                 </div>
@@ -423,7 +423,7 @@ class Sensor extends Component {
                                             <td style={{ textAlign: "right" }}>
                                                 <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
                                                 <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
-                                                    <MdInfo size="16" color={ruuviTheme.colors.primaryLight} />
+                                                    <MdInfo size="16" color={ruuviTheme.colors.infoIcon} />
                                                 </IconButton>
                                                 <Button variant='link' color="primary" ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                 <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
