@@ -12,6 +12,7 @@ import { MdClear } from "react-icons/md";
 import NetworkApi from "../NetworkApi";
 import notify from "../utils/notify";
 import RDialog from "./RDialog";
+import { addNewlines } from "../TextHelper";
 
 const maxSharesPerSensor = 10;
 
@@ -75,12 +76,12 @@ class ShareDialog extends Component {
         var { t } = this.props;
         return (
             <RDialog title={t("share_sensor_title")} isOpen={this.props.open} onClose={this.props.onClose}>
-                {t("share_sensor_description").split("\\n").map((x, i) => <div key={i}>{x}<br /></div>)}
+                {addNewlines(t("share_sensor_description"), "\\n")}
                 <br />
                 <div style={{ fontFamily: "Montserrat", fontWeight: 800 }}>{t("share_sensor_add_friend")}</div>
-                <Input autoFocus placeholder={t("email")} type="email" value={this.state.email} onChange={this.emailHandler.bind(this)} mt="10px" mb="10px" />
+                <Input autoFocus placeholder={t("email")} type="email" value={this.state.email} onChange={this.emailHandler.bind(this)} mt="10px" />
                 <div style={{ textAlign: "right" }}>
-                    <Button disabled={this.state.loading || this.props.sensor.sharedTo.length >= maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)} onClick={this.share.bind(this)} mt="2">{t("share")}</Button>
+                    <Button disabled={this.state.loading || this.props.sensor.sharedTo.length >= maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)} onClick={this.share.bind(this)} mt="17px">{t("share")}</Button>
                 </div>
                 {this.props.sensor.sharedTo.length > 0 && <>
                     <div style={{ fontWeight: "bold" }}>{t("share_sensor_already_shared")} {this.props.sensor.sharedTo.length}/{maxSharesPerSensor}</div>

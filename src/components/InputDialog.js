@@ -39,7 +39,7 @@ class InputDialog extends Component {
                 {this.props.description && <Box mb="2">{this.props.description}</Box>}
                 <Input autoFocus value={this.state.value} type={this.props.number ? "number" : ""} onChange={e => this.updateInput(e)} />
                 <div style={{ textAlign: "right" }}>
-                    <Button onClick={this.update.bind(this)} mt="2" disabled={this.props.number && isNaN(this.getNumber())}>{this.props.buttonText}</Button>
+                    <Button onClick={this.update.bind(this)} mt="17px" disabled={this.props.number && isNaN(this.getNumber())}>{this.props.buttonText}</Button>
                 </div>
             </RDialog>
         )
