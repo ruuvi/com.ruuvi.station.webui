@@ -2,6 +2,8 @@ import pjson from '../package.json';
 import DataCache from './DataCache';
 import parse from './decoder/parser';
 
+// api docs: https://docs.ruuvi.com/communication/ruuvi-network/backends/serverless/user-api
+
 function sortSensors(sensors) {
     for (var i = 0; i < sensors.length; i++) {
         if (!sensors[i].name) {
@@ -272,6 +274,71 @@ class NetworkApi {
             return response.json();
         })
             .then(response => success(response))
+    }
+    resetImage(sensor, success, error) {
+        fetch(this.url + "/upload", {
+            ...this.options,
+            method: 'POST',
+            body: JSON.stringify({ action: "reset", sensor }),
+        })
+            .then(function (response) {
+                if (response.status === 200) {
+                    return response.json()
+                }
+                throw (response)
+            })
+            .then(response => {
+                success(response);
+            }).catch(e => {
+                error(e);
+            });
+    }
+    prepareUpload(sensor, type, success, error) {
+        fetch(this.url + "/upload", {
+            ...this.options,
+            method: 'POST',
+            body: JSON.stringify({ sensor, type }),
+        })
+            .then(function (response) {
+                if (response.status === 200) {
+                    return response.json()
+                }
+                throw (response)
+            })
+            .then(response => {
+                success(response);
+            }).catch(e => {
+                error(e);
+            });
+    }
+    async uploadImage(url, type, file, success, error) {
+        function dataURItoBlob(dataURI) {
+            var byteString = dataURI.split(',')[0].indexOf('base64') >= 0 ?
+                atob(dataURI.split(',')[1]) : unescape(dataURI.split(',')[1]);
+
+            var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            var ia = new Uint8Array(byteString.length);
+            for (var i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ia], { type: mimeString });
+        }
+        fetch(url, {
+            ...{ headers: new Headers({ "Content-Type": "multipart/form-data" }) },
+            method: 'PUT',
+            body: dataURItoBlob(file),
+        })
+            .then(function (response) {
+                if (response.status === 200) {
+                    return
+                }
+                throw (response)
+            })
+            .then(response => {
+                success(response);
+            }).catch(e => {
+                error(e);
+            });
     }
 }
 

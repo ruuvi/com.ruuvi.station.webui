@@ -112,9 +112,12 @@ const accordionButton = {
 function SensorHeader(props) {
     const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
     if (isLargeDisplay) {
-        return <div style={{display: "flex", justifyContent: "space-between"}}>
-            <Avatar bg="primary" size="xl" name={props.sensor.name} src={props.sensor.picture} />
-            <span style={{width: "100%", marginLeft: 8}}>
+        return <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
+            <label for="avatarUpload">
+                <Avatar bg="primary" _hover={{ filter: "blur(1px)" }} style={{ cursor: "pointer" }} size="xl" name={props.sensor.name} src={props.testImgSrc || props.sensor.picture} />
+            </label>
+            <span style={{ width: "100%", marginLeft: 8 }}>
                 <Heading style={sensorName}>
                     {props.sensor.name}
                 </Heading>
@@ -136,7 +139,10 @@ function SensorHeader(props) {
                             <NavClose />
                         </td>
                         <td width="33%" align="center">
-                            <Avatar mt="3" bg="primary" size="lg" name={props.sensor.name} src={props.sensor.picture} />
+                            <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
+                            <label for="avatarUpload">
+                                <Avatar mt="3" bg="primary" size="lg" name={props.sensor.name} src={props.sensor.picture} />
+                            </label>
                         </td>
                         <td width="33%" align="right" style={{ verticalAlign: "top" }}>
                             <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
@@ -389,7 +395,55 @@ class Sensor extends Component {
         var { t } = this.props
         return (
             <Box borderWidth="1px" borderRadius="lg" overflow="hidden" pt={{ base: "5px", md: "35px" }} pl={{ base: "5px", md: "35px" }} pr={{ base: "5px", md: "35px" }} style={{ backgroundColor: "white" }}>
-                <SensorHeader {...this.props} lastUpdateTime={this.state.lastestDatapoint && this.state.lastestDatapoint.measurements.length ? this.state.lastestDatapoint.measurements[0].timestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)} />
+                <SensorHeader {...this.props} lastUpdateTime={this.state.lastestDatapoint && this.state.lastestDatapoint.measurements.length ? this.state.lastestDatapoint.measurements[0].timestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}
+                    fileUploadChange={f => {
+                        let file = f.target.files[0]
+                        if (file.type.match(/image.*/)) {
+                            let reader = new FileReader();
+                            reader.onload = readerEvent => {
+                                let image = new Image();
+                                image.onload = () => {
+                                    let canvas = document.createElement('canvas'),
+                                        max_size = 1440,
+                                        width = image.width,
+                                        height = image.height;
+
+                                    if (height > max_size) {
+                                        width *= max_size / height;
+                                        height = max_size;
+                                    }
+                                    canvas.width = width;
+                                    canvas.height = height;
+                                    canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+                                    let dataUrl = canvas.toDataURL('image/jpeg');
+                                    let api = new NetworkApi();
+                                    api.prepareUpload(this.props.sensor.sensor, 'image/jpeg', ya => {
+                                        if (ya.result === "success") {
+                                            let url = ya.data.uploadURL
+                                            api.uploadImage(url, 'image/jpeg', dataUrl, () => {
+                                                let s = this.props.sensor;
+                                                s.picture = dataUrl.split("?")[0]
+                                                this.props.updateSensor(s);
+                                                this.forceUpdate();
+                                                notify.success("image_uploaded")
+                                            }, err => {
+                                                console.log("err", err)
+                                                notify.error("image_upload_error")
+                                            })
+                                        }
+                                    }, err => {
+                                        alert("err", err)
+                                        notify.error("image_upload_error")
+                                    })
+                                }
+                                image.src = readerEvent.target.result;
+                            }
+                            reader.readAsDataURL(file);
+                        } else {
+                            notify.error("image_upload_error")
+                        }
+                    }}
+                />
                 {this.state.loading ? (
                     <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
                         <Progress isIndeterminate={true} color="#e6f6f2" />
