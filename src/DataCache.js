@@ -30,7 +30,7 @@ var cache = {
             }
             if (!data) return
             let oldData = await cache.getData(sensor, mode, 0)
-            data = [...data, ...oldData]
+            data = [...data, ...(oldData || [])]
             data.sort(compare)
             // remove duplicates
             data = data.filter(function (item, pos, ary) {

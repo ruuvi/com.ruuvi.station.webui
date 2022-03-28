@@ -71,15 +71,15 @@ export default function App() {
             {new NetworkApi().isStaging() ? "(staging) " : ""}
           </Text>
           <span style={{ width: "100%", textAlign: "right" }}>
-            <SensorMenu sensors={sensors} />
+            <SensorMenu sensors={sensors} key={Math.random()} />
             <LanguageMenu />
             <UserMenu logout={logout} settings={() => window.location.href += "?settings"} email={user.email} />
           </span>
         </HStack>
         <div style={{ marginTop: "20px" }}>
           <Switch>
-            <Route path="/:id" component={Dashboard} />
-            <Route path="/" component={Dashboard} />
+            <Route path="/:id" render={rp => <Dashboard reloadTags={() => { forceUpdate() }} {...rp} />} />
+            <Route path="/" render={rp => <Dashboard reloadTags={() => { forceUpdate() }} {...rp} />} />
           </Switch>
           <div style={bottomText}><a href="https://ruuvi.com/" target="_blank" rel="noreferrer">ruuvi.com</a></div>
           <div style={versionText}>v{pjson.version}</div>

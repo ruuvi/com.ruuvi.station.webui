@@ -97,6 +97,7 @@ class Dashboard extends Component {
         var current = this.getCurrentSensor().sensor;
         this.setState({ ...this.state, sensors: this.state.sensors.filter(x => x.sensor !== current) })
         this.props.history.push('/')
+        this.props.reloadTags();
     }
     updateSensor(sensor) {
         var idx = this.state.sensors.findIndex(x => x.sensor.sensor === sensor.sensor)
