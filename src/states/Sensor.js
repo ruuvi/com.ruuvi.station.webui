@@ -465,7 +465,9 @@ class Sensor extends Component {
                         {this.state.data && <div>
                             <StatGroup style={{ marginTop: "30px", marginBottom: "30px" }}>
                                 {bigCardFields.map(x => {
-                                    return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
+                                    let value = this.getLatestReading()[x];
+                                    if (value === undefined) return null;
+                                    return <SensorReading key={x} value={value == null ? "-" : localeNumber(getUnitHelper(x).value(value, this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
                                         alertTriggered={this.isAlertTriggerd(x)}
                                         label={t(getUnitHelper(x).label)}
                                         unit={x === "movement" ? t(getUnitHelper(x).unit) : getUnitHelper(x).unit}
@@ -599,6 +601,7 @@ class Sensor extends Component {
                                     <AccordionPanel style={accordionPanel}>
                                         <List>
                                             {["Temperature", "Humidity", "Pressure"].map(x => {
+                                                if (this.getLatestReading()[x.toLowerCase()] === undefined) return null;
                                                 var uh = getUnitHelper(x.toLocaleLowerCase());
                                                 var value = uh.value(this.state.data["offset" + x], true);
                                                 var unit = uh.unit;
