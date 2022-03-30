@@ -17,6 +17,7 @@ import {
     AccordionPanel,
     AccordionIcon,
     useMediaQuery,
+    CircularProgress,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
@@ -115,7 +116,9 @@ function SensorHeader(props) {
         return <div style={{ display: "flex", justifyContent: "space-between" }}>
             <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
             <label for="avatarUpload">
-                <Avatar bg="primary" _hover={{ filter: "blur(1px)" }} style={{ cursor: "pointer" }} size="xl" name={props.sensor.name} src={props.testImgSrc || props.sensor.picture} />
+                {props.loadingImage ? <CircularProgress size={"96px"} isIndeterminate={true} color="primary" /> :
+                    <Avatar bg="primary" style={{ cursor: "pointer" }} size="xl" name={props.sensor.name} src={props.testImgSrc || props.sensor.picture} />
+                }
             </label>
             <span style={{ width: "100%", marginLeft: 8 }}>
                 <Heading style={sensorName}>
@@ -141,7 +144,9 @@ function SensorHeader(props) {
                         <td width="33%" align="center">
                             <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
                             <label for="avatarUpload">
-                                <Avatar mt="3" bg="primary" size="lg" name={props.sensor.name} src={props.sensor.picture} />
+                                {props.loadingImage ? <CircularProgress mt="3" size={"64px"} isIndeterminate={true} color="primary" /> :
+                                    <Avatar mt="3" bg="primary" size="lg" name={props.sensor.name} src={props.sensor.picture} />
+                                }
                             </label>
                         </td>
                         <td width="33%" align="right" style={{ verticalAlign: "top" }}>
@@ -180,6 +185,7 @@ class Sensor extends Component {
             showShare: false,
             offsetDialog: null,
             graphRenderKey: 0,
+            loadingImage: false,
         }
         this.applyAccordionSetting()
     }
@@ -367,6 +373,7 @@ class Sensor extends Component {
         })
     }
     export() {
+        new NetworkApi().resetImage(this.props.sensor.sensor, () => { })
         exportCSV(this.state.data, this.props.sensor.name)
     }
     setOpenAccordion(open) {
@@ -396,9 +403,11 @@ class Sensor extends Component {
         return (
             <Box borderWidth="1px" borderRadius="lg" overflow="hidden" pt={{ base: "5px", md: "35px" }} pl={{ base: "5px", md: "35px" }} pr={{ base: "5px", md: "35px" }} style={{ backgroundColor: "white" }}>
                 <SensorHeader {...this.props} lastUpdateTime={this.state.lastestDatapoint && this.state.lastestDatapoint.measurements.length ? this.state.lastestDatapoint.measurements[0].timestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}
+                    loadingImage={this.state.loadingImage}
                     fileUploadChange={f => {
                         let file = f.target.files[0]
                         if (file.type.match(/image.*/)) {
+                            this.setState({ ...this.state, loadingImage: true })
                             let reader = new FileReader();
                             reader.onload = readerEvent => {
                                 let image = new Image();
@@ -425,22 +434,25 @@ class Sensor extends Component {
                                                 s.picture = dataUrl.split("?")[0]
                                                 this.props.updateSensor(s);
                                                 this.forceUpdate();
-                                                notify.success("image_uploaded")
+                                                this.setState({ ...this.state, loadingImage: false })
                                             }, err => {
                                                 console.log("err", err)
-                                                notify.error("image_upload_error")
+                                                notify.error("something_went_wrong")
+                                                this.setState({ ...this.state, loadingImage: false })
                                             })
                                         }
                                     }, err => {
                                         alert("err", err)
-                                        notify.error("image_upload_error")
+                                        notify.error("something_went_wrong")
+                                        this.setState({ ...this.state, loadingImage: false })
                                     })
                                 }
                                 image.src = readerEvent.target.result;
                             }
                             reader.readAsDataURL(file);
                         } else {
-                            notify.error("image_upload_error")
+                            notify.error("something_went_wrong")
+                            this.setState({ ...this.state, loadingImage: false })
                         }
                     }}
                 />
