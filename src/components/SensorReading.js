@@ -9,6 +9,7 @@ import BigValue from "./BigValue";
 import { MdInfo } from "react-icons/md";
 import notify from "../utils/notify";
 import { useTranslation } from "react-i18next";
+import { addNewlines } from "../TextHelper";
 
 const height = 120
 
@@ -31,7 +32,9 @@ const labelStyle = {
 
 function info(e, t, sensorType) {
     e.stopPropagation();
-    notify.info(t(`${sensorType}_info`))
+    let text = t(`${sensorType}_info`)
+    text = addNewlines(text)
+    notify.info(text)
 }
 
 export default function SensorReading(props) {

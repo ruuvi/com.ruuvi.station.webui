@@ -1,7 +1,7 @@
 import { Alert, Text, createStandaloneToast, AlertIcon, CloseButton } from '@chakra-ui/react'
 import { ruuviTheme } from '../themes'
 
-function toastIt(title, status, duration) {
+function toastIt(text, status, duration) {
     const toast = createStandaloneToast()
     toast({
         duration: duration || 4000,
@@ -20,7 +20,7 @@ function toastIt(title, status, duration) {
             >
                 <AlertIcon color={status !== "info" ? "white" : ruuviTheme.colors.gray} />
                 <Text fontWeight={status !== "info" ? 600 : undefined}>
-                    {title}
+                    {text}
                 </Text>
                 <CloseButton
                     size="sm"
@@ -35,14 +35,14 @@ function toastIt(title, status, duration) {
 }
 
 var notify = {
-    success: (title) => {
-        toastIt(title, "success")
+    success: (text) => {
+        toastIt(text, "success")
     },
-    error: (title) => {
-        toastIt(title, "error")
+    error: (text) => {
+        toastIt(text, "error")
     },
-    info: (title) => {
-        toastIt(title, "info", 7 * 1000)
+    info: (text) => {
+        toastIt(text, "info", 7 * 1000)
     }
 }
 
