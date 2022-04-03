@@ -369,7 +369,7 @@ class Sensor extends Component {
         })
     }
     export() {
-        exportCSV(this.state.data, this.props.sensor.name)
+        exportCSV(this.state.data, this.props.sensor.name, this.props.t)
     }
     setOpenAccordion(open) {
         new Store().setOpenAccordions(open)

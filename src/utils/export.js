@@ -1,8 +1,29 @@
 import { getUnitHelper } from "../UnitHelper";
 
-export function exportCSV(data, sensorName) {
-    var csvHeader = ['Timestamp', `Temperature (${getUnitHelper("temperature").unit})`, `Humidity (${getUnitHelper("humidity").unit})`, `Pressure (${getUnitHelper("pressure").unit})`, 'RSSI', 'Acceleration X', 'Acceleration Y', 'Acceleration Z', 'Voltage', 'Movement counter', 'Measurement sequence number']
-    data = data.measurements.map(x => [toISOString(new Date(x.timestamp * 1000)), x.parsed.temperature, x.parsed.humidity, x.parsed.pressure, x.parsed.rssi, x.parsed.accelerationX, x.parsed.accelerationY, x.parsed.accelerationZ, x.parsed.battery, x.parsed.movementCounter, x.parsed.measurementSequenceNumber])
+export function exportCSV(data, sensorName, t) {
+    const sensorHeaders = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber"]
+    var csvHeader = [t('timestamp')];
+    let uHelp = {};
+    sensorHeaders.forEach(x => {
+        uHelp[x] = getUnitHelper(x, true)
+        let header = t(uHelp[x].label)
+        if (x === "rssi") header = "RSSI";
+        if (["temperature", "humidity", "pressure"].indexOf(x) !== -1) {
+            header += ` (${uHelp[x].unit})`
+        }
+        csvHeader.push(header)
+    })
+    data = data.measurements.map(x => {
+        let row = [toISOString(new Date(x.timestamp * 1000))]
+        sensorHeaders.forEach(s => {
+            if (s === "humidity") {
+                row.push(uHelp[s].value(x.parsed[s], x.parsed.temperature))
+            } else {
+                row.push(uHelp[s].value(x.parsed[s]))
+            }
+        });
+        return row;
+    })
 
     var csv = csvHeader.toString() + "\n"
     for (var i = data.length - 1; i >= 0; i--) {

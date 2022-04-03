@@ -16,7 +16,7 @@ const unitHelper = {
     "measurementSequenceNumber": { label: "measurement_sequence_number", unit: "", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: true },
 }
 
-export function getUnitHelper(key) {
+export function getUnitHelper(key, plaintext) {
     if (key === "temperature") {
         let settings = localStorage.getItem("settings");
         if (settings) {
@@ -41,7 +41,7 @@ export function getUnitHelper(key) {
         if (settings) {
             settings = JSON.parse(settings)
             if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "1") {
-                thing.unit = <span>g/m<sup>3</sup></span>
+                thing.unit = plaintext ? "g/m³" : <span>g/m<sup>3</sup></span>
                 return thing;
             } else if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "2") {
                 thing.unit = "°C"
