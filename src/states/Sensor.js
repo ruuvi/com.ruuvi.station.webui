@@ -369,7 +369,6 @@ class Sensor extends Component {
         })
     }
     export() {
-        new NetworkApi().resetImage(this.props.sensor.sensor, () => { })
         exportCSV(this.state.data, this.props.sensor.name)
     }
     setOpenAccordion(open) {
