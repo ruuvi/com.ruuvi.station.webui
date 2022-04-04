@@ -40,8 +40,11 @@ class Graph extends Component {
         if (!this.props.data) return [[], []];
         var d = JSON.parse(JSON.stringify(this.props.data));
         d = d.reverse();
-        return [d.map(x => x.timestamp),
-        d.map(x => getUnitHelper(this.props.dataKey).value(x.parsed[this.props.dataKey], x.parsed.temperature))]
+        d = d.filter(x => x.parsed[this.props.dataKey] !== undefined)
+        return [
+            d.map(x => x.timestamp),
+            d.map(x => getUnitHelper(this.props.dataKey).value(x.parsed[this.props.dataKey], x.parsed.temperature))
+        ]
     }
     getXRange() {
         return [this.props.from / 1000, new Date().getTime() / 1000]
