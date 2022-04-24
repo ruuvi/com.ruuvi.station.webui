@@ -38,11 +38,33 @@ const versionText = {
 }
 
 export default function App() {
+  try {
+    let cookie = document.cookie;
+    if (cookie) {
+      let keys = cookie.split(";")
+      keys.forEach(key => {
+        if (key.indexOf("station_user=") !== -1) {
+          let payload = key.replace("station_user=", "")
+          //console.log("found station user cookie")
+          let parsed = JSON.parse(payload)
+          if (parsed && parsed.accessToken) {
+            let domain = ".ruuvi.com"
+            document.cookie = `station_user=;domain=${domain};Max-Age=-99999999`
+            document.cookie = `station_status=signedIn;domain=${domain}`
+            new NetworkApi().setUser(parsed)
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.log("could not parse cookie", e)
+  }
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
   const logout = () => {
     new NetworkApi().removeToken()
     window.location.replace("/#/")
+    //window.location.href = "https://ruuvi.com/station"
     forceUpdate()
   }
   var user = new NetworkApi().getUser()

@@ -45,6 +45,8 @@ class NetworkApi {
     }
     removeToken() {
         localStorage.removeItem(this.getUserKey())
+        let domain = ".ruuvi.com"
+        document.cookie = `station_status=signedIn;domain=${domain};Max-Age=-99999999`
     }
     isStaging() {
         return window.location.href.indexOf("/staging") !== -1
