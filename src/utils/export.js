@@ -25,6 +25,11 @@ export function exportCSV(data, sensorName, t) {
         return row;
     })
 
+    // filter duplicates
+    data = data.filter(function (item, pos, ary) {
+        return !pos || item[0] !== ary[pos - 1][0];
+    });
+
     var csv = csvHeader.toString() + "\n"
     for (var i = data.length - 1; i >= 0; i--) {
         csv += data[i].toString() + "\n"
