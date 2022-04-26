@@ -29,15 +29,22 @@
     input {
         width: 100%;
         height: 40px;
+        font-size: 14px;
         margin: 8px 0;
         display: inline-block;
-        border: 2px solid #77cdc2;
+        border: 2px solid #d4ede8;
         border-radius: 4px;
         box-sizing: border-box;
     }
 
+    input:focus {
+        border: 2px solid #77cdc2;
+    }
+
     input[type=pin] {
         text-align: center;
+        max-width: 40px;
+        margin: 1px;
     }
 
     input[type=email] {
@@ -47,8 +54,11 @@
     button {
         width: 100%;
         background-color: #77cdc2;
-        color: rgb(0, 0, 0);
+        color: #ffffff;
         padding: 14px 20px;
+        font-weight: 500;
+        font-size: 16px;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         margin: 8px 0;
         border: none;
         border-radius: 16px;
@@ -58,24 +68,41 @@
     button:hover {
         background-color: #77cdc2;
     }
+
+    #activationCodeLabel {
+        color: #1b4847;
+        font-size: 18px;
+        font-style: italic;
+        font-weight: 600;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        margin-bottom: 16px;
+    }
+
+    @keyframes fadeInOut {
+        from {
+            opacity: 0;
+        }
+    }
 </style>
 
 <body>
     <div id="view_container">
+        <div id="view_loading" style="text-align: center;">
+            <img class="rotate" width="100px" src="android-chrome-512x512.png" />
+        </div>
         <div id="view_email">
             <input id="emailInput" type="email" placeholder="Email.." />
             <br />
-            <button id="loginButton" onClick="login()">Get code</button>
+            <button id="loginButton" onClick="login()">Sign in</button>
         </div>
         <div id="view_code" style="text-align: center;">
-            <span id="activationCodeLabel">
+            <div id="activationCodeLabel">
                 Check your email for an activation code.
-            </span>
-            <br />
-            <input maxlength=1 id="pin_1" type="pin" onkeyup="moveOnMax(this,'pin_2')" style="max-width: 40px;" />
-            <input maxlength=1 id="pin_2" type="pin" onkeyup="moveOnMax(this,'pin_3')" style="max-width: 40px;" />
-            <input maxlength=1 id="pin_3" type="pin" onkeyup="moveOnMax(this,'pin_4')" style="max-width: 40px;" />
-            <input maxlength=1 id="pin_4" type="pin" onkeyup="verify()" style="width: 40px;" />
+            </div>
+            <input maxlength=1 id="pin_1" type="pin" onkeyup="moveOnMax(this,'pin_2')" />
+            <input maxlength=1 id="pin_2" type="pin" onkeyup="moveOnMax(this,'pin_3')" />
+            <input maxlength=1 id="pin_3" type="pin" onkeyup="moveOnMax(this,'pin_4')" />
+            <input maxlength=1 id="pin_4" type="pin" onkeyup="verify()" />
         </div>
         <div id="view_link">
             <button id="openButton" onClick="sendOpenPage()">Open Ruuvi Station</button>
@@ -95,7 +122,7 @@
                 }],
             'loginButton':
                 ['innerText', {
-                    'en': 'Sign in',
+                    'en': 'Login',
                     'fi': 'Kirjaudu',
                     'sv': 'Logga in',
                 }],
@@ -104,6 +131,12 @@
                     'en': 'Check your email for an activation code.',
                     'fi': 'Tarkasta aktivointikoodi saamastasi sähköpostista.',
                     'sv': 'Kontrollera din e-post efter en aktiveringskod.',
+                }],
+            'openButton':
+                ['innerText', {
+                    'en': 'Open Ruuvi Station',
+                    'fi': 'Avaa Ruuvi Station',
+                    'sv': 'Öppna Ruuvi Station',
                 }],
         }
 
@@ -132,6 +165,7 @@
         }
         function login() {
             let email = document.getElementById("emailInput").value
+            setView("view_loading")
             fetch(apiUrl + "/register", {
                 method: 'POST',
                 body: JSON.stringify({ email: email }),
@@ -145,7 +179,7 @@
                 .then(response => {
                     console.log("resp", response)
                     if (response.result === "success") {
-                        setVisibility("view_code")
+                        setView("view_code")
                     } else {
                         alert(response.error)
                     }
@@ -158,6 +192,7 @@
         }
         function verify() {
             let token = getToken()
+            setView("view_loading")
             fetch(apiUrl + "/verify?token=" + token).then(function (response) {
                 return response.json();
             })
@@ -165,6 +200,7 @@
                     if (response.result === "success") {
                         console.log(response)
                         document.cookie = `station_user=${JSON.stringify(response.data)};domain=${domain}`
+                        setView("view_link")
                         sendOpenPage(response.data)
                     } else {
                         alert(response.error)
@@ -180,15 +216,14 @@
         function sendData(data) {
             window.parent.postMessage(JSON.stringify(data), "*")
         }
-        function setVisibility(view) {
-            const views = ["view_email", "view_code", "view_link"]
+        function setView(view) {
+            const views = ["view_email", "view_code", "view_link", "view_loading"]
             views.forEach(v => {
                 document.getElementById(v).style.display = v === view ? "block" : "none";
             });
         }
 
         window.addEventListener("message", (event) => {
-            //console.log("Station got a message!", event)
             try {
                 let parsed = JSON.parse(event.data);
                 switch (parsed.type) {
@@ -197,7 +232,7 @@
                         setLanguage(lang)
                         break;
                     case "isSignedIn":
-                        setVisibility(parsed.data ? "view_link" : "view_email")
+                        setView(parsed.data ? "view_link" : "view_email")
                         break;
                 }
             } catch (error) {
@@ -206,8 +241,9 @@
         }, false);
 
         var isSignedIn = isSignedIn();
-        setVisibility(isSignedIn ? "view_link" : "view_email")
+        setView(isSignedIn ? "view_link" : "view_email")
 
+        setLanguage()
         sendData({ type: "getLangauge" })
     </script>
 
