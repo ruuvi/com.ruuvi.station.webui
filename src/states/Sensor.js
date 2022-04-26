@@ -200,18 +200,22 @@ class Sensor extends Component {
         document.title = "Ruuvi Sensor: " + this.props.sensor.name
         if (this.props.sensor !== prevProps.sensor) {
             this.applyAccordionSetting()
-            this.loadData(true)
+            this.loadData(true, true)
         }
     }
     getDataMode() {
         return this.state.from > 24 ? "sparse" : "dense";
     }
-    async loadData(showLoading) {
+    async loadData(showLoading, clearLast) {
         clearTimeout(this.latestDataUpdate);
         this.latestDataUpdate = setTimeout(() => {
             this.loadData()
         }, 60 * 1000);
-        this.setState({ ...this.state, loading: showLoading !== undefined, ...(showLoading ? { data: null } : {}) })
+        let newState = { ...this.state, loading: showLoading !== undefined, ...(showLoading ? { data: null } : {}) };
+        if (clearLast) {
+            newState.lastestDatapoint = null;
+        }
+        this.setState(newState)
         new NetworkApi().getAlerts(data => {
             if (data.result === "success") {
                 var sensor = data.data.sensors.find(x => x.sensor === this.props.sensor.sensor)
@@ -451,56 +455,63 @@ class Sensor extends Component {
                         }
                     }}
                 />
-                {this.state.loading ? (
+                {this.state.loading && !this.state.lastestDatapoint ? (
                     <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
                         <Progress isIndeterminate={true} color="#e6f6f2" />
                     </Stack>
                 ) : (
                     <div>
-                        {this.state.data && <div>
-                            <StatGroup style={{ marginBottom: 30, marginTop: 30 }} justifyContent="start">
-                                {mainSensorFields.map(x => {
-                                    let value = this.getLatestReading()[x];
-                                    if (value === undefined) return null;
-                                    return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
-                                        alertTriggered={this.isAlertTriggerd(x)}
-                                        label={getUnitHelper(x).label}
-                                        unit={getUnitHelper(x).unit}
-                                        selected={this.state.graphKey === x}
-                                        onClick={() => this.setGraphKey(x)} />
-                                })}
-                            </StatGroup>
-                            <div style={{ marginTop: 30, marginBottom: 20 }}>
-                                <table width="100%">
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <div style={graphLengthText}>
-                                                    {t("history")}
-                                                </div>
-                                                <div style={graphInfo}>
-                                                    {t("selected")}: {t(getUnitHelper(this.state.graphKey).label)} {this.getSelectedUnit()}
-                                                </div>
-                                            </td>
-                                            <td style={{ textAlign: "right" }}>
-                                                <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
-                                                <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
-                                                    <MdInfo size="16" color={ruuviTheme.colors.infoIcon} />
-                                                </IconButton>
-                                                <Button variant='link' color="primary" ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
-                                                <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            {!this.state.data || !this.state.data.measurements.length ? (
+                        <StatGroup style={{ marginBottom: 30, marginTop: 30 }} justifyContent="start">
+                            {mainSensorFields.map(x => {
+                                let value = this.getLatestReading()[x];
+                                if (value === undefined) return null;
+                                return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
+                                    alertTriggered={this.isAlertTriggerd(x)}
+                                    label={getUnitHelper(x).label}
+                                    unit={getUnitHelper(x).unit}
+                                    selected={this.state.graphKey === x}
+                                    onClick={() => this.setGraphKey(x)} />
+                            })}
+                        </StatGroup>
+                        <div style={{ marginTop: 30, marginBottom: 20 }}>
+                            <table width="100%">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div style={graphLengthText}>
+                                                {t("history")}
+                                            </div>
+                                            <div style={graphInfo}>
+                                                {t("selected")}: {t(getUnitHelper(this.state.graphKey).label)} {this.getSelectedUnit()}
+                                            </div>
+                                        </td>
+                                        <td style={{ textAlign: "right" }}>
+                                            <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
+                                            <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
+                                                <MdInfo size="16" color={ruuviTheme.colors.infoIcon} />
+                                            </IconButton>
+                                            <Button variant='link' color="primary" ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
+                                            <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        {this.state.loading ? (
+                            <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
+                                <Progress isIndeterminate={true} color="#e6f6f2" />
+                            </Stack>
+                        ) : (
+                            <> {!this.state.data || !this.state.data.measurements.length ? (
                                 <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
                             ) : (
                                 <Box ml={-5} mr={-5}>
                                     <Graph key={`graphkey${this.state.graphRenderKey}`} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
                                 </Box>
                             )}
+                            </>
+                        )}
+                        {this.state.data && <div>
                             <div style={{ height: "20px" }} />
                             <Accordion allowMultiple ml={{ base: -15, md: -35 }} mr={{ base: -15, md: -35 }} defaultIndex={this.openAccodrions} onChange={v => this.setOpenAccordion(v)}>
                                 <AccordionItem onChange={v => console.log(v)}>
