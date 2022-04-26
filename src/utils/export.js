@@ -16,11 +16,11 @@ export function exportCSV(data, sensorName, t) {
     data = data.measurements.map(x => {
         let row = [toISOString(new Date(x.timestamp * 1000))]
         sensorHeaders.forEach(s => {
-            if (s === "humidity") {
-                row.push(uHelp[s].value(x.parsed[s], x.parsed.temperature))
-            } else {
-                row.push(uHelp[s].value(x.parsed[s]))
-            }
+            let val = s === "humidity" ?
+                uHelp[s].value(x.parsed[s], x.parsed.temperature) :
+                uHelp[s].value(x.parsed[s]);
+            if (isNaN(val)) val = "-";
+            row.push(val)
         });
         return row;
     })
