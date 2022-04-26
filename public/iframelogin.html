@@ -78,7 +78,11 @@
         margin-bottom: 16px;
     }
 
-    @keyframes fadeInOut {
+    .fadeInOut {
+        animation: fadeInOutAnim 1s infinite alternate;
+    }
+
+    @keyframes fadeInOutAnim {
         from {
             opacity: 0;
         }
@@ -88,7 +92,7 @@
 <body>
     <div id="view_container">
         <div id="view_loading" style="text-align: center;">
-            <img class="rotate" width="100px" src="android-chrome-512x512.png" />
+            <img class="fadeInOut" width="100px" src="android-chrome-512x512.png" />
         </div>
         <div id="view_email">
             <input id="emailInput" type="email" placeholder="Email.." />
