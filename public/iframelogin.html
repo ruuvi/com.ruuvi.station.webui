@@ -1,93 +1,105 @@
 <!DOCTYPE html>
 
 <html>
-<style>
-    * {
-        padding: 0;
-        margin: 0;
-    }
 
-    body {
-        position: absolute;
-        width: 100%;
-        top: 50%;
-        -webkit-transform: translate(0%, -50%);
-        transform: translate(0%, -50%);
-    }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
 
-    #view_container {
-        padding: 5px;
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Mulish:ital,wght@1,800&display=swap" rel="stylesheet">
+    <style>
 
-    input:focus,
-    select:focus,
-    textarea:focus,
-    button:focus {
-        outline: none;
-    }
-
-    input {
-        width: 100%;
-        height: 40px;
-        font-size: 14px;
-        margin: 8px 0;
-        display: inline-block;
-        border: 2px solid #d4ede8;
-        border-radius: 4px;
-        box-sizing: border-box;
-    }
-
-    input:focus {
-        border: 2px solid #77cdc2;
-    }
-
-    input[type=pin] {
-        text-align: center;
-        max-width: 40px;
-        margin: 1px;
-    }
-
-    input[type=email] {
-        padding: 12px 20px;
-    }
-
-    button {
-        width: 100%;
-        background-color: #77cdc2;
-        color: #ffffff;
-        padding: 14px 20px;
-        font-weight: 500;
-        font-size: 16px;
-        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-        margin: 8px 0;
-        border: none;
-        border-radius: 16px;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background-color: #77cdc2;
-    }
-
-    #activationCodeLabel {
-        color: #1b4847;
-        font-size: 18px;
-        font-style: italic;
-        font-weight: 600;
-        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-        margin-bottom: 16px;
-    }
-
-    .fadeInOut {
-        animation: fadeInOutAnim 1s infinite alternate;
-    }
-
-    @keyframes fadeInOutAnim {
-        from {
-            opacity: 0;
+        * {
+            padding: 0;
+            margin: 0;
         }
-    }
-</style>
+
+        body {
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            -webkit-transform: translate(0%, -50%);
+            transform: translate(0%, -50%);
+        }
+
+        #view_container {
+            padding: 5px;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus,
+        button:focus {
+            outline: none;
+        }
+
+        input {
+            width: 100%;
+            height: 40px;
+            font-size: 14px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 2px solid #d4ede8;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border: 2px solid #77cdc2;
+        }
+
+        input[type=pin] {
+            text-transform: uppercase;
+            text-align: center;
+            max-width: 40px;
+            margin: 1px;
+        }
+
+        input[type=email] {
+            padding: 12px 10px;
+        }
+
+        button {
+            width: 100%;
+            background-color: #77cdc2;
+            color: #ffffff;
+            padding: 14px 25px;
+            font-weight: 800;
+            font-size: .875rem;
+            font-family: "Montserrat", sans-serif;
+            text-transform: uppercase;
+            margin: 8px 0;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #77cdc2;
+        }
+
+        #activationCodeLabel {
+            color: #1b4847;
+            font-size: 18px;
+            font-style: italic;
+            font-weight: 800;
+            font-family: "Mulish", sans-serif;
+            margin-bottom: 16px;
+        }
+
+        .fadeInOut {
+            animation: fadeInOutAnim 1s infinite alternate;
+        }
+
+        @keyframes fadeInOutAnim {
+            from {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
 
 <body>
     <div id="view_container">
@@ -95,7 +107,7 @@
             <img class="fadeInOut" width="100px" src="android-chrome-512x512.png" />
         </div>
         <div id="view_email">
-            <input id="emailInput" type="email" placeholder="Email.." />
+            <input id="emailInput" type="email" placeholder="Email.." onkeyup="emailInput(event)" />
             <br />
             <button id="loginButton" onClick="login()">Sign in</button>
         </div>
@@ -103,10 +115,10 @@
             <div id="activationCodeLabel">
                 Check your email for an activation code.
             </div>
-            <input maxlength=1 id="pin_1" type="pin" onkeyup="moveOnMax(this,'pin_2')" />
-            <input maxlength=1 id="pin_2" type="pin" onkeyup="moveOnMax(this,'pin_3')" />
-            <input maxlength=1 id="pin_3" type="pin" onkeyup="moveOnMax(this,'pin_4')" />
-            <input maxlength=1 id="pin_4" type="pin" onkeyup="verify()" />
+            <input maxlength=1 id="pin_1" type="pin" onkeyup="moveOnMax(this,event,1)"/>
+            <input maxlength=1 id="pin_2" type="pin" onkeyup="moveOnMax(this,event,2)"/>
+            <input maxlength=1 id="pin_3" type="pin" onkeyup="moveOnMax(this,event,3)"/>
+            <input maxlength=1 id="pin_4" type="pin" onkeyup="verify(event)"/>
         </div>
         <div id="view_link">
             <button id="openButton" onClick="sendOpenPage()">Open Ruuvi Station</button>
@@ -152,9 +164,40 @@
             })
         }
 
-        function moveOnMax(field, nextFieldID) {
+        const target = document.getElementById('pin_1');
+
+        target.addEventListener('paste', (event) => {
+            let paste = (event.clipboardData || window.clipboardData).getData('text');
+            if (paste.length === 4) {
+                for (let i = 0; i < 4; i++) {
+                    document.getElementById(`pin_${i + 1}`).value = paste[i]
+                }
+                verify();
+                event.preventDefault();
+            }
+        });
+
+        function moveOnMax(field, e, thisPinNumber) {
+            if (e.keyCode === 8) { // Backspace
+                if (thisPinNumber === 1) {
+                    document.getElementById(`pin_${thisPinNumber}`).value = "";
+                } else {
+                    if (document.getElementById(`pin_${thisPinNumber}`).value) {
+                        document.getElementById(`pin_${thisPinNumber}`).value = "";
+                    } else {
+                        document.getElementById(`pin_${thisPinNumber - 1}`).focus();
+                        document.getElementById(`pin_${thisPinNumber - 1}`).value = "";
+                    }
+                }
+                return
+            }
             if (field.value.length == 1) {
-                document.getElementById(nextFieldID).focus();
+                document.getElementById(`pin_${thisPinNumber + 1}`).focus();
+            }
+        }
+        function emailInput(event) {
+            if (event.keyCode === 13) {
+                login();
             }
         }
         function isStaging() {
@@ -169,6 +212,7 @@
         }
         function login() {
             let email = document.getElementById("emailInput").value
+            if (!email) return
             setView("view_loading")
             fetch(apiUrl + "/register", {
                 method: 'POST',
@@ -186,6 +230,7 @@
                         setView("view_code")
                     } else {
                         alert(response.error)
+                        setView("view_email")
                     }
                 })
         }
@@ -194,7 +239,12 @@
                 return document.getElementById("pin_" + x).value
             }).join("")
         }
-        function verify() {
+        function verify(e) {
+            if (e && e.keyCode === 8) { // Backspace
+                document.getElementById(`pin_3`).focus();
+                document.getElementById(`pin_3`).value = "";
+                return
+            }
             let token = getToken()
             setView("view_loading")
             fetch(apiUrl + "/verify?token=" + token).then(function (response) {
@@ -208,10 +258,12 @@
                         sendOpenPage(response.data)
                     } else {
                         alert(response.error)
+                        setView("view_email")
                     }
                 })
                 .catch(error => {
                     alert("err")
+                    setView("view_email")
                 });
         }
         function sendOpenPage(userData) {
@@ -223,7 +275,11 @@
         function setView(view) {
             const views = ["view_email", "view_code", "view_link", "view_loading"]
             views.forEach(v => {
-                document.getElementById(v).style.display = v === view ? "block" : "none";
+                let isThisView = v === view
+                document.getElementById(v).style.display = isThisView ? "block" : "none";
+                if (isThisView && view === "view_code") {
+                    document.getElementById("pin_1").focus();
+                }
             });
         }
 
