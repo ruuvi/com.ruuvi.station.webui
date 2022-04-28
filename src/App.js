@@ -14,6 +14,7 @@ import SensorMenu from "./components/SensorMenu";
 import LanguageMenu from "./components/LanguageMenu";
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
+import i18next from "i18next";
 
 
 const bottomText = {
@@ -59,6 +60,17 @@ export default function App() {
   } catch (e) {
     console.log("could not parse cookie", e)
   }
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  if (params.lang) {
+    const supportedLangs = ["en", "fi", "sv"]
+    if (supportedLangs.indexOf(params.lang) > -1) {
+      localStorage.setItem("selected_language", params.lang)
+      i18next.changeLanguage(params.lang)
+      window.location.href = window.location.href.split("?")[0];
+    }
+  }
+
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
   const logout = () => {
