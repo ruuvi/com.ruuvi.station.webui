@@ -1,7 +1,7 @@
 import { getUnitHelper } from "../UnitHelper";
 
 export function exportCSV(data, sensorName, t) {
-    const sensorHeaders = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber"]
+    const sensorHeaders = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber", "txPower"]
     var csvHeader = [t('timestamp')];
     let uHelp = {};
     sensorHeaders.forEach(x => {

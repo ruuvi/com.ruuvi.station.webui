@@ -44,7 +44,7 @@ import { ruuviTheme } from "../themes";
 import pjson from '../../package.json';
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"];
-var sensorInfoOrder = ["mac", "dataFormat"];
+var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
 
 const graphInfo = {
     fontFamily: "mulish",
