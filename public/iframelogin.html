@@ -8,9 +8,9 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Mulish:ital,wght@1,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Mulish:ital,wght@1,800&display=swap"
+        rel="stylesheet">
     <style>
-
         * {
             padding: 0;
             margin: 0;
@@ -89,13 +89,20 @@
             margin-bottom: 16px;
         }
 
-        .fadeInOut {
-            animation: fadeInOutAnim 1s infinite alternate;
+        #loading {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 2px solid rgba(0, 0, 0, .0);
+            border-radius: 100%;
+            border-top-color: #1b4847;
+            border-right-color: #1b4847;
+            animation: spin 0.5s linear infinite;
         }
 
-        @keyframes fadeInOutAnim {
-            from {
-                opacity: 0;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
             }
         }
     </style>
@@ -104,7 +111,7 @@
 <body>
     <div id="view_container">
         <div id="view_loading" style="text-align: center;">
-            <img class="fadeInOut" width="100px" src="android-chrome-512x512.png" />
+            <div id="loading"></div>
         </div>
         <div id="view_email">
             <input id="emailInput" type="email" placeholder="Email.." onkeyup="emailInput(event)" />
@@ -115,10 +122,10 @@
             <div id="activationCodeLabel">
                 Check your email for an activation code.
             </div>
-            <input maxlength=1 id="pin_1" type="pin" onkeyup="moveOnMax(this,event,1)"/>
-            <input maxlength=1 id="pin_2" type="pin" onkeyup="moveOnMax(this,event,2)"/>
-            <input maxlength=1 id="pin_3" type="pin" onkeyup="moveOnMax(this,event,3)"/>
-            <input maxlength=1 id="pin_4" type="pin" onkeyup="verify(event)"/>
+            <input maxlength=1 id="pin_1" type="pin" onkeyup="moveOnMax(this,event,1)" />
+            <input maxlength=1 id="pin_2" type="pin" onkeyup="moveOnMax(this,event,2)" />
+            <input maxlength=1 id="pin_3" type="pin" onkeyup="moveOnMax(this,event,3)" />
+            <input maxlength=1 id="pin_4" type="pin" onkeyup="verify(event)" />
         </div>
         <div id="view_link">
             <button id="openButton" onClick="sendOpenPage()">Open Ruuvi Station</button>
