@@ -45,7 +45,7 @@ export default function SensorReading(props) {
         maxWidth: isLargeDisplay ? 300 : "50%"
     }
     return (
-        <Stat style={{ ...width, margin: "5px", height: height, backgroundColor: props.alertTriggered ? ruuviTheme.colors.errorBackground : "rgba(230,246,242,0.5)", border: props.selected ? props.alertTriggered ? "2px solid " + ruuviTheme.colors.error : "2px solid rgba(1,174,144,0.3)" : "2px solid rgba(0,0,0,0)", borderRadius: "10px", cursor: "pointer" }} onClick={props.onClick}>
+        <Stat style={{ ...width, margin: "5px", height: height, paddingLeft: "15px", paddingRight: "15px", backgroundColor: props.alertTriggered ? ruuviTheme.colors.errorBackground : "rgba(230,246,242,0.5)", border: props.selected ? props.alertTriggered ? "2px solid " + ruuviTheme.colors.error : "2px solid rgba(1,174,144,0.3)" : "2px solid rgba(0,0,0,0)", borderRadius: "10px", cursor: "pointer" }} onClick={props.onClick}>
             <IconButton style={{ position: "absolute", right: 0, margin: -8 }} variant="ghost" onClick={e => info(e, t, props.label)}>
                 <MdInfo size="16" color={ruuviTheme.colors.primaryLight} />
             </IconButton>
