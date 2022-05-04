@@ -144,7 +144,9 @@
       "acceleration_z_info": "Ruuvi sensor's three-dimensional digital accelerometer continuously measures proper acceleration in g (g ≈ 9,81 m/s^2).\n\nTip: Acceleration values can tell you orientation of a stationary sensor.",
       "signal_strength_info": "Received signal strength is measured by receiver device in decibel milliwatts (dBm). Bigger the number, stronger the received signal.\n\nTip: Every 3 dB step doubles the received radio energy. Meaning, for example, -37 dBm is two times stronger than -40 dBm.",
       "measurement_sequence_number_info": "When Ruuvi sensor is refreshing its measurements (every ~2,5 seconds), the measurement sequence number is increased. Maximum value of the counter is 16 bits (65536) and when reached, it starts again from zero.\n\nTip: When the sensor is rebooting, the counter is automatically reset to zero. By examinating history cycles of the measurement counter, you can see if the sensor has rebooted unintentionally.",
-      "timestamp": "Timestamp"
+      "timestamp": "Timestamp",
+      "replace_battery": "Replace battery!",
+      "battery_ok": "Battery OK"
     }
   },
   "fi": {
@@ -292,7 +294,9 @@
       "acceleration_z_info": "Ruuvin kolmiulotteinen digitaalinen kiihtyvyysmittari mittaa jatkuvaa kiihtyvyyttä mittayksiköllä g (g ≈ 9,81 m/s^2).\n\nVinkki: Kiihtyvyysarvoista voi päätellä paikallaan olevan anturin asennon.",
       "signal_strength_info": "Vastaanotin mittaa vastaanotettua signaalia desibelimilliwatteina (dBm). Suurempi lukema tarkoittaa vahvempaa signaalia.\n\nVinkki: Vastaanotettu radiotaajuusenergia tuplaantuu jokaisen 3 dB välein. Tämä tarkoittaa sitä, että esimerkiksi -37 dBm signaali on puolet vahvempi kuin -40 dBm.",
       "measurement_sequence_number_info": "Mittausjärjestysnumero kasvaa, koska mittauksia päivitetään jatkuvasti (~2,5 sekunnin välein). Suurin mahdollinen luku on 16 bittiä (65536) ja tämän täyttyessä laskuri nollaantuu.\n\nVinkki: Mittausjärjestysnumero alkaa nollasta myös anturin uudelleenkäynnistymisen yhteydessä. Mittaussyklien perusteella vaikuttaa siltä, että anturi on uudelleenkäynnistynyt.",
-      "timestamp": "Päivämäärä"
+      "timestamp": "Päivämäärä",
+      "replace_battery": "Vaihda paristo!",
+      "battery_ok": "Paristo OK"
     }
   },
   "sv": {
@@ -440,7 +444,9 @@
       "acceleration_z_info": "Ruuvis tredimensionella digitala accelerometer mäter den kontinuerliga accelerationen i g (g ≈ 9,81 m/s^2).\n\nTips: Den stationära sensorns position kan härledas från accelerationsvärdena.",
       "signal_strength_info": "Mottagaren mäter den mottagna signalen i decibel milliwatt (dBm). En högre avläsning betyder en starkare signal.\n\nTips: Den mottagna RF-energin fördubblas varje 3 dB. Det betyder till exempel att en signal på -37 dBm är hälften så stark som en signal på -40 dBm.",
       "measurement_sequence_number_info": "Mätsekvensnumret ökar när mätningarna ständigt uppdateras (var ~2,5 sekund). Maximalt möjliga antal är 16 bitar (65536) och när den är fylld kommer räknaren att återställas.\n\nTips: Mätsekvensnumret börjar från noll även när sensorn startas om. Baserat på mätcyklerna kan man se om sensors har starts om.",
-      "timestamp": "Datum"
+      "timestamp": "Datum",
+      "replace_battery": "Byt batteriet!",
+      "battery_ok": "Batteri OK"
     }
   }
 }

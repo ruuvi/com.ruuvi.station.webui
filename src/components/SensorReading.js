@@ -54,7 +54,7 @@ export default function SensorReading(props) {
                     value={t(props.value)}
                     unit={props.label === "movement_counter" ? t(props.unit) : props.unit}
                 />
-                <span style={labelStyle}>{t(props.label)}</span>
+                <span style={labelStyle}>{t(props.label)} <br />{props.info && "(" + t(props.info) + ")"}</span>
             </div>
         </Stat >
     )

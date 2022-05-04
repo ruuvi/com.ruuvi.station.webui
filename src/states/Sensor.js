@@ -42,6 +42,7 @@ import DurationPicker from "../components/DurationPicker";
 import notify from "../utils/notify"
 import { ruuviTheme } from "../themes";
 import pjson from '../../package.json';
+import { isBatteryLow } from "../utils/battery";
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
@@ -466,6 +467,7 @@ class Sensor extends Component {
                                 let value = this.getLatestReading()[x];
                                 if (value === undefined) return null;
                                 return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
+                                    info={x !== "battery" ? undefined : isBatteryLow(this.getLatestReading()[x], this.getLatestReading().temperature) ? "replace_battery" : "battery_ok"}
                                     alertTriggered={this.isAlertTriggerd(x)}
                                     label={getUnitHelper(x).label}
                                     unit={getUnitHelper(x).unit}
