@@ -5,16 +5,16 @@ import {
   HashRouter
 } from "react-router-dom";
 import NetworkApi from "./NetworkApi";
-import SignIn from "./states/SignIn";
 import logo from './img/ruuvi-vector-logo.svg'
 import { ChakraProvider, Text, HStack, Image } from "@chakra-ui/react"
-import Dashboard from "./states/Dashboard";
-import UserMenu from "./components/UserMenu";
-import SensorMenu from "./components/SensorMenu";
-import LanguageMenu from "./components/LanguageMenu";
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
+const SignIn  = React.lazy(() => import("./states/SignIn"));
+const Dashboard = React.lazy(() => import("./states/Dashboard"));
+const UserMenu = React.lazy(() => import("./components/UserMenu"));
+const SensorMenu = React.lazy(() => import("./components/SensorMenu"));
+const LanguageMenu = React.lazy(() => import("./components/LanguageMenu"));
 
 
 const bottomText = {
