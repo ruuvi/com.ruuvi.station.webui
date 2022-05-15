@@ -146,7 +146,8 @@
       "measurement_sequence_number_info": "When Ruuvi sensor is refreshing its measurements (every ~2,5 seconds), the measurement sequence number is increased. Maximum value of the counter is 16 bits (65536) and when reached, it starts again from zero.\n\nTip: When the sensor is rebooting, the counter is automatically reset to zero. By examinating history cycles of the measurement counter, you can see if the sensor has rebooted unintentionally.",
       "timestamp": "Timestamp",
       "replace_battery": "Replace battery!",
-      "battery_ok": "Battery OK"
+      "battery_ok": "Battery OK",
+      "voltage": "Voltage"
     }
   },
   "fi": {
@@ -296,7 +297,8 @@
       "measurement_sequence_number_info": "Mittausjärjestysnumero kasvaa, koska mittauksia päivitetään jatkuvasti (~2,5 sekunnin välein). Suurin mahdollinen luku on 16 bittiä (65536) ja tämän täyttyessä laskuri nollaantuu.\n\nVinkki: Mittausjärjestysnumero alkaa nollasta myös anturin uudelleenkäynnistymisen yhteydessä. Mittaussyklien perusteella vaikuttaa siltä, että anturi on uudelleenkäynnistynyt.",
       "timestamp": "Päivämäärä",
       "replace_battery": "Vaihda paristo!",
-      "battery_ok": "Paristo OK"
+      "battery_ok": "Paristo OK",
+      "voltage": "Jännite"
     }
   },
   "sv": {
@@ -446,7 +448,8 @@
       "measurement_sequence_number_info": "Mätsekvensnumret ökar när mätningarna ständigt uppdateras (var ~2,5 sekund). Maximalt möjliga antal är 16 bitar (65536) och när den är fylld kommer räknaren att återställas.\n\nTips: Mätsekvensnumret börjar från noll även när sensorn startas om. Baserat på mätcyklerna kan man se om sensors har starts om.",
       "timestamp": "Datum",
       "replace_battery": "Byt batteriet!",
-      "battery_ok": "Batteri OK"
+      "battery_ok": "Batteri OK",
+      "voltage": "Spänning"
     }
   }
 }

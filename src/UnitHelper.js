@@ -5,7 +5,7 @@ const unitHelper = {
     "humidity": { label: "humidity", unit: "%", value: (value, temperature) => humidityToUserFormat(value, temperature), fromUser: (value) => value, decimals: 2, graphable: true },
     "pressure": { label: "pressure", unit: "hPa", value: (value) => pressureToUserFormat(value), decimals: 2, fromUser: (value) => pressureFromUserFormat(value), graphable: true },
     "movementCounter": { label: "movement_counter", unit: "movements", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: true },
-    "battery": { label: "battery_voltage", unit: "V", value: (value) => value / 1000, fromUser: (value) => value, decimals: 3, graphable: true },
+    "battery": { label: "battery_voltage", exportLabel: "voltage", unit: "V", value: (value) => value / 1000, fromUser: (value) => value, decimals: 3, graphable: true },
     "accelerationX": { label: "acceleration_x", unit: "g", value: (value) => value / 1000, fromUser: (value) => value, decimals: 3, graphable: true },
     "accelerationY": { label: "acceleration_y", unit: "g", value: (value) => value / 1000, fromUser: (value) => value, decimals: 3, graphable: true },
     "accelerationZ": { label: "acceleration_z", unit: "g", value: (value) => value / 1000, fromUser: (value) => value, decimals: 3, graphable: true },
@@ -54,7 +54,7 @@ export function getUnitHelper(key, plaintext) {
                 return thing;
             } else {
                 thing.unit = "%"
-                return thing; 
+                return thing;
             }
         }
     }
@@ -74,7 +74,7 @@ export function getUnitHelper(key, plaintext) {
                 return thing;
             } else {
                 thing.unit = "hPa"
-                return thing; 
+                return thing;
             }
         }
     }

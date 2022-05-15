@@ -6,7 +6,7 @@ export function exportCSV(data, sensorName, t) {
     let uHelp = {};
     sensorHeaders.forEach(x => {
         uHelp[x] = getUnitHelper(x, true)
-        let header = t(uHelp[x].label)
+        let header = t(uHelp[x].exportLabel || uHelp[x].label)
         if (x === "rssi") header = "RSSI";
         if (["temperature", "humidity", "pressure"].indexOf(x) !== -1) {
             header += ` (${uHelp[x].unit})`
