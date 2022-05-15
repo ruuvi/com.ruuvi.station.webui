@@ -261,8 +261,10 @@ class NetworkApi {
                 error(e);
             });
     }
-    getAlerts(success) {
-        fetch(this.url + "/alerts", this.options).then(function (response) {
+    getAlerts(mac, success) {
+        let url = this.url + "/alerts";
+        if (mac) url += "?sensor="+mac
+        fetch(url, this.options).then(function (response) {
             return response.json();
         })
             .then(response => success(response))

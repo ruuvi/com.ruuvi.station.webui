@@ -7,22 +7,11 @@ import {
     Button,
 } from "@chakra-ui/react"
 import { MdArrowDropDown } from "react-icons/md"
-import NetworkApi from "../NetworkApi";
 import { withTranslation } from 'react-i18next';
 import { uppercaseFirst } from "../TextHelper";
 import { ruuviTheme } from "../themes";
 
 class LanguageMenu extends Component {
-    seeSettings = () => {
-        new NetworkApi().getSettings(settings => {
-            alert(JSON.stringify(settings, null, 2))
-        })
-    }
-    seeAlerts = () => {
-        new NetworkApi().getAlerts(alerts => {
-            alert(JSON.stringify(alerts, null, 2))
-        })
-    }
     langChange = (lng) => {
         localStorage.setItem("selected_language", lng)
         this.props.i18n.changeLanguage(lng);

@@ -48,7 +48,7 @@ class Dashboard extends Component {
         }, 60 * 1000);
         // dont load alerts if sensor view is open
         if (this.getCurrentSensor()) return
-        new NetworkApi().getAlerts(data => {
+        new NetworkApi().getAlerts(null, data => {
             if (data.result === "success") {
                 this.setState({ ...this.state, alerts: data.data.sensors })
             }

@@ -216,7 +216,7 @@ class Sensor extends Component {
             newState.lastestDatapoint = null;
         }
         this.setState(newState)
-        new NetworkApi().getAlerts(data => {
+        new NetworkApi().getAlerts(this.props.sensor.sensor, data => {
             if (data.result === "success") {
                 var sensor = data.data.sensors.find(x => x.sensor === this.props.sensor.sensor)
                 if (sensor) this.setState({ ...this.state, alerts: sensor.alerts })

@@ -8,20 +8,9 @@ import {
 } from "@chakra-ui/react"
 import { FaUserAlt } from "react-icons/fa"
 import { MdArrowDropDown } from "react-icons/md"
-import NetworkApi from "../NetworkApi";
 import { withTranslation } from 'react-i18next';
 
 class UserMenu extends Component {
-    seeSettings = () => {
-        new NetworkApi().getSettings(settings => {
-            alert(JSON.stringify(settings))
-        })
-    }
-    seeAlerts = () => {
-        new NetworkApi().getAlerts(alerts => {
-            alert(JSON.stringify(alerts))
-        })
-    }
     settings() {
         this.props.settings();
     }
