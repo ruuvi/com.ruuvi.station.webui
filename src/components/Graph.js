@@ -33,9 +33,17 @@ const legendHider = ({
 });
 
 
-var lastDataPoints = -1;
-var zoomHasChanged = false;
+var lastDataPointTs = -1;
+var dataUpdated = false;
+let dataKeyChanged = false;
 class Graph extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            data: [],
+            zoom: undefined,
+        }
+    }
     getGraphData() {
         if (!this.props.data) return [[], []];
         var d = JSON.parse(JSON.stringify(this.props.data));
@@ -45,6 +53,21 @@ class Graph extends Component {
             d.map(x => x.timestamp),
             d.map(x => getUnitHelper(this.props.dataKey).value(x.parsed[this.props.dataKey], x.parsed.temperature))
         ]
+    }
+    setStateVar(k, v) {
+        let state = this.state;
+        state[k] = v;
+        this.setState(state);
+    }
+    shouldComponentUpdate(nextProps) {
+        dataKeyChanged = this.props.dataKey !== nextProps.dataKey;
+        if (this.props.data && this.props.data.length) {
+            let ts = this.props.data[0].timestamp;
+            dataUpdated = ts !== lastDataPointTs;
+            lastDataPointTs = ts;
+        }
+        if (this.state.zoom && this.props.data.length && nextProps.data.length && this.props.data[0].timestamp !== nextProps.data[0].timestamp) return false
+        return dataKeyChanged || this.props.data.length !== nextProps.data.length
     }
     getXRange() {
         return [this.props.from / 1000, new Date().getTime() / 1000]
@@ -86,18 +109,20 @@ class Graph extends Component {
                             cursor: { show: this.props.cursor || false, drag: { x: true, y: true, uni: 50 } },
                             scales: {
                                 x: {
-                                    time: true, auto: this.props.from === undefined, range: (_, fromMin, fromMax) => {
-                                        let dataHasChanged = lastDataPoints !== this.props.data.length;
-                                        lastDataPoints = this.props.data.length;
-                                        if ((dataHasChanged && !zoomHasChanged) || this.props.data.length === 1 || (this.props.data.length && fromMax === this.props.data[0].timestamp && fromMin === this.props.data[this.props.data.length - 1].timestamp)) {
-                                            let range = this.getXRange();
-                                            fromMin = range[0]
-                                            fromMax = range[1]
-                                            zoomHasChanged = false
-                                        } else {
-                                            zoomHasChanged = true
+                                    time: true, auto: this.props.from === undefined, range: (_, fromX, toX) => {
+                                        if (this.state.zoom && (dataKeyChanged || dataUpdated)) {
+                                            // keep zoom range
+                                            dataKeyChanged = false
+                                            return this.state.zoom
                                         }
-                                        return [fromMin, fromMax]
+                                        if (Number.isInteger(fromX) && Number.isInteger(toX) && !dataKeyChanged) {
+                                            // reset zoom
+                                            this.setStateVar("zoom", undefined)
+                                        } else {
+                                            // set zoom
+                                            this.setStateVar("zoom", [fromX, toX])
+                                        }
+                                        return [fromX, toX]
                                     }
                                 }
                             },

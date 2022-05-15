@@ -181,7 +181,6 @@ class Sensor extends Component {
             editName: false,
             showShare: false,
             offsetDialog: null,
-            graphRenderKey: 0,
             loadingImage: false,
         }
         this.applyAccordionSetting()
@@ -379,9 +378,6 @@ class Sensor extends Component {
     setOpenAccordion(open) {
         new Store().setOpenAccordions(open)
     }
-    resetZoom() {
-        this.setState({ ...this.state, graphRenderKey: Math.random() })
-    }
     zoomInfo() {
         notify.info(addNewlines(this.props.t("zoom_info")))
     }
@@ -508,7 +504,7 @@ class Sensor extends Component {
                                 <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
                             ) : (
                                 <Box ml={-5} mr={-5}>
-                                    <Graph key={`graphkey${this.state.graphRenderKey}`} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                    <Graph key={"sensor_graph"} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
                                 </Box>
                             )}
                             </>
