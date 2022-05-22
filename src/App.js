@@ -97,7 +97,7 @@ export default function App() {
   return (
     <ChakraProvider theme={ruuviTheme}>
       <HashRouter>
-        <HStack style={{ backgroundColor: "white", boxShadow: "0px 1px 2px #dddddd", paddingLeft: "25px", paddingRight: "25px" }} height="60px">
+        <HStack style={{ backgroundColor: "white", boxShadow: "0px 1px 2px #dddddd", paddingLeft: "25px", paddingRight: "25px" }} height="52px">
           <a href="/#">
             <Image alt="logo" height={30} src={logo} fit="scale-down" />
           </a>
