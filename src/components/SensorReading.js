@@ -2,6 +2,7 @@ import React from "react";
 import {
     IconButton,
     Stat,
+    useColorMode,
     useMediaQuery,
 } from "@chakra-ui/react"
 import { ruuviTheme } from "../themes";
@@ -43,6 +44,7 @@ function info(e, t, sensorType) {
 }
 
 export default function SensorReading(props) {
+    let mode = useColorMode().colorMode;
     const { t } = useTranslation();
     const [isLargeDisplay] = useMediaQuery("(min-width: 500px)")
     var width = {
@@ -50,9 +52,9 @@ export default function SensorReading(props) {
         maxWidth: isLargeDisplay ? 300 : "50%"
     }
     return (
-        <Stat style={{ ...width, margin: "5px", paddingLeft: 15, paddingRight: 15, height: height, backgroundColor: props.alertTriggered ? ruuviTheme.colors.errorBackground : "rgba(230,246,242,0.5)", border: props.selected ? props.alertTriggered ? "2px solid " + ruuviTheme.colors.error : "2px solid rgba(1,174,144,0.3)" : "2px solid rgba(0,0,0,0)", borderRadius: "10px", cursor: "pointer" }} onClick={props.onClick}>
+        <Stat className="sensorValueBox" style={{ ...width, margin: "5px", paddingLeft: 15, paddingRight: 15, height: height, backgroundColor: props.alertTriggered ? ruuviTheme.colors.errorBackground : undefined, border: props.selected ? props.alertTriggered ? "2px solid " + ruuviTheme.colors.error : "2px solid " + ruuviTheme.newColors.sensorValueBoxActiveBorder[mode] : "2px solid rgba(0,0,0,0)", borderRadius: "10px", cursor: "pointer" }} onClick={props.onClick}>
             <IconButton style={{ position: "absolute", right: 0, margin: -8 }} variant="ghost" onClick={e => info(e, t, props.label)}>
-                <MdInfo size="16" color={ruuviTheme.colors.primaryLight} />
+                <MdInfo size="16" />
             </IconButton>
             <div style={middle}>
                 <BigValue
@@ -60,7 +62,7 @@ export default function SensorReading(props) {
                     unit={props.label === "movement_counter" ? t(props.unit) : props.unit}
                 />
                 <span style={labelStyle}>{t(props.label)}</span>
-                {props.info && <span style={{...labelStyle, ...infoLabel}}>({t(props.info)})</span>}
+                {props.info && <span style={{ ...labelStyle, ...infoLabel }}>({t(props.info)})</span>}
             </div>
         </Stat >
     )

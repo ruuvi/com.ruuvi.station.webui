@@ -6,11 +6,13 @@ import {
 } from "react-router-dom";
 import NetworkApi from "./NetworkApi";
 import logo from './img/ruuvi-vector-logo.svg'
-import { ChakraProvider, Text, HStack, Image } from "@chakra-ui/react"
+import logoDark from './img/ruuvi-vector-logo-dark.svg'
+import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton } from "@chakra-ui/react"
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
-const SignIn  = React.lazy(() => import("./states/SignIn"));
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
+const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
 const SensorMenu = React.lazy(() => import("./components/SensorMenu"));
@@ -36,6 +38,32 @@ const versionText = {
   color: "#c8dbd9",
   marginTop: -4,
   paddingBottom: 20,
+}
+
+
+function ColorModeSwitch() {
+  const { colorMode, toggleColorMode } = useColorMode()
+  return (
+    <>
+      <IconButton variant="ghost" onClick={toggleColorMode}>{colorMode === 'light' ? <MoonIcon /> : <SunIcon />}</IconButton>
+    </>
+  )
+}
+
+function Logo() {
+  const { colorMode } = useColorMode()
+  if (colorMode === "light") {
+    return (
+      <a href="/#">
+        <Image alt="logo" height={30} src={logo} fit="scale-down" />
+      </a>
+    )
+  }
+  return (
+    <a href="/#">
+      <Image alt="logo" height={30} src={logoDark} fit="scale-down" />
+    </a>
+  )
 }
 
 export default function App() {
@@ -97,20 +125,19 @@ export default function App() {
   return (
     <ChakraProvider theme={ruuviTheme}>
       <HashRouter>
-        <HStack style={{ backgroundColor: "white", boxShadow: "0px 1px 2px #dddddd", paddingLeft: "25px", paddingRight: "25px" }} height="52px">
-          <a href="/#">
-            <Image alt="logo" height={30} src={logo} fit="scale-down" />
-          </a>
+        <HStack className="topbar" style={{ paddingLeft: "25px", paddingRight: "25px" }} height="60px">
+          <Logo />
           <Text>
             {new NetworkApi().isStaging() ? "(staging) " : ""}
           </Text>
           <span style={{ width: "100%", textAlign: "right" }}>
+            <ColorModeSwitch />
             <SensorMenu sensors={sensors} key={Math.random()} />
             <LanguageMenu />
             <UserMenu logout={logout} settings={() => window.location.href += "?settings"} email={user.email} />
           </span>
         </HStack>
-        <div style={{ marginTop: "20px" }}>
+        <div>
           <Switch>
             <Route path="/:id" render={rp => <Dashboard reloadTags={() => { forceUpdate() }} {...rp} />} />
             <Route path="/" render={rp => <Dashboard reloadTags={() => { forceUpdate() }} {...rp} />} />

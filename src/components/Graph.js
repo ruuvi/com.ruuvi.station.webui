@@ -5,6 +5,7 @@ import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 import UplotTouchZoomPlugin from "./UplotTouchZoomPlugin";
 import { ruuviTheme } from "../themes";
+import { withColorMode } from "../utils/withColorMode";
 const UplotReact = React.lazy(() => import('uplot-react'));
 
 function ddmm(ts) {
@@ -61,6 +62,7 @@ class Graph extends Component {
         this.setState(state);
     }
     shouldComponentUpdate(nextProps) {
+        if (nextProps.colorMode.colorMode !== this.props.colorMode.colorMode) return true;
         dataKeyChanged = this.props.dataKey !== nextProps.dataKey;
         if (this.state.zoom && !dataKeyChanged) return false;
         if (this.props.data && this.props.data.length) {
@@ -81,6 +83,7 @@ class Graph extends Component {
             plugins.push(UplotTouchZoomPlugin(this.getXRange()))
             plugins.push(legendHider)
         }
+        let colorMode = this.props.colorMode.colorMode;
         return (
             <SizeMe>{({ size }) =>
                 <Suspense fallback={
@@ -105,8 +108,8 @@ class Graph extends Component {
                                 spanGaps: true,
                                 points: { show: this.props.points || false, size: 4, fill: "green" },
                                 width: 2,
-                                fill: ruuviTheme.colors.primaryLight,
-                                stroke: ruuviTheme.colors.primary,
+                                fill: ruuviTheme.graph.fill[colorMode],
+                                stroke: ruuviTheme.graph.stroke[colorMode],
                                 value: (self, rawValue) => localeNumber(rawValue)
                             }],
                             cursor: { show: this.props.cursor || false, drag: { x: true, y: true, uni: 50 } },
@@ -155,6 +158,7 @@ class Graph extends Component {
                                 {
                                     grid: { show: false },
                                     font: "12px Arial",
+                                    stroke: ruuviTheme.graph.axisLabels[colorMode],
                                     values: (_, ticks) => {
                                         var xRange = ticks[ticks.length - 1] - ticks[0]
                                         var xRangeHours = xRange / 60 / 60
@@ -171,7 +175,8 @@ class Graph extends Component {
                                         })
                                     }
                                 }, {
-                                    grid: { stroke: ruuviTheme.colors.graphGrid, width: 2 },
+                                    grid: { stroke: ruuviTheme.graph.grid[colorMode], width: 2 },
+                                    stroke: ruuviTheme.graph.axisLabels[colorMode],
                                     size: 55,
                                     ticks: {
                                         size: 0
@@ -189,4 +194,4 @@ class Graph extends Component {
     }
 }
 
-export default withTranslation()(Graph);
+export default withTranslation()(withColorMode(Graph));

@@ -18,7 +18,7 @@ function toastIt(text, status, duration) {
                 padding="20px"
                 status={status}
                 bg={ruuviTheme.colors.toast[status]}
-                color={status !== "info" ? "white" : undefined}
+                color={status !== "info" ? "white" : "black"}
             >
                 <AlertIcon color={status !== "info" ? "white" : ruuviTheme.colors.gray} />
                 <Text fontWeight={status !== "info" ? 600 : undefined}>

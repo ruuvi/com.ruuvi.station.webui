@@ -15,8 +15,8 @@ class NavPrevNext extends Component {
     render() {
         return (
             <>
-                <IconButton isRound={true} onClick={() => this.props.prev()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "2px", marginRight: "5px" }}><MdArrowBack /></IconButton>
-                <IconButton isRound={true} onClick={() => this.props.next()} style={{ backgroundColor: "#f0faf9", color: "#26ccc0", marginTop: "1px", marginRight: "5px" }}><MdArrowForward /></IconButton>
+                <IconButton isRound={true} className="navButton" onClick={() => this.props.prev()} style={{ marginTop: "2px", marginRight: "5px" }}><MdArrowBack /></IconButton>
+                <IconButton isRound={true} className="navButton" onClick={() => this.props.next()} style={{ marginTop: "1px", marginRight: "5px" }}><MdArrowForward /></IconButton>
             </>
         )
     }

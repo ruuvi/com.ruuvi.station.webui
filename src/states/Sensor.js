@@ -43,6 +43,7 @@ import notify from "../utils/notify"
 import { ruuviTheme } from "../themes";
 import pjson from '../../package.json';
 import { isBatteryLow } from "../utils/battery";
+import sensorbglayer from '../img/sensor-bg-layer.png'
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
@@ -94,7 +95,6 @@ const detailedSubText = {
 }
 
 const accordionPanel = {
-    backgroundColor: "#f6fcfb",
     paddingTop: 0,
     paddingBottom: 0,
 }
@@ -121,7 +121,7 @@ function SensorHeader(props) {
                 <Heading style={sensorName}>
                     {props.sensor.name}
                 </Heading>
-                <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>
+                <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }} className="subtitle">
                     <DurationText from={props.lastUpdateTime} t={props.t} />
                 </div>
             </span>
@@ -397,310 +397,314 @@ class Sensor extends Component {
     render() {
         var { t } = this.props
         return (
-            <Box borderWidth="1px" borderRadius="lg" overflow="hidden" pt={{ base: "5px", md: "35px" }} pl={{ base: "5px", md: "35px" }} pr={{ base: "5px", md: "35px" }} style={{ backgroundColor: "white" }}>
-                <SensorHeader {...this.props} lastUpdateTime={this.state.lastestDatapoint && this.state.lastestDatapoint.measurements.length ? this.state.lastestDatapoint.measurements[0].timestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}
-                    loadingImage={this.state.loadingImage}
-                    fileUploadChange={f => {
-                        let file = f.target.files[0]
-                        if (file.type.match(/image.*/)) {
-                            this.setState({ ...this.state, loadingImage: true })
-                            let reader = new FileReader();
-                            reader.onload = readerEvent => {
-                                let image = new Image();
-                                image.onload = () => {
-                                    let canvas = document.createElement('canvas'),
-                                        max_size = 1440,
-                                        width = image.width,
-                                        height = image.height;
+            <Box>
+                <Box minHeight={1500}>
+                    <Box overflow="hidden" pt={{ base: "5px", md: "35px" }} backgroundPosition="center" paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
+                        <SensorHeader {...this.props} lastUpdateTime={this.state.lastestDatapoint && this.state.lastestDatapoint.measurements.length ? this.state.lastestDatapoint.measurements[0].timestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}
+                            loadingImage={this.state.loadingImage}
+                            fileUploadChange={f => {
+                                let file = f.target.files[0]
+                                if (file.type.match(/image.*/)) {
+                                    this.setState({ ...this.state, loadingImage: true })
+                                    let reader = new FileReader();
+                                    reader.onload = readerEvent => {
+                                        let image = new Image();
+                                        image.onload = () => {
+                                            let canvas = document.createElement('canvas'),
+                                                max_size = 1440,
+                                                width = image.width,
+                                                height = image.height;
 
-                                    if (height > max_size) {
-                                        width *= max_size / height;
-                                        height = max_size;
-                                    }
-                                    canvas.width = width;
-                                    canvas.height = height;
-                                    canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-                                    let dataUrl = canvas.toDataURL('image/jpeg');
-                                    let api = new NetworkApi();
-                                    api.prepareUpload(this.props.sensor.sensor, 'image/jpeg', ya => {
-                                        if (ya.result === "success") {
-                                            let url = ya.data.uploadURL
-                                            api.uploadImage(url, 'image/jpeg', dataUrl, () => {
-                                                let s = this.props.sensor;
-                                                s.picture = dataUrl.split("?")[0]
-                                                this.props.updateSensor(s);
-                                                this.forceUpdate();
-                                                this.setState({ ...this.state, loadingImage: false })
+                                            if (height > max_size) {
+                                                width *= max_size / height;
+                                                height = max_size;
+                                            }
+                                            canvas.width = width;
+                                            canvas.height = height;
+                                            canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+                                            let dataUrl = canvas.toDataURL('image/jpeg');
+                                            let api = new NetworkApi();
+                                            api.prepareUpload(this.props.sensor.sensor, 'image/jpeg', ya => {
+                                                if (ya.result === "success") {
+                                                    let url = ya.data.uploadURL
+                                                    api.uploadImage(url, 'image/jpeg', dataUrl, () => {
+                                                        let s = this.props.sensor;
+                                                        s.picture = dataUrl.split("?")[0]
+                                                        this.props.updateSensor(s);
+                                                        this.forceUpdate();
+                                                        this.setState({ ...this.state, loadingImage: false })
+                                                    }, err => {
+                                                        console.log("err", err)
+                                                        notify.error("something_went_wrong")
+                                                        this.setState({ ...this.state, loadingImage: false })
+                                                    })
+                                                }
                                             }, err => {
                                                 console.log("err", err)
                                                 notify.error("something_went_wrong")
                                                 this.setState({ ...this.state, loadingImage: false })
                                             })
                                         }
-                                    }, err => {
-                                        alert("err", err)
-                                        notify.error("something_went_wrong")
-                                        this.setState({ ...this.state, loadingImage: false })
-                                    })
+                                        image.src = readerEvent.target.result;
+                                    }
+                                    reader.readAsDataURL(file);
+                                } else {
+                                    notify.error("something_went_wrong")
+                                    this.setState({ ...this.state, loadingImage: false })
                                 }
-                                image.src = readerEvent.target.result;
-                            }
-                            reader.readAsDataURL(file);
-                        } else {
-                            notify.error("something_went_wrong")
-                            this.setState({ ...this.state, loadingImage: false })
-                        }
-                    }}
-                />
-                {this.state.loading && !this.state.lastestDatapoint ? (
-                    <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
-                        <Progress isIndeterminate={true} color="#e6f6f2" />
-                    </Stack>
-                ) : (
-                    <div>
-                        <StatGroup style={{ marginBottom: 30, marginTop: 30 }} justifyContent="start">
-                            {mainSensorFields.map(x => {
-                                let value = this.getLatestReading()[x];
-                                if (value === undefined) return null;
-                                return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
-                                    info={x !== "battery" ? undefined : isBatteryLow(this.getLatestReading()[x], this.getLatestReading().temperature) ? "replace_battery" : "battery_ok"}
-                                    alertTriggered={this.isAlertTriggerd(x)}
-                                    label={getUnitHelper(x).label}
-                                    unit={getUnitHelper(x).unit}
-                                    selected={this.state.graphKey === x}
-                                    onClick={() => this.setGraphKey(x)} />
-                            })}
-                        </StatGroup>
-                        <div style={{ marginTop: 30, marginBottom: 20 }}>
-                            <table width="100%">
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <div style={graphLengthText}>
-                                                {t("history")}
-                                            </div>
-                                            <div style={graphInfo}>
-                                                {t("selected")}: {t(getUnitHelper(this.state.graphKey).label)} {this.getSelectedUnit()}
-                                            </div>
-                                        </td>
-                                        <td style={{ textAlign: "right" }}>
-                                            <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
-                                            <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
-                                                <MdInfo size="16" color={ruuviTheme.colors.infoIcon} />
-                                            </IconButton>
-                                            <Button variant='link' color="primary" ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
-                                            <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        {this.state.loading ? (
+                            }}
+                        />
+                        {this.state.loading && !this.state.lastestDatapoint ? (
                             <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
                                 <Progress isIndeterminate={true} color="#e6f6f2" />
                             </Stack>
                         ) : (
-                            <> {!this.state.data || !this.state.data.measurements.length ? (
-                                <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
-                            ) : (
-                                <Box ml={-5} mr={-5}>
-                                    <Graph key={"sensor_graph"} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
-                                </Box>
-                            )}
-                            </>
+                            <div>
+                                <StatGroup style={{ marginBottom: 30, marginTop: 30 }} justifyContent="start">
+                                    {mainSensorFields.map(x => {
+                                        let value = this.getLatestReading()[x];
+                                        if (value === undefined) return null;
+                                        return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
+                                            info={x !== "battery" ? undefined : isBatteryLow(this.getLatestReading()[x], this.getLatestReading().temperature) ? "replace_battery" : "battery_ok"}
+                                            alertTriggered={this.isAlertTriggerd(x)}
+                                            label={getUnitHelper(x).label}
+                                            unit={getUnitHelper(x).unit}
+                                            selected={this.state.graphKey === x}
+                                            onClick={() => this.setGraphKey(x)} />
+                                    })}
+                                </StatGroup>
+                                <div style={{ marginTop: 30, marginBottom: 20 }}>
+                                    <table width="100%">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <div style={graphLengthText}>
+                                                        {t("history")}
+                                                    </div>
+                                                    <div style={graphInfo}>
+                                                        {t("selected")}: {t(getUnitHelper(this.state.graphKey).label)} {this.getSelectedUnit()}
+                                                    </div>
+                                                </td>
+                                                <td style={{ textAlign: "right" }}>
+                                                    <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
+                                                    <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
+                                                        <MdInfo size="16" color={ruuviTheme.colors.infoIcon} />
+                                                    </IconButton>
+                                                    <Button variant='link' color="primary" ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
+                                                    <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {this.state.loading ? (
+                                    <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
+                                        <Progress isIndeterminate={true} color="#e6f6f2" />
+                                    </Stack>
+                                ) : (
+                                    <> {!this.state.data || !this.state.data.measurements.length ? (
+                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
+                                    ) : (
+                                        <Box ml={-5} mr={-5}>
+                                            <Graph key={"sensor_graph"} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                        </Box>
+                                    )}
+                                    </>
+                                )}
+                            </div>
                         )}
-                        {this.state.data && <div>
-                            <div style={{ height: "20px" }} />
-                            <Accordion allowMultiple ml={{ base: -15, md: -35 }} mr={{ base: -15, md: -35 }} defaultIndex={this.openAccodrions} onChange={v => this.setOpenAccordion(v)}>
-                                <AccordionItem onChange={v => console.log(v)}>
-                                    <AccordionButton style={accordionButton} _hover={{}}>
-                                        <Box flex="1" textAlign="left" style={collapseText}>
-                                            {t("general")}
-                                        </Box>
-                                        <AccordionIcon />
-                                    </AccordionButton>
-                                    <hr />
-                                    <AccordionPanel style={accordionPanel}>
-                                        <List>
-                                            <ListItem>
-                                                <table style={accordionContent}>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td width="50%">
-                                                                <div style={detailedTitle}>{t("sensor_name")}</div>
-                                                            </td>
-                                                            <td style={detailedText}>
-                                                                <EditableText text={this.props.sensor.name} onClick={() => this.editName(true)} />
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </ListItem>
-                                            <hr />
-                                            <ListItem>
-                                                <table style={accordionContent}>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td width="50%">
-                                                                <div style={detailedTitle}>{t("owner")}</div>
-                                                            </td>
-                                                            <td style={detailedText}>
-                                                                {this.props.sensor.owner}
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </ListItem>
-                                            {this.props.sensor.canShare &&
-                                                <>
-                                                    <hr />
-                                                    <ListItem style={{ cursor: "pointer" }} onClick={() => this.share(true)}>
-                                                        <table style={accordionContent}>
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td width="50%">
-                                                                        <div style={detailedTitle}>{t("share")}</div>
-                                                                    </td>
-                                                                    <td style={detailedText}>
-                                                                        {t(this.props.sensor.sharedTo.length ? "sensor_shared" : "share")}
-                                                                        <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </ListItem>
-                                                </>
-                                            }
-                                        </List>
-                                    </AccordionPanel>
-                                </AccordionItem>
-                                <AccordionItem>
-                                    <AccordionButton style={accordionButton} _hover={{}}>
-                                        <Box flex="1" textAlign="left" style={collapseText}>
-                                            {t("alerts")}
-                                        </Box>
-                                        <AccordionIcon />
-                                    </AccordionButton>
-                                    <hr />
-                                    <AccordionPanel style={accordionPanel}>
-                                        <List style={accordionContent}>
-                                            {["temperature", "humidity", "pressure", "movement"].map(x => {
-                                                let dataKey = x === "movement" ? "movementCounter" : x;
-                                                if (this.getLatestReading()[dataKey] === undefined) return null;
-                                                var alert = this.getAlert(x)
-                                                return <AlertItem key={x} alerts={this.state.alerts} alert={alert}
-                                                    detailedTitle={detailedTitle}
-                                                    detailedText={detailedText} detailedSubText={detailedSubText}
-                                                    type={x} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />
-                                            })}
-                                        </List>
-                                    </AccordionPanel>
-                                </AccordionItem>
-                                <AccordionItem hidden={this.isSharedSensor()}>
-                                    <AccordionButton style={accordionButton} _hover={{}}>
-                                        <Box flex="1" textAlign="left" style={collapseText}>
-                                            {t("offset_correction")}
-                                        </Box>
-                                        <AccordionIcon />
-                                    </AccordionButton>
-                                    <hr />
-                                    <AccordionPanel style={accordionPanel}>
-                                        <List>
-                                            {["Temperature", "Humidity", "Pressure"].map(x => {
-                                                if (this.getLatestReading()[x.toLowerCase()] === undefined) return null;
-                                                var uh = getUnitHelper(x.toLocaleLowerCase());
-                                                var value = uh.value(this.state.data["offset" + x], true);
-                                                var unit = uh.unit;
-                                                if (x === "Humidity") {
-                                                    // humidity offset is always %
-                                                    value = this.state.data["offset" + x]
-                                                    unit = "%"
-                                                }
-                                                return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, offsetDialog: x })}>
+                    </Box>
+                    {this.state.data && <Box>
+                        <div style={{ height: "20px" }} />
+                        <Accordion allowMultiple defaultIndex={this.openAccodrions} onChange={v => this.setOpenAccordion(v)}>
+                            <AccordionItem onChange={v => console.log(v)}>
+                                <AccordionButton style={accordionButton} _hover={{}}>
+                                    <Box flex="1" textAlign="left" style={collapseText}>
+                                        {t("general")}
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                                <hr />
+                                <AccordionPanel style={accordionPanel}>
+                                    <List>
+                                        <ListItem>
+                                            <table style={accordionContent}>
+                                                <tbody>
+                                                    <tr>
+                                                        <td width="50%">
+                                                            <div style={detailedTitle}>{t("sensor_name")}</div>
+                                                        </td>
+                                                        <td style={detailedText}>
+                                                            <EditableText text={this.props.sensor.name} onClick={() => this.editName(true)} />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </ListItem>
+                                        <hr />
+                                        <ListItem>
+                                            <table style={accordionContent}>
+                                                <tbody>
+                                                    <tr>
+                                                        <td width="50%">
+                                                            <div style={detailedTitle}>{t("owner")}</div>
+                                                        </td>
+                                                        <td style={detailedText}>
+                                                            {this.props.sensor.owner}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </ListItem>
+                                        {this.props.sensor.canShare &&
+                                            <>
+                                                <hr />
+                                                <ListItem style={{ cursor: "pointer" }} onClick={() => this.share(true)}>
                                                     <table style={accordionContent}>
                                                         <tbody>
                                                             <tr>
-                                                                <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
+                                                                <td width="50%">
+                                                                    <div style={detailedTitle}>{t("share")}</div>
+                                                                </td>
                                                                 <td style={detailedText}>
-                                                                    {localeNumber(value, uh.decimals)} {unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
+                                                                    {t(this.props.sensor.sharedTo.length ? "sensor_shared" : "share")}
+                                                                    <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
                                                                 </td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
-                                                    {x !== "Pressure" && <hr />}
                                                 </ListItem>
-                                            })}
-                                        </List>
-                                    </AccordionPanel>
-                                </AccordionItem>
-                                <AccordionItem>
-                                    <AccordionButton style={accordionButton} _hover={{}}>
-                                        <Box flex="1" textAlign="left" style={collapseText}>
-                                            {uppercaseFirst(t("more_info"))}
-                                        </Box>
-                                        <AccordionIcon />
-                                    </AccordionButton>
-                                    <hr />
-                                    <AccordionPanel style={accordionPanel}>
-                                        <List>
-                                            {sensorInfoOrder.map((order, i) => {
-                                                var x = this.getLatestReading(true).find(x => x.key === order);
-                                                if (!x) return null
-                                                let uh = getUnitHelper(x.key)
-                                                return (
-                                                    <ListItem key={x.key}>
-                                                        <table style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : console.log("Not graphable")}>
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td style={detailedTitle}> {t(uh.label || x.key)}</td>
-                                                                    <td style={{ ...detailedText, textDecoration: uh.graphable ? "underline" : "" }}>
-                                                                        {localeNumber(uh.value(x.value), uh.decimals)} {uh.unit}
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                        {i !== sensorInfoOrder.length - 1 && <hr />}
-                                                    </ListItem>
-                                                )
-                                            })}
-                                        </List>
-                                    </AccordionPanel>
-                                </AccordionItem>
-
-                                <AccordionItem>
-                                    <AccordionButton style={accordionButton} _hover={{}}>
-                                        <Box flex="1" textAlign="left" style={collapseText}>
-                                            {t("remove")}
-                                        </Box>
-                                        <AccordionIcon />
-                                    </AccordionButton>
-                                    <hr />
-                                    <AccordionPanel style={accordionPanel}>
-                                        <List>
-                                            <ListItem>
-                                                <table width="100%" style={accordionContent}>
+                                            </>
+                                        }
+                                    </List>
+                                </AccordionPanel>
+                            </AccordionItem>
+                            <AccordionItem>
+                                <AccordionButton style={accordionButton} _hover={{}}>
+                                    <Box flex="1" textAlign="left" style={collapseText}>
+                                        {t("alerts")}
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                                <hr />
+                                <AccordionPanel style={accordionPanel}>
+                                    <List style={accordionContent}>
+                                        {["temperature", "humidity", "pressure", "movement"].map(x => {
+                                            let dataKey = x === "movement" ? "movementCounter" : x;
+                                            if (this.getLatestReading()[dataKey] === undefined) return null;
+                                            var alert = this.getAlert(x)
+                                            return <AlertItem key={x} alerts={this.state.alerts} alert={alert}
+                                                detailedTitle={detailedTitle}
+                                                detailedText={detailedText} detailedSubText={detailedSubText}
+                                                type={x} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />
+                                        })}
+                                    </List>
+                                </AccordionPanel>
+                            </AccordionItem>
+                            <AccordionItem hidden={this.isSharedSensor()}>
+                                <AccordionButton style={accordionButton} _hover={{}}>
+                                    <Box flex="1" textAlign="left" style={collapseText}>
+                                        {t("offset_correction")}
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                                <hr />
+                                <AccordionPanel style={accordionPanel}>
+                                    <List>
+                                        {["Temperature", "Humidity", "Pressure"].map(x => {
+                                            if (this.getLatestReading()[x.toLowerCase()] === undefined) return null;
+                                            var uh = getUnitHelper(x.toLocaleLowerCase());
+                                            var value = uh.value(this.state.data["offset" + x], true);
+                                            var unit = uh.unit;
+                                            if (x === "Humidity") {
+                                                // humidity offset is always %
+                                                value = this.state.data["offset" + x]
+                                                unit = "%"
+                                            }
+                                            return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, offsetDialog: x })}>
+                                                <table style={accordionContent}>
                                                     <tbody>
                                                         <tr>
-                                                            <td width="50%">
-                                                                <div style={detailedTitle}>{t("remove_this_sensor")}</div>
-                                                            </td>
+                                                            <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
                                                             <td style={detailedText}>
-                                                                <Button onClick={() => this.remove()}>{t("remove")}</Button>
+                                                                {localeNumber(value, uh.decimals)} {unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
                                                             </td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
+                                                {x !== "Pressure" && <hr />}
                                             </ListItem>
-                                        </List>
-                                    </AccordionPanel>
-                                </AccordionItem>
-                            </Accordion>
-                        </div>}
-                    </div>
-                )}
-                <EditNameDialog open={this.state.editName} onClose={() => this.editName(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
-                <ShareDialog open={this.state.showShare} onClose={() => this.share(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
-                {this.state.data && <OffsetDialog open={this.state.offsetDialog} onClose={() => this.setState({ ...this.state, offsetDialog: null })} sensor={this.props.sensor} offsets={{ "Humidity": this.state.data.offsetHumidity, "Pressure": this.state.data.offsetPressure, "Temperature": this.state.data.offsetTemperature }} lastReading={this.getLatestReading()} updateSensor={this.props.updateSensor} />}
+                                        })}
+                                    </List>
+                                </AccordionPanel>
+                            </AccordionItem>
+                            <AccordionItem>
+                                <AccordionButton style={accordionButton} _hover={{}}>
+                                    <Box flex="1" textAlign="left" style={collapseText}>
+                                        {uppercaseFirst(t("more_info"))}
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                                <hr />
+                                <AccordionPanel style={accordionPanel}>
+                                    <List>
+                                        {sensorInfoOrder.map((order, i) => {
+                                            var x = this.getLatestReading(true).find(x => x.key === order);
+                                            if (!x) return null
+                                            let uh = getUnitHelper(x.key)
+                                            return (
+                                                <ListItem key={x.key}>
+                                                    <table style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : console.log("Not graphable")}>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td style={detailedTitle}> {t(uh.label || x.key)}</td>
+                                                                <td style={{ ...detailedText, textDecoration: uh.graphable ? "underline" : "" }}>
+                                                                    {localeNumber(uh.value(x.value), uh.decimals)} {uh.unit}
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    {i !== sensorInfoOrder.length - 1 && <hr />}
+                                                </ListItem>
+                                            )
+                                        })}
+                                    </List>
+                                </AccordionPanel>
+                            </AccordionItem>
+
+                            <AccordionItem>
+                                <AccordionButton style={accordionButton} _hover={{}}>
+                                    <Box flex="1" textAlign="left" style={collapseText}>
+                                        {t("remove")}
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                                <hr />
+                                <AccordionPanel style={accordionPanel}>
+                                    <List>
+                                        <ListItem>
+                                            <table width="100%" style={accordionContent}>
+                                                <tbody>
+                                                    <tr>
+                                                        <td width="50%">
+                                                            <div style={detailedTitle}>{t("remove_this_sensor")}</div>
+                                                        </td>
+                                                        <td style={detailedText}>
+                                                            <Button onClick={() => this.remove()}>{t("remove")}</Button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </ListItem>
+                                    </List>
+                                </AccordionPanel>
+                            </AccordionItem>
+                        </Accordion>
+                    </Box>}
+                    <EditNameDialog open={this.state.editName} onClose={() => this.editName(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
+                    <ShareDialog open={this.state.showShare} onClose={() => this.share(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
+                    {this.state.data && <OffsetDialog open={this.state.offsetDialog} onClose={() => this.setState({ ...this.state, offsetDialog: null })} sensor={this.props.sensor} offsets={{ "Humidity": this.state.data.offsetHumidity, "Pressure": this.state.data.offsetPressure, "Temperature": this.state.data.offsetTemperature }} lastReading={this.getLatestReading()} updateSensor={this.props.updateSensor} />}
+                </Box>
             </Box>
         )
     }

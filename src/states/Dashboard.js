@@ -9,6 +9,9 @@ import Store from "../Store";
 import SessionStore from "../SessionStore";
 import notify from "../utils/notify";
 import SettingsModal from "../components/SettingsModal";
+import bg from '../img/bg.jpg'
+import sensorbglayer from '../img/sensor-bg-layer.png'
+import { withColorMode } from "../utils/withColorMode";
 
 const infoText = {
     fontFamily: "mulish",
@@ -48,7 +51,7 @@ class Dashboard extends Component {
         }, 60 * 1000);
         // dont load alerts if sensor view is open
         if (this.getCurrentSensor()) return
-        new NetworkApi().getAlerts(null, data => {
+        new NetworkApi().getAlerts(data => {
             if (data.result === "success") {
                 this.setState({ ...this.state, alerts: data.data.sensors })
             }
@@ -126,45 +129,58 @@ class Dashboard extends Component {
     render() {
         if (this.props.match.params.id) SessionStore.setBackRoute(`/${this.props.match.params.id}`)
         else SessionStore.setBackRoute("/")
+        let colorMode = this.props.colorMode.colorMode;
         return (
             <>
-                <Box marginTop="36px" marginLeft={{ base: "10px", md: "20px", lg: "50px" }} marginRight={{ base: "10px", md: "20px", lg: "50px" }}>
-                    {!this.getCurrentSensor() &&
-                        <div style={{ textAlign: "end", marginTop: -20 }} >
-                            <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
-                        </div>
-                    }
-                    {this.state.loading &&
-                        <center>
-                            <Spinner size="xl" />
-                        </center>
-                    }
-                    {!this.state.loading && !this.state.sensors.length &&
-                        <center style={{ margin: 32, ...infoText }}>
-                            {this.props.t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{this.addRuuviLink(x)}<br /></div>)}
-                        </center>
-                    }
-                    {this.getCurrentSensor() ? (
-                        <Sensor sensor={this.getCurrentSensor()}
-                            close={() => this.props.history.push('/')}
-                            next={() => this.nextIndex(1)}
-                            prev={() => this.nextIndex(-1)}
-                            remove={() => this.removeSensor()}
-                            setAlerts={alerts => this.setState({ ...this.state, alerts: alerts })}
-                            updateSensor={(sensor) => this.updateSensor(sensor)}
-                        />
-                    ) : (
-                        <Box justifyContent={{ base: "space-evenly", lg: this.state.sensors.length > 2 ? "space-evenly" : "start" }} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", marginLeft: -16, marginRight: -16 }}>
-                            <>
-                                {this.state.sensors.map(x => {
-                                    return <span key={x.sensor + this.state.from} style={{ margin: 16, minWidth: "350px", maxWidth: "450px", flexGrow: 2, flex: "1 1 0px" }}>
-                                        <a href={"#/" + x.sensor}>
-                                            <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} dataFrom={this.state.from} />
-                                        </a></span>
-                                })}
-                            </>
+                <Box>
+                    <Box backgroundImage={colorMode === "dark" ? this.getCurrentSensor() ? this.getCurrentSensor().picture || bg : bg : undefined} backgroundColor={this.getCurrentSensor() && colorMode === "light" ? "white" : undefined} backgroundSize="cover" backgroundPosition="top" >
+                        <Box backgroundImage={colorMode === "dark" ? sensorbglayer : undefined} backgroundSize="cover" backgroundPosition="top" >
+                            {this.state.loading &&
+                                <center>
+                                    <Spinner size="xl" />
+                                </center>
+                            }
+                            {!this.state.loading && !this.state.sensors.length &&
+                                <center style={{ margin: 32, ...infoText }}>
+                                    {this.props.t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{this.addRuuviLink(x)}<br /></div>)}
+                                </center>
+                            }
+                            {this.getCurrentSensor() ? (
+                                <Sensor sensor={this.getCurrentSensor()}
+                                    close={() => this.props.history.push('/')}
+                                    next={() => this.nextIndex(1)}
+                                    prev={() => this.nextIndex(-1)}
+                                    remove={() => this.removeSensor()}
+                                    setAlerts={alerts => this.setState({ ...this.state, alerts: alerts })}
+                                    updateSensor={(sensor) => this.updateSensor(sensor)}
+                                />
+                            ) : (
+                                <Box paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
+                                    <div style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 26 }}>
+                                        <div style={{ fontFamily: "montserrat", fontSize: 48, fontWeight: 800 }}>
+                                            Hello Friend,
+                                        </div>
+                                        <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic", color: "#51b5a5" }} >
+                                            Randomized welcome message here.
+                                        </div>
+                                        <div style={{ textAlign: "end" }} >
+                                            <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
+                                        </div>
+                                    </div>
+                                    <Box justifyContent={{ base: "space-evenly", lg: this.state.sensors.length > 2 ? "space-evenly" : "start" }} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
+                                        <>
+                                            {this.state.sensors.map(x => {
+                                                return <span key={x.sensor + this.state.from} style={{ margin: 16, minWidth: "350px", maxWidth: "450px", flexGrow: 2, flex: "1 1 0px" }}>
+                                                    <a href={"#/" + x.sensor}>
+                                                        <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} dataFrom={this.state.from} />
+                                                    </a></span>
+                                            })}
+                                        </>
+                                    </Box>
+                                </Box>
+                            )}
                         </Box>
-                    )}
+                    </Box>
                 </Box>
                 <SettingsModal open={this.showSettings()} onClose={() => this.closeSettings()} />
             </>
@@ -172,4 +188,4 @@ class Dashboard extends Component {
     }
 }
 
-export default withTranslation()(Dashboard);
+export default withTranslation()(withColorMode(Dashboard));
