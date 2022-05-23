@@ -45,9 +45,9 @@ export default function DurationPicker(props) {
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
             <MenuButton as={Button}
-                rightIcon={<MdArrowDropDown size={26} color="#77cdc2" style={{ marginLeft: -10 }} />}
+                rightIcon={<MdArrowDropDown size={26} color="#77cdc2" style={{ marginLeft: -10, marginRight: -8 }} />}
                 variant="ddl"
-                style={{ backgroundColor: "transparent", ...detailedSubText }}
+                style={{ backgroundColor: "white", ...detailedSubText }}
                 borderRadius='4px'
                 borderWidth="1px">
                 {ts.k} {t(ts.t).toLowerCase()}
