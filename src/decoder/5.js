@@ -5,7 +5,7 @@ const parseRawRuuvi = function (data) {
 
   let temperature = (data[3] << 8) | (data[4] & 0xff);
   if (temperature > 32767) {
-    temperature -= 65534;
+    temperature -= 65536;
   }
   robject.temperature = temperature / 200.0;
   robject.temperature = round(robject.temperature, 2);
