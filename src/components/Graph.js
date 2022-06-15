@@ -36,6 +36,7 @@ const legendHider = ({
 var lastDataPointTs = -1;
 var dataUpdated = false;
 let dataKeyChanged = false;
+let xRangeUpdateThottle = 0;
 class Graph extends Component {
     constructor(props) {
         super(props)
@@ -61,11 +62,13 @@ class Graph extends Component {
     }
     shouldComponentUpdate(nextProps) {
         dataKeyChanged = this.props.dataKey !== nextProps.dataKey;
+        if (this.state.zoom && !dataKeyChanged) return false;
         if (this.props.data && this.props.data.length) {
             let ts = this.props.data[0].timestamp;
-            dataUpdated = ts !== lastDataPointTs;
+            dataUpdated = ts !== lastDataPointTs || this.props.data.length !== nextProps.data.length;
             lastDataPointTs = ts;
         }
+        if (this.state.zoom && this.props.data.length && nextProps.data.length && this.props.data[0].timestamp !== nextProps.data[0].timestamp) console.log("Should NOT")
         if (this.state.zoom && this.props.data.length && nextProps.data.length && this.props.data[0].timestamp !== nextProps.data[0].timestamp) return false
         return dataKeyChanged || this.props.data.length !== nextProps.data.length
     }
@@ -110,17 +113,39 @@ class Graph extends Component {
                             scales: {
                                 x: {
                                     time: true, auto: this.props.from === undefined, range: (_, fromX, toX) => {
-                                        if (this.state.zoom && (dataKeyChanged || dataUpdated)) {
-                                            // keep zoom range
-                                            dataKeyChanged = false
-                                            return this.state.zoom
+                                        // redo this at some point, this will do as a workaround for now.
+                                        let allowZoom = true;
+                                        if (xRangeUpdateThottle + 20 > new Date().getTime()) {
+                                            console.log("throttle x-range updates")
+                                            allowZoom = false;
                                         }
-                                        if (Number.isInteger(fromX) && Number.isInteger(toX) && !dataKeyChanged) {
-                                            // reset zoom
-                                            this.setStateVar("zoom", undefined)
-                                        } else {
-                                            // set zoom
-                                            this.setStateVar("zoom", [fromX, toX])
+                                        xRangeUpdateThottle = new Date().getTime();
+                                        let zoom = this.state.zoom;;
+                                        if (allowZoom) {
+                                            if (zoom && (dataKeyChanged || dataUpdated)) {
+                                                // keep zoom range
+                                                console.log("keep zoom")
+                                                dataKeyChanged = false
+                                                dataUpdated = false;
+                                                return zoom
+                                            }
+                                            if (Number.isInteger(fromX) && Number.isInteger(toX) && !dataKeyChanged) {
+                                                // reset zoom
+                                                console.log("reset zoom")
+                                                this.setStateVar("zoom", undefined)
+                                                zoom = undefined;
+                                            } else if (!dataUpdated && !dataKeyChanged) {
+                                                // set zoom
+                                                console.log("set zoom")
+                                                this.setStateVar("zoom", [fromX, toX])
+                                                zoom = [fromX, toX]
+                                            }
+                                        }
+                                        dataKeyChanged = false
+                                        if (this.props.from && !zoom) {
+                                            console.log("update x range")
+                                            dataUpdated = false;
+                                            return this.getXRange()
                                         }
                                         return [fromX, toX]
                                     }
