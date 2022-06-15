@@ -351,7 +351,7 @@ class Sensor extends Component {
         this.setState({ ...this.state, editName: state })
     }
     updateAlert(alert, prevEnabled) {
-        var offToOn = true;
+        var offToOn = alert.enabled;
         var alerts = this.state.alerts;
         var alertIdx = alerts.findIndex(x => x.sensor === alert.sensor && x.type === alert.type)
         if (alertIdx !== -1) {
