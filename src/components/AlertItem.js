@@ -9,7 +9,7 @@ import RangeInputDialog from "./RangeInputDialog";
 import pjson from '../../package.json';
 import ScreenSizeWrapper from "./ScreenSizeWrapper";
 import { ruuviTheme } from "../themes";
-const AlertSlider  = React.lazy(() => import("./AlertSlider"));
+const AlertSlider = React.lazy(() => import("./AlertSlider"));
 
 class AlertItem extends Component {
     constructor(props) {
@@ -110,11 +110,11 @@ class AlertItem extends Component {
                     </ScreenSizeWrapper>
                     {type !== "movement" &&
                         <Box mt="4">
-                             <Suspense fallback={
-      <center style={{ width: "100%", marginTop: 100 }}>
-        <span className='spinner'></span>
-      </center>
-    }>
+                            <Suspense fallback={
+                                <center style={{ width: "100%", marginTop: 100 }}>
+                                    <span className='spinner'></span>
+                                </center>
+                            }>
                                 <AlertSlider type={type} value={alert || { ...getAlertRange(this.props.type) }} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, type, alert ? alert.enabled : false, !final)} />
                             </Suspense>
                         </Box>
