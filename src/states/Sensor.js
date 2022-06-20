@@ -43,7 +43,6 @@ import notify from "../utils/notify"
 import { ruuviTheme } from "../themes";
 import pjson from '../../package.json';
 import { isBatteryLow } from "../utils/battery";
-import sensorbglayer from '../img/sensor-bg-layer.png'
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];

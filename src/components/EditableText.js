@@ -1,4 +1,6 @@
+import { useColorMode } from "@chakra-ui/react";
 import pen from "../img/pen.svg";
+import penDark from "../img/pen-dark.svg";
 
 function getStyledText(text) {
     var startB = text.split("<b>")
@@ -12,6 +14,7 @@ function getStyledText(text) {
     return output;
 }
 export default function EditableText(props) {
+    let colorMode = useColorMode().colorMode;
     var extraStyle = {};
     if (props.spread) {
         extraStyle.display = "flex"
@@ -22,6 +25,6 @@ export default function EditableText(props) {
         <span>
             {getStyledText(props.text)}
         </span>
-        <img src={pen} style={{ paddingLeft: "10px", display: "inline-block", marginBottom: 2 }} width="23px" height="13px" alt="Pen" />
+        <img src={colorMode === "dark" ? penDark : pen} style={{ paddingLeft: "10px", display: "inline-block", marginBottom: 2 }} width="23px" height="13px" alt="Pen" />
     </span>
 }
