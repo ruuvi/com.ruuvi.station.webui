@@ -7,6 +7,9 @@ import 'typeface-montserrat';
 import 'typeface-mulish';
 import 'typeface-oswald';
 import './i18n';
+import { createStandaloneToast } from '@chakra-ui/toast'
+const { ToastContainer } = createStandaloneToast()
+
 
 ReactDOM.render(
   <React.StrictMode>
@@ -16,6 +19,7 @@ ReactDOM.render(
       </center>
     }>
       <App />
+      <ToastContainer />
     </Suspense>
   </React.StrictMode>,
   document.getElementById('root')

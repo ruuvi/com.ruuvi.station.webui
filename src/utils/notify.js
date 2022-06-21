@@ -1,8 +1,10 @@
-import { Alert, Text, createStandaloneToast, AlertIcon, CloseButton } from '@chakra-ui/react'
+import { Alert, Text, AlertIcon, CloseButton } from '@chakra-ui/react'
 import { ruuviTheme } from '../themes'
+import { createStandaloneToast } from '@chakra-ui/toast'
+
 
 function toastIt(text, status, duration) {
-    const toast = createStandaloneToast()
+    const { toast } = createStandaloneToast()
     toast({
         duration: duration || 4000,
         render: (props) => (
