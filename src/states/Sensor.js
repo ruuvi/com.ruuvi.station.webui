@@ -221,57 +221,57 @@ class Sensor extends Component {
                 var sensor = data.data.sensors.find(x => x.sensor === this.props.sensor.sensor)
                 if (sensor) this.setState({ ...this.state, alerts: sensor.alerts })
             }
-            try {
-                (async () => {
-                    let lastestDatapoint = await new NetworkApi().getLastestDataAsync(this.props.sensor.sensor)
-                    if (lastestDatapoint.result === "success") {
-                        this.setState({ ...this.state, lastestDatapoint: lastestDatapoint.data })
-                    }
-                })()
-                let dataMode = this.getDataMode();
-                var thisFrom = this.state.from;
-                var that = this;
-                async function load(until, initialLoad) {
-                    var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
-                    if (!until) until = Math.floor(new Date().getTime() / 1000);
-                    if (!initialLoad && that.state.data.measurements.length) since = that.state.data.measurements[0].timestamp + 1;
-                    if (until <= since) return;
-                    var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
-                    // stop fetching data if sensor page has changed
-                    if (that.props.sensor.sensor !== resp.data.sensor) return;
-                    if (that.state.from !== thisFrom) return;
-                    if (resp.result === "success") {
-                        let d = parse(resp.data);
-                        var stateData = that.state.data;
-                        // no data
-                        if (!stateData && d.measurements.length === 0) {
-                            that.setState({ ...that.state, data: d, loading: false })
-                            return
-                        }
-                        // looks like timerange has changed, stop
-                        if (!d.measurements && d.measurements[d.measurements.length - 1].timestamp < since) return;
-                        if (!stateData) stateData = d;
-                        else if (initialLoad && stateData.measurements.length) {
-                            stateData.measurements = stateData.measurements.concat(d.measurements)
-                        }
-                        else {
-                            // data refresh, add new once to the beginning of the array
-                            stateData.measurements = [...d.measurements, ...stateData.measurements]
-                        }
-                        that.setState({ ...that.state, data: stateData, loading: false, table: d.table, resolvedMode: d.resolvedMode })
-                        if (initialLoad && (d.fromCache || d.measurements.length >= pjson.settings.dataFetchPaginationSize)) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
-                    } else if (resp.result === "error") {
-                        notify.error(that.props.t(`UserApiError.${resp.code}`))
-                        that.setState({ ...that.state, loading: false })
-                    }
-                }
-                load(null, this.state.data === null || showLoading, true)
-            } catch (e) {
-                notify.error(this.props.t("internet_connection_problem"))
-                console.log("err", e)
-                this.setState({ ...this.state, loading: false })
-            }
         })
+        try {
+            (async () => {
+                let lastestDatapoint = await new NetworkApi().getLastestDataAsync(this.props.sensor.sensor)
+                if (lastestDatapoint.result === "success") {
+                    this.setState({ ...this.state, lastestDatapoint: lastestDatapoint.data })
+                }
+            })()
+            let dataMode = this.getDataMode();
+            var thisFrom = this.state.from;
+            var that = this;
+            async function load(until, initialLoad) {
+                var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
+                if (!until) until = Math.floor(new Date().getTime() / 1000);
+                if (!initialLoad && that.state.data.measurements.length) since = that.state.data.measurements[0].timestamp + 1;
+                if (until <= since) return;
+                var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
+                // stop fetching data if sensor page has changed
+                if (that.props.sensor.sensor !== resp.data.sensor) return;
+                if (that.state.from !== thisFrom) return;
+                if (resp.result === "success") {
+                    let d = parse(resp.data);
+                    var stateData = that.state.data;
+                    // no data
+                    if (!stateData && d.measurements.length === 0) {
+                        that.setState({ ...that.state, data: d, loading: false })
+                        return
+                    }
+                    // looks like timerange has changed, stop
+                    if (!d.measurements && d.measurements[d.measurements.length - 1].timestamp < since) return;
+                    if (!stateData) stateData = d;
+                    else if (initialLoad && stateData.measurements.length) {
+                        stateData.measurements = stateData.measurements.concat(d.measurements)
+                    }
+                    else {
+                        // data refresh, add new once to the beginning of the array
+                        stateData.measurements = [...d.measurements, ...stateData.measurements]
+                    }
+                    that.setState({ ...that.state, data: stateData, loading: false, table: d.table, resolvedMode: d.resolvedMode })
+                    if (initialLoad && (d.fromCache || d.measurements.length >= pjson.settings.dataFetchPaginationSize)) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
+                } else if (resp.result === "error") {
+                    notify.error(that.props.t(`UserApiError.${resp.code}`))
+                    that.setState({ ...that.state, loading: false })
+                }
+            }
+            load(null, this.state.data === null || showLoading, true)
+        } catch (e) {
+            notify.error(this.props.t("internet_connection_problem"))
+            console.log("err", e)
+            this.setState({ ...this.state, loading: false })
+        }
     }
     getLatestReading(kv) {
         if (!this.state.lastestDatapoint) return [];
