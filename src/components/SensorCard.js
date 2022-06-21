@@ -41,6 +41,7 @@ class SensorCard extends Component {
             data: null,
             lastParsedReading: null,
             loading: true,
+            loadingHistory: true,
             graphDataKey: "temperature",
         }
     }
@@ -50,14 +51,14 @@ class SensorCard extends Component {
     componentWillUnmount() {
         clearTimeout(this.fetchDataLoop);
     }
-    async loadGraphData(graphDataMode, lastDataPoint) {
+    async loadGraphData(graphDataMode) {
         var graphData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), null, { mode: graphDataMode })
         if (graphData.result === "success") {
             let d = parse(graphData.data);
-            this.setState({ data: d, lastParsedReading: lastDataPoint, loading: false, table: d.table, resolvedMode: d.resolvedMode })
+            this.setState({ data: d, loading: false, loadingHistory: false, table: d.table, resolvedMode: d.resolvedMode })
         } else if (graphData.result === "error") {
             console.error(graphData.error)
-            this.setState({ ...this.state, loading: false })
+            this.setState({ ...this.state, loading: false, loadingHistory: false })
         }
     }
     async loadData() {
@@ -71,14 +72,15 @@ class SensorCard extends Component {
             if (singleData.result === "success") {
                 let oneDenseData = singleData.data;
                 var lastParsedReading = oneDenseData.measurements.length === 1 ? oneDenseData.measurements[0] : null
+                this.setState({ ...this.state, loading: false, lastParsedReading: lastParsedReading })
                 this.loadGraphData(graphDataMode, lastParsedReading);
             } else if (singleData.result === "error") {
                 console.error(singleData.error)
-                this.setState({ ...this.state, loading: false })
+                this.setState({ ...this.state, loading: false, loadingHistory: false })
             }
         } catch (e) {
             console.log("err", e)
-            this.setState({ data: null, loading: false })
+            this.setState({ data: null, loading: false, loadingHistory: false })
         }
 
     }
@@ -110,7 +112,7 @@ class SensorCard extends Component {
         var { t } = this.props;
         return (
             <div>
-                <Box height="360px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }}  _hover={{shadow: "0px 0px 0px 2px rgba(1,174,144,0.3)"}}>
+                <Box height="360px" borderRadius="lg" overflow="hidden" padding="24px" style={{ backgroundColor: "white" }} _hover={{ shadow: "0px 0px 0px 2px rgba(1,174,144,0.3)" }}>
                     <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
                         {this.props.sensor.name}
                     </Heading>
@@ -130,7 +132,13 @@ class SensorCard extends Component {
                                     {this.state.data && this.state.data.measurements.length ? (
                                         <Graph title="" dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
                                     ) : (
-                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: 200 }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{t("no_data_in_range").split("\n").map(x => <div key={x}>{x}</div>)}</div></center>
+                                        <>
+                                            {this.state.loadingHistory ? (
+                                                <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: 200 }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}><Spinner size="xl" /></div></center>
+                                            ) : (
+                                                <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: 200 }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{t("no_data_in_range").split("\n").map(x => <div key={x}>{x}</div>)}</div></center>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                                 <hr style={{ margin: "0px 0 10px 0" }} />
