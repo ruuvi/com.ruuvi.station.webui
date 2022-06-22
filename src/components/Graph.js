@@ -116,7 +116,7 @@ class Graph extends Component {
                                         // redo this at some point, this will do as a workaround for now.
                                         let allowZoom = true;
                                         if (xRangeUpdateThottle + 20 > new Date().getTime()) {
-                                            console.log("throttle x-range updates")
+                                            //console.log("throttle x-range updates")
                                             allowZoom = false;
                                         }
                                         xRangeUpdateThottle = new Date().getTime();
@@ -124,26 +124,26 @@ class Graph extends Component {
                                         if (allowZoom) {
                                             if (zoom && (dataKeyChanged || dataUpdated)) {
                                                 // keep zoom range
-                                                console.log("keep zoom")
+                                                //console.log("keep zoom")
                                                 dataKeyChanged = false
                                                 dataUpdated = false;
                                                 return zoom
                                             }
                                             if (Number.isInteger(fromX) && Number.isInteger(toX) && !dataKeyChanged) {
                                                 // reset zoom
-                                                console.log("reset zoom")
+                                                //console.log("reset zoom")
                                                 this.setStateVar("zoom", undefined)
                                                 zoom = undefined;
                                             } else if (!dataUpdated && !dataKeyChanged) {
                                                 // set zoom
-                                                console.log("set zoom")
+                                                //console.log("set zoom")
                                                 this.setStateVar("zoom", [fromX, toX])
                                                 zoom = [fromX, toX]
                                             }
                                         }
                                         dataKeyChanged = false
                                         if (this.props.from && !zoom) {
-                                            console.log("update x range")
+                                            //console.log("update x range")
                                             dataUpdated = false;
                                             return this.getXRange()
                                         }

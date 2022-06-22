@@ -131,11 +131,23 @@ class NetworkApi {
                 if (until && (since >= oldest || (since <= oldest)) && until <= newest) {
                     let dataToBe = cachedData.filter(x => x.timestamp <= until && x.timestamp >= since)
                     if (dataToBe.length > 1) {
-                        var d = await this.getLastestDataAsync(mac)
-                        if (d.result === "success") {
-                            d.data.measurements = dataToBe
-                            d.data.fromCache = true;
-                            return d;
+                        // validate that there is no gaps
+                        const cacheGapLimit = 60 * 60;
+                        let cacheIsValid = true;
+                        for (var i = 1; i < dataToBe.length; i++) {
+                            if ((dataToBe[i - 1].timestamp - dataToBe[i].timestamp) > cacheGapLimit) {
+                                console.log(`gap in cached data at ${dataToBe[i - 1].timestamp} ${(dataToBe[i - 1].timestamp - dataToBe[i].timestamp)}s, fetching fresh`);
+                                cacheIsValid = false;
+                                break;
+                            }
+                        }
+                        if (cacheIsValid) {
+                            var d = await this.getLastestDataAsync(mac)
+                            if (d.result === "success") {
+                                d.data.measurements = dataToBe
+                                d.data.fromCache = true;
+                                return d;
+                            }
                         }
                     }
                 }
@@ -263,7 +275,7 @@ class NetworkApi {
     }
     getAlerts(mac, success) {
         let url = this.url + "/alerts";
-        if (mac) url += "?sensor="+mac
+        if (mac) url += "?sensor=" + mac
         fetch(url, this.options).then(function (response) {
             return response.json();
         })
