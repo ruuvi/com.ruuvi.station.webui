@@ -137,7 +137,8 @@ export const ruuviTheme = extendTheme({
             900: '#d4ede8',
         },
         primaryScheme: {
-            500: '#44c9b9',
+            200: '#44c9b9', // dark mode
+            500: '#44c9b9', // light mode
         },
         text: "#1b4847",
         toast: {

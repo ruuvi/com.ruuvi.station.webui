@@ -27,8 +27,8 @@ class UserMenu extends Component {
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
                     */}
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} _hover={{ bg: "#edfbf7" }} onClick={() => this.settings()}>{t("settings")}</MenuItem>
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} _hover={{ bg: "#edfbf7" }} onClick={() => this.props.logout()}>{t("sign_out")}</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} _hover={{ bg: "primaryLighter" }} onClick={() => this.settings()}>{t("settings")}</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} _hover={{ bg: "primaryLighter" }} onClick={() => this.props.logout()}>{t("sign_out")}</MenuItem>
                 </MenuList>
             </Menu>
         )
