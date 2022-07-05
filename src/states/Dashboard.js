@@ -133,8 +133,8 @@ class Dashboard extends Component {
         return (
             <>
                 <Box>
-                    <Box backgroundImage={colorMode === "dark" ? this.getCurrentSensor() ? this.getCurrentSensor().picture || bg : bg : undefined} backgroundColor={this.getCurrentSensor() && colorMode === "light" ? "white" : undefined} backgroundSize="cover" backgroundPosition="top" >
-                        <Box backgroundImage={colorMode === "dark" ? sensorbglayer : undefined} backgroundSize="cover" backgroundPosition="top" >
+                    <Box backgroundColor={this.getCurrentSensor() && colorMode === "light" ? "white" : undefined} backgroundSize="cover" backgroundPosition="top" >
+                        <Box backgroundSize="cover" backgroundPosition="top" >
                             {this.state.loading &&
                                 <center>
                                     <Spinner size="xl" />

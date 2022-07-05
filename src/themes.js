@@ -40,7 +40,7 @@ Accordion icons: #fff, 30%
 let colors = {
     contentBg: { light: "white", dark: "#111111" },
     text: { light: "#1b4847", dark: "white" },
-    topbar: { light: "white", dark: "#001d1bf2" },
+    topbar: { light: "white", dark: "#001b1a" },
     subtitle: { light: "#1b4847", dark: "#00cebbcc" },
     accordionIcon: { light: undefined, dark: "#ffffff4d !important" },
     accordionButton: { light: undefined, dark: "#003434" },
@@ -64,7 +64,7 @@ export const ruuviTheme = extendTheme({
     styles: {
         global: (props) => ({
             body: {
-                bg: props.colorMode === "light" ? "#e6f6f2" : "rgba(1,39,39,0.9)",
+                bg: props.colorMode === "light" ? "#e6f6f2" : "#001b1a",
                 color: props.colorMode === "light" ? "#1b4847 !important" : "white !important",
             },
             '.subtitle': {

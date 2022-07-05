@@ -114,8 +114,8 @@ class SensorCard extends Component {
         let colorMode = this.props.colorMode.colorMode;
         return (
             <div>
-                <Box className="content sensorCard" borderRadius="lg" overflow="hidden" _hover={{ shadow: "0px 0px 0px 2px rgba(1,174,144,0.3)" }} backgroundImage={colorMode === "dark" ? this.props.sensor.picture : undefined} backgroundSize="cover">
-                    <Box backgroundImage={colorMode === "dark" ? sensorboxbg : undefined} padding="24px" height="360px" backgroundSize="cover">
+                <Box className="content sensorCard" borderRadius="lg" overflow="hidden" _hover={{ shadow: "0px 0px 0px 2px rgba(1,174,144,0.3)" }} backgroundSize="cover">
+                    <Box padding="24px" height="360px" backgroundSize="cover">
                         <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
                             {this.props.sensor.name}
                         </Heading>
