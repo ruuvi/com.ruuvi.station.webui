@@ -33,7 +33,6 @@ const lastUpdatedText = {
     fontFamily: "mulish",
     fontWeight: 600,
     fontSize: 14,
-    color: "rgba(27, 72, 71, 0.5)"
 }
 
 class SensorCard extends Component {
@@ -163,7 +162,7 @@ class SensorCard extends Component {
                         )}
                     </Box>
                 </Box>
-                <div style={{ ...lastUpdatedText, width: "100%", textAlign: "right", marginTop: 5 }}>
+                <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%", textAlign: "right", marginTop: 5 }}>
                     <DurationText from={this.state.lastParsedReading ? this.state.lastParsedReading.timestamp : " - "} t={this.props.t} />
                 </div>
             </div>

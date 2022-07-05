@@ -55,7 +55,8 @@ let colors = {
     graphStroke: { dark: "#34ad9f", light: "#44c9b9" },
     graphGrid: { dark: "rgba(68, 201, 185, 0.1)", light: "rgba(212,237,232,0.5)" },
     sensorCardBackground: { light: undefined, dark: "#003434 !important" },
-    signinInputBg: {light: "white", dark: undefined }
+    signinInputBg: {light: "white", dark: undefined },
+    dashboardUpdatedAtColor: {light: "#1b484780", dark: "#ffffff80"}
 }
 
 export const ruuviTheme = extendTheme({
@@ -105,6 +106,9 @@ export const ruuviTheme = extendTheme({
             '.signinInput': {
                 bg: colors.signinInputBg[props.colorMode],
             },
+            '.dashboardUpdatedAt': {
+                color: colors.dashboardUpdatedAtColor[props.colorMode]
+            }
         })
     },
     graph: {
