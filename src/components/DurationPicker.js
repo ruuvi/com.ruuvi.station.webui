@@ -55,7 +55,7 @@ export default function DurationPicker(props) {
             </MenuButton>
             <MenuList>
                 {renderTimespans.map(x => {
-                    return <MenuItem key={x.v} style={{ fontFamily: "mulish", fontSize: 16, backgroundColor: ts.v === x.v ? ruuviTheme.colors.primaryLight : undefined }} onClick={() => props.onChange(x.v)}>{x.k} {t(x.t).toLowerCase()}</MenuItem>
+                    return <MenuItem key={x.v} style={{ ...detailedSubText, backgroundColor: ts.v === x.v ? ruuviTheme.colors.primaryLight : undefined }} onClick={() => props.onChange(x.v)}>{x.k} {t(x.t).toLowerCase()}</MenuItem>
                 })}
             </MenuList>
         </Menu>
