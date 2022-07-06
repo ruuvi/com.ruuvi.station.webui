@@ -29,7 +29,7 @@ class LanguageMenu extends Component {
         }
         return (
             <Menu autoSelect={false}>
-                <MenuButton disabled={false} as={Button} variant="ddl"  rightIcon={<MdArrowDropDown size={26} color="#77cdc2" style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 15, fontWeight: 800, paddingRight: 0  }}>
+                <MenuButton disabled={false} as={Button} variant="ddl"  rightIcon={<MdArrowDropDown size={26} color="#77cdc2" style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 15, fontWeight: 800, paddingRight: 0, paddingLeft: 8  }}>
                     {uppercaseFirst(i18n.language || "en")}
                 </MenuButton>
                 <MenuList mt="2">

@@ -9,8 +9,6 @@ import Store from "../Store";
 import SessionStore from "../SessionStore";
 import notify from "../utils/notify";
 import SettingsModal from "../components/SettingsModal";
-import bg from '../img/bg.jpg'
-import sensorbglayer from '../img/sensor-bg-layer.png'
 import { withColorMode } from "../utils/withColorMode";
 
 const infoText = {
@@ -157,10 +155,10 @@ class Dashboard extends Component {
                             ) : (
                                 <Box paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
                                     <div style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 26 }}>
-                                        <div style={{ fontFamily: "montserrat", fontSize: 48, fontWeight: 800 }}>
+                                        <div style={{ fontFamily: "montserrat", fontSize: 48, fontWeight: 800, lineHeight: 1 }}>
                                             Hello Friend,
                                         </div>
-                                        <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic", color: "#51b5a5" }} >
+                                        <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic", color: "#51b5a5", marginBottom: 20 }} >
                                             Randomized welcome message here.
                                         </div>
                                         <div style={{ textAlign: "end" }} >

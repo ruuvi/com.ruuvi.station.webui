@@ -125,7 +125,7 @@ export default function App() {
   return (
     <ChakraProvider theme={ruuviTheme}>
       <HashRouter>
-        <HStack className="topbar" style={{ paddingLeft: "25px", paddingRight: "25px" }} height="60px">
+        <HStack className="topbar" style={{ paddingLeft: "18px", paddingRight: "18px" }} height="60px">
           <Logo />
           <Text>
             {new NetworkApi().isStaging() ? "(staging) " : ""}

@@ -14,7 +14,6 @@ import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 import DurationText from "./DurationText";
 import BigValue from "./BigValue";
-import sensorboxbg from '../img/sensor-box-bg.png'
 import { withColorMode } from "../utils/withColorMode";
 
 const smallSensorValue = {
@@ -111,7 +110,6 @@ class SensorCard extends Component {
     }
     render() {
         var { t } = this.props;
-        let colorMode = this.props.colorMode.colorMode;
         return (
             <div>
                 <Box className="content sensorCard" borderRadius="lg" overflow="hidden" _hover={{ shadow: "0px 0px 0px 2px rgba(1,174,144,0.3)" }} backgroundSize="cover">
