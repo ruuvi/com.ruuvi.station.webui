@@ -34,7 +34,7 @@ class LanguageMenu extends Component {
                 </MenuButton>
                 <MenuList mt="2">
                     {["en", "fi", "sv"].map(x => {
-                        return <MenuItem key={x} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", backgroundColor: i18n.language === x ? ruuviTheme.colors.primaryLight : undefined }}_hover={{ bg: "primaryLighter" }} onClick={() => this.langChange(x)}>{uppercaseFirst(x)}</MenuItem>
+                        return <MenuItem key={x} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, backgroundColor: i18n.language === x ? ruuviTheme.colors.primaryLight : undefined }}_hover={{ bg: "primaryLighter" }} onClick={() => this.langChange(x)}>{uppercaseFirst(x)}</MenuItem>
                     })}
                 </MenuList>
             </Menu>

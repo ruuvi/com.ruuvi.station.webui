@@ -22,13 +22,13 @@ class UserMenu extends Component {
                     <FaUserAlt />
                 </MenuButton>
                 <MenuList mt="2">
-                    <MenuItem isDisabled={true} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", cursor: "unset" }}>{this.props.email}</MenuItem>
+                    <MenuItem isDisabled={true} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, cursor: "unset" }}>{this.props.email}</MenuItem>
                     {/**
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
                     */}
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} _hover={{ bg: "primaryLighter" }} onClick={() => this.settings()}>{t("settings")}</MenuItem>
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold" }} _hover={{ bg: "primaryLighter" }} onClick={() => this.props.logout()}>{t("sign_out")}</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} _hover={{ bg: "primaryLighter" }} onClick={() => this.settings()}>{t("settings")}</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} _hover={{ bg: "primaryLighter" }} onClick={() => this.props.logout()}>{t("sign_out")}</MenuItem>
                 </MenuList>
             </Menu>
         )

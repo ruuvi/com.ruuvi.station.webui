@@ -42,7 +42,7 @@ class SensorMenu extends Component {
                         </MenuButton>
                         <MenuList mt="2">
                             {this.state.sensors.map(x => {
-                                return <MenuItem key={x.sensor} style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", backgroundColor: this.getCurrentSensor() === x.sensor ? ruuviTheme.colors.primaryLight : undefined }} _hover={{ bg: "primaryLighter" }} onClick={() => this.props.history.push('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
+                                return <MenuItem key={x.sensor} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, backgroundColor: this.getCurrentSensor() === x.sensor ? ruuviTheme.colors.primaryLight : undefined }} _hover={{ bg: "primaryLighter" }} onClick={() => this.props.history.push('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
                             })}
                         </MenuList>
                     </Menu>
