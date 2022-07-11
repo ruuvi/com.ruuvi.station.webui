@@ -155,12 +155,14 @@ class Dashboard extends Component {
                             ) : (
                                 <Box paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
                                     <div style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 26 }}>
+                                        {/*
                                         <div style={{ fontFamily: "montserrat", fontSize: 48, fontWeight: 800, lineHeight: 1 }}>
                                             Hello Friend,
                                         </div>
                                         <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic", color: "#51b5a5", marginBottom: 20 }} >
                                             Randomized welcome message here.
                                         </div>
+                                        */}
                                         <div style={{ textAlign: "end" }} >
                                             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
                                         </div>
