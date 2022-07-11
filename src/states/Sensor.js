@@ -132,25 +132,27 @@ function SensorHeader(props) {
     } else {
         return <center>
             <Box m={2}>
-                <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                    <tr>
-                        <td width="33%" style={{ verticalAlign: "top" }}>
-                            <NavClose />
-                        </td>
-                        <td width="33%" align="center">
-                            <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
-                            <label for="avatarUpload">
-                                {props.loadingImage ? <CircularProgress mt="3" size={"64px"} isIndeterminate={true} color="primary" /> :
-                                    <Avatar mt="3" bg="primary" size="lg" name={props.sensor.name} src={props.sensor.picture} />
-                                }
-                            </label>
-                        </td>
-                        <td width="33%" align="right" style={{ verticalAlign: "top" }}>
-                            <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
-                                <NavPrevNext prev={props.prev} next={props.next} />
-                            </span>
-                        </td>
-                    </tr>
+                <table width="100%" border="0" cellSpacing="0" cellPadding="0">
+                    <tbody>
+                        <tr>
+                            <td width="33%" style={{ verticalAlign: "top" }}>
+                                <NavClose />
+                            </td>
+                            <td width="33%" align="center">
+                                <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
+                                <label for="avatarUpload">
+                                    {props.loadingImage ? <CircularProgress mt="3" size={"64px"} isIndeterminate={true} color="primary" /> :
+                                        <Avatar mt="3" bg="primary" size="lg" name={props.sensor.name} src={props.sensor.picture} />
+                                    }
+                                </label>
+                            </td>
+                            <td width="33%" align="right" style={{ verticalAlign: "top" }}>
+                                <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
+                                    <NavPrevNext prev={props.prev} next={props.next} />
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
                 <div style={{ width: "65%", marginTop: "5px" }}>
                     <Heading style={sensorNameMobile}>

@@ -5,6 +5,7 @@ import {
     MenuList,
     MenuItem,
     Button,
+    MenuDivider,
 } from "@chakra-ui/react"
 import { FaUserAlt } from "react-icons/fa"
 import { MdArrowDropDown } from "react-icons/md"
@@ -22,13 +23,15 @@ class UserMenu extends Component {
                     <FaUserAlt />
                 </MenuButton>
                 <MenuList mt="2">
-                    <MenuItem isDisabled={true} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, cursor: "unset" }}>{this.props.email}</MenuItem>
+                    <MenuItem isDisabled={true} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, cursor: "unset", borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>{this.props.email}</MenuItem>
+                    <MenuDivider />
                     {/**
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
                     */}
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} _hover={{ bg: "primaryLighter" }} onClick={() => this.settings()}>{t("settings")}</MenuItem>
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} _hover={{ bg: "primaryLighter" }} onClick={() => this.props.logout()}>{t("sign_out")}</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.settings()}>{t("settings")}</MenuItem>
+                    <MenuDivider />
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => this.props.logout()}>{t("sign_out")}</MenuItem>
                 </MenuList>
             </Menu>
         )

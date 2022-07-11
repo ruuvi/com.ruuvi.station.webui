@@ -4,10 +4,10 @@ import {
     MenuItem,
     MenuButton,
     Button,
+    MenuDivider,
 } from "@chakra-ui/react"
 import { MdArrowDropDown } from "react-icons/md"
 import { useTranslation } from 'react-i18next';
-import { ruuviTheme } from "../themes";
 
 var timespans = [
     { k: "1", t: "hour", v: 1 },
@@ -49,13 +49,20 @@ export default function DurationPicker(props) {
                 variant="ddl"
                 className="durationPicker"
                 style={{ ...detailedSubText }}
-                borderRadius='4px'
-                borderWidth="1px">
+                borderRadius='4px'>
                 {ts.k} {t(ts.t).toLowerCase()}
             </MenuButton>
             <MenuList>
-                {renderTimespans.map(x => {
-                    return <MenuItem key={x.v} style={{ ...detailedSubText, backgroundColor: ts.v === x.v ? ruuviTheme.colors.primaryLight : undefined }} onClick={() => props.onChange(x.v)}>{x.k} {t(x.t).toLowerCase()}</MenuItem>
+                {renderTimespans.map((x, i) => {
+                    let divider = <></>
+                    let borderStyle = {};
+                    if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
+                    if (i === renderTimespans.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
+                    else divider = <MenuDivider />
+                    return <>
+                    <MenuItem key={x.v} className={ts.v === x.v ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => props.onChange(x.v)}>{x.k} {t(x.t).toLowerCase()}</MenuItem>
+                    {divider}
+                    </>
                 })}
             </MenuList>
         </Menu>

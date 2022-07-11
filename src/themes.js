@@ -39,7 +39,8 @@ Accordion icons: #fff, 30%
 
 let colors = {
     contentBg: { light: "white", dark: "#111111" },
-    text: { light: "#1b4847", dark: "white" },
+    text: { light: "#1b4847", dark: "#00ae9480" },
+    textInactive: { light: "#1b484780", dark: "#ffffff80" },
     topbar: { light: "white", dark: "#001b1a" },
     subtitle: { light: "#1b4847", dark: "#00cebbcc" },
     accordionIcon: { light: undefined, dark: "#ffffff4d !important" },
@@ -48,15 +49,19 @@ let colors = {
     sensorValueBoxBg: { light: "rgba(230,246,242,0.5)", dark: "#00cdb955" },
     sensorValueBoxIcon: { light: "rgba(68, 201, 185, 0.3)", dark: "#00ae9480" },
     sensorValueBoxActiveBorder: { light: "rgba(1,174,144,0.3)", dark: "#00cdb9" },
-    menuButtonBg: { light: "white", dark: "#00413f4d" },
+    menuButtonBg: { light: "white", dark: "#003434 !important" },
     navButtonBg: { light: "#f0faf9 !important", dark: "#00413f4d !important" },
     navButtonColor: { light: "#26ccc0 !important", dark: "white !important" },
     graphFill: { dark: "rgba(68, 201, 185, 0.3)", light: "rgba(68, 201, 185, 0.3)" },
     graphStroke: { dark: "#34ad9f", light: "#44c9b9" },
     graphGrid: { dark: "rgba(68, 201, 185, 0.1)", light: "rgba(212,237,232,0.5)" },
     sensorCardBackground: { light: undefined, dark: "#003434 !important" },
-    signinInputBg: {light: "white", dark: undefined },
-    dashboardUpdatedAtColor: {light: "#1b484780", dark: "#ffffff80"}
+    signinInputBg: { light: "white", dark: undefined },
+    dashboardUpdatedAtColor: { light: "#1b484780", dark: "#ffffff80" },
+    toastErrorBackground: { light: "#f15a24", dark: "#f15a24" },
+    toastInfoBackground: { light: "#e6f6f2", dark: "#003434" },
+    toastSuccessBackground: { light: "#44c9b9", dark: "#44c9b9" },
+    colorMenuActive: { light: "rgba(68, 201, 185, 0.3)", dark: "#0B2626" },
 }
 
 export const ruuviTheme = extendTheme({
@@ -108,7 +113,11 @@ export const ruuviTheme = extendTheme({
             },
             '.dashboardUpdatedAt': {
                 color: colors.dashboardUpdatedAtColor[props.colorMode]
-            }
+            },
+            '.menuActive': {
+                bg: colors.colorMenuActive[props.colorMode],
+                color: colors.textInactive[props.colorMode] + " !important",
+            },
         })
     },
     graph: {
@@ -146,9 +155,9 @@ export const ruuviTheme = extendTheme({
         },
         text: "#1b4847",
         toast: {
-            error: "#f15a24",
-            info: "#e6f6f2",
-            success: "#44c9b9",
+            error: colors.toastErrorBackground,
+            info: colors.toastInfoBackground,
+            success: colors.toastSuccessBackground,
         },
     },
     components: {
@@ -187,16 +196,31 @@ export const ruuviTheme = extendTheme({
                 },
                 dialog: {
                     fontFamily: "Mulish",
-                    bg: colors.contentBg[props.colorMode]
+                    bg: colors.sensorCardBackground[props.colorMode]
                 }
             }),
         },
         Menu: {
             baseStyle: (props) => ({
+                button: {
+                    border: "none"
+                },
                 list: {
-                    bg: colors.contentBg[props.colorMode]
+                    padding: 0,
+                    bg: colors.menuButtonBg[props.colorMode],
+                    border: "none",
+                    boxShadow: props.colorMode === "dark" ? "0px 0px 10px #00000050 !important" : "0px 0px 10px #00000030 !important",
+                },
+                item: {
+                    overflow: "none",
+                    _hover: { bg: colors.colorMenuActive[props.colorMode] },
+                    padding: 3
+                },
+                divider: {
+                    margin: 0,
+                    color: props.colorMode === "dark" ? "#ffffff1a" : "#0000001a",
                 }
             }),
-        }
-    }
+        },
+    },
 })

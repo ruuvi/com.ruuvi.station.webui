@@ -2,9 +2,13 @@ import { Alert, Text, AlertIcon, CloseButton } from '@chakra-ui/react'
 import { ruuviTheme } from '../themes'
 import { createStandaloneToast } from '@chakra-ui/toast'
 
+function hackyGetColorMode() {
+    return localStorage.getItem("chakra-ui-color-mode") === "dark" ? "dark" : "light";
+}
 
 function toastIt(text, status, duration) {
     const { toast } = createStandaloneToast()
+    let colorMode = hackyGetColorMode()
     toast({
         duration: duration || 4000,
         render: (props) => (
@@ -17,8 +21,8 @@ function toastIt(text, status, duration) {
                 width="auto"
                 padding="20px"
                 status={status}
-                bg={ruuviTheme.colors.toast[status]}
-                color={status !== "info" ? "white" : "black"}
+                bg={ruuviTheme.colors.toast[status][colorMode]}
+                color={status !== "info" || colorMode === "dark" ? "white" : "black"}
             >
                 <AlertIcon color={status !== "info" ? "white" : ruuviTheme.colors.gray} />
                 <Text fontWeight={status !== "info" ? 600 : undefined}>
