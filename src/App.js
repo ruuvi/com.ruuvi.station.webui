@@ -11,7 +11,8 @@ import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton } from "@
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
-import { MoonIcon, SunIcon } from "@chakra-ui/icons";
+import { SunIcon } from "@chakra-ui/icons";
+import { MdOutlineNightlight } from "react-icons/md";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -45,7 +46,7 @@ function ColorModeSwitch() {
   const { colorMode, toggleColorMode } = useColorMode()
   return (
     <>
-      <IconButton variant="ghost" onClick={toggleColorMode}>{colorMode === 'light' ? <MoonIcon /> : <SunIcon />}</IconButton>
+      <IconButton variant="ghost" onClick={toggleColorMode}>{colorMode === 'light' ? <MdOutlineNightlight /> : <SunIcon />}</IconButton>
     </>
   )
 }
