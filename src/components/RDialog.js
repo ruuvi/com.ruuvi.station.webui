@@ -18,7 +18,7 @@ export default function RDialog(props) {
                 <ModalContent>
                     <ModalHeader style={{ marginTop: 15 }}>{props.title}</ModalHeader>
                     <ModalCloseButton style={{ margin: 15 }}>
-                        <IconButton isRound={true} className="navButton"><MdClose /></IconButton>
+                        <IconButton isRound={true} className="navButton" variant="nav"><MdClose /></IconButton>
                     </ModalCloseButton>
                     <ModalBody mb="3">
                         {props.children}

@@ -48,9 +48,9 @@ let colors = {
     accordionPanel: { light: "#f0faf9", dark: "#00343480" },
     sensorValueBoxBg: { light: "rgba(230,246,242,0.5)", dark: "#00cdb955" },
     sensorValueBoxIcon: { light: "rgba(68, 201, 185, 0.3)", dark: "#00ae9480" },
-    sensorValueBoxActiveBorder: { light: "rgba(1,174,144,0.3)", dark: "#00cdb9" },
+    sensorValueBoxActiveBorder: { light: "rgba(1,174,144,0.3)", dark: "#1f9385" },
     menuButtonBg: { light: "white", dark: "#003434 !important" },
-    navButtonBg: { light: "#f0faf9 !important", dark: "#00413f4d !important" },
+    navButtonBg: { light: "#f0faf9", dark: "#083c3d" },
     navButtonColor: { light: "#26ccc0 !important", dark: "white !important" },
     graphFill: { dark: "rgba(68, 201, 185, 0.3)", light: "rgba(68, 201, 185, 0.3)" },
     graphStroke: { dark: "#34ad9f", light: "#44c9b9" },
@@ -62,6 +62,8 @@ let colors = {
     toastInfoBackground: { light: "#e6f6f2", dark: "#003434" },
     toastSuccessBackground: { light: "#44c9b9", dark: "#44c9b9" },
     colorMenuActive: { light: "rgba(68, 201, 185, 0.3)", dark: "#0B2626" },
+    buttonBackground: { light: "#44c9b9", dark: "#083c3d" },
+    buttonFocus: { light: "rgba(1,174,144,0.3)", dark: "#1f9385" },
 }
 
 export const ruuviTheme = extendTheme({
@@ -85,10 +87,10 @@ export const ruuviTheme = extendTheme({
                 bg: colors.menuButtonBg[props.colorMode],
             },
             '.navButton': {
-                bg: colors.navButtonBg[props.colorMode],
+                bg: colors.navButtonBg[props.colorMode] + " !important",
                 color: colors.navButtonColor[props.colorMode],
-                borderColor: "#ffffff6d !important",
                 border: "1px",
+                borderColor: "#ffffff00 !important",
             },
             '.chakra-accordion__button': {
                 bg: colors.accordionButton[props.colorMode],
@@ -101,12 +103,18 @@ export const ruuviTheme = extendTheme({
             },
             '.sensorValueBox': {
                 bg: colors.sensorValueBoxBg[props.colorMode],
+                _hover: {
+                    shadow: "0px 0px 0px 1px " + colors.buttonFocus[props.colorMode]
+                },
             },
             '.sensorValueBox button': {
                 color: colors.sensorValueBoxIcon[props.colorMode],
             },
             '.sensorCard': {
                 backgroundColor: colors.sensorCardBackground[props.colorMode],
+                _hover: {
+                    shadow: "0px 0px 0px 1px " + colors.buttonFocus[props.colorMode]
+                },
             },
             '.signinInput': {
                 bg: colors.signinInputBg[props.colorMode],
@@ -162,23 +170,51 @@ export const ruuviTheme = extendTheme({
     },
     components: {
         Button: {
-            baseStyle: {
+            baseStyle: (props) => ({
                 borderRadius: 30,
-            },
+                bg: colors.buttonBackground[props.colorMode],
+                border: "1px",
+                borderColor: "#ffffff00 !important",
+                _hover: { borderColor: colors.buttonFocus[props.colorMode] + " !important" },
+            }),
             variants: {
                 solid: (props) => ({
-                    bg: "primary",
-                    color: "white",
-                    _hover: { bg: "primaryDark" },
+                    bg: props.colorMode === "light" ? "#44c9b9" : undefined,
+                    color: props.colorMode === "light" ? "white" : undefined,
+                    _hover: { borderColor: colors.buttonFocus[props.colorMode] + " !important", backgroundColor: colors.buttonBackground[props.colorMode] + " !important" },
                     fontFamily: "Mulish",
                     fontWeight: 800,
                     textTransform: "capitalize",
                     paddingLeft: 25,
                     paddingRight: 25,
                 }),
+                nav: (props) => ({
+                    bg: props.colorMode === "light" ? "#44c9b9" : undefined,
+                    color: props.colorMode === "light" ? "white" : undefined,
+                    _hover: { borderColor: colors.buttonFocus[props.colorMode] + " !important" },
+                    fontFamily: "Mulish",
+                    fontWeight: 800,
+                    textTransform: "capitalize",
+                    paddingLeft: 25,
+                    paddingRight: 25,
+                }),
+                topbar:(props) => ({ 
+                    bg: props.colorMode === "light" ? "white" : undefined,
+                    border: "0px",
+                    _hover: "none",
+                }),
+                ghost: (props) => ({
+                    bg: "transparent",
+                    border: "0px",
+                }),
+                ddl: (props) => ({
+                    bg: props.colorMode === "light" ? "white" : undefined,
+                }),
                 link: (props) => ({
+                    bg: "transparent",
                     textDecoration: "underline",
                     _hover: "none",
+                    border: "0px",
                 })
             },
         },

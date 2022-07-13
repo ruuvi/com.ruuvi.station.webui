@@ -28,7 +28,7 @@ class NavClose extends Component {
     render() {
         return (
             <>
-                <IconButton isRound={true} className="navButton" onClick={this.clicked} style={{ marginTop: "1px", marginRight: "5px" }}><MdClose /></IconButton>
+                <IconButton isRound={true} className="navButton" variant="nav" onClick={this.clicked} style={{ marginTop: "1px", marginRight: "5px" }}><MdClose /></IconButton>
             </>
         )
     }

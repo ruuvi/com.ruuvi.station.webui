@@ -127,7 +127,7 @@ class SignIn extends Component {
                                                     {t("type_your_email")}
                                                 </Text>
                                                 <Input className="signinInput" placeholder={t("email")} type="email" value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} autoFocus onKeyDown={this.emailKeyDown.bind(this)} />
-                                                <Button colorScheme="teal" isDisabled={!this.emailIsValid()} onClick={this.register.bind(this)} style={buttonText}>{t("login")}</Button>
+                                                <Button isDisabled={!this.emailIsValid()} onClick={this.register.bind(this)} style={buttonText}>{t("login")}</Button>
                                             </Stack>
                                         </SlideFade>
                                     }
