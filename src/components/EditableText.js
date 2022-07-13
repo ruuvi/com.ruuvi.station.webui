@@ -22,9 +22,9 @@ export default function EditableText(props) {
         extraStyle.width = "100%"
     }
     return <span style={{ ...props.style, cursor: "pointer", ...extraStyle }} onClick={props.onClick}>
-        <span>
+        <span style={{ opacity: props.opacity }}>
             {getStyledText(props.text)}
         </span>
-        <img src={colorMode === "dark" ? penDark : pen} style={{ paddingLeft: "10px", display: "inline-block", marginBottom: 2 }} width="23px" height="13px" alt="Pen" />
+        <img src={colorMode === "dark" ? penDark : pen} style={{ paddingLeft: "10px", display: "inline-block", marginBottom: 2, opacity: 1 }} width="23px" height="13px" alt="Pen" />
     </span>
 }

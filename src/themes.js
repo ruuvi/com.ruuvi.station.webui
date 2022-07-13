@@ -258,5 +258,12 @@ export const ruuviTheme = extendTheme({
                 }
             }),
         },
+        Accordion: {
+            baseStyle: (props) => ({
+                icon: {
+                    color: props.colorMode === "dark" ? "#ffffff80 !important" : undefined
+                },
+            }),
+        },
     },
 })

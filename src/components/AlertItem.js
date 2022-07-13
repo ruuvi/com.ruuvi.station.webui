@@ -92,15 +92,15 @@ class AlertItem extends Component {
                             <span style={{ ...this.props.detailedText, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="primaryScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
                         </span>
                     </div>
-                    <ScreenSizeWrapper isMobile>
+                    <ScreenSizeWrapper>
                         <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
-                            <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText, opacity: alert && alert.description ? null : 0.5 }} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
+                            <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText}} opacity={alert && alert.description ? null : 0.5} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
                         </div>
                         <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
                             <span style={this.props.detailedSubText}>{type === "movement" ? <span>{this.getAlertText(alert, type)}</span> : <EditableText text={this.getAlertText(alert, type)} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</span>
                         </div>
                     </ScreenSizeWrapper>
-                    <ScreenSizeWrapper>
+                    <ScreenSizeWrapper isMobile>
                         <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
                             <EditableText spread onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText, opacity: alert && alert.description ? null : 0.5 }} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
                         </div>
