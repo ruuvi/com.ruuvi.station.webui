@@ -94,7 +94,7 @@ class AlertItem extends Component {
                     </div>
                     <ScreenSizeWrapper>
                         <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
-                            <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText}} opacity={alert && alert.description ? null : 0.5} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
+                            <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText }} opacity={alert && alert.description ? null : 0.5} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
                         </div>
                         <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
                             <span style={this.props.detailedSubText}>{type === "movement" ? <span>{this.getAlertText(alert, type)}</span> : <EditableText text={this.getAlertText(alert, type)} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</span>
@@ -102,7 +102,7 @@ class AlertItem extends Component {
                     </ScreenSizeWrapper>
                     <ScreenSizeWrapper isMobile>
                         <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
-                            <EditableText spread onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText, opacity: alert && alert.description ? null : 0.5 }} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
+                            <EditableText spread onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText }} opacity={alert && alert.description ? null : 0.5} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
                         </div>
                         <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
                             <span style={{ ...this.props.detailedSubText, width: "100%" }}>{type === "movement" ? <span>{this.getAlertText(alert, type)}</span> : <EditableText spread text={this.getAlertText(alert, type)} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</span>
