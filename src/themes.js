@@ -46,7 +46,7 @@ let colors = {
     accordionIcon: { light: undefined, dark: "#ffffff4d !important" },
     accordionButton: { light: undefined, dark: "#003434" },
     accordionPanel: { light: "#f0faf9", dark: "#00343480" },
-    sensorValueBoxBg: { light: "rgba(230,246,242,0.5)", dark: "#00cdb955" },
+    sensorValueBoxBg: { light: "rgba(230,246,242,0.5)", dark: "#083c3d" },
     sensorValueBoxIcon: { light: "rgba(68, 201, 185, 0.3)", dark: "#00ae9480" },
     sensorValueBoxActiveBorder: { light: "rgba(1,174,144,0.3)", dark: "#1f9385" },
     menuButtonBg: { light: "white", dark: "#003434 !important" },
