@@ -158,7 +158,7 @@ function SensorHeader(props) {
                     <Heading style={sensorNameMobile}>
                         {props.sensor.name}
                     </Heading>
-                    <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic" }}>
+                    <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic" }} className="subtitle">
                         <DurationText from={props.lastUpdateTime} t={props.t} />
                     </div>
                 </div>
@@ -491,7 +491,7 @@ class Sensor extends Component {
                                                     <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
                                                         <MdInfo size="16" color={ruuviTheme.colors.infoIcon} />
                                                     </IconButton>
-                                                    <Button variant='link' color="primary" ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
+                                                    <Button variant='link' ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                     <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
                                                 </td>
                                             </tr>

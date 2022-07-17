@@ -42,19 +42,19 @@ let colors = {
     text: { light: "#1b4847", dark: "#00ae9480" },
     textInactive: { light: "#1b484780", dark: "#ffffff80" },
     topbar: { light: "white", dark: "#001b1a" },
-    subtitle: { light: "#1b4847", dark: "#00cebbcc" },
+    subtitle: { light: "#1f9385", dark: "#00cebbcc" },
     accordionIcon: { light: undefined, dark: "#ffffff4d !important" },
-    accordionButton: { light: undefined, dark: "#003434" },
-    accordionPanel: { light: "#f0faf9", dark: "#00343480" },
-    sensorValueBoxBg: { light: "rgba(230,246,242,0.5)", dark: "#083c3d" },
+    accordionButton: { light: "#ffffff", dark: "#003434" },
+    accordionPanel: { light: "#f0faf900", dark: "#00343480" },
+    sensorValueBoxBg: { light: "#ffffff", dark: "#083c3d" },
     sensorValueBoxIcon: { light: "rgba(68, 201, 185, 0.3)", dark: "#00ae9480" },
-    sensorValueBoxActiveBorder: { light: "rgba(1,174,144,0.3)", dark: "#1f9385" },
+    sensorValueBoxActiveBorder: { light: "#1f9385", dark: "#1f9385" },
     menuButtonBg: { light: "white", dark: "#003434 !important" },
-    navButtonBg: { light: "#f0faf9", dark: "#083c3d" },
-    navButtonColor: { light: "#26ccc0 !important", dark: "white !important" },
+    navButtonBg: { light: "#ffffff", dark: "#083c3d" },
+    navButtonColor: { light: "#1f9385 !important", dark: "white !important" },
     graphFill: { dark: "rgba(68, 201, 185, 0.3)", light: "rgba(68, 201, 185, 0.3)" },
     graphStroke: { dark: "#34ad9f", light: "#44c9b9" },
-    graphGrid: { dark: "rgba(68, 201, 185, 0.1)", light: "rgba(212,237,232,0.5)" },
+    graphGrid: { dark: "rgba(68, 201, 185, 0.1)", light: "#083c3d1a" },
     sensorCardBackground: { light: undefined, dark: "#003434 !important" },
     signinInputBg: { light: "white", dark: undefined },
     dashboardUpdatedAtColor: { light: "#1b484780", dark: "#ffffff80" },
@@ -63,7 +63,7 @@ let colors = {
     toastSuccessBackground: { light: "#44c9b9", dark: "#44c9b9" },
     colorMenuActive: { light: "rgba(68, 201, 185, 0.3)", dark: "#0B2626" },
     buttonBackground: { light: "#44c9b9", dark: "#083c3d" },
-    buttonFocus: { light: "rgba(1,174,144,0.3)", dark: "#1f9385" },
+    buttonFocus: { light: "#1f9385", dark: "#1f9385" },
 }
 
 export const ruuviTheme = extendTheme({
@@ -71,14 +71,14 @@ export const ruuviTheme = extendTheme({
     styles: {
         global: (props) => ({
             body: {
-                bg: props.colorMode === "light" ? "#e6f6f2" : "#001b1a",
+                bg: props.colorMode === "light" ? "#edf2f2" : "#001b1a",
                 color: props.colorMode === "light" ? "#1b4847 !important" : "white !important",
             },
             '.subtitle': {
                 color: colors.subtitle[props.colorMode]
             },
             '.topbar': {
-                bg: colors.topbar[props.colorMode],
+                bg: "#ffffff00"//colors.topbar[props.colorMode],
             },
             '.content': {
                 bg: colors.contentBg[props.colorMode]
@@ -125,6 +125,12 @@ export const ruuviTheme = extendTheme({
             '.menuActive': {
                 bg: colors.colorMenuActive[props.colorMode],
                 color: colors.textInactive[props.colorMode] + " !important",
+            },
+            '.dropdownIcon': {
+                color: "#1f9385"
+            },
+            hr: {
+                borderColor: props.colorMode === "light" ? "#083c3d1a" : undefined
             },
         })
     },
@@ -179,7 +185,7 @@ export const ruuviTheme = extendTheme({
             }),
             variants: {
                 solid: (props) => ({
-                    bg: props.colorMode === "light" ? "#44c9b9" : undefined,
+                    bg: colors.buttonBackground[props.colorMode] + " !important",
                     color: props.colorMode === "light" ? "white" : undefined,
                     _hover: { borderColor: colors.buttonFocus[props.colorMode] + " !important", backgroundColor: colors.buttonBackground[props.colorMode] + " !important" },
                     fontFamily: "Mulish",
@@ -206,12 +212,14 @@ export const ruuviTheme = extendTheme({
                 ghost: (props) => ({
                     bg: "transparent",
                     border: "0px",
+                    _hover: { backgroundColor: colors.buttonFocus[props.colorMode] + "2a !important" },
                 }),
                 ddl: (props) => ({
                     bg: props.colorMode === "light" ? "white" : undefined,
                 }),
                 link: (props) => ({
                     bg: "transparent",
+                    color: "#1f9385",
                     textDecoration: "underline",
                     _hover: "none",
                     border: "0px",

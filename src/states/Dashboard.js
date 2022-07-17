@@ -127,11 +127,10 @@ class Dashboard extends Component {
     render() {
         if (this.props.match.params.id) SessionStore.setBackRoute(`/${this.props.match.params.id}`)
         else SessionStore.setBackRoute("/")
-        let colorMode = this.props.colorMode.colorMode;
         return (
             <>
                 <Box>
-                    <Box backgroundColor={this.getCurrentSensor() && colorMode === "light" ? "white" : undefined} backgroundSize="cover" backgroundPosition="top" >
+                    <Box backgroundSize="cover" backgroundPosition="top" >
                         <Box backgroundSize="cover" backgroundPosition="top" >
                             {this.state.loading &&
                                 <center>
