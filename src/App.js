@@ -42,8 +42,16 @@ const versionText = {
 }
 
 
+let currColorMode;
 function ColorModeSwitch() {
   const { colorMode, toggleColorMode } = useColorMode()
+  if (currColorMode !== colorMode) {
+    currColorMode = colorMode;
+    try {
+      document.querySelector('meta[name="theme-color"]').setAttribute("content", ruuviTheme.newColors.bodyBg[currColorMode]);
+    } catch (error) {
+    }
+  }
   return (
     <>
       <IconButton variant="ghost" onClick={toggleColorMode}>{colorMode === 'light' ? <MdOutlineNightlight /> : <SunIcon />}</IconButton>

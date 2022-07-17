@@ -38,6 +38,7 @@ Accordion icons: #fff, 30%
 */
 
 let colors = {
+    bodyBg: { light: "#edf2f2", dark: "#001b1a" },
     contentBg: { light: "white", dark: "#111111" },
     text: { light: "#1b4847", dark: "#00ae9480" },
     textInactive: { light: "#1b484780", dark: "#ffffff80" },
@@ -71,7 +72,7 @@ export const ruuviTheme = extendTheme({
     styles: {
         global: (props) => ({
             body: {
-                bg: props.colorMode === "light" ? "#edf2f2" : "#001b1a",
+                bg: colors.bodyBg[props.colorMode],
                 color: props.colorMode === "light" ? "#1b4847 !important" : "white !important",
             },
             '.subtitle': {
@@ -204,7 +205,7 @@ export const ruuviTheme = extendTheme({
                     paddingLeft: 25,
                     paddingRight: 25,
                 }),
-                topbar:(props) => ({ 
+                topbar: (props) => ({
                     bg: props.colorMode === "light" ? "white" : undefined,
                     border: "0px",
                     _hover: "none",
