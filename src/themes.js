@@ -40,7 +40,7 @@ Accordion icons: #fff, 30%
 let colors = {
     bodyBg: { light: "#edf2f2", dark: "#001b1a" },
     contentBg: { light: "white", dark: "#111111" },
-    text: { light: "#1b4847", dark: "#00ae9480" },
+    text: { light: "#1b4847", dark: "#ffffff" },
     textInactive: { light: "#1b484780", dark: "#ffffff80" },
     topbar: { light: "white", dark: "#001b1a" },
     subtitle: { light: "#1f9385", dark: "#00cebbcc" },
