@@ -54,7 +54,7 @@ let colors = {
     navButtonBg: { light: "#ffffff", dark: "#083c3d" },
     navButtonColor: { light: "#1f9385 !important", dark: "white !important" },
     graphFill: { dark: "rgba(68, 201, 185, 0.3)", light: "rgba(68, 201, 185, 0.3)" },
-    graphStroke: { dark: "#34ad9f", light: "#44c9b9" },
+    graphStroke: { dark: "#34ad9f", light: "#1f9385" },
     graphGrid: { dark: "rgba(68, 201, 185, 0.1)", light: "#083c3d1a" },
     sensorCardBackground: { light: undefined, dark: "#003434 !important" },
     signinInputBg: { light: "white", dark: undefined },
@@ -63,7 +63,7 @@ let colors = {
     toastInfoBackground: { light: "#e6f6f2", dark: "#003434" },
     toastSuccessBackground: { light: "#44c9b9", dark: "#44c9b9" },
     colorMenuActive: { light: "rgba(68, 201, 185, 0.3)", dark: "#0B2626" },
-    buttonBackground: { light: "#44c9b9", dark: "#083c3d" },
+    buttonBackground: { light: "#35AD9F", dark: "#35AD9F" },
     buttonFocus: { light: "#1f9385", dark: "#1f9385" },
 }
 
@@ -127,8 +127,8 @@ export const ruuviTheme = extendTheme({
                 bg: colors.colorMenuActive[props.colorMode],
                 color: colors.textInactive[props.colorMode] + " !important",
             },
-            '.dropdownIcon': {
-                color: "#1f9385"
+            '.buttonSideIcon': {
+                color: "#35AD9F"
             },
             hr: {
                 borderColor: props.colorMode === "light" ? "#083c3d1a" : undefined
