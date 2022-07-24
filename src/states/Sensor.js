@@ -489,7 +489,7 @@ class Sensor extends Component {
                                                 <td style={{ textAlign: "right" }}>
                                                     <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
                                                     <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
-                                                        <MdInfo size="16" color={ruuviTheme.colors.infoIcon} />
+                                                        <MdInfo size="16" className="buttonSideIcon" />
                                                     </IconButton>
                                                     <Button variant='link' ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                     <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />

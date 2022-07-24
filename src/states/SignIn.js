@@ -126,7 +126,7 @@ class SignIn extends Component {
                                                 <Text style={infoText}>
                                                     {t("type_your_email")}
                                                 </Text>
-                                                <Input className="signinInput" placeholder={t("email")} type="email" value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} autoFocus onKeyDown={this.emailKeyDown.bind(this)} />
+                                                <Input className="signinInput" placeholder={t("email")} autocomplete="email" type="email" value={this.state.email} onChange={e => this.setState({ ...this.state, email: e.target.value })} autoFocus onKeyDown={this.emailKeyDown.bind(this)} />
                                                 <Button isDisabled={!this.emailIsValid()} onClick={this.register.bind(this)} style={buttonText}>{t("login")}</Button>
                                             </Stack>
                                         </SlideFade>
@@ -139,9 +139,9 @@ class SignIn extends Component {
                                                 </Text>
                                                 <HStack>
                                                     <div style={{ textAlign: "center", width: "100%" }}>
-                                                        <PinInput type="alphanumeric" value={this.state.validationCode} onChange={code => this.updateValidationCode(code)} autoFocus>
+                                                        <PinInput type="alphanumeric" focusBorderColor="#1f9385" value={this.state.validationCode} onChange={code => this.updateValidationCode(code)} autoFocus>
                                                             {Array(4).fill().map(() => {
-                                                                return <PinInputField className="signinInput" _focus="none" style={{ margin: 5 }} />
+                                                                return <PinInputField style={{ margin: 5 }} />
                                                             })}
                                                         </PinInput>
                                                     </div>

@@ -128,7 +128,7 @@ export const ruuviTheme = extendTheme({
                 color: colors.textInactive[props.colorMode] + " !important",
             },
             '.buttonSideIcon': {
-                color: "#35AD9F"
+                color: "rgba(68, 201, 185, 0.6)"
             },
             hr: {
                 borderColor: props.colorMode === "light" ? "#083c3d1a" : undefined
@@ -228,8 +228,8 @@ export const ruuviTheme = extendTheme({
             },
         },
         Input: {
-            defaultProps: {
-                focusBorderColor: "rgba(1,174,144,0.3)",
+            defaultProps:{
+                focusBorderColor: colors.buttonFocus.dark,
             }
         },
         Modal: {

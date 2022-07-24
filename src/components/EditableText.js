@@ -25,6 +25,6 @@ export default function EditableText(props) {
         <span style={{ opacity: props.opacity }}>
             {getStyledText(props.text)}
         </span>
-        <img src={colorMode === "dark" ? penDark : pen} style={{ paddingLeft: "10px", display: "inline-block", marginBottom: 2, opacity: 1 }} width="23px" height="13px" alt="Pen" />
+        <img src={pen} style={{ paddingLeft: "10px", display: "inline-block", marginBottom: 2 }} width="23px" height="13px" alt="Pen" />
     </span>
 }
