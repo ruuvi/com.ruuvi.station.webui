@@ -43,8 +43,17 @@ const versionText = {
 
 
 let currColorMode;
+let hasSeenDarkMode;
 function ColorModeSwitch() {
-  const { colorMode, toggleColorMode } = useColorMode()
+  const { colorMode, toggleColorMode, setColorMode } = useColorMode()
+  
+  // TODO: remove this in later releases
+  if (!hasSeenDarkMode && !localStorage.getItem("hasSeenDarkMode")) {
+    localStorage.setItem("hasSeenDarkMode", true);
+    hasSeenDarkMode = true;
+    setColorMode("dark")
+  }
+
   if (currColorMode !== colorMode) {
     currColorMode = colorMode;
     try {
