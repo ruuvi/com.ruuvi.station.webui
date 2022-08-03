@@ -13,6 +13,7 @@ import pjson from "./../package.json"
 import i18next from "i18next";
 import { SunIcon } from "@chakra-ui/icons";
 import { MdOutlineNightlight } from "react-icons/md";
+import cache from "./DataCache";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -121,6 +122,8 @@ export default function App() {
   const forceUpdate = React.useCallback(() => updateState({}), []);
   const logout = () => {
     new NetworkApi().removeToken()
+    localStorage.clear();
+    cache.clear();
     window.location.replace("/#/")
     //window.location.href = "https://ruuvi.com/station"
     forceUpdate()

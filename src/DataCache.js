@@ -6,6 +6,9 @@ function getKey(sensor, mode) {
 }
 
 var cache = {
+    clear:  () => {
+        localForage.clear();
+    },
     getData: async (sensor, mode, from) => {
         try {
             var data = await localForage.getItem(getKey(sensor, mode))
