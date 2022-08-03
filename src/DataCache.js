@@ -1,11 +1,18 @@
 import * as localForage from "localforage";
 import pjson from "./../package.json"
 
+const DB_VERSION = 1;
+
 function getKey(sensor, mode) {
     return `cache_${sensor}_${mode}`
 }
 
 var cache = {
+    init: async () => {
+        let version = await localForage.getItem("cacheVersion")
+        // eslint-disable-next-line eqeqeq
+        if (version != DB_VERSION) localForage.clear();
+    },
     clear:  () => {
         localForage.clear();
     },

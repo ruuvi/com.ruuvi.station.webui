@@ -86,6 +86,7 @@ function Logo() {
 }
 
 export default function App() {
+  cache.init()
   try {
     let cookie = document.cookie;
     if (cookie) {
