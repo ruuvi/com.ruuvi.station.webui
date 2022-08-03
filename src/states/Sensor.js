@@ -187,7 +187,7 @@ class Sensor extends Component {
         this.applyAccordionSetting()
     }
     applyAccordionSetting() {
-        this.openAccodrions = new Store().getOpenAccordions() || [0, 1, 2, 3, 4];
+        this.openAccodrions = new Store().getOpenAccordions() || [0];
     }
     componentDidMount() {
         if (this.props.sensor) {
