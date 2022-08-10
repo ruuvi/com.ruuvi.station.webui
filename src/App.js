@@ -64,7 +64,7 @@ function ColorModeSwitch() {
   }
   return (
     <>
-      <IconButton variant="ghost" onClick={toggleColorMode}>{colorMode === 'light' ? <MdOutlineNightlight /> : <SunIcon />}</IconButton>
+      <IconButton variant="ghost" style={{paddingRight: 16}} onClick={toggleColorMode}>{colorMode === 'light' ? <MdOutlineNightlight /> : <SunIcon />}</IconButton>
     </>
   )
 }
