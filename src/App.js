@@ -154,7 +154,6 @@ export default function App() {
           <span style={{ width: "100%", textAlign: "right" }}>
             <ColorModeSwitch />
             <SensorMenu sensors={sensors} key={Math.random()} />
-            <LanguageMenu />
             <UserMenu logout={logout} settings={() => window.location.href += "?settings"} email={user.email} />
           </span>
         </HStack>

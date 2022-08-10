@@ -23,14 +23,14 @@ class LanguageMenu extends Component {
             return (
                 <>
                     {langs.map(x => {
-                        return <span key={x} style={{ fontFamily: "mulish", margin: 6, fontSize: 16, fontWeight: "bold", cursor: "pointer", textDecoration: (i18n.language || "en") === x ? "underline" : "" }} onClick={() => this.langChange(x)}>{uppercaseFirst(x)}</span>
+                        return <span key={x} style={{ fontFamily: "mulish", margin: 6, fontWeight: "bold", cursor: "pointer", textDecoration: (i18n.language || "en") === x ? "underline" : "" }} onClick={() => this.langChange(x)}>{uppercaseFirst(x)}</span>
                     })}
                 </>
             )
         }
         return (
             <Menu autoSelect={false}>
-                <MenuButton disabled={false} as={Button} variant="topbar" rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 15, fontWeight: 800, paddingRight: 0, paddingLeft: 8 }}>
+                <MenuButton disabled={false} as={Button} variant="topbar" rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 15, paddingLeft: 0 }}>
                     {uppercaseFirst(i18n.language || "en")}
                 </MenuButton>
                 <MenuList mt="2">
@@ -41,7 +41,7 @@ class LanguageMenu extends Component {
                         if (i === langs.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                         else divider = <MenuDivider />
                         return <>
-                            <MenuItem key={x} className={i18n.language === x ? "menuActive" : undefined} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, ...borderStyle }} onClick={() => this.langChange(x)}>{uppercaseFirst(x)}</MenuItem>
+                            <MenuItem key={x} className={i18n.language === x ? "menuActive" : undefined} style={{ fontFamily: "mulish", ...borderStyle }} onClick={() => this.langChange(x)}>{uppercaseFirst(x)}</MenuItem>
                             {divider}
                         </>
                     })}

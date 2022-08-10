@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import RadioInput from "../components/RadioInput";
-import { Box, Progress, HStack } from "@chakra-ui/react"
+import { Box, Progress, HStack, FormControl, FormLabel } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import NavClose from "../components/NavClose";
 import notify from "../utils/notify";
+import LanguageMenu from '../components/LanguageMenu';
+import { t } from "i18next";
 
 const header = {
     fontFamily: "montserrat",
@@ -86,6 +88,13 @@ class Settings extends Component {
                 </>
             ) : (
                 <>
+                    <FormControl  style={{marginBottom: -8}} >
+                        <FormLabel>
+                            {t("language")}
+                        </FormLabel>
+                        <LanguageMenu/>
+                    </FormControl>
+                    <br />
                     <RadioInput label={"settings_temperature_unit"} value={this.state.settings.UNIT_TEMPERATURE} options={temperatureOptions} onChange={v => this.updateSetting("UNIT_TEMPERATURE", v)} loading={this.state.savingSettings.indexOf("UNIT_TEMPERATURE") !== -1} />
                     <br />
                     <RadioInput label={"settings_humidity_unit"} value={this.state.settings.UNIT_HUMIDITY} options={humidityOptions} onChange={v => this.updateSetting("UNIT_HUMIDITY", v)} loading={this.state.savingSettings.indexOf("UNIT_HUMIDITY") !== -1} />
