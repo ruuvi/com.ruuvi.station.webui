@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+/*
 import {
     Menu,
     MenuButton,
@@ -8,8 +9,10 @@ import {
     MenuDivider,
 } from "@chakra-ui/react"
 import { MdArrowDropDown } from "react-icons/md"
+*/
 import { withTranslation } from 'react-i18next';
 import { uppercaseFirst } from "../TextHelper";
+import RadioInput from "./RadioInput";
 
 class LanguageMenu extends Component {
     langChange = (lng) => {
@@ -19,6 +22,7 @@ class LanguageMenu extends Component {
     render() {
         const { i18n } = this.props;
         const langs = ["en", "fi", "sv"];
+        const radioLangs = [{label: "English", value: "en"}, {label: "Finnish", value: "fi"}, {label: "Svenska", value: "sv"}];
         if (this.props.loginPage) {
             return (
                 <>
@@ -28,6 +32,10 @@ class LanguageMenu extends Component {
                 </>
             )
         }
+        return (
+            <RadioInput label={"language"} value={i18n.language || "en"} options={radioLangs} onChange={v => this.langChange(v)} />
+        )
+        /*
         return (
             <Menu autoSelect={false}>
                 <MenuButton disabled={false} as={Button} variant="topbar" rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 15, paddingLeft: 0 }}>
@@ -48,6 +56,7 @@ class LanguageMenu extends Component {
                 </MenuList>
             </Menu>
         )
+        */
     }
 }
 
