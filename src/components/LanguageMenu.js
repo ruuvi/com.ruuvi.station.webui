@@ -22,7 +22,7 @@ class LanguageMenu extends Component {
     render() {
         const { i18n } = this.props;
         const langs = ["en", "fi", "sv"];
-        const radioLangs = [{label: "English", value: "en"}, {label: "Finnish", value: "fi"}, {label: "Svenska", value: "sv"}];
+        const radioLangs = [{label: "language_english", value: "en"}, {label: "language_finnish", value: "fi"}, {label: "language_swedish", value: "sv"}];
         if (this.props.loginPage) {
             return (
                 <>
