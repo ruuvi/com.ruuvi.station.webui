@@ -18,7 +18,6 @@ const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
 const SensorMenu = React.lazy(() => import("./components/SensorMenu"));
-const LanguageMenu = React.lazy(() => import("./components/LanguageMenu"));
 
 
 const bottomText = {
@@ -44,17 +43,9 @@ const versionText = {
 
 
 let currColorMode;
-let hasSeenDarkMode;
 function ColorModeSwitch() {
-  const { colorMode, toggleColorMode, setColorMode } = useColorMode()
+  const { colorMode, toggleColorMode } = useColorMode()
   
-  // TODO: remove this in later releases
-  if (!hasSeenDarkMode && !localStorage.getItem("hasSeenDarkMode")) {
-    localStorage.setItem("hasSeenDarkMode", true);
-    hasSeenDarkMode = true;
-    setColorMode("dark")
-  }
-
   if (currColorMode !== colorMode) {
     currColorMode = colorMode;
     try {
