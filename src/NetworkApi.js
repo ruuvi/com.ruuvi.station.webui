@@ -117,9 +117,10 @@ class NetworkApi {
         return data;
     }
     async getAsync(mac, since, until, settings) {
-        const cacheGapLimit = 60 * 60;
         if (!this.options) return null;
         var mode = settings.mode || "mixed";
+        const cacheGapLimit = mode === "sparse" ? 60 * 20 : 60 * 2;
+        const minAmountForCachedDatapointFromCache = 10;
         var useCache = false;
         var cachedData;
         var saveCache = false;
@@ -134,17 +135,23 @@ class NetworkApi {
                     if (dataToBe.length > 1) {
                         // validate that there is no gaps
                         let cacheIsValid = true;
+                        let validUntil = -1;
                         for (var i = 1; i < dataToBe.length; i++) {
                             if ((dataToBe[i - 1].timestamp - dataToBe[i].timestamp) > cacheGapLimit) {
-                                console.log(`gap in cached data at ${dataToBe[i - 1].timestamp} ${(dataToBe[i - 1].timestamp - dataToBe[i].timestamp)}s, fetching fresh`);
+                                validUntil = i;
+                                //console.log(`gap in cached data at ${dataToBe[i - 1].timestamp} ${(dataToBe[i - 1].timestamp - dataToBe[i].timestamp)}s, ${validUntil} ok datapoints`);
                                 cacheIsValid = false;
                                 break;
                             }
                         }
-                        if (cacheIsValid) {
+                        if (cacheIsValid || validUntil > minAmountForCachedDatapointFromCache) {
                             var d = await this.getLastestDataAsync(mac)
                             if (d.result === "success") {
-                                d.data.measurements = dataToBe
+                                if (validUntil <= minAmountForCachedDatapointFromCache) {
+                                    d.data.measurements = dataToBe
+                                } else {
+                                    d.data.measurements = dataToBe.splice(0, validUntil)
+                                }
                                 d.data.fromCache = true;
                                 return d;
                             }
