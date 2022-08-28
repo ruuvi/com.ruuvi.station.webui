@@ -51,6 +51,9 @@ class EditNameDialog extends Component {
         var { t } = this.props;
         return (
             <RDialog title={t("sensor_name")} isOpen={this.props.open} onClose={this.props.onClose}>
+                <p style={{marginBottom: "8px"}}>
+                    {t("rename_sensor_message")}
+                </p>
                 <Input autoFocus placeholder={t("sensor_name")} value={this.state.name} onChange={e => this.updateName(e.target.value)} />
                 <div style={{ textAlign: "right" }}>
                     <Button disabled={this.state.loading || !this.state.name} onClick={this.update.bind(this)} mt="17px">{t("update")}</Button>
