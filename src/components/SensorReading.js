@@ -3,7 +3,6 @@ import {
     IconButton,
     Stat,
     useColorMode,
-    useMediaQuery,
 } from "@chakra-ui/react"
 import { ruuviTheme } from "../themes";
 import BigValue from "./BigValue";
@@ -46,13 +45,9 @@ function info(e, t, sensorType) {
 export default function SensorReading(props) {
     let mode = useColorMode().colorMode;
     const { t } = useTranslation();
-    const [isLargeDisplay] = useMediaQuery("(min-width: 500px)")
-    var width = {
-        minWidth: isLargeDisplay ? 200 : "45%",
-        maxWidth: isLargeDisplay ? 300 : "50%"
-    }
+    let width = 400
     return (
-        <Stat className="sensorValueBox" style={{ ...width, margin: "5px", paddingLeft: 15, paddingRight: 15, height: height, backgroundColor: props.alertTriggered ? ruuviTheme.colors.errorBackground : undefined, border: props.selected ? props.alertTriggered ? "2px solid " + ruuviTheme.colors.error : "2px solid " + ruuviTheme.newColors.sensorValueBoxActiveBorder[mode] : "2px solid rgba(0,0,0,0)", borderRadius: "10px", cursor: "pointer" }} onClick={props.onClick}>
+        <Stat className="sensorValueBox" style={{ width, maxWidth: "100%", height: height, backgroundColor: props.alertTriggered ? ruuviTheme.colors.errorBackground : undefined, border: props.selected ? props.alertTriggered ? "2px solid " + ruuviTheme.colors.error : "2px solid " + ruuviTheme.newColors.sensorValueBoxActiveBorder[mode] : "2px solid rgba(0,0,0,0)", borderRadius: "10px", cursor: "pointer" }} onClick={props.onClick}>
             <IconButton style={{ position: "absolute", right: 0, margin: -8 }} variant="ghost" onClick={e => info(e, t, props.label)}>
                 <MdInfo className="buttonSideIcon" size="16" />
             </IconButton>

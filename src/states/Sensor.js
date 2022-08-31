@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import NetworkApi from '../NetworkApi'
 import {
-    StatGroup,
     Heading,
     Stack,
     Button,
@@ -40,7 +39,6 @@ import NavClose from "../components/NavClose";
 import NavPrevNext from "../components/NavPrevNext";
 import DurationPicker from "../components/DurationPicker";
 import notify from "../utils/notify"
-import { ruuviTheme } from "../themes";
 import pjson from '../../package.json';
 import { isBatteryLow } from "../utils/battery";
 
@@ -165,6 +163,13 @@ function SensorHeader(props) {
             </Box>
         </center>
     }
+}
+
+function SensorValueGrid(props) {
+    const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
+    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap="10px" gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "220px" : "45%"}, max-content))`}>
+        {props.children}
+    </Box>
 }
 
 class Sensor extends Component {
@@ -461,7 +466,7 @@ class Sensor extends Component {
                             </Stack>
                         ) : (
                             <div>
-                                <StatGroup style={{ marginBottom: 30, marginTop: 30 }} justifyContent="start">
+                                <SensorValueGrid>
                                     {mainSensorFields.map(x => {
                                         let value = this.getLatestReading()[x];
                                         if (value === undefined) return null;
@@ -473,7 +478,7 @@ class Sensor extends Component {
                                             selected={this.state.graphKey === x}
                                             onClick={() => this.setGraphKey(x)} />
                                     })}
-                                </StatGroup>
+                                </SensorValueGrid>
                                 <div style={{ marginTop: 30, marginBottom: 20 }}>
                                     <table width="100%">
                                         <tbody>
