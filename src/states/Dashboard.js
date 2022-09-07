@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box, Link } from "@chakra-ui/react"
+import { Spinner, Box, Link, useMediaQuery } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
@@ -14,6 +14,13 @@ import { withColorMode } from "../utils/withColorMode";
 const infoText = {
     fontFamily: "mulish",
     fontSize: 16,
+}
+
+function DashboardGrid(props) {
+    const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
+    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap="30px" gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "400px" : "100%"}, max-content))`}>
+        {props.children}
+    </Box>
 }
 
 class Dashboard extends Component {
@@ -153,7 +160,7 @@ class Dashboard extends Component {
                                 />
                             ) : (
                                 <Box paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
-                                    <div style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 26 }}>
+                                    <div style={{ paddingLeft: 16, paddingTop: 26 }}>
                                         {/*
                                         <div style={{ fontFamily: "montserrat", fontSize: 48, fontWeight: 800, lineHeight: 1 }}>
                                             Hello Friend,
@@ -166,16 +173,16 @@ class Dashboard extends Component {
                                             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
                                         </div>
                                     </div>
-                                    <Box justifyContent={{ base: "space-evenly", lg: this.state.sensors.length > 2 ? "space-evenly" : "start" }} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
+                                    <DashboardGrid>
                                         <>
                                             {this.state.sensors.map(x => {
-                                                return <span key={x.sensor + this.state.from} style={{ margin: 16, minWidth: "350px", maxWidth: "450px", flexGrow: 2, flex: "1 1 0px" }}>
+                                                return <span key={x.sensor + this.state.from} style={{ width: 1000, maxWidth: "100%" }}>
                                                     <a href={"#/" + x.sensor}>
                                                         <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} dataFrom={this.state.from} />
                                                     </a></span>
                                             })}
                                         </>
-                                    </Box>
+                                    </DashboardGrid>
                                 </Box>
                             )}
                         </Box>
