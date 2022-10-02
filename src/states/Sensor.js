@@ -41,6 +41,7 @@ import DurationPicker from "../components/DurationPicker";
 import notify from "../utils/notify"
 import pjson from '../../package.json';
 import { isBatteryLow } from "../utils/battery";
+import uploadBackgroundImage from "../BackgroundUploader";
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
@@ -409,55 +410,10 @@ class Sensor extends Component {
                         <SensorHeader {...this.props} lastUpdateTime={this.state.lastestDatapoint && this.state.lastestDatapoint.measurements.length ? this.state.lastestDatapoint.measurements[0].timestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}
                             loadingImage={this.state.loadingImage}
                             fileUploadChange={f => {
-                                let file = f.target.files[0]
-                                if (file.type.match(/image.*/)) {
-                                    this.setState({ ...this.state, loadingImage: true })
-                                    let reader = new FileReader();
-                                    reader.onload = readerEvent => {
-                                        let image = new Image();
-                                        image.onload = () => {
-                                            let canvas = document.createElement('canvas'),
-                                                max_size = 1440,
-                                                width = image.width,
-                                                height = image.height;
-
-                                            if (height > max_size) {
-                                                width *= max_size / height;
-                                                height = max_size;
-                                            }
-                                            canvas.width = width;
-                                            canvas.height = height;
-                                            canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-                                            let dataUrl = canvas.toDataURL('image/jpeg');
-                                            let api = new NetworkApi();
-                                            api.prepareUpload(this.props.sensor.sensor, 'image/jpeg', ya => {
-                                                if (ya.result === "success") {
-                                                    let url = ya.data.uploadURL
-                                                    api.uploadImage(url, 'image/jpeg', dataUrl, () => {
-                                                        let s = this.props.sensor;
-                                                        s.picture = dataUrl.split("?")[0]
-                                                        this.props.updateSensor(s);
-                                                        this.forceUpdate();
-                                                        this.setState({ ...this.state, loadingImage: false })
-                                                    }, err => {
-                                                        console.log("err", err)
-                                                        notify.error("something_went_wrong")
-                                                        this.setState({ ...this.state, loadingImage: false })
-                                                    })
-                                                }
-                                            }, err => {
-                                                console.log("err", err)
-                                                notify.error("something_went_wrong")
-                                                this.setState({ ...this.state, loadingImage: false })
-                                            })
-                                        }
-                                        image.src = readerEvent.target.result;
-                                    }
-                                    reader.readAsDataURL(file);
-                                } else {
-                                    notify.error("something_went_wrong")
+                                this.setState({ ...this.state, loadingImage: true })
+                                uploadBackgroundImage(this.props.sensor, f, t, res => {
                                     this.setState({ ...this.state, loadingImage: false })
-                                }
+                                })
                             }}
                         />
                         {this.state.loading && !this.state.lastestDatapoint ? (

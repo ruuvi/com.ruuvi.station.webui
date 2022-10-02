@@ -5,6 +5,7 @@ import {
     Box,
     SimpleGrid,
     GridItem,
+    Avatar,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "./Graph";
@@ -15,6 +16,9 @@ import { getUnitHelper, localeNumber } from "../UnitHelper";
 import DurationText from "./DurationText";
 import BigValue from "./BigValue";
 import { withColorMode } from "../utils/withColorMode";
+import bglayer from '../img/bg-layer.png';
+import { MdAdd, MdCameraAlt } from "react-icons/md";
+import uploadBackgroundImage from "../BackgroundUploader";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -43,6 +47,8 @@ class SensorCard extends Component {
             loading: true,
             loadingHistory: true,
             graphDataKey: "temperature",
+            imageHover: false,
+            loadingImage: false,
         }
     }
     componentDidMount() {
@@ -108,62 +114,114 @@ class SensorCard extends Component {
         if (!alert) return false
         return alert.enabled && alert.triggered;
     }
+    setHover(state) {
+        this.setState({
+            ...this.state,
+            imageHover: state,
+            avatarHover: false
+        });
+    }
     render() {
         var { t } = this.props;
+        let showGraph = this.props.showGraph;
+        let showImage = this.props.showImage;
+        if (!showGraph && this.props.size !== "mobile") showGraph = true
+        let height = showGraph ? this.props.size === "medium" ? 300 : 360 : 200;
+        let graphHeight = height - 180;
+        let imageWidth = height / 2;
+        let imageButtonSize = 80;
+        if (this.props.size === "medium") graphHeight = 135;
+        if (this.props.size === "mobile" && showGraph) showImage = false;
         return (
             <div>
-                <Box className="content sensorCard" borderRadius="lg" overflow="hidden" backgroundSize="cover">
-                    <Box padding="24px" height="360px" backgroundSize="cover">
-                        <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
-                            {this.props.sensor.name}
-                        </Heading>
-                        {this.state.loading ? (
-                            <center style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>
-                                <Spinner size="xl" />
-                            </center>
-                        ) : (
-                            <div>
-                                {this.state.lastParsedReading ? <div>
-                                    <BigValue
-                                        value={localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals)}
-                                        unit={getUnitHelper("temperature").unit}
-                                        alertActive={this.isAlertTriggerd("temperature")}
-                                    />
-                                    <div style={{ marginLeft: -30, marginRight: -30, marginTop: -10, marginBottom: -10 }}>
-                                        {this.state.data && this.state.data.measurements.length ? (
-                                            <Graph title="" dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={200} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
-                                        ) : (
-                                            <>
-                                                {this.state.loadingHistory ? (
-                                                    <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: 200 }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}><Spinner size="xl" /></div></center>
-                                                ) : (
-                                                    <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: 200 }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{t("no_data_in_range").split("\n").map(x => <div key={x}>{x}</div>)}</div></center>
-                                                )}
-                                            </>
-                                        )}
+                <Box className="content sensorCard" height={height} borderRadius="lg" overflow="hidden">
+                    <Box height="100%" margin="auto">
+                        {showImage &&
+                            <Box float="left" width={imageWidth} className="imageBackgroundColor" position={"relative"} backgroundImage={this.props.sensor.picture} backgroundSize="cover" backgroundPosition="center" height="100%"
+                                onMouseEnter={() => this.setHover(true)}
+                                onMouseLeave={() => this.setHover(false)}>
+                                <Box className="imageBackgroundOverlay" backgroundImage={bglayer} backgroundSize="cover" backgroundPosition="center" width={imageWidth} height={height}>
+                                    <div style={{ height: "100%" }}>
                                     </div>
-                                    <hr style={{ margin: "0px 0 10px 0" }} />
-                                    <SimpleGrid columns={2} style={{ width: "100%" }}>
-                                        {["humidity", "battery", "pressure", "movementCounter"].map(x => {
-                                            let value = this.getLatestReading()[x];
-                                            if (value === undefined) return null;
-                                            return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
-                                                <span style={smallSensorValue}>{value == null ? "-" : localeNumber(getUnitHelper(x).value(value, this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}</span>
-                                                <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
-                                            </GridItem>
-                                        })}
-                                    </SimpleGrid>
-                                </div> : <div>
-                                    <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
-                                </div>}
-                            </div>
-                        )}
+                                </Box>
+                                {((!this.props.sensor.picture || (!this.props.sensor.picture && (this.state.imageHover)))) &&
+                                    <Box>
+                                        <label htmlFor={"up" + this.props.sensor.sensor}>
+                                            <input type="file" accept="image/*" style={{ display: "none" }} id={"up" + this.props.sensor.sensor} onChange={f => {
+                                                this.setState({ ...this.state, loadingImage: true })
+                                                uploadBackgroundImage(this.props.sensor, f, t, res => {
+                                                    this.setState({ ...this.state, loadingImage: false })
+                                                })
+                                            }} />
+                                            <center style={{ position: "absolute", top: 0, bottom: 0, width: "100%", cursor: "pointer" }}>
+                                                <Avatar bg="primary"
+                                                    style={{ marginTop: height / 2 - imageButtonSize / 2 }}
+                                                    height={imageButtonSize + "px"} width={imageButtonSize + "px"} icon={this.state.loadingImage ? <Spinner color="white" /> : this.state.imageHover ? <MdAdd size="30px" color="white" /> : <MdCameraAlt size="30px" color="white" />}
+                                                />
+                                                {this.state.imageHover && <Box color="primary" mt="2" style={smallSensorValue}>Add image</Box>}
+                                            </center>
+                                        </label>
+                                    </Box>
+                                }
+                            </Box>
+                        }
+                        <Box padding="24px" marginLeft={showImage ? imageWidth : 0}>
+                            <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
+                                {this.props.sensor.name}
+                            </Heading>
+                            {this.state.loading ? (
+                                <center style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>
+                                    <Spinner size="xl" />
+                                </center>
+                            ) : (
+                                <div style={{ maxWidth: this.props.size === "mobile" && !this.props.showGraph ? "300px" : undefined }}>
+                                    {this.state.lastParsedReading ? <div>
+                                        <BigValue
+                                            value={localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals)}
+                                            unit={getUnitHelper("temperature").unit}
+                                            alertActive={this.isAlertTriggerd("temperature")}
+                                        />
+                                        <div style={{ marginLeft: -24, marginRight: -30, marginTop: -10, marginBottom: -10, paddingBottom: -50 }}>
+                                            {this.state.data && this.state.data.measurements.length ? (
+                                                <>
+                                                    {showGraph &&
+                                                        <Box height={graphHeight}>
+                                                            <Graph title="" key={this.props.sensor.sensor} dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
+                                                        </Box>
+                                                    }
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {this.state.loadingHistory ? (
+                                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}><Spinner size="xl" /></div></center>
+                                                    ) : showGraph && (
+                                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{t("no_data_in_range").split("\n").map(x => <div key={x}>{x}</div>)}</div></center>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                        <SimpleGrid columns={2} style={{ width: "100%", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : 20) + "px 0 0 0" }}>
+                                            {["humidity", "battery", "pressure", "movementCounter"].map(x => {
+                                                let value = this.getLatestReading()[x];
+                                                if (value === undefined) return null;
+                                                return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
+                                                    <span style={smallSensorValue}>{value == null ? "-" : localeNumber(getUnitHelper(x).value(value, this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}</span>
+                                                    <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
+                                                </GridItem>
+                                            })}
+                                        </SimpleGrid>
+                                        <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%", marginTop: 5 }}>
+                                            <DurationText from={this.state.lastParsedReading ? this.state.lastParsedReading.timestamp : " - "} t={this.props.t} />
+                                        </div>
+                                    </div> : <div>
+                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
+                                    </div>}
+                                </div>
+                            )}
+                        </Box>
                     </Box>
                 </Box>
-                <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%", textAlign: "right", marginTop: 5 }}>
-                    <DurationText from={this.state.lastParsedReading ? this.state.lastParsedReading.timestamp : " - "} t={this.props.t} />
-                </div>
-            </div>
+            </div >
         )
     }
 }

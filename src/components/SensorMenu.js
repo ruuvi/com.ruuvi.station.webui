@@ -47,10 +47,10 @@ class SensorMenu extends Component {
                                 if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
                                 if (i === this.state.sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                                 else divider = <MenuDivider />
-                                return <>
+                                return <div key={x.sensor + "div"}>
                                     <MenuItem key={x.sensor} className={this.getCurrentSensor() === x.sensor ? "menuActive" : undefined} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, ...borderStyle }} onClick={() => this.props.history.push('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
                                     {divider}
-                                </>
+                                </div>
                             })}
                         </MenuList>
                     </Menu>

@@ -59,10 +59,10 @@ export default function DurationPicker(props) {
                     if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
                     if (i === renderTimespans.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                     else divider = <MenuDivider />
-                    return <>
+                    return <div key={x.v+"p"}>
                     <MenuItem key={x.v} className={ts.v === x.v ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => props.onChange(x.v)}>{x.k} {t(x.t).toLowerCase()}</MenuItem>
                     {divider}
-                    </>
+                    </div>
                 })}
             </MenuList>
         </Menu>

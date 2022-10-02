@@ -65,6 +65,7 @@ let colors = {
     colorMenuActive: { light: "rgba(68, 201, 185, 0.3)", dark: "#0B2626" },
     buttonBackground: { light: "#35AD9F", dark: "#35AD9F" },
     buttonFocus: { light: "#1f9385", dark: "#1f9385" },
+    imageBackgroundColor: { light: "#d8edea", dark: "#2d605c" },
 }
 
 export const ruuviTheme = extendTheme({
@@ -133,6 +134,12 @@ export const ruuviTheme = extendTheme({
             hr: {
                 borderColor: props.colorMode === "light" ? "#083c3d1a" : undefined
             },
+            '.imageBackgroundColor': {
+                backgroundColor: colors.imageBackgroundColor[props.colorMode] +" !important",
+            },
+            '.imageBackgroundOverlay': {
+                opacity: props.colorMode === "dark" ? 0.75 : 0.3,
+            }
         })
     },
     graph: {
@@ -208,7 +215,7 @@ export const ruuviTheme = extendTheme({
                 topbar: (props) => ({
                     bg: props.colorMode === "light" ? "white" : undefined,
                     border: "0px",
-                    _hover: "none",
+                    _hover: {},
                 }),
                 ghost: (props) => ({
                     bg: "transparent",
@@ -218,11 +225,16 @@ export const ruuviTheme = extendTheme({
                 ddl: (props) => ({
                     bg: props.colorMode === "light" ? "white" : undefined,
                 }),
+                imageToggle: (props) => ({
+                    borderRadius: 3,
+                    bg: colors.menuButtonBg[props.colorMode],
+                    color: "rgba(68, 201, 185, 0.6)",
+                }),
                 link: (props) => ({
                     bg: "transparent",
                     color: "#1f9385",
                     textDecoration: "underline",
-                    _hover: "none",
+                    _hover: {},
                     border: "0px",
                 })
             },

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box, Link, useMediaQuery } from "@chakra-ui/react"
+import { Spinner, Box, Link, useMediaQuery, Button } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
@@ -10,6 +10,7 @@ import SessionStore from "../SessionStore";
 import notify from "../utils/notify";
 import SettingsModal from "../components/SettingsModal";
 import { withColorMode } from "../utils/withColorMode";
+import { MdEqualizer, MdImage } from "react-icons/md";
 
 const infoText = {
     fontFamily: "mulish",
@@ -17,22 +18,33 @@ const infoText = {
 }
 
 function DashboardGrid(props) {
-    const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
-    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap="30px" gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "400px" : "100%"}, max-content))`}>
-        {props.children}
+    const [isLargeDisplay] = useMediaQuery("(min-width: 1600px)")
+    const [isMediumDisplay] = useMediaQuery("(min-width: 1024px)")
+    //const isMobileDisplay = !isLargeDisplay && !isMediumDisplay
+    let size = ""
+    if (isLargeDisplay) size = "large"
+    else if (isMediumDisplay) size = "medium"
+    else size = "mobile"
+    //this.state.showBig ? "550px" : "400px"
+    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap="30px" gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "500px" :  props.showGraph ? "100%" : "360px"}, max-content))`}>
+        {props.children(size)}
     </Box>
 }
+//{props.children}
 
 class Dashboard extends Component {
     constructor(props) {
         super(props)
+        let store = new Store();
         this.state = {
             loading: true,
             sensors: [],
             alerts: [],
             from: 24 * 3,
+            showGraph: store.getDashboardShowGraph(),
+            showBig: true,
         }
-        var from = new Store().getDashboardFrom();
+        var from = store.getDashboardFrom();
         if (from) {
             // apply new dashboard history length limit to old stored value
             if (from > 24 * 7) from = 24 * 7;
@@ -131,6 +143,11 @@ class Dashboard extends Component {
     closeSettings() {
         window.location.href = window.location.href.split("?")[0]
     }
+    showGraphClick() {
+        let showGraph = !this.state.showGraph
+        this.setState({ ...this.state, showGraph: showGraph })
+        new Store().setDashboardShowGraph(showGraph)
+    }
     render() {
         if (this.props.match.params.id) SessionStore.setBackRoute(`/${this.props.match.params.id}`)
         else SessionStore.setBackRoute("/")
@@ -170,18 +187,21 @@ class Dashboard extends Component {
                                         </div>
                                         */}
                                         <div style={{ textAlign: "end" }} >
+                                            <Button variant="imageToggle" mr={2} onClick={this.showGraphClick.bind(this)}>{this.state.showGraph ? <MdEqualizer size="23px" /> : <MdImage size="23px" />}</Button>
                                             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
                                         </div>
                                     </div>
-                                    <DashboardGrid>
-                                        <>
-                                            {this.state.sensors.map(x => {
-                                                return <span key={x.sensor + this.state.from} style={{ width: 1000, maxWidth: "100%" }}>
-                                                    <a href={"#/" + x.sensor}>
-                                                        <SensorCard sensor={x} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} dataFrom={this.state.from} />
-                                                    </a></span>
-                                            })}
-                                        </>
+                                    <DashboardGrid showGraph={this.state.showGraph}>
+                                        {size => {
+                                            return <>
+                                                {this.state.sensors.map(x => {
+                                                    return <span key={x.sensor + this.state.from} style={{ width: 1000, maxWidth: "100%" }}>
+                                                        <a href={"#/" + x.sensor}>
+                                                            <SensorCard sensor={x} size={size} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} dataFrom={this.state.from} showImage={!this.state.showGraph} showGraph={this.state.showGraph} />
+                                                        </a></span>
+                                                })}
+                                            </>
+                                        }}
                                     </DashboardGrid>
                                 </Box>
                             )}
