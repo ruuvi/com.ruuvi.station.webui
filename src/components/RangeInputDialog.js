@@ -29,7 +29,7 @@ class RangeInputDialog extends Component {
         this.props.onClose(true, value)
     }
     isValid() {
-        var value = this.state.value;
+        var value = JSON.parse(JSON.stringify(this.state.value));
         for (var i = 0; i < value.length; i++) {
             value[i] = parseFloat(value[i]);
             if (isNaN(value[i])) {
