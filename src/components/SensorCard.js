@@ -130,6 +130,7 @@ class SensorCard extends Component {
         let graphHeight = height - 180;
         let imageWidth = height / 2;
         let imageButtonSize = 80;
+        if (this.props.size === "mobile") imageButtonSize = 60;
         if (this.props.size === "medium") graphHeight = 135;
         if (this.props.size === "mobile" && showGraph) showImage = false;
         return (
@@ -158,7 +159,7 @@ class SensorCard extends Component {
                                                     style={{ marginTop: height / 2 - imageButtonSize / 2 }}
                                                     height={imageButtonSize + "px"} width={imageButtonSize + "px"} icon={this.state.loadingImage ? <Spinner color="white" /> : this.state.imageHover ? <MdAdd size="30px" color="white" /> : <MdCameraAlt size="30px" color="white" />}
                                                 />
-                                                {this.state.imageHover && <Box color="primary" mt="2" style={smallSensorValue}>Add image</Box>}
+                                                {this.props.size !== "mobile" && this.state.imageHover && <Box color="primary" mt="2" style={smallSensorValue}>Add image</Box>}
                                             </center>
                                         </label>
                                     </Box>
@@ -166,7 +167,7 @@ class SensorCard extends Component {
                             </Box>
                         }
                         <Box padding="24px" marginLeft={showImage ? imageWidth : 0}>
-                            <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>
+                            <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap" }}>
                                 {this.props.sensor.name}
                             </Heading>
                             {this.state.loading ? (
