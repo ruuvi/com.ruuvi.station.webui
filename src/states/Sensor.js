@@ -115,7 +115,7 @@ function SensorHeader(props) {
                     <Avatar bg="primary" style={{ cursor: "pointer" }} size="xl" name={props.sensor.name} src={props.testImgSrc || props.sensor.picture} />
                 }
             </label>
-            <span style={{ width: "100%", marginLeft: 8 }}>
+            <span style={{ width: "100%", marginLeft: 18 }}>
                 <Heading style={sensorName}>
                     {props.sensor.name}
                 </Heading>
