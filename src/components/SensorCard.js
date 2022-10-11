@@ -12,7 +12,7 @@ import Graph from "./Graph";
 import parse from "../decoder/parser";
 import { Spinner } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
-import { getUnitHelper, localeNumber } from "../UnitHelper";
+import { getDisplayValue, getUnitHelper, localeNumber } from "../UnitHelper";
 import DurationText from "./DurationText";
 import BigValue from "./BigValue";
 import { withColorMode } from "../utils/withColorMode";
@@ -178,7 +178,7 @@ class SensorCard extends Component {
                                 <div style={{ maxWidth: this.props.size === "mobile" && !this.props.showGraph ? "300px" : undefined }}>
                                     {this.state.lastParsedReading ? <div>
                                         <BigValue
-                                            value={localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals)}
+                                            value={getDisplayValue("temperature",localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals))}
                                             unit={getUnitHelper("temperature").unit}
                                             alertActive={this.isAlertTriggerd("temperature")}
                                         />
@@ -206,7 +206,7 @@ class SensorCard extends Component {
                                                 let value = this.getLatestReading()[x];
                                                 if (value === undefined) return null;
                                                 return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
-                                                    <span style={smallSensorValue}>{value == null ? "-" : localeNumber(getUnitHelper(x).value(value, this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}</span>
+                                                    <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, this.getLatestReading()["temperature"]), getUnitHelper(x).decimals))}</span>
                                                     <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
                                                 </GridItem>
                                             })}

@@ -12,7 +12,7 @@ export default function RadioInput(props) {
     const { t } = useTranslation();
 
     return (
-        <FormControl>
+        <FormControl {...props.style}>
             <FormLabel>{t(props.label)} {props.loading && <CircularProgress mt="-1" size="4" isIndeterminate={true} color="primary" />}</FormLabel>
             <RadioGroup value={props.value} onChange={v => props.onChange(v)}>
                 <Stack>

@@ -211,7 +211,7 @@ class Dashboard extends Component {
                         </Box>
                     </Box>
                 </Box>
-                <SettingsModal open={this.showSettings()} onClose={() => this.closeSettings()} />
+                <SettingsModal open={this.showSettings()} onClose={() => this.closeSettings()} updateUI={() => this.forceUpdate()} />
             </>
         )
     }

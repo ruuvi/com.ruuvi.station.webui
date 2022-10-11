@@ -16,6 +16,59 @@ const unitHelper = {
     "measurementSequenceNumber": { label: "measurement_sequence_number", unit: "", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: true },
 }
 
+export function getUnitFor(key, setting) {
+    switch (key) {
+        case "temperature":
+            switch (setting) {
+                case "F": return "°F"
+                case "K": return "K"
+                default: return "°C"
+            }
+        case "humidity":
+            switch (setting) {
+                case "1": return "g/m³"
+                case "2":
+                    let settings = localStorage.getItem("settings");
+                    settings = JSON.parse(settings)
+                    return getUnitFor("temperature", settings.UNIT_TEMPERATURE)
+                default: return "%"
+            }
+        case "pressure":
+            switch (setting) {
+                case "0": return "Pa"
+                case "2": return "mmHg"
+                case "3": return "inHg"
+                default: return "hPa"
+            }
+        default:
+            return ""
+    }
+}
+
+export function getDisplayValue(key, value) {
+    if (!["temperature", "humidity", "pressure"].includes(key)) return value
+    let settings = localStorage.getItem("settings");
+    if (settings) {
+        settings = JSON.parse(settings)
+        let resolution = 2;
+        if (value != null) {
+            if (key === "temperature") {
+                if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE)
+            }
+            if (key === "humidity") {
+                if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_HUMIDITY)
+            }
+            if (key === "pressure") {
+                if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
+            }
+            if (typeof (value) === "string") value = value.replace(" ","").replace(",", ".").replace("−", "-")
+            value = parseFloat(value).toFixed(resolution)
+            value = localeNumber(+value, resolution)
+        }
+    }
+    return value
+}
+
 export function getUnitHelper(key, plaintext) {
     if (key === "temperature") {
         let settings = localStorage.getItem("settings");
@@ -92,6 +145,7 @@ export function localeNumber(value, decimals) {
 export function temperatureToUserFormat(temperature, offset) {
     offset = offset === true;
     var settings = localStorage.getItem("settings");
+    let roundTo = 2;
     if (settings) {
         settings = JSON.parse(settings)
         if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
@@ -101,7 +155,7 @@ export function temperatureToUserFormat(temperature, offset) {
             temperature = temperature + 273.15;
         }
     }
-    return round(temperature, 2)
+    return round(temperature, roundTo)
 }
 
 export function temperatureFromUserFormat(temperature) {

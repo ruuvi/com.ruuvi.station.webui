@@ -10,6 +10,7 @@ import { MdInfo } from "react-icons/md";
 import notify from "../utils/notify";
 import { useTranslation } from "react-i18next";
 import { addNewlines } from "../TextHelper";
+import { getDisplayValue } from "../UnitHelper";
 
 const height = 120
 
@@ -42,10 +43,32 @@ function info(e, t, sensorType) {
     notify.info(text)
 }
 
+
+/*
+    let settings = localStorage.getItem("settings");
+    if (settings) {
+        settings = JSON.parse(settings)
+        let resolution = 2;
+        if (ms.temperature != null) {
+            if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE)
+            ms.temperature = +ms.temperature.toFixed(resolution)
+        }
+        if (ms.humidity != null) {
+            if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_HUMIDITY)
+        }
+        if (ms.pressure != null) {
+            if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
+        }
+    }
+*/
+
 export default function SensorReading(props) {
     let mode = useColorMode().colorMode;
     const { t } = useTranslation();
     let width = 400
+
+    let val = props.value;
+    val = getDisplayValue(props.label, val)
     return (
         <Stat className="sensorValueBox" style={{ width, maxWidth: "100%", height: height, backgroundColor: props.alertTriggered ? ruuviTheme.colors.errorBackground : undefined, border: props.selected ? props.alertTriggered ? "2px solid " + ruuviTheme.colors.error : "2px solid " + ruuviTheme.newColors.sensorValueBoxActiveBorder[mode] : "2px solid rgba(0,0,0,0)", borderRadius: "10px", cursor: "pointer" }} onClick={props.onClick}>
             <IconButton style={{ position: "absolute", right: 0, margin: -8 }} variant="ghost" onClick={e => info(e, t, props.label)}>
@@ -53,7 +76,7 @@ export default function SensorReading(props) {
             </IconButton>
             <div style={middle}>
                 <BigValue
-                    value={t(props.value)}
+                    value={val}
                     unit={props.label === "movement_counter" ? t(props.unit) : props.unit}
                 />
                 <span style={labelStyle}>{t(props.label)}</span>

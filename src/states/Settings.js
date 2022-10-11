@@ -6,11 +6,16 @@ import { withTranslation } from 'react-i18next';
 import NavClose from "../components/NavClose";
 import notify from "../utils/notify";
 import LanguageMenu from '../components/LanguageMenu';
+import { getUnitFor } from "../UnitHelper";
 
 const header = {
     fontFamily: "montserrat",
     fontSize: "24px",
     fontWeight: 800,
+}
+
+const tabbed = {
+    marginLeft: "18px"
 }
 
 const temperatureOptions = [
@@ -29,6 +34,14 @@ const pressureOptions = [
     { value: "2", label: "pressure_mmhg_name" },
     { value: "3", label: "pressure_inhg_name" },
 ]
+let resolutionOptions = (type, unitVal) => {
+    let unit = getUnitFor(type, unitVal)
+    return [
+        { value: "0", label: "1 " + unit },
+        { value: "1", label: "0,1 " + unit },
+        { value: "2", label: "0,01 " + unit },
+    ]
+}
 
 class Settings extends Component {
     constructor(props) {
@@ -39,6 +52,9 @@ class Settings extends Component {
                 UNIT_HUMIDITY: "0",
                 UNIT_TEMPERATURE: "C",
                 UNIT_PRESSURE: "1",
+                ACCURACY_HUMIDITY: "2",
+                ACCURACY_PRESSURE: "2",
+                ACCURACY_TEMPERATURE: "2"
             },
             savingSettings: [],
         }
@@ -68,8 +84,11 @@ class Settings extends Component {
                 this.setState({ ...this.state, savingSettings: saving });
                 // reload settings in the safest way possible, will be improved in another issue
                 new NetworkApi().getSettings(settings => {
-                    if (settings.result === "success")
+                    if (settings.result === "success"){
                         localStorage.setItem("settings", JSON.stringify(settings.data.settings))
+                        if (this.props.updateUI) this.props.updateUI()
+                    }
+
                 })
             } else if (b.result === "error") {
                 notify.error(`UserApiError.${this.props.t(b.code)}`)
@@ -87,13 +106,19 @@ class Settings extends Component {
                 </>
             ) : (
                 <>
-                    <LanguageMenu/>
+                    <LanguageMenu />
                     <br />
                     <RadioInput label={"settings_temperature_unit"} value={this.state.settings.UNIT_TEMPERATURE} options={temperatureOptions} onChange={v => this.updateSetting("UNIT_TEMPERATURE", v)} loading={this.state.savingSettings.indexOf("UNIT_TEMPERATURE") !== -1} />
                     <br />
+                    <RadioInput label={"temperature_resolution"} style={tabbed} value={this.state.settings.ACCURACY_TEMPERATURE} options={resolutionOptions("temperature", this.state.settings.UNIT_TEMPERATURE)} onChange={v => this.updateSetting("ACCURACY_TEMPERATURE", v)} loading={this.state.savingSettings.indexOf("ACCURACY_TEMPERATURE") !== -1} />
+                    <br />
                     <RadioInput label={"settings_humidity_unit"} value={this.state.settings.UNIT_HUMIDITY} options={humidityOptions} onChange={v => this.updateSetting("UNIT_HUMIDITY", v)} loading={this.state.savingSettings.indexOf("UNIT_HUMIDITY") !== -1} />
                     <br />
+                    <RadioInput label={"humidity_resolution"} style={tabbed} value={this.state.settings.ACCURACY_HUMIDITY} options={resolutionOptions("humidity", this.state.settings.UNIT_HUMIDITY)} onChange={v => this.updateSetting("ACCURACY_HUMIDITY", v)} loading={this.state.savingSettings.indexOf("ACCURACY_HUMIDITY") !== -1} />
+                    <br />
                     <RadioInput label={"settings_pressure_unit"} value={this.state.settings.UNIT_PRESSURE} options={pressureOptions} onChange={v => this.updateSetting("UNIT_PRESSURE", v)} loading={this.state.savingSettings.indexOf("UNIT_PRESSURE") !== -1} />
+                    <br />
+                    <RadioInput label={"pressure_resolution"} style={tabbed} value={this.state.settings.ACCURACY_PRESSURE} options={resolutionOptions("pressure", this.state.settings.UNIT_PRESSURE)} onChange={v => this.updateSetting("ACCURACY_PRESSURE", v)} loading={this.state.savingSettings.indexOf("ACCURACY_PRESSURE") !== -1} />
                 </>
             )}
         </>
