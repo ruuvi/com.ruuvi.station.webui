@@ -196,6 +196,7 @@ class Sensor extends Component {
         this.openAccodrions = new Store().getOpenAccordions() || [0];
     }
     componentDidMount() {
+        window.scrollTo(0,0)
         if (this.props.sensor) {
             this.loadData(true)
         }
