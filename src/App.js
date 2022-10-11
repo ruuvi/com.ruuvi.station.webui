@@ -7,13 +7,14 @@ import {
 import NetworkApi from "./NetworkApi";
 import logo from './img/ruuvi-vector-logo.svg'
 import logoDark from './img/ruuvi-vector-logo-dark.svg'
-import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton } from "@chakra-ui/react"
+import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton, Tooltip } from "@chakra-ui/react"
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
 import { SunIcon } from "@chakra-ui/icons";
 import { MdOutlineNightlight } from "react-icons/md";
 import cache from "./DataCache";
+import { useTranslation } from "react-i18next";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -44,8 +45,9 @@ const versionText = {
 
 let currColorMode;
 function ColorModeSwitch() {
+  const { t } = useTranslation();
   const { colorMode, toggleColorMode } = useColorMode()
-  
+
   if (currColorMode !== colorMode) {
     currColorMode = colorMode;
     try {
@@ -55,7 +57,9 @@ function ColorModeSwitch() {
   }
   return (
     <>
-      <IconButton variant="ghost" style={{marginRight: 16}} onClick={toggleColorMode}>{colorMode === 'light' ? <MdOutlineNightlight /> : <SunIcon />}</IconButton>
+      <Tooltip label={t("color_mode_tooltip")} closeOnClick={false}>
+        <IconButton variant="ghost" style={{ marginRight: 16 }} onClick={toggleColorMode}>{colorMode === 'light' ? <MdOutlineNightlight /> : <SunIcon />}</IconButton>
+      </Tooltip>
     </>
   )
 }

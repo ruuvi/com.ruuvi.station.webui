@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box, Link, useMediaQuery, Button } from "@chakra-ui/react"
+import { Spinner, Box, Link, useMediaQuery, Button, Tooltip } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
@@ -149,6 +149,7 @@ class Dashboard extends Component {
         new Store().setDashboardShowGraph(showGraph)
     }
     render() {
+        var { t } = this.props;
         if (this.props.match.params.id) SessionStore.setBackRoute(`/${this.props.match.params.id}`)
         else SessionStore.setBackRoute("/")
         return (
@@ -163,7 +164,7 @@ class Dashboard extends Component {
                             }
                             {!this.state.loading && !this.state.sensors.length &&
                                 <center style={{ margin: 32, ...infoText }}>
-                                    {this.props.t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{this.addRuuviLink(x)}<br /></div>)}
+                                    {t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{this.addRuuviLink(x)}<br /></div>)}
                                 </center>
                             }
                             {this.getCurrentSensor() ? (
@@ -187,7 +188,9 @@ class Dashboard extends Component {
                                         </div>
                                         */}
                                         <div style={{ textAlign: "end" }} >
-                                            <Button variant="imageToggle" mr={2} onClick={this.showGraphClick.bind(this)}>{this.state.showGraph ? <MdEqualizer size="23px" /> : <MdImage size="23px" />}</Button>
+                                            <Tooltip label={t("toggle_image_tooltip")} closeOnClick={false}>
+                                                <Button variant="imageToggle" mr={2} onClick={this.showGraphClick.bind(this)}>{this.state.showGraph ? <MdEqualizer size="23px" /> : <MdImage size="23px" />}</Button>
+                                            </Tooltip>
                                             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
                                         </div>
                                     </div>

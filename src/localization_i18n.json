@@ -152,7 +152,12 @@
       "timestamp": "Timestamp",
       "replace_battery": "Replace battery!",
       "battery_ok": "Battery OK",
-      "voltage": "Voltage"
+      "voltage": "Voltage",
+      "temperature_resolution": "Temperature resolution",
+      "humidity_resolution": "Humidity resolution",
+      "pressure_resolution": "Pressure resolution",
+      "color_mode_tooltip": "Toggle color mode",
+      "toggle_image_tooltip": "Toggle between image or graph only cards"
     }
   },
   "fi": {
@@ -308,7 +313,12 @@
       "timestamp": "Päivämäärä",
       "replace_battery": "Vaihda paristo!",
       "battery_ok": "Paristo OK",
-      "voltage": "Jännite"
+      "voltage": "Jännite",
+      "temperature_resolution": "Lämpötilan resoluutio",
+      "humidity_resolution": "Kosteuden resoluutio",
+      "pressure_resolution": "Paineen resoluutio",
+      "color_mode_tooltip": "Vaihda väritilaa",
+      "toggle_image_tooltip": "Vaihda vain kuva- tai kaaviokorttien välillä"
     }
   },
   "sv": {
@@ -464,7 +474,12 @@
       "timestamp": "Datum",
       "replace_battery": "Byt batteriet!",
       "battery_ok": "Batteri OK",
-      "voltage": "Spänning"
+      "voltage": "Spänning",
+      "temperature_resolution": "Temperaturupplösning",
+      "humidity_resolution": "Fuktighetsupplösning",
+      "pressure_resolution": "Tryckupplösning",
+      "color_mode_tooltip": "Byt färgeläge",
+      "toggle_image_tooltip": "Växla mellan kort med endast bild eller graf"
     }
   }
 }
