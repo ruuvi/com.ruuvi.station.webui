@@ -50,10 +50,10 @@ class AlertItem extends Component {
             if (enabled !== null) alert.enabled = enabled;
         } else {
             alert = {
-                ...alert,
                 type: type,
                 enabled: enabled === true,
-                ...getAlertRange(type)
+                ...getAlertRange(type),
+                ...alert,
             }
         }
         this.setState({ ...this.state, alert: alert, editDescription: false, editMinValue: false, editMaxValue: false, rangeInputDialog: false })
