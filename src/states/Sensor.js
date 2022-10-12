@@ -105,6 +105,15 @@ const accordionButton = {
     paddingRight: 21,
 }
 
+function AccordionText(props) {
+    const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
+    let tstyle = JSON.parse(JSON.stringify(collapseText));
+    if (!isLargeDisplay) tstyle.fontSize = "18px";
+    return <Box flex="1" textAlign="left" style={tstyle}>
+        {props.children}
+    </Box>
+}
+
 function SensorHeader(props) {
     const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
     if (isLargeDisplay) {
@@ -196,7 +205,7 @@ class Sensor extends Component {
         this.openAccodrions = new Store().getOpenAccordions() || [0];
     }
     componentDidMount() {
-        window.scrollTo(0,0)
+        window.scrollTo(0, 0)
         if (this.props.sensor) {
             this.loadData(true)
         }
@@ -482,9 +491,9 @@ class Sensor extends Component {
                         <Accordion allowMultiple defaultIndex={this.openAccodrions} onChange={v => this.setOpenAccordion(v)}>
                             <AccordionItem onChange={v => console.log(v)}>
                                 <AccordionButton style={accordionButton} _hover={{}}>
-                                    <Box flex="1" textAlign="left" style={collapseText}>
+                                    <AccordionText>
                                         {t("general")}
-                                    </Box>
+                                    </AccordionText>
                                     <AccordionIcon />
                                 </AccordionButton>
                                 <hr />
@@ -544,9 +553,9 @@ class Sensor extends Component {
                             </AccordionItem>
                             <AccordionItem>
                                 <AccordionButton style={accordionButton} _hover={{}}>
-                                    <Box flex="1" textAlign="left" style={collapseText}>
+                                    <AccordionText>
                                         {t("alerts")}
-                                    </Box>
+                                    </AccordionText>
                                     <AccordionIcon />
                                 </AccordionButton>
                                 <hr />
@@ -566,9 +575,9 @@ class Sensor extends Component {
                             </AccordionItem>
                             <AccordionItem hidden={this.isSharedSensor()}>
                                 <AccordionButton style={accordionButton} _hover={{}}>
-                                    <Box flex="1" textAlign="left" style={collapseText}>
+                                    <AccordionText>
                                         {t("offset_correction")}
-                                    </Box>
+                                    </AccordionText>
                                     <AccordionIcon />
                                 </AccordionButton>
                                 <hr />
@@ -603,9 +612,9 @@ class Sensor extends Component {
                             </AccordionItem>
                             <AccordionItem>
                                 <AccordionButton style={accordionButton} _hover={{}}>
-                                    <Box flex="1" textAlign="left" style={collapseText}>
+                                    <AccordionText>
                                         {uppercaseFirst(t("more_info"))}
-                                    </Box>
+                                    </AccordionText>
                                     <AccordionIcon />
                                 </AccordionButton>
                                 <hr />
@@ -637,9 +646,9 @@ class Sensor extends Component {
 
                             <AccordionItem>
                                 <AccordionButton style={accordionButton} _hover={{}}>
-                                    <Box flex="1" textAlign="left" style={collapseText}>
+                                    <AccordionText>
                                         {t("remove")}
-                                    </Box>
+                                    </AccordionText>
                                     <AccordionIcon />
                                 </AccordionButton>
                                 <hr />
