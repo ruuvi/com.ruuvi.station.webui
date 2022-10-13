@@ -157,7 +157,8 @@
       "humidity_resolution": "Humidity resolution",
       "pressure_resolution": "Pressure resolution",
       "color_mode_tooltip": "Toggle color mode",
-      "toggle_image_tooltip": "Toggle between image or graph only cards"
+      "button_card_image_tooltip": "Show images",
+      "button_card_graph_tooltip": "Show graphs"
     }
   },
   "fi": {
@@ -318,7 +319,8 @@
       "humidity_resolution": "Kosteuden resoluutio",
       "pressure_resolution": "Paineen resoluutio",
       "color_mode_tooltip": "Vaihda väritilaa",
-      "toggle_image_tooltip": "Vaihda vain kuva- tai kaaviokorttien välillä"
+      "button_card_image_tooltip": "Näytä kuvat",
+      "button_card_graph_tooltip": "Näytä kaaviot"
     }
   },
   "sv": {
@@ -479,7 +481,8 @@
       "humidity_resolution": "Fuktighetsupplösning",
       "pressure_resolution": "Tryckupplösning",
       "color_mode_tooltip": "Byt färgeläge",
-      "toggle_image_tooltip": "Växla mellan kort med endast bild eller graf"
+      "button_card_image_tooltip": "Visa bilder",
+      "button_card_graph_tooltip": "Visa grafer"
     }
   }
 }

@@ -188,7 +188,7 @@ class Dashboard extends Component {
                                         </div>
                                         */}
                                         <div style={{ textAlign: "end" }} >
-                                            <Tooltip label={t("toggle_image_tooltip")} closeOnClick={false} hasArrow>
+                                            <Tooltip label={t(this.state.showGraph ? "button_card_image_tooltip" : "button_card_graph_tooltip")} closeOnClick={false} hasArrow>
                                                 <Button variant="imageToggle" mr={2} onClick={this.showGraphClick.bind(this)}>{this.state.showGraph ? <MdImage size="23px" /> : <MdEqualizer size="23px" />}</Button>
                                             </Tooltip>
                                             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
