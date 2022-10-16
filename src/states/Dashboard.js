@@ -147,6 +147,9 @@ class Dashboard extends Component {
         let showGraph = !this.state.showGraph
         this.setState({ ...this.state, showGraph: showGraph })
         new Store().setDashboardShowGraph(showGraph)
+        // sometimes the graphs will not resize when graph is toggled on/off
+        // this 'fixes' it, it'll have to do for now
+        setTimeout(()=>{this.forceUpdate()},10)
     }
     render() {
         var { t } = this.props;
