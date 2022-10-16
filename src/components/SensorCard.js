@@ -167,9 +167,15 @@ class SensorCard extends Component {
                             </Box>
                         }
                         <Box padding="24px" marginLeft={showImage ? imageWidth : 0}>
-                            <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap" }}>
-                                {this.props.sensor.name}
-                            </Heading>
+                            {this.props.size === "mobile" && !showGraph ? (
+                                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1, maxLines: 2, height: "32px" }}>
+                                    {this.props.sensor.name}
+                                </Heading>
+                            ) : (
+                                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    {this.props.sensor.name}
+                                </Heading>
+                            )}
                             {this.state.loading ? (
                                 <center style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>
                                     <Spinner size="xl" />
@@ -201,7 +207,7 @@ class SensorCard extends Component {
                                                 </>
                                             )}
                                         </div>
-                                        <SimpleGrid columns={2} style={{ width: "100%", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : 20) + "px 0 0 0" }}>
+                                        <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 0 0" }}>
                                             {["humidity", "battery", "pressure", "movementCounter"].map(x => {
                                                 let value = this.getLatestReading()[x];
                                                 if (value === undefined) return null;
