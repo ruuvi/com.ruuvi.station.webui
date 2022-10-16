@@ -105,11 +105,11 @@ export default function App() {
   }
   const urlSearchParams = new URLSearchParams(window.location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
-  if (params.lang) {
+  if (params.lng) {
     const supportedLangs = ["en", "fi", "sv"]
-    if (supportedLangs.indexOf(params.lang) > -1) {
-      localStorage.setItem("selected_language", params.lang)
-      i18next.changeLanguage(params.lang)
+    if (supportedLangs.indexOf(params.lng) > -1) {
+      localStorage.setItem("selected_language", params.lng)
+      i18next.changeLanguage(params.lng)
       window.location.href = window.location.href.split("?")[0];
     }
   }
