@@ -26,7 +26,7 @@ function DashboardGrid(props) {
     else if (isMediumDisplay) size = "medium"
     else size = "mobile"
     //this.state.showBig ? "550px" : "400px"
-    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap="20px" gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" :  props.showGraph ? "300px" : "360px"}, max-content))`}>
+    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap={{ base: "10px", md: "20px" }} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" :  props.showGraph ? "300px" : "360px"}, max-content))`}>
         {props.children(size)}
     </Box>
 }
