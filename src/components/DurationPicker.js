@@ -18,6 +18,7 @@ var timespans = [
     { k: "2", t: "days", v: 24 * 2 },
     { k: "3", t: "days", v: 24 * 3 },
     { k: "1", t: "week", v: 24 * 7 },
+    { k: "2", t: "weeks", v: 24 * 7 * 2 },
     { k: "1", t: "month", v: 24 * 7 * 4 },
     { k: "3", t: "months", v: 24 * 7 * 4 * 3 },
     { k: "6", t: "months", v: 24 * 7 * 4 * 6 },
