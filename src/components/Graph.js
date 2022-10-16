@@ -152,6 +152,13 @@ class Graph extends Component {
                                         }
                                         return [fromX, toX]
                                     }
+                                },
+                                y: {
+                                    range: (_, fromY, toY) => {
+                                        fromY -= 0.5
+                                        toY += 0.5
+                                        return [fromY, toY]
+                                    }
                                 }
                             },
                             axes: [
