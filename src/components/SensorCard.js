@@ -35,7 +35,7 @@ const smallSensorValueUnit = {
 const lastUpdatedText = {
     fontFamily: "mulish",
     fontWeight: 600,
-    fontSize: 14,
+    fontSize: 12,
 }
 
 class SensorCard extends Component {
