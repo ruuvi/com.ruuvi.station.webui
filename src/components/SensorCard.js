@@ -168,7 +168,7 @@ class SensorCard extends Component {
                         }
                         <Box padding="24px" marginLeft={showImage ? imageWidth : 0}>
                             {this.props.size === "mobile" && !showGraph ? (
-                                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1, maxLines: 2, height: "32px" }}>
+                                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, height: "36px" }}>
                                     {this.props.sensor.name}
                                 </Heading>
                             ) : (
