@@ -221,7 +221,7 @@ class SensorCard extends Component {
                                             <DurationText from={this.state.lastParsedReading ? this.state.lastParsedReading.timestamp : " - "} t={this.props.t} />
                                         </div>
                                     </div> : <div>
-                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: 100 }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
+                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: height / 2 - 80 }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
                                     </div>}
                                 </div>
                             )}
