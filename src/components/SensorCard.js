@@ -88,7 +88,6 @@ class SensorCard extends Component {
             console.log("err", e)
             this.setState({ data: null, loading: false, loadingHistory: false })
         }
-
     }
     getLatestReading() {
         if (!this.state.lastParsedReading) return [];
@@ -126,13 +125,14 @@ class SensorCard extends Component {
         let showGraph = this.props.showGraph;
         let showImage = this.props.showImage;
         if (!showGraph && this.props.size !== "mobile") showGraph = true
-        let height = showGraph ? this.props.size === "medium" ? 300 : 360 : 200;
-        let graphHeight = height - 180;
+        let height = showGraph ? this.props.size === "medium" ? 300 : 360 : 193;
+        let graphHeight = height - 170;
         let imageWidth = height / 2;
         let imageButtonSize = 80;
         if (this.props.size === "mobile") imageButtonSize = 60;
-        if (this.props.size === "medium") graphHeight = 135;
+        if (this.props.size === "medium") graphHeight = 145;
         if (this.props.size === "mobile" && showGraph) showImage = false;
+        let isSmallCard = this.props.size === "mobile" && !showGraph
         return (
             <div>
                 <Box className="content sensorCard" height={height} borderRadius="lg" overflow="hidden">
@@ -167,27 +167,31 @@ class SensorCard extends Component {
                             </Box>
                         }
                         <Box padding="24px" marginLeft={showImage ? imageWidth : 0}>
-                            {this.props.size === "mobile" && !showGraph ? (
-                                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, height: "36px" }}>
-                                    {this.props.sensor.name}
-                                </Heading>
-                            ) : (
-                                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                    {this.props.sensor.name}
-                                </Heading>
-                            )}
+                            <Box height={isSmallCard ? "98px" : ""}>
+                                {isSmallCard ? (
+                                    <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, lineHeight: "19px", maxHeight: "38px" }}>
+                                        {this.props.sensor.name}
+                                    </Heading>
+                                ) : (
+                                    <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                        {this.props.sensor.name}
+                                    </Heading>
+                                )}
+                                {this.state.lastParsedReading &&
+                                    <BigValue
+                                        value={getDisplayValue("temperature", localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals))}
+                                        unit={getUnitHelper("temperature").unit}
+                                        alertActive={this.isAlertTriggerd("temperature")}
+                                    />
+                                }
+                            </Box>
                             {this.state.loading ? (
-                                <center style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>
+                                <center style={{ position: "relative", top: "50%", marginTop: isSmallCard ? 0 : height/3, transform: "translateY(-50%)" }}>
                                     <Spinner size="xl" />
                                 </center>
                             ) : (
                                 <div style={{ maxWidth: this.props.size === "mobile" && !this.props.showGraph ? "300px" : undefined }}>
                                     {this.state.lastParsedReading ? <div>
-                                        <BigValue
-                                            value={getDisplayValue("temperature",localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals))}
-                                            unit={getUnitHelper("temperature").unit}
-                                            alertActive={this.isAlertTriggerd("temperature")}
-                                        />
                                         <div style={{ marginLeft: -24, marginRight: -30, marginTop: -10, marginBottom: -10, paddingBottom: -50 }}>
                                             {this.state.data && this.state.data.measurements.length ? (
                                                 <>
@@ -217,7 +221,7 @@ class SensorCard extends Component {
                                                 </GridItem>
                                             })}
                                         </SimpleGrid>
-                                        <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%", marginTop: 5 }}>
+                                        <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%" }}>
                                             <DurationText from={this.state.lastParsedReading ? this.state.lastParsedReading.timestamp : " - "} t={this.props.t} />
                                         </div>
                                     </div> : <div>
