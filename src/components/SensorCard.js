@@ -155,7 +155,7 @@ class SensorCard extends Component {
                                                 })
                                             }} />
                                             <center style={{ position: "absolute", top: 0, bottom: 0, width: "100%", cursor: "pointer" }}>
-                                                <Avatar bg="primary"
+                                                <Avatar
                                                     style={{ marginTop: height / 2 - imageButtonSize / 2 }}
                                                     height={imageButtonSize + "px"} width={imageButtonSize + "px"} icon={this.state.loadingImage ? <Spinner color="white" /> : this.state.imageHover ? <MdAdd size="30px" color="white" /> : <MdCameraAlt size="30px" color="white" />}
                                                 />

@@ -121,7 +121,7 @@ function SensorHeader(props) {
             <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
             <label for="avatarUpload">
                 {props.loadingImage ? <CircularProgress size={"96px"} isIndeterminate={true} color="primary" /> :
-                    <Avatar bg="primary" style={{ cursor: "pointer" }} size="xl" name={props.sensor.name} src={props.testImgSrc || props.sensor.picture} />
+                    <Avatar style={{ cursor: "pointer" }} size="xl" name={props.sensor.name} src={props.testImgSrc || props.sensor.picture} />
                 }
             </label>
             <span style={{ width: "100%", marginLeft: 18 }}>

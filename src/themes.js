@@ -129,7 +129,7 @@ export const ruuviTheme = extendTheme({
                 color: colors.textInactive[props.colorMode] + " !important",
             },
             '.buttonSideIcon': {
-                color: "rgba(68, 201, 185, 0.6)"
+                color: colors.buttonBackground[props.colorMode]
             },
             hr: {
                 borderColor: props.colorMode === "light" ? "#083c3d1a" : undefined
@@ -171,9 +171,9 @@ export const ruuviTheme = extendTheme({
             800: '#d4ede8',
             900: '#d4ede8',
         },
-        primaryScheme: {
-            200: '#44c9b9', // dark mode
-            500: '#44c9b9', // light mode
+        buttonIconScheme: {
+            200: colors.buttonBackground.dark, // dark mode
+            500: colors.buttonBackground.light, // light mode
         },
         text: "#1b4847",
         toast: {
@@ -228,7 +228,7 @@ export const ruuviTheme = extendTheme({
                 imageToggle: (props) => ({
                     borderRadius: 3,
                     bg: colors.menuButtonBg[props.colorMode],
-                    color: "rgba(68, 201, 185, 0.6)",
+                    color: colors.buttonBackground[props.colorMode],
                 }),
                 link: (props) => ({
                     bg: "transparent",
@@ -283,6 +283,13 @@ export const ruuviTheme = extendTheme({
             baseStyle: (props) => ({
                 icon: {
                     color: props.colorMode === "dark" ? "#ffffff80 !important" : undefined
+                },
+            }),
+        },
+        Avatar: {
+            baseStyle: (props) => ({
+                container: {
+                    bg: colors.buttonBackground[props.colorMode]
                 },
             }),
         },
