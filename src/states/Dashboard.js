@@ -26,7 +26,7 @@ function DashboardGrid(props) {
     else if (isMediumDisplay) size = "medium"
     else size = "mobile"
     //this.state.showBig ? "550px" : "400px"
-    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap={{ base: "10px", md: "20px" }} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" :  props.showGraph ? "300px" : "360px"}, max-content))`}>
+    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap={size === "mobile" ? "10px" : "20px"} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" :  props.showGraph ? "300px" : "360px"}, max-content))`}>
         {props.children(size)}
     </Box>
 }
@@ -180,7 +180,7 @@ class Dashboard extends Component {
                                     updateSensor={(sensor) => this.updateSensor(sensor)}
                                 />
                             ) : (
-                                <Box paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
+                                <Box paddingLeft={{ base: "10px", lg: "50px" }} paddingRight={{ base: "10px", lg: "50px" }}>
                                     <div style={{ paddingLeft: 16, paddingTop: 26 }}>
                                         {/*
                                         <div style={{ fontFamily: "montserrat", fontSize: 48, fontWeight: 800, lineHeight: 1 }}>
