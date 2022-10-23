@@ -33,11 +33,17 @@ class InputDialog extends Component {
         }
         this.setState({ ...this.state, value: value })
     }
+    keyDown = (e) => {
+        if (e.key === 'Enter') {
+            if (this.props.number && isNaN(this.getNumber())) return
+            this.update();
+        }
+    }
     render() {
         return (
             <RDialog title={this.props.title} isOpen={this.props.open} onClose={() => this.props.onClose(false)}>
                 {this.props.description && <Box mb="2">{this.props.description}</Box>}
-                <Input autoFocus value={this.state.value} type={this.props.number ? "number" : ""} onChange={e => this.updateInput(e)} />
+                <Input autoFocus value={this.state.value} type={this.props.number ? "number" : ""} onChange={e => this.updateInput(e)} onKeyDown={this.keyDown.bind(this)} />
                 <div style={{ textAlign: "right" }}>
                     <Button onClick={this.update.bind(this)} mt="17px" disabled={this.props.number && isNaN(this.getNumber())}>{this.props.buttonText}</Button>
                 </div>

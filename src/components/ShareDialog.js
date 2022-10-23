@@ -71,6 +71,15 @@ class ShareDialog extends Component {
     emailHandler(evt) {
         this.setState({ ...this.state, email: evt.target.value });
     }
+    isInvalidValid = () => {
+        return this.state.loading || this.props.sensor.sharedTo.length >= maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)
+    }
+    keyDown = (e) => {
+        if (e.key === 'Enter') {
+            if (this.isInvalidValid()) return
+            this.share();
+        }
+    }
     render() {
         if (!this.props.sensor || !this.props.sensor.canShare) return <></>
         var { t } = this.props;
@@ -79,9 +88,9 @@ class ShareDialog extends Component {
                 {addNewlines(t("share_sensor_description"), "\\n")}
                 <br />
                 <div style={{ fontFamily: "Montserrat", fontWeight: 800 }}>{t("share_sensor_add_friend")}</div>
-                <Input autoFocus placeholder={t("email")} type="email" value={this.state.email} onChange={this.emailHandler.bind(this)} mt="10px" />
+                <Input autoFocus placeholder={t("email")} type="email" value={this.state.email} onChange={this.emailHandler.bind(this)} mt="10px" onKeyDown={this.keyDown.bind(this)} />
                 <div style={{ textAlign: "right" }}>
-                    <Button disabled={this.state.loading || this.props.sensor.sharedTo.length >= maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)} onClick={this.share.bind(this)} mt="17px">{t("share")}</Button>
+                    <Button disabled={this.isInvalidValid()} onClick={this.share.bind(this)} mt="17px">{t("share")}</Button>
                 </div>
                 {this.props.sensor.sharedTo.length > 0 && <>
                     <div style={{ fontWeight: "bold" }}>{t("share_sensor_already_shared")} {this.props.sensor.sharedTo.length}/{maxSharesPerSensor}</div>
