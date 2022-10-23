@@ -11,6 +11,7 @@ import notify from "../utils/notify";
 import SettingsModal from "../components/SettingsModal";
 import { withColorMode } from "../utils/withColorMode";
 import { MdEqualizer, MdImage } from "react-icons/md";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 const infoText = {
     fontFamily: "mulish",
@@ -52,7 +53,7 @@ class Dashboard extends Component {
         }
     }
     getCurrentSensor() {
-        let id = this.props.match.params.id;
+        let id = this.props.params.id;
         return this.state.sensors.find(x => x.sensor === id);
     }
     componentDidUpdate() {
@@ -111,12 +112,12 @@ class Dashboard extends Component {
         if (direction === 1 && indexOfCurrent === this.state.sensors.length - 1) setNext = this.state.sensors[0].sensor
         else if (direction === -1 && indexOfCurrent === 0) setNext = this.state.sensors[this.state.sensors.length - 1].sensor
         else setNext = this.state.sensors[indexOfCurrent + direction].sensor
-        this.props.history.push('/' + setNext)
+        this.props.navigate('/' + setNext)
     }
     removeSensor() {
         var current = this.getCurrentSensor().sensor;
         this.setState({ ...this.state, sensors: this.state.sensors.filter(x => x.sensor !== current) })
-        this.props.history.push('/')
+        this.props.navigate('/')
         this.props.reloadTags();
     }
     updateSensor(sensor) {
@@ -138,10 +139,12 @@ class Dashboard extends Component {
         return out;
     }
     showSettings() {
-        return this.props.location.search.indexOf("settings") !== -1;
+        return this.props.searchParams[0].has("settings");
     }
     closeSettings() {
-        window.location.href = window.location.href.split("?")[0]
+        this.props.navigate({
+            search: "",
+        }, {replace: true});
     }
     showGraphClick() {
         let showGraph = !this.state.showGraph
@@ -150,7 +153,7 @@ class Dashboard extends Component {
     }
     render() {
         var { t } = this.props;
-        if (this.props.match.params.id) SessionStore.setBackRoute(`/${this.props.match.params.id}`)
+        if (this.props.params.id) SessionStore.setBackRoute(`/${this.props.params.id}`)
         else SessionStore.setBackRoute("/")
         return (
             <>
@@ -169,7 +172,7 @@ class Dashboard extends Component {
                             }
                             {this.getCurrentSensor() ? (
                                 <Sensor sensor={this.getCurrentSensor()}
-                                    close={() => this.props.history.push('/')}
+                                    close={() => this.props.navigate('/')}
                                     next={() => this.nextIndex(1)}
                                     prev={() => this.nextIndex(-1)}
                                     remove={() => this.removeSensor()}
@@ -217,4 +220,12 @@ class Dashboard extends Component {
     }
 }
 
-export default withTranslation()(withColorMode(Dashboard));
+export default withTranslation()(withColorMode((props) => (
+    <Dashboard
+        {...props}
+        params={useParams()}
+        location={useLocation()}
+        navigate={useNavigate()}
+        searchParams={useSearchParams()}
+    />
+)));

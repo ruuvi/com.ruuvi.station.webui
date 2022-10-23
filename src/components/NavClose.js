@@ -2,10 +2,10 @@ import React, { Component } from "react";
 import {
     IconButton
 } from "@chakra-ui/react"
-import { withRouter } from "react-router";
 import { addListener, removeListener } from "../utils/shortcuts";
 import SessionStore from "../SessionStore";
 import { MdClose } from "react-icons/md";
+import { useParams, useNavigate } from "react-router-dom";
 
 class NavClose extends Component {
     constructor(props) {
@@ -19,10 +19,10 @@ class NavClose extends Component {
         removeListener("Escape")
     }
     clicked() {
-        if (this.props.match.params.id) {
-            this.props.history.push('/')
+        if (this.props.params.id) {
+            this.props.navigate('/')
         } else {
-            this.props.history.push(SessionStore.getBackRoute())
+            this.props.navigate(SessionStore.getBackRoute())
         }
     }
     render() {
@@ -34,4 +34,10 @@ class NavClose extends Component {
     }
 }
 
-export default withRouter(NavClose);
+export default (props) => (
+    <NavClose
+        {...props}
+        params={useParams()}
+        navigate={useNavigate()}
+    />
+);

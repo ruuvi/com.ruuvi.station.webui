@@ -9,8 +9,9 @@ import {
 } from "@chakra-ui/react"
 import { MdArrowDropDown } from "react-icons/md"
 import NetworkApi from "../NetworkApi";
-import { withRouter } from 'react-router-dom'
+import withRouter from "../utils/withRouter"
 import { withTranslation } from 'react-i18next';
+import { useNavigate } from "react-router-dom";
 
 class SensorMenu extends Component {
     constructor(props) {
@@ -28,7 +29,7 @@ class SensorMenu extends Component {
         });
     }
     getCurrentSensor() {
-        var path = this.props.location.pathname
+        var path = this.props.router.location.pathname
         return path.substring(path.indexOf("/") + 1, path.length)
     }
     render() {
@@ -48,7 +49,7 @@ class SensorMenu extends Component {
                                 if (i === this.state.sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                                 else divider = <MenuDivider />
                                 return <div key={x.sensor + "div"}>
-                                    <MenuItem key={x.sensor} className={this.getCurrentSensor() === x.sensor ? "menuActive" : undefined} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, ...borderStyle }} onClick={() => this.props.history.push('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
+                                    <MenuItem key={x.sensor} className={this.getCurrentSensor() === x.sensor ? "menuActive" : undefined} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, ...borderStyle }} onClick={() => this.props.navigate('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
                                     {divider}
                                 </div>
                             })}
@@ -60,4 +61,9 @@ class SensorMenu extends Component {
     }
 }
 
-export default withRouter(withTranslation()(SensorMenu));
+export default withRouter(withTranslation()((props) => (
+    <SensorMenu
+        {...props}
+        navigate={useNavigate()}
+    />
+)));

@@ -186,7 +186,7 @@ class SensorCard extends Component {
                                 }
                             </Box>
                             {this.state.loading ? (
-                                <center style={{ position: "relative", top: "50%", marginTop: isSmallCard ? 0 : height/3, transform: "translateY(-50%)" }}>
+                                <center style={{ position: "relative", top: "50%", marginTop: isSmallCard ? 0 : height / 3, transform: "translateY(-50%)" }}>
                                     <Spinner size="xl" />
                                 </center>
                             ) : (
@@ -196,18 +196,18 @@ class SensorCard extends Component {
                                             {this.state.data && this.state.data.measurements.length ? (
                                                 <>
                                                     {showGraph &&
-                                                        <Box height={graphHeight}>
-                                                            <Graph title="" key={this.props.sensor.sensor + showImage.toString()} dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
-                                                        </Box>
+                                                        <Graph title="" key={this.props.sensor.sensor + showImage.toString()} dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
                                                     }
                                                 </>
                                             ) : (
                                                 <>
-                                                    {this.state.loadingHistory ? (
-                                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}><Spinner size="xl" /></div></center>
-                                                    ) : showGraph && (
-                                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{t("no_data_in_range").split("\n").map(x => <div key={x}>{x}</div>)}</div></center>
-                                                    )}
+                                                    {showGraph && <>
+                                                        {this.state.loadingHistory ? (
+                                                            <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}><Spinner size="xl" /></div></center>
+                                                        ) : showGraph && (
+                                                            <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{t("no_data_in_range").split("\n").map(x => <div key={x}>{x}</div>)}</div></center>
+                                                        )}
+                                                    </>}
                                                 </>
                                             )}
                                         </div>

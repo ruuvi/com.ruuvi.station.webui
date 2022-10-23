@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 //import reportWebVitals from './reportWebVitals';
@@ -11,7 +11,8 @@ import { createStandaloneToast } from '@chakra-ui/toast'
 const { ToastContainer } = createStandaloneToast()
 
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
   <React.StrictMode>
     <Suspense fallback={
       <center style={{ width: "100%", marginTop: 100 }}>

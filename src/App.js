@@ -1,8 +1,8 @@
 import React from "react";
 import {
-  Switch,
+  Routes,
   Route,
-  HashRouter
+  HashRouter,
 } from "react-router-dom";
 import NetworkApi from "./NetworkApi";
 import logo from './img/ruuvi-vector-logo.svg'
@@ -141,7 +141,7 @@ export default function App() {
   })
   return (
     <ChakraProvider theme={ruuviTheme}>
-      <HashRouter>
+      <HashRouter basename="/">
         <HStack className="topbar" style={{ paddingLeft: "18px", paddingRight: "18px" }} height="60px">
           <Logo />
           <Text>
@@ -154,10 +154,10 @@ export default function App() {
           </span>
         </HStack>
         <div>
-          <Switch>
-            <Route path="/:id" render={rp => <Dashboard reloadTags={() => { forceUpdate() }} {...rp} />} />
-            <Route path="/" render={rp => <Dashboard reloadTags={() => { forceUpdate() }} {...rp} />} />
-          </Switch>
+          <Routes>
+            <Route path="/:id" element={<Dashboard reloadTags={() => { forceUpdate() }} />} />
+            <Route path="/" element={<Dashboard reloadTags={() => { forceUpdate() }} />} />
+          </Routes>
           <div style={bottomText}><a href="https://ruuvi.com/" target="_blank" rel="noreferrer">ruuvi.com</a></div>
           <div style={versionText}>v{pjson.version}</div>
         </div>

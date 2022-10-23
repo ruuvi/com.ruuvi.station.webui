@@ -9,7 +9,7 @@ import { CircularProgress, SlideFade } from "@chakra-ui/react"
 import { PinInput, PinInputField } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import LanguageMenu from "../components/LanguageMenu";
-import { withRouter } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 
 const loginText = {
@@ -41,15 +41,17 @@ class SignIn extends Component {
         }
     }
     componentDidMount() {
-        let token = new URLSearchParams(this.props.location.search).get('token');
-        if (token) {
-            this.props.history.push({
+        if (this.props.searchParams[0].has("token")) {
+            let token = this.props.searchParams[0].get("token")
+            this.props.navigate({
                 pathname: '/',
                 search: ''
-            })
-            this.setState({ ...this.state, validationCode: token, loading: true }, () => {
-                this.validate()
-            })
+            }, { replace: true })
+            if (token) {
+                this.setState({ ...this.state, validationCode: token, loading: true }, () => {
+                    this.validate()
+                })
+            }
         }
     }
     register() {
@@ -160,4 +162,11 @@ class SignIn extends Component {
     }
 }
 
-export default withRouter(withTranslation()(SignIn));
+export default withTranslation()((props) => (
+    <SignIn
+        {...props}
+        params={useParams()}
+        navigate={useNavigate()}
+        searchParams={useSearchParams()}
+    />
+));

@@ -26,7 +26,7 @@ import { MdChevronRight, MdInfo } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 import { exportCSV } from "../utils/export";
-import { withRouter } from 'react-router-dom';
+import withRouter from "../utils/withRouter"
 import DurationText from "../components/DurationText";
 import Store from "../Store";
 import ShareDialog from "../components/ShareDialog";
@@ -119,7 +119,7 @@ function SensorHeader(props) {
     if (isLargeDisplay) {
         return <div style={{ display: "flex", justifyContent: "space-between" }}>
             <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
-            <label for="avatarUpload">
+            <label htmlFor="avatarUpload">
                 {props.loadingImage ? <CircularProgress size={"96px"} isIndeterminate={true} color="primary" /> :
                     <Avatar style={{ cursor: "pointer" }} size="xl" name={props.sensor.name} src={props.testImgSrc || props.sensor.picture} />
                 }
@@ -148,7 +148,7 @@ function SensorHeader(props) {
                             </td>
                             <td width="33%" align="center">
                                 <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
-                                <label for="avatarUpload">
+                                <label htmlFor="avatarUpload">
                                     {props.loadingImage ? <CircularProgress mt="3" size={"64px"} isIndeterminate={true} color="primary" /> :
                                         <Avatar mt="3" bg="primary" size="lg" name={props.sensor.name} src={props.sensor.picture} />
                                     }
