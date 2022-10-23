@@ -46,6 +46,12 @@ class EditNameDialog extends Component {
         var limit = pjson.settings.sensorNameMaxLength
         this.setState({ ...this.state, name: name.substring(0, limit) })
     }
+    keyDown = (e) => {
+        if (e.key === 'Enter') {
+            if (this.state.loading || !this.state.name) return
+            this.update();
+        }
+    }
     render() {
         if (!this.props.sensor) return <></>
         var { t } = this.props;
@@ -54,7 +60,7 @@ class EditNameDialog extends Component {
                 <p style={{marginBottom: "8px"}}>
                     {t("rename_sensor_message")}
                 </p>
-                <Input autoFocus placeholder={t("sensor_name")} value={this.state.name} onChange={e => this.updateName(e.target.value)} />
+                <Input autoFocus placeholder={t("sensor_name")} value={this.state.name} onChange={e => this.updateName(e.target.value)} onKeyDown={this.keyDown.bind(this)} />
                 <div style={{ textAlign: "right" }}>
                     <Button disabled={this.state.loading || !this.state.name} onClick={this.update.bind(this)} mt="17px">{t("update")}</Button>
                 </div>
