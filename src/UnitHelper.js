@@ -45,25 +45,33 @@ export function getUnitFor(key, setting) {
     }
 }
 
+var logOnce = false
 export function getDisplayValue(key, value) {
-    if (!["temperature", "humidity", "pressure"].includes(key)) return value
-    let settings = localStorage.getItem("settings");
-    if (settings) {
-        settings = JSON.parse(settings)
-        let resolution = 2;
-        if (value != null) {
-            if (key === "temperature") {
-                if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE)
+    try {
+        if (!["temperature", "humidity", "pressure"].includes(key)) return value
+        let settings = localStorage.getItem("settings");
+        if (settings) {
+            settings = JSON.parse(settings)
+            let resolution = 2;
+            if (value != null) {
+                if (key === "temperature") {
+                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE)
+                }
+                if (key === "humidity") {
+                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_HUMIDITY)
+                }
+                if (key === "pressure") {
+                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
+                }
+                if (typeof (value) === "string") value = value.replace(" ", "").replace(",", ".").replace("−", "-")
+                value = parseFloat(value).toFixed(resolution)
+                value = localeNumber(+value, resolution)
             }
-            if (key === "humidity") {
-                if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_HUMIDITY)
-            }
-            if (key === "pressure") {
-                if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
-            }
-            if (typeof (value) === "string") value = value.replace(" ","").replace(",", ".").replace("−", "-")
-            value = parseFloat(value).toFixed(resolution)
-            value = localeNumber(+value, resolution)
+        }
+    } catch (error) {
+        if (!logOnce) {
+            console.log("getDisplayValue", error)
+            logOnce = true
         }
     }
     return value
