@@ -45,7 +45,6 @@ export function getUnitFor(key, setting) {
     }
 }
 
-var logOnce = false
 export function getDisplayValue(key, value) {
     try {
         if (!["temperature", "humidity", "pressure"].includes(key)) return value
@@ -55,13 +54,13 @@ export function getDisplayValue(key, value) {
             let resolution = 2;
             if (value != null) {
                 if (key === "temperature") {
-                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE)
+                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE || unitHelper.temperature.decimals)
                 }
                 if (key === "humidity") {
-                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_HUMIDITY)
+                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_HUMIDITY || unitHelper.humidity.decimals)
                 }
                 if (key === "pressure") {
-                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
+                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_PRESSURE || unitHelper.pressure.decimals)
                 }
                 if (typeof (value) === "string") value = value.replace(" ", "").replace(",", ".").replace("−", "-")
                 value = parseFloat(value).toFixed(resolution)
@@ -69,10 +68,7 @@ export function getDisplayValue(key, value) {
             }
         }
     } catch (error) {
-        if (!logOnce) {
-            console.log("getDisplayValue", error)
-            logOnce = true
-        }
+        console.log("getDisplayValue", error)
     }
     return value
 }
