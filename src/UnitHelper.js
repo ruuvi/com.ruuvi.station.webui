@@ -54,13 +54,16 @@ export function getDisplayValue(key, value) {
             let resolution = 2;
             if (value != null) {
                 if (key === "temperature") {
-                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE || unitHelper.temperature.decimals)
+                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE)
+                    else resolution = unitHelper.temperature.decimals
                 }
                 if (key === "humidity") {
-                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_HUMIDITY || unitHelper.humidity.decimals)
+                    if (settings.ACCURACY_HUMIDITY) resolution = parseInt(settings.ACCURACY_HUMIDITY)
+                    else resolution = unitHelper.humidity.decimals
                 }
                 if (key === "pressure") {
-                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_PRESSURE || unitHelper.pressure.decimals)
+                    if (settings.ACCURACY_PRESSURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
+                    else resolution = unitHelper.pressure.decimals
                 }
                 if (typeof (value) === "string") value = value.replace(" ", "").replace(",", ".").replace("−", "-")
                 value = parseFloat(value).toFixed(resolution)
