@@ -197,7 +197,7 @@ class SensorCard extends Component {
                                                 <>
                                                     {showGraph &&
                                                         <Box height={graphHeight}>
-                                                            <Graph title="" key={this.props.sensor.sensor} dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
+                                                            <Graph title="" key={this.props.sensor.sensor + showImage.toString()} dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
                                                         </Box>
                                                     }
                                                 </>
