@@ -265,7 +265,10 @@
                         sendOpenPage(response.data)
                     } else {
                         alert(response.error)
-                        setView("view_email")
+                        for (let i = 0; i < 4; i++) {
+                            document.getElementById(`pin_${i + 1}`).value = ""
+                        }
+                        setView("view_code")
                     }
                 })
                 .catch(error => {
