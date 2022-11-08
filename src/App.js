@@ -57,8 +57,10 @@ function ColorModeSwitch() {
   }
   return (
     <>
-      <Tooltip label={t("color_mode_tooltip")} hasArrow closeDelay={1000}>
-        <IconButton variant="ghost" style={{ marginRight: 16 }} onClick={toggleColorMode}>{colorMode === 'light' ? <MdOutlineNightlight /> : <SunIcon />}</IconButton>
+      <Tooltip key="color_mode_tooltip" label={t("color_mode_tooltip")} hasArrow closeOnScroll={true}>
+        <IconButton variant="ghost" style={{ marginRight: 16 }} onClick={toggleColorMode}>
+          {colorMode === 'light' ? <MdOutlineNightlight /> : <SunIcon />}
+        </IconButton>
       </Tooltip>
     </>
   )

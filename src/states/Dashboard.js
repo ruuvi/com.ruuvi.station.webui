@@ -27,7 +27,7 @@ function DashboardGrid(props) {
     else if (isMediumDisplay) size = "medium"
     else size = "mobile"
     //this.state.showBig ? "550px" : "400px"
-    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap={size === "mobile" ? "10px" : "20px"} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" :  props.showGraph ? "300px" : "360px"}, max-content))`}>
+    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap={size === "mobile" ? "10px" : "20px"} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" : props.showGraph ? "300px" : "360px"}, max-content))`}>
         {props.children(size)}
     </Box>
 }
@@ -144,7 +144,7 @@ class Dashboard extends Component {
     closeSettings() {
         this.props.navigate({
             search: "",
-        }, {replace: true});
+        }, { replace: true });
     }
     showGraphClick() {
         let showGraph = !this.state.showGraph
@@ -191,8 +191,10 @@ class Dashboard extends Component {
                                         </div>
                                         */}
                                         <div style={{ textAlign: "end" }} >
-                                            <Tooltip label={t(this.state.showGraph ? "button_card_image_tooltip" : "button_card_graph_tooltip")} hasArrow closeDelay={1000}>
-                                                <Button variant="imageToggle" mr={2} onClick={this.showGraphClick.bind(this)}>{this.state.showGraph ? <MdImage size="23px" /> : <MdEqualizer size="23px" />}</Button>
+                                            <Tooltip label={t(this.state.showGraph ? "button_card_image_tooltip" : "button_card_graph_tooltip")} hasArrow closeOnScroll={true}>
+                                                <Button variant="imageToggle" mr={2} onClick={this.showGraphClick.bind(this)}>
+                                                    {this.state.showGraph ? <MdImage size="23px" /> : <MdEqualizer size="23px" />}
+                                                </Button>
                                             </Tooltip>
                                             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
                                         </div>
