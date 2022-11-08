@@ -47,6 +47,7 @@ let currColorMode;
 function ColorModeSwitch() {
   const { t } = useTranslation();
   const { colorMode, toggleColorMode } = useColorMode()
+  const [showTooltip, setShowTooltip] = React.useState(false);
 
   if (currColorMode !== colorMode) {
     currColorMode = colorMode;
@@ -57,8 +58,8 @@ function ColorModeSwitch() {
   }
   return (
     <>
-      <Tooltip key="color_mode_tooltip" label={t("color_mode_tooltip")} hasArrow closeOnScroll={true}>
-        <IconButton variant="ghost" style={{ marginRight: 16 }} onClick={toggleColorMode}>
+      <Tooltip key="color_mode_tooltip" label={t("color_mode_tooltip")} hasArrow isOpen={showTooltip}>
+        <IconButton variant="ghost" style={{ marginRight: 16 }} onClick={() => toggleColorMode() || setTimeout(() => setShowTooltip(false), 4000)} onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
           {colorMode === 'light' ? <MdOutlineNightlight /> : <SunIcon />}
         </IconButton>
       </Tooltip>

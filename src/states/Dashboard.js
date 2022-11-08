@@ -3,7 +3,7 @@ import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
 import { Spinner, Box, Link, useMediaQuery, Button, Tooltip } from "@chakra-ui/react"
-import { withTranslation } from 'react-i18next';
+import { useTranslation, withTranslation } from 'react-i18next';
 import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
 import SessionStore from "../SessionStore";
@@ -31,7 +31,16 @@ function DashboardGrid(props) {
         {props.children(size)}
     </Box>
 }
-//{props.children}
+
+function GraphToggle(props) {
+    var { t } = useTranslation();
+    const [showTooltip, setShowTooltip] = React.useState(false);
+    return <Tooltip label={t(props.label)} hasArrow isOpen={showTooltip}>
+        <Button variant="imageToggle" mr={2} onClick={() => props.showGraphClick() || setTimeout(() => setShowTooltip(false), 4000)} onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
+            {props.showGraph ? <MdImage size="23px" /> : <MdEqualizer size="23px" />}
+        </Button>
+    </Tooltip>
+}
 
 class Dashboard extends Component {
     constructor(props) {
@@ -191,11 +200,7 @@ class Dashboard extends Component {
                                         </div>
                                         */}
                                         <div style={{ textAlign: "end" }} >
-                                            <Tooltip label={t(this.state.showGraph ? "button_card_image_tooltip" : "button_card_graph_tooltip")} hasArrow closeOnScroll={true}>
-                                                <Button variant="imageToggle" mr={2} onClick={this.showGraphClick.bind(this)}>
-                                                    {this.state.showGraph ? <MdImage size="23px" /> : <MdEqualizer size="23px" />}
-                                                </Button>
-                                            </Tooltip>
+                                            <GraphToggle label={this.state.showGraph ? "button_card_image_tooltip" : "button_card_graph_tooltip"} showGraph={this.state.showGraph} showGraphClick={this.showGraphClick.bind(this)} />
                                             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
                                         </div>
                                     </div>
