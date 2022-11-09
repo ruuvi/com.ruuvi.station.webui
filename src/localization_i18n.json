@@ -158,7 +158,8 @@
       "pressure_resolution": "Pressure resolution",
       "color_mode_tooltip": "Toggle color mode",
       "button_card_image_tooltip": "Show images",
-      "button_card_graph_tooltip": "Show graphs"
+      "button_card_graph_tooltip": "Show graphs",
+      "support": "Support"
     }
   },
   "fi": {
@@ -320,7 +321,8 @@
       "pressure_resolution": "Paineen resoluutio",
       "color_mode_tooltip": "Vaihda väritilaa",
       "button_card_image_tooltip": "Näytä kuvat",
-      "button_card_graph_tooltip": "Näytä kaaviot"
+      "button_card_graph_tooltip": "Näytä kaaviot",
+      "support": "Tuki"
     }
   },
   "sv": {
@@ -482,7 +484,8 @@
       "pressure_resolution": "Tryckupplösning",
       "color_mode_tooltip": "Byt färgeläge",
       "button_card_image_tooltip": "Visa bilder",
-      "button_card_graph_tooltip": "Visa grafer"
+      "button_card_graph_tooltip": "Visa grafer",
+      "support": "Support"
     }
   }
 }

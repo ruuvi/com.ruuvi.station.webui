@@ -7,7 +7,7 @@ import {
 import NetworkApi from "./NetworkApi";
 import logo from './img/ruuvi-vector-logo.svg'
 import logoDark from './img/ruuvi-vector-logo-dark.svg'
-import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton, Tooltip } from "@chakra-ui/react"
+import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton, Tooltip, Button } from "@chakra-ui/react"
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
@@ -38,9 +38,18 @@ const versionText = {
   fontSize: 16,
   fontWeight: 600,
   color: "#c8dbd9",
-  marginTop: -4,
   paddingBottom: 20,
 }
+
+const supportLink = {
+  fontFamily: "mulish",
+  fontSize: "14px",
+  width: "100%",
+  textAlign: "center",
+  color: "#1f9385",
+  textDecoration: "underline",
+}
+
 
 
 let currColorMode;
@@ -117,6 +126,8 @@ export default function App() {
     }
   }
 
+  let { t, i18n } = useTranslation()
+
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
   const logout = () => {
@@ -162,6 +173,7 @@ export default function App() {
             <Route path="/" element={<Dashboard reloadTags={() => { forceUpdate() }} />} />
           </Routes>
           <div style={bottomText}><a href="https://ruuvi.com/" target="_blank" rel="noreferrer">ruuvi.com</a></div>
+          <div style={supportLink}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi/tuki" : "https://ruuvi.com/support"}>{t("support")}</a></div>
           <div style={versionText}>v{pjson.version}</div>
         </div>
       </HashRouter>
