@@ -12,6 +12,7 @@ import SettingsModal from "../components/SettingsModal";
 import { withColorMode } from "../utils/withColorMode";
 import { MdEqualizer, MdImage } from "react-icons/md";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import SensorTypePicker from "../components/SensorTypePicker";
 
 const infoText = {
     fontFamily: "mulish",
@@ -36,7 +37,7 @@ function GraphToggle(props) {
     var { t } = useTranslation();
     const [showTooltip, setShowTooltip] = React.useState(false);
     return <Tooltip label={t(props.label)} hasArrow isOpen={showTooltip}>
-        <Button variant="imageToggle" mr={2} onClick={() => props.showGraphClick() || setTimeout(() => setShowTooltip(false), 4000)} onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
+        <Button variant="imageToggle" ml={2} mt={-0.5} onClick={() => props.showGraphClick() || setTimeout(() => setShowTooltip(false), 4000)} onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
             {props.showGraph ? <MdImage size="23px" /> : <MdEqualizer size="23px" />}
         </Button>
     </Tooltip>
@@ -53,6 +54,7 @@ class Dashboard extends Component {
             from: 24 * 3,
             showGraph: store.getDashboardShowGraph(),
             showBig: true,
+            graphType: store.getDashboardGraphType()
         }
         var from = store.getDashboardFrom();
         if (from) {
@@ -160,6 +162,10 @@ class Dashboard extends Component {
         this.setState({ ...this.state, showGraph: showGraph })
         new Store().setDashboardShowGraph(showGraph)
     }
+    setGraphType(type) {
+        this.setState({ ...this.state, graphType: type })
+        new Store().setDashboardGraphType(type)
+    }
     render() {
         var { t } = this.props;
         if (this.props.params.id) SessionStore.setBackRoute(`/${this.props.params.id}`)
@@ -200,8 +206,9 @@ class Dashboard extends Component {
                                         </div>
                                         */}
                                         <div style={{ textAlign: "end" }} >
-                                            <GraphToggle label={this.state.showGraph ? "button_card_image_tooltip" : "button_card_graph_tooltip"} showGraph={this.state.showGraph} showGraphClick={this.showGraphClick.bind(this)} />
+                                            <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
                                             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
+                                            <GraphToggle label={this.state.showGraph ? "button_card_image_tooltip" : "button_card_graph_tooltip"} showGraph={this.state.showGraph} showGraphClick={this.showGraphClick.bind(this)} />
                                         </div>
                                     </div>
                                     <DashboardGrid showGraph={this.state.showGraph}>
@@ -210,7 +217,7 @@ class Dashboard extends Component {
                                                 {this.state.sensors.map(x => {
                                                     return <span key={x.sensor + this.state.from} style={{ width: 1000, maxWidth: "100%" }}>
                                                         <a href={"#/" + x.sensor}>
-                                                            <SensorCard sensor={x} size={size} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} dataFrom={this.state.from} showImage={!this.state.showGraph} showGraph={this.state.showGraph} />
+                                                            <SensorCard sensor={x} size={size} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} dataFrom={this.state.from} showImage={!this.state.showGraph} showGraph={this.state.showGraph} graphType={this.state.graphType} />
                                                         </a></span>
                                                 })}
                                             </>

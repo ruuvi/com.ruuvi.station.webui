@@ -46,7 +46,6 @@ class SensorCard extends Component {
             lastParsedReading: null,
             loading: true,
             loadingHistory: true,
-            graphDataKey: "temperature",
             imageHover: false,
             loadingImage: false,
         }
@@ -196,7 +195,7 @@ class SensorCard extends Component {
                                             {this.state.data && this.state.data.measurements.length ? (
                                                 <>
                                                     {showGraph &&
-                                                        <Graph title="" key={this.props.sensor.sensor + showImage.toString()} dataKey={this.state.graphDataKey} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
+                                                        <Graph title="" key={this.props.sensor.sensor + showImage.toString() + this.props.graphType} dataKey={this.props.graphType} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
                                                     }
                                                 </>
                                             ) : (

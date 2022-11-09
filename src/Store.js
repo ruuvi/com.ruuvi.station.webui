@@ -2,6 +2,7 @@ const GRAPH_FROM_KEY = "graph_from";
 const DASHBOARD_FROM_KEY = "dashboard_from";
 const SENSOR_OPEN_ACCORDIONS = "sensor_open_accordions";
 const DASHBOARD_SHOW_GRAPH_KEY = "dashboard_show_graph";
+const DASHBOARD_GRAPH_TYPE_KEY = "dashboard_graph_type";
 
 class Store {
     setGraphFrom(v) {
@@ -28,6 +29,12 @@ class Store {
     }
     getDashboardShowGraph() {
         return localStorage.getItem(DASHBOARD_SHOW_GRAPH_KEY) === "true"
+    }
+    setDashboardGraphType(v) {
+        localStorage.setItem(DASHBOARD_GRAPH_TYPE_KEY, v)
+    }
+    getDashboardGraphType() {
+        return localStorage.getItem(DASHBOARD_GRAPH_TYPE_KEY) || "temperature"
     }
 }
 
