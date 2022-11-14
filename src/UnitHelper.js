@@ -145,6 +145,7 @@ export function getUnitHelper(key, plaintext) {
 
 export function localeNumber(value, decimals) {
     if (typeof (value) !== "number") return value
+    if (isNaN(value)) return "-"
     if (decimals === undefined) return value.toLocaleString("fi-FI")
     return value.toLocaleString("fi-FI", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 }

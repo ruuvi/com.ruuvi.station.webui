@@ -132,6 +132,7 @@ class SensorCard extends Component {
         if (this.props.size === "medium") graphHeight = 145;
         if (this.props.size === "mobile" && showGraph) showImage = false;
         let isSmallCard = this.props.size === "mobile" && !showGraph
+        let mainStat = this.props.graphType || "temperature";
         return (
             <div>
                 <Box className="content sensorCard" height={height} borderRadius="lg" overflow="hidden">
@@ -178,9 +179,9 @@ class SensorCard extends Component {
                                 )}
                                 {this.state.lastParsedReading &&
                                     <BigValue
-                                        value={getDisplayValue("temperature", localeNumber(getUnitHelper("temperature").value(this.getLatestReading().temperature), getUnitHelper("temperature").decimals))}
-                                        unit={getUnitHelper("temperature").unit}
-                                        alertActive={this.isAlertTriggerd("temperature")}
+                                        value={getDisplayValue(mainStat, localeNumber(getUnitHelper(mainStat).value(this.getLatestReading()[mainStat]), getUnitHelper(mainStat).decimals))}
+                                        unit={getUnitHelper(mainStat).unit}
+                                        alertActive={this.isAlertTriggerd(mainStat)}
                                     />
                                 }
                             </Box>
@@ -195,7 +196,7 @@ class SensorCard extends Component {
                                             {this.state.data && this.state.data.measurements.length ? (
                                                 <>
                                                     {showGraph &&
-                                                        <Graph title="" key={this.props.sensor.sensor + showImage.toString() + this.props.graphType} dataKey={this.props.graphType} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
+                                                        <Graph title="" key={this.props.sensor.sensor + showImage.toString() + mainStat} dataKey={mainStat} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
                                                     }
                                                 </>
                                             ) : (
@@ -211,7 +212,7 @@ class SensorCard extends Component {
                                             )}
                                         </div>
                                         <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 0 0" }}>
-                                            {["humidity", "battery", "pressure", "movementCounter"].map(x => {
+                                            {["humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature": undefined]].map(x => {
                                                 let value = this.getLatestReading()[x];
                                                 if (value === undefined) return null;
                                                 return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>

@@ -20,6 +20,8 @@ const opts = ["temperature", "humidity", "pressure", "movementCounter", "battery
 export default function SensorTypePicker(props) {
     const { t } = useTranslation();
     let v = props.value || "temperature";
+    let current = t(getUnitHelper(v).label);
+    if (current.length > 15) current = current.substring(0,15)+"..."
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
             <MenuButton as={Button}
@@ -29,7 +31,7 @@ export default function SensorTypePicker(props) {
                 className="durationPicker"
                 style={{ ...detailedSubText }}
                 borderRadius='4px'>
-                {t(getUnitHelper(v).label)}
+                {current}
             </MenuButton>
             <MenuList>
                 {opts.map((x, i) => {
