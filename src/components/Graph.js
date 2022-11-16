@@ -118,7 +118,7 @@ class Graph extends Component {
         let colorMode = this.props.colorMode.colorMode;
         let height = this.props.height || 300;
         return (
-            <div ref={this.pRef} style={{ height: height }}>
+            <div ref={this.pRef} style={{ height: height + (this.props.cardView ? 0 : 25) }}>
                 {this.state.resizing ? (
                     <center style={{ width: "100%", height: height, paddingTop: height / 4 }}>
                         <span className='spinner'></span>
