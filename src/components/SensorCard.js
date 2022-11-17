@@ -179,7 +179,7 @@ class SensorCard extends Component {
                                 )}
                                 {this.state.lastParsedReading &&
                                     <BigValue
-                                        value={getDisplayValue(mainStat, localeNumber(getUnitHelper(mainStat).value(this.getLatestReading()[mainStat]), getUnitHelper(mainStat).decimals))}
+                                        value={getDisplayValue(mainStat, localeNumber(getUnitHelper(mainStat).value(this.getLatestReading()[mainStat], mainStat === "humidity" ? this.getLatestReading().temperature : undefined), getUnitHelper(mainStat).decimals))}
                                         unit={getUnitHelper(mainStat).unit}
                                         alertActive={this.isAlertTriggerd(mainStat)}
                                     />
