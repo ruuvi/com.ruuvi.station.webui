@@ -35,7 +35,7 @@ const versionText = {
   width: "100%",
   textAlign: "center",
   fontFamily: "mulish",
-  fontSize: 16,
+  fontSize: 10,
   fontWeight: 600,
   color: "#c8dbd9",
   paddingBottom: 20,
