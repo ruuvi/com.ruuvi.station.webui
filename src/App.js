@@ -7,7 +7,7 @@ import {
 import NetworkApi from "./NetworkApi";
 import logo from './img/ruuvi-vector-logo.svg'
 import logoDark from './img/ruuvi-vector-logo-dark.svg'
-import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton, Tooltip, Button } from "@chakra-ui/react"
+import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton, Tooltip, useMediaQuery } from "@chakra-ui/react"
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
@@ -56,7 +56,7 @@ let currColorMode;
 function ColorModeSwitch() {
   const { t } = useTranslation();
   const { colorMode, toggleColorMode } = useColorMode()
-  const [showTooltip, setShowTooltip] = React.useState(false);
+  const [isMobile] = useMediaQuery("(max-width: 1023px)")
 
   if (currColorMode !== colorMode) {
     currColorMode = colorMode;
@@ -67,8 +67,8 @@ function ColorModeSwitch() {
   }
   return (
     <>
-      <Tooltip key="color_mode_tooltip" label={t("color_mode_tooltip")} hasArrow isOpen={showTooltip}>
-        <IconButton variant="ghost" style={{ marginRight: 16 }} onClick={() => toggleColorMode() || setTimeout(() => setShowTooltip(false), 4000)} onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
+      <Tooltip key="color_mode_tooltip" label={t("color_mode_tooltip")} hasArrow isDisabled={isMobile}>
+        <IconButton variant="ghost" style={{ marginRight: 16 }} onClick={() => toggleColorMode()}>
           {colorMode === 'light' ? <MdOutlineNightlight /> : <SunIcon />}
         </IconButton>
       </Tooltip>
@@ -166,9 +166,9 @@ export default function App() {
             <SensorMenu sensors={sensors} key={Math.random()} />
             <UserMenu logout={logout} settings={() => {
               if (window.location.href.indexOf("#") !== -1) {
-              window.location.href += "?settings"
+                window.location.href += "?settings"
               } else {
-              window.location.href += "#/?settings"
+                window.location.href += "#/?settings"
               }
             }} email={user.email} />
           </span>

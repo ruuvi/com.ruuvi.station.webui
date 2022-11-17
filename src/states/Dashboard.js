@@ -35,9 +35,9 @@ function DashboardGrid(props) {
 
 function GraphToggle(props) {
     var { t } = useTranslation();
-    const [showTooltip, setShowTooltip] = React.useState(false);
-    return <Tooltip label={t(props.label)} hasArrow isOpen={showTooltip}>
-        <Button variant="imageToggle" ml={2} mt={-0.5} onClick={() => props.showGraphClick() || setTimeout(() => setShowTooltip(false), 4000)} onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
+    const [isMobile] = useMediaQuery("(max-width: 1023px)")
+    return <Tooltip label={t(props.label)} hasArrow isDisabled={isMobile}>
+        <Button variant="imageToggle" ml={2} mt={-0.5} onClick={() => props.showGraphClick()}>
             {props.showGraph ? <MdImage size="23px" /> : <MdEqualizer size="23px" />}
         </Button>
     </Tooltip>
