@@ -178,7 +178,7 @@ export default function App() {
             <Route path="/:id" element={<Dashboard reloadTags={() => { forceUpdate() }} />} />
             <Route path="/" element={<Dashboard reloadTags={() => { forceUpdate() }} />} />
           </Routes>
-          <div style={bottomText}><a href="https://ruuvi.com/" target="_blank" rel="noreferrer">ruuvi.com</a></div>
+          <div style={bottomText}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi" : "https://ruuvi.com/"} target="_blank" rel="noreferrer">ruuvi.com</a></div>
           <div style={supportLink}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi/tuki" : "https://ruuvi.com/support"}>{t("support")}</a></div>
           <div style={versionText}>v{pjson.version}</div>
         </div>
