@@ -1,4 +1,4 @@
-import { Alert, Text, AlertIcon, CloseButton } from '@chakra-ui/react'
+import { Alert, Text, AlertIcon, CloseButton, Box } from '@chakra-ui/react'
 import { ruuviTheme } from '../themes'
 import { createStandaloneToast } from '@chakra-ui/toast'
 
@@ -28,6 +28,7 @@ function toastIt(text, status, duration) {
                 <Text fontWeight={status !== "info" ? 600 : undefined}>
                     {text}
                 </Text>
+                <Box flexGrow={10}></Box>
                 <CloseButton
                     alignSelf='flex-start'
                     position='relative'
