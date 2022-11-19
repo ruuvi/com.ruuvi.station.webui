@@ -29,11 +29,12 @@ function toastIt(text, status, duration) {
                     {text}
                 </Text>
                 <CloseButton
+                    alignSelf='flex-start'
+                    position='relative'
+                    right={-1}
+                    top={-1}
                     size="sm"
                     onClick={props.onClose}
-                    position="absolute"
-                    insetEnd={1}
-                    top={1}
                 />
             </Alert>
         ),
