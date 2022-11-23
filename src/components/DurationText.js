@@ -12,7 +12,8 @@ class DurationText extends Component {
         }
     }
     componentDidMount() {
-        this.interval = setInterval(() => this.setState({ ...this.state, to: new Date().getTime() / 1000 }), 1000);
+        this.setState({ ...this.state, from: this.props.from, to: new Date().getTime() / 1000 });
+        this.interval = setInterval(() => this.setState({ ...this.state, from: this.props.from, to: new Date().getTime() / 1000 }), 1000);
     }
     componentWillUnmount() {
         clearInterval(this.interval);

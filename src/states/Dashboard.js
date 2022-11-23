@@ -73,46 +73,38 @@ class Dashboard extends Component {
     componentWillUnmount() {
         clearTimeout(this.alertUpdateLoop);
     }
-    loadAlerts() {
+    async fetchData(initialSensors) {
         clearTimeout(this.alertUpdateLoop);
         this.alertUpdateLoop = setTimeout(() => {
-            this.loadAlerts()
+            this.fetchData()
         }, 60 * 1000);
         // dont load alerts if sensor view is open
         if (this.getCurrentSensor()) return
-        new NetworkApi().getAlerts(null, data => {
-            if (data.result === "success") {
-                this.setState({ ...this.state, alerts: data.data.sensors })
-            }
-        })
+        let resp = await new NetworkApi().getAllSensorsAsync();
+        if (resp.result === "success") {
+            let sensors = this.state.sensors;
+            if (initialSensors) sensors = initialSensors
+            sensors.forEach((x,i) => {
+                let newSensor = resp.data.sensors.find(y => y.sensor === x.sensor)
+                if (newSensor) {
+                    sensors[i] = {...x, ...newSensor}
+                }
+            })
+            this.setState({ ...this.state, sensors: sensors, loading: false })
+        }
     }
     updateFrom(v) {
         this.setState({ ...this.state, from: v })
         new Store().setDashboardFrom(v)
     }
-    componentDidMount() {
+    async componentDidMount() {
         var api = new NetworkApi();
-        api.sensors(resp => {
-            if (resp.result === "success") {
-                var d = resp.data.sensors;
-                api.user(uresp => {
-                    if (resp.result === "success") {
-                        for (var i = 0; i < d.length; i++) {
-                            let mac = d[i].sensor;
-                            var uSensor = uresp.data.sensors.find(x => x.sensor === mac)
-                            if (uSensor) d[i] = { ...d[i], ...uSensor }
-                        }
-                        this.setState({ ...this.state, sensors: d, loading: false })
-                        this.loadAlerts();
-                    } else if (resp.result === "error") {
-                        notify.error(this.props.t(`UserApiError.${resp.code}`))
-                    }
-                })
-            } else if (resp.result === "error") {
-                notify.error(this.props.t(`UserApiError.${resp.code}`))
+        api.user(uresp => {
+            if (uresp.result === "success") {
+                this.fetchData(uresp.data.sensors)
+            } else if (uresp.result === "error") {
+                notify.error(this.props.t(`UserApiError.${uresp.code}`))
             }
-        }, (e) => {
-            notify.error(this.props.t(`something_went_wrong`))
         })
     }
     nextIndex(direction) {
@@ -217,7 +209,7 @@ class Dashboard extends Component {
                                                 {this.state.sensors.map(x => {
                                                     return <span key={x.sensor + this.state.from} style={{ width: 1000, maxWidth: "100%" }}>
                                                         <a href={"#/" + x.sensor}>
-                                                            <SensorCard sensor={x} size={size} alerts={this.state.alerts.find(y => y.sensor === x.sensor)} dataFrom={this.state.from} showImage={!this.state.showGraph} showGraph={this.state.showGraph} graphType={this.state.graphType} />
+                                                            <SensorCard sensor={x} size={size} dataFrom={this.state.from} showImage={!this.state.showGraph} showGraph={this.state.showGraph} graphType={this.state.graphType} />
                                                         </a></span>
                                                 })}
                                             </>

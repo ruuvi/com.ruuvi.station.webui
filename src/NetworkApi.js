@@ -188,6 +188,18 @@ class NetworkApi {
         }
         return respData;
     };
+    async getAllSensorsAsync() {
+        var q = "?sharedToMe=true"
+        q += "&measurements=true"
+        q += "&alerts=true"
+        q += "&sharedToOthers=true"
+        const resp = await fetch(this.url + "/sensors-dense" + q, this.options)
+        const respData = await resp.json()
+        respData.data?.sensors.forEach(x => {
+            parse(x)
+        })
+        return respData;
+    }
     share(mac, email, success) {
         fetch(this.url + "/share", {
             ...this.options,

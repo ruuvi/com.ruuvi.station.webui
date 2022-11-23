@@ -44,7 +44,7 @@ class SensorCard extends Component {
         this.state = {
             data: null,
             lastParsedReading: null,
-            loading: true,
+            loading: false,
             loadingHistory: true,
             imageHover: false,
             loadingImage: false,
@@ -70,27 +70,19 @@ class SensorCard extends Component {
         clearTimeout(this.fetchDataLoop);
         this.fetchDataLoop = setTimeout(() => {
             this.loadData()
-        }, 60 * 1000);
+        }, 60 * 1000 * (this.props.dataFrom > 1 ? 5 : 1));
         var graphDataMode = this.props.dataFrom <= 24 ? "mixed" : "sparse";
         try {
-            let singleData = await new NetworkApi().getLastestDataAsync(this.props.sensor.sensor)
-            if (singleData.result === "success") {
-                let oneDenseData = singleData.data;
-                var lastParsedReading = oneDenseData.measurements.length === 1 ? oneDenseData.measurements[0] : null
-                this.setState({ ...this.state, loading: false, lastParsedReading: lastParsedReading })
-                this.loadGraphData(graphDataMode, lastParsedReading);
-            } else if (singleData.result === "error") {
-                console.error(singleData.error)
-                this.setState({ ...this.state, loading: false, loadingHistory: false })
-            }
+            this.loadGraphData(graphDataMode);
         } catch (e) {
             console.log("err", e)
             this.setState({ data: null, loading: false, loadingHistory: false })
         }
     }
     getLatestReading() {
-        if (!this.state.lastParsedReading) return [];
-        return this.state.lastParsedReading.parsed;
+        var lastParsedReading = this.props.sensor.measurements.length === 1 ? this.props.sensor.measurements[0] : null
+        if (!lastParsedReading) return null;
+        return {...lastParsedReading.parsed, timestamp: lastParsedReading.timestamp};
     }
     getTimeSinceLastUpdate() {
         if (!this.state.data || !this.state.data.measurements.length) return " - ";
@@ -99,10 +91,10 @@ class SensorCard extends Component {
         return Math.floor(((now - lastUpdate) / 60))
     }
     getAlert(type) {
-        if (!this.props.alerts) return null
-        var idx = this.props.alerts.alerts.findIndex(x => x.type === type)
+        if (!this.props.sensor) return null
+        var idx = this.props.sensor.alerts.findIndex(x => x.type === type)
         if (idx !== -1) {
-            return this.props.alerts.alerts[idx]
+            return this.props.sensor.alerts[idx]
         }
         return null
     }
@@ -133,6 +125,7 @@ class SensorCard extends Component {
         if (this.props.size === "mobile" && showGraph) showImage = false;
         let isSmallCard = this.props.size === "mobile" && !showGraph
         let mainStat = this.props.graphType || "temperature";
+        let latestReading = this.getLatestReading();
         return (
             <div>
                 <Box className="content sensorCard" height={height} borderRadius="lg" overflow="hidden">
@@ -177,9 +170,9 @@ class SensorCard extends Component {
                                         {this.props.sensor.name}
                                     </Heading>
                                 )}
-                                {this.state.lastParsedReading &&
+                                {latestReading &&
                                     <BigValue
-                                        value={getDisplayValue(mainStat, localeNumber(getUnitHelper(mainStat).value(this.getLatestReading()[mainStat], mainStat === "humidity" ? this.getLatestReading().temperature : undefined), getUnitHelper(mainStat).decimals))}
+                                        value={getDisplayValue(mainStat, localeNumber(getUnitHelper(mainStat).value(latestReading[mainStat], mainStat === "humidity" ? latestReading.temperature : undefined), getUnitHelper(mainStat).decimals))}
                                         unit={getUnitHelper(mainStat).unit}
                                         alertActive={this.isAlertTriggerd(mainStat)}
                                     />
@@ -191,7 +184,7 @@ class SensorCard extends Component {
                                 </center>
                             ) : (
                                 <div style={{ maxWidth: this.props.size === "mobile" && !this.props.showGraph ? "300px" : undefined }}>
-                                    {this.state.lastParsedReading ? <div>
+                                    {latestReading ? <div>
                                         <div style={{ marginLeft: -24, marginRight: -30, marginTop: -10, marginBottom: -10, paddingBottom: -50 }}>
                                             {this.state.data && this.state.data.measurements.length ? (
                                                 <>
@@ -212,17 +205,17 @@ class SensorCard extends Component {
                                             )}
                                         </div>
                                         <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 0 0" }}>
-                                            {["humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature": undefined]].map(x => {
-                                                let value = this.getLatestReading()[x];
+                                            {["humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature" : undefined]].map(x => {
+                                                let value = latestReading[x];
                                                 if (value === undefined) return null;
                                                 return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
-                                                    <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, this.getLatestReading()["temperature"]), getUnitHelper(x).decimals))}</span>
+                                                    <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
                                                     <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
                                                 </GridItem>
                                             })}
                                         </SimpleGrid>
                                         <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%" }}>
-                                            <DurationText from={this.state.lastParsedReading ? this.state.lastParsedReading.timestamp : " - "} t={this.props.t} />
+                                            <DurationText from={latestReading ? latestReading.timestamp : " - "} t={this.props.t} />
                                         </div>
                                     </div> : <div>
                                         <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: height / 2 - 80 }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
