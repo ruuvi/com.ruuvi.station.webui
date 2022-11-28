@@ -221,7 +221,7 @@ class Sensor extends Component {
         }
     }
     getDataMode() {
-        return this.state.from > 24 ? "sparse" : "dense";
+        return "mixed"
     }
     async loadData(showLoading, clearLast) {
         clearTimeout(this.latestDataUpdate);

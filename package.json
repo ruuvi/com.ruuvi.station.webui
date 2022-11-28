@@ -4,7 +4,7 @@
   "settings": {
     "sensorNameMaxLength": 32,
     "alertDescriptionMaxLength": 100,
-    "dataFetchPaginationSize": 1000,
+    "dataFetchPaginationSize": 1500,
     "dataCacheLengthInDays": 100
   },
   "private": true,
