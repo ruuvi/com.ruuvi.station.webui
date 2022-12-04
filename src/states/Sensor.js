@@ -187,13 +187,11 @@ class Sensor extends Component {
         super(props)
         this.state = {
             data: null,
-            lastestDatapoint: null,
             loading: true,
             graphKey: "temperature",
             from: new Store().getGraphFrom() || 24,
             table: "",
             resolvedMode: "",
-            alerts: [],
             editName: false,
             showShare: false,
             offsetDialog: null,
@@ -215,7 +213,7 @@ class Sensor extends Component {
     }
     componentDidUpdate(prevProps) {
         document.title = "Ruuvi Sensor: " + this.props.sensor.name
-        if (this.props.sensor !== prevProps.sensor) {
+        if (this.props.sensor.sensor !== prevProps.sensor.sensor) {
             this.applyAccordionSetting()
             this.loadData(true, true)
         }
@@ -233,19 +231,7 @@ class Sensor extends Component {
             newState.lastestDatapoint = null;
         }
         this.setState(newState)
-        new NetworkApi().getAlerts(this.props.sensor.sensor, data => {
-            if (data.result === "success") {
-                var sensor = data.data.sensors.find(x => x.sensor === this.props.sensor.sensor)
-                if (sensor) this.setState({ ...this.state, alerts: sensor.alerts })
-            }
-        })
         try {
-            (async () => {
-                let lastestDatapoint = await new NetworkApi().getLastestDataAsync(this.props.sensor.sensor)
-                if (lastestDatapoint.result === "success") {
-                    this.setState({ ...this.state, lastestDatapoint: lastestDatapoint.data })
-                }
-            })()
             let dataMode = this.getDataMode();
             var thisFrom = this.state.from;
             var that = this;
@@ -290,11 +276,14 @@ class Sensor extends Component {
             this.setState({ ...this.state, loading: false })
         }
     }
+    getLatestReadingFromProps() {
+        var lastParsedReading = this.props.sensor.measurements.length === 1 ? this.props.sensor.measurements[0] : null
+        if (!lastParsedReading) return null;
+        return { ...lastParsedReading.parsed, timestamp: lastParsedReading.timestamp };
+    }
     getLatestReading(kv) {
-        if (!this.state.lastestDatapoint) return [];
-        var ms = this.state.lastestDatapoint.measurements;
-        if (!ms || !ms.length) return [];
-        ms = ms[0].parsed;
+        let ms = this.getLatestReadingFromProps()
+        if (!ms) return [];
         if (!kv) return ms;
         var objs = Object.keys(ms);
         return objs.map(x => {
@@ -321,9 +310,10 @@ class Sensor extends Component {
         this.setState({ ...this.state, graphKey: key });
     }
     getAlert(type) {
-        var idx = this.state.alerts.findIndex(x => x.type === type)
+        if (!this.props.sensor) return null
+        var idx = this.props.sensor.alerts.findIndex(x => x.type === type)
         if (idx !== -1) {
-            return this.state.alerts[idx]
+            return this.props.sensor.alerts[idx]
         }
         return null
     }
@@ -369,13 +359,12 @@ class Sensor extends Component {
     }
     updateAlert(alert, prevEnabled) {
         var offToOn = alert.enabled;
-        var alerts = this.state.alerts;
-        var alertIdx = alerts.findIndex(x => x.sensor === alert.sensor && x.type === alert.type)
+        let sensor = JSON.parse(JSON.stringify(this.props.sensor))
+        var alertIdx = sensor.alerts.findIndex(x => x.sensor === alert.sensor && x.type === alert.type)
         if (alertIdx !== -1) {
             offToOn = !prevEnabled && alert.enabled
-            alerts[alertIdx] = alert
-            this.setState({ ...this.state, alerts: alerts });
-            this.props.setAlerts(alerts)
+            sensor.alerts[alertIdx] = alert
+            this.props.updateSensor(sensor)
         }
         new NetworkApi().setAlert({ ...alert, sensor: this.props.sensor.sensor }, resp => {
             switch (resp.result) {
@@ -413,11 +402,12 @@ class Sensor extends Component {
     }
     render() {
         var { t } = this.props
+        let lastReading = this.getLatestReading()
         return (
             <Box>
                 <Box minHeight={1500}>
                     <Box overflow="hidden" pt={{ base: "5px", md: "35px" }} backgroundPosition="center" paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
-                        <SensorHeader {...this.props} lastUpdateTime={this.state.lastestDatapoint && this.state.lastestDatapoint.measurements.length ? this.state.lastestDatapoint.measurements[0].timestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}
+                        <SensorHeader {...this.props} lastUpdateTime={lastReading ? lastReading.timestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}
                             loadingImage={this.state.loadingImage}
                             fileUploadChange={f => {
                                 this.setState({ ...this.state, loadingImage: true })
@@ -426,65 +416,59 @@ class Sensor extends Component {
                                 })
                             }}
                         />
-                        {this.state.loading && !this.state.lastestDatapoint ? (
-                            <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
-                                <Progress isIndeterminate={true} color="#e6f6f2" />
-                            </Stack>
-                        ) : (
-                            <div>
-                                <SensorValueGrid>
-                                    {mainSensorFields.map(x => {
-                                        let value = this.getLatestReading()[x];
-                                        if (value === undefined) return null;
-                                        return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
-                                            info={x !== "battery" ? undefined : isBatteryLow(this.getLatestReading()[x], this.getLatestReading().temperature) ? "replace_battery" : "battery_ok"}
-                                            alertTriggered={this.isAlertTriggerd(x)}
-                                            label={getUnitHelper(x).label}
-                                            unit={getUnitHelper(x).unit}
-                                            selected={this.state.graphKey === x}
-                                            onClick={() => this.setGraphKey(x)} />
-                                    })}
-                                </SensorValueGrid>
-                                <div style={{ marginTop: 30, marginBottom: 20 }}>
-                                    <table width="100%">
-                                        <tbody>
-                                            <tr>
-                                                <td>
-                                                    <div style={graphLengthText}>
-                                                        {t("history")}
-                                                    </div>
-                                                    <div style={graphInfo}>
-                                                        {t("selected")}: {t(getUnitHelper(this.state.graphKey).label)} {this.getSelectedUnit()}
-                                                    </div>
-                                                </td>
-                                                <td style={{ textAlign: "right" }}>
-                                                    <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
-                                                    <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
-                                                        <MdInfo size="16" className="buttonSideIcon" />
-                                                    </IconButton>
-                                                    <Button variant='link' ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
-                                                    <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {this.state.loading ? (
-                                    <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
-                                        <Progress isIndeterminate={true} color="#e6f6f2" />
-                                    </Stack>
-                                ) : (
-                                    <> {!this.state.data || !this.state.data.measurements.length ? (
-                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
-                                    ) : (
-                                        <Box ml={-5} mr={-5}>
-                                            <Graph key={"sensor_graph"} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
-                                        </Box>
-                                    )}
-                                    </>
-                                )}
+                        <div>
+                            <SensorValueGrid>
+                                {mainSensorFields.map(x => {
+                                    let value = this.getLatestReading()[x];
+                                    if (value === undefined) return null;
+                                    return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
+                                        info={x !== "battery" ? undefined : isBatteryLow(this.getLatestReading()[x], this.getLatestReading().temperature) ? "replace_battery" : "battery_ok"}
+                                        alertTriggered={this.isAlertTriggerd(x)}
+                                        label={getUnitHelper(x).label}
+                                        unit={getUnitHelper(x).unit}
+                                        selected={this.state.graphKey === x}
+                                        onClick={() => this.setGraphKey(x)} />
+                                })}
+                            </SensorValueGrid>
+                            <div style={{ marginTop: 30, marginBottom: 20 }}>
+                                <table width="100%">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div style={graphLengthText}>
+                                                    {t("history")}
+                                                </div>
+                                                <div style={graphInfo}>
+                                                    {t("selected")}: {t(getUnitHelper(this.state.graphKey).label)} {this.getSelectedUnit()}
+                                                </div>
+                                            </td>
+                                            <td style={{ textAlign: "right" }}>
+                                                <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
+                                                <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
+                                                    <MdInfo size="16" className="buttonSideIcon" />
+                                                </IconButton>
+                                                <Button variant='link' ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
+                                                <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                        )}
+                            {this.state.loading ? (
+                                <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
+                                    <Progress isIndeterminate={true} color="#e6f6f2" />
+                                </Stack>
+                            ) : (
+                                <> {!this.state.data || !this.state.data.measurements.length ? (
+                                    <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
+                                ) : (
+                                    <Box ml={-5} mr={-5}>
+                                        <Graph key={"sensor_graph"} dataKey={this.state.graphKey} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                    </Box>
+                                )}
+                                </>
+                            )}
+                        </div>
                     </Box>
                     {this.state.data && <Box>
                         <div style={{ height: "20px" }} />
@@ -565,7 +549,8 @@ class Sensor extends Component {
                                             let dataKey = x === "movement" ? "movementCounter" : x;
                                             if (this.getLatestReading()[dataKey] === undefined) return null;
                                             var alert = this.getAlert(x)
-                                            return <AlertItem key={x} alerts={this.state.alerts} alert={alert}
+                                            let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description : x
+                                            return <AlertItem key={key} alerts={this.props.sensor.alerts} alert={alert}
                                                 detailedTitle={detailedTitle}
                                                 detailedText={detailedText} detailedSubText={detailedSubText}
                                                 type={x} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />

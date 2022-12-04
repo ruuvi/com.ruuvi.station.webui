@@ -50,7 +50,6 @@ class Dashboard extends Component {
         this.state = {
             loading: true,
             sensors: [],
-            alerts: [],
             from: 24 * 3,
             showGraph: store.getDashboardShowGraph(),
             showBig: true,
@@ -78,16 +77,14 @@ class Dashboard extends Component {
         this.alertUpdateLoop = setTimeout(() => {
             this.fetchData()
         }, 60 * 1000);
-        // dont load alerts if sensor view is open
-        if (this.getCurrentSensor()) return
         let resp = await new NetworkApi().getAllSensorsAsync();
         if (resp.result === "success") {
             let sensors = this.state.sensors;
             if (initialSensors) sensors = initialSensors
-            sensors.forEach((x,i) => {
+            sensors.forEach((x, i) => {
                 let newSensor = resp.data.sensors.find(y => y.sensor === x.sensor)
                 if (newSensor) {
-                    sensors[i] = {...x, ...newSensor}
+                    sensors[i] = { ...x, ...newSensor }
                 }
             })
             this.setState({ ...this.state, sensors: sensors, loading: false })
@@ -183,7 +180,6 @@ class Dashboard extends Component {
                                     next={() => this.nextIndex(1)}
                                     prev={() => this.nextIndex(-1)}
                                     remove={() => this.removeSensor()}
-                                    setAlerts={alerts => this.setState({ ...this.state, alerts: alerts })}
                                     updateSensor={(sensor) => this.updateSensor(sensor)}
                                 />
                             ) : (
