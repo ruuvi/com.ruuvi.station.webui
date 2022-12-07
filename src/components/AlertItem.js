@@ -11,6 +11,12 @@ import ScreenSizeWrapper from "./ScreenSizeWrapper";
 import { ruuviTheme } from "../themes";
 const AlertSlider = React.lazy(() => import("./AlertSlider"));
 
+function alertRounding(alert) {
+    if (alert) {
+        alert.min = Math.round(alert.min * 10) / 10
+        alert.max = Math.round(alert.max * 10) / 10
+    } 
+}
 class AlertItem extends Component {
     constructor(props) {
         super(props)
@@ -19,6 +25,7 @@ class AlertItem extends Component {
             editDescription: false,
             rangeInputDialog: false,
         }
+        alertRounding(this.state.alert)
     }
     getAlertText(alert, type) {
         if (type === "movement") {
@@ -56,6 +63,7 @@ class AlertItem extends Component {
                 ...alert,
             }
         }
+        alertRounding(alert)
         this.setState({ ...this.state, alert: alert, editDescription: false, editMinValue: false, editMaxValue: false, rangeInputDialog: false })
         if (!dontUpdate) {
             this.props.onChange(alert, wasEnabled)
