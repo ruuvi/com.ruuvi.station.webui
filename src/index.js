@@ -13,7 +13,6 @@ const { ToastContainer } = createStandaloneToast()
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
     <Suspense fallback={
       <center style={{ width: "100%", marginTop: 100 }}>
         <span className='spinner'></span>
@@ -21,8 +20,7 @@ root.render(
     }>
       <App />
       <ToastContainer />
-    </Suspense>
-  </React.StrictMode>,
+    </Suspense>,
   document.getElementById('root')
 );
 

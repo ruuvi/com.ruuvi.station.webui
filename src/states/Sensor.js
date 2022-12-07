@@ -197,6 +197,7 @@ class Sensor extends Component {
             offsetDialog: null,
             loadingImage: false,
         }
+        this.isLoading = false;
         this.applyAccordionSetting()
     }
     applyAccordionSetting() {
@@ -215,6 +216,7 @@ class Sensor extends Component {
         document.title = "Ruuvi Sensor: " + this.props.sensor.name
         if (this.props.sensor.sensor !== prevProps.sensor.sensor) {
             this.applyAccordionSetting()
+            this.isLoading = false;
             this.loadData(true, true)
         }
     }
@@ -222,6 +224,7 @@ class Sensor extends Component {
         return "mixed"
     }
     async loadData(showLoading, clearLast) {
+        if (this.isLoading) return
         clearTimeout(this.latestDataUpdate);
         this.latestDataUpdate = setTimeout(() => {
             this.loadData()
@@ -236,11 +239,16 @@ class Sensor extends Component {
             var thisFrom = this.state.from;
             var that = this;
             async function load(until, initialLoad) {
+                that.isLoading = true;
                 var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
                 if (!until) until = Math.floor(new Date().getTime() / 1000);
                 if (!initialLoad && that.state.data.measurements.length) since = that.state.data.measurements[0].timestamp + 1;
-                if (until <= since) return;
+                if (until <= since) {
+                    that.isLoading = false;
+                    return;
+                }
                 var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
+                that.isLoading = false;
                 // stop fetching data if sensor page has changed
                 if (that.props.sensor.sensor !== resp.data.sensor) return;
                 if (that.state.from !== thisFrom) return;

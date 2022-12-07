@@ -175,7 +175,7 @@ class Dashboard extends Component {
                                 </center>
                             }
                             {this.getCurrentSensor() ? (
-                                <Sensor sensor={this.getCurrentSensor()}
+                                <Sensor key={this.getCurrentSensor().sensor} sensor={this.getCurrentSensor()}
                                     close={() => this.props.navigate('/')}
                                     next={() => this.nextIndex(1)}
                                     prev={() => this.nextIndex(-1)}
