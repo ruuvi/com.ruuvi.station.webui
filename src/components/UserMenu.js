@@ -31,7 +31,7 @@ class UserMenu extends Component {
                     */}
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.settings()}>{t("settings")}</MenuItem>
                     <MenuDivider />
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => this.props.logout()}>{t("sign_out")}</MenuItem>
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.props.myAccount()}>{t("my_account")}</MenuItem>
                 </MenuList>
             </Menu>
         )

@@ -377,6 +377,20 @@ class NetworkApi {
                 error(e);
             });
     }
+    async getSubscription() {
+        const resp = await fetch(this.url + "/subscription", this.options)
+        const respData = await resp.json()
+        return respData;
+    }
+    async claimSubscription(code) {
+        const resp = await fetch(this.url + "/subscription", {
+            ...this.options,
+            method: 'POST',
+            body: code
+        })
+        const respData = await resp.json()
+        return respData;
+    }
 }
 
 export default NetworkApi;

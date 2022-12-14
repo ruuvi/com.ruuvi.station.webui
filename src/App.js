@@ -169,11 +169,17 @@ export default function App() {
           <span style={{ width: "100%", textAlign: "right" }}>
             <ColorModeSwitch />
             <SensorMenu sensors={sensors} key={Math.random()} />
-            <UserMenu logout={logout} settings={() => {
+            <UserMenu settings={() => {
               if (window.location.href.indexOf("#") !== -1) {
                 window.location.href += "?settings"
               } else {
                 window.location.href += "#/?settings"
+              }
+            }} myAccount={() => {
+              if (window.location.href.indexOf("#") !== -1) {
+                window.location.href += "?myaccount"
+              } else {
+                window.location.href += "#/?myaccount"
               }
             }} email={user.email} />
           </span>

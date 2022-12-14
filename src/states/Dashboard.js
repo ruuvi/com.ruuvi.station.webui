@@ -13,6 +13,7 @@ import { withColorMode } from "../utils/withColorMode";
 import { MdEqualizer, MdImage } from "react-icons/md";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import SensorTypePicker from "../components/SensorTypePicker";
+import MyAccountModal from "../components/MyAccountModal";
 
 const infoText = {
     fontFamily: "mulish",
@@ -138,10 +139,10 @@ class Dashboard extends Component {
         }
         return out;
     }
-    showSettings() {
-        return this.props.searchParams[0].has("settings");
+    showModal(name) {
+        return this.props.searchParams[0].has(name);
     }
-    closeSettings() {
+    closeModal() {
         this.props.navigate({
             search: "",
         }, { replace: true });
@@ -216,7 +217,10 @@ class Dashboard extends Component {
                         </Box>
                     </Box>
                 </Box>
-                <SettingsModal open={this.showSettings()} onClose={() => this.closeSettings()} updateUI={() => this.forceUpdate()} />
+                <SettingsModal open={this.showModal("settings")} onClose={() => this.closeModal()} updateUI={() => this.forceUpdate()} />
+                {this.showModal("myaccount") && 
+                    <MyAccountModal open={this.showModal("myaccount")} onClose={() => this.closeModal()} updateUI={() => this.forceUpdate()} />
+                }
             </>
         )
     }
