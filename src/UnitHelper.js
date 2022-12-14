@@ -64,6 +64,8 @@ export function getDisplayValue(key, value) {
                 if (key === "pressure") {
                     if (settings.ACCURACY_PRESSURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
                     else resolution = unitHelper.pressure.decimals
+                    // don't show decimals for Pa
+                    if (settings.UNIT_PRESSURE === "0") resolution = 0
                 }
                 if (typeof (value) === "string") value = value.replace(" ", "").replace(",", ".").replace("−", "-")
                 value = parseFloat(value).toFixed(resolution)

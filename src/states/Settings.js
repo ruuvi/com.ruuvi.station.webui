@@ -118,7 +118,9 @@ class Settings extends Component {
                     <br />
                     <RadioInput label={"settings_pressure_unit"} value={this.state.settings.UNIT_PRESSURE} options={pressureOptions} onChange={v => this.updateSetting("UNIT_PRESSURE", v)} loading={this.state.savingSettings.indexOf("UNIT_PRESSURE") !== -1} />
                     <br />
-                    <RadioInput label={"pressure_resolution"} style={tabbed} value={this.state.settings.ACCURACY_PRESSURE} options={resolutionOptions("pressure", this.state.settings.UNIT_PRESSURE)} onChange={v => this.updateSetting("ACCURACY_PRESSURE", v)} loading={this.state.savingSettings.indexOf("ACCURACY_PRESSURE") !== -1} />
+                    {this.state.settings.UNIT_PRESSURE !== "0" &&
+                        <RadioInput label={"pressure_resolution"} style={tabbed} value={this.state.settings.ACCURACY_PRESSURE} options={resolutionOptions("pressure", this.state.settings.UNIT_PRESSURE)} onChange={v => this.updateSetting("ACCURACY_PRESSURE", v)} loading={this.state.savingSettings.indexOf("ACCURACY_PRESSURE") !== -1} />
+                    }
                 </>
             )}
         </>
