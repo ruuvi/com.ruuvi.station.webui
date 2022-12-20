@@ -7,14 +7,15 @@ import {
 import NetworkApi from "./NetworkApi";
 import logo from './img/ruuvi-vector-logo.svg'
 import logoDark from './img/ruuvi-vector-logo-dark.svg'
-import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton, Tooltip, useMediaQuery } from "@chakra-ui/react"
+import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton, Tooltip, useMediaQuery, Box } from "@chakra-ui/react"
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
-import { SunIcon } from "@chakra-ui/icons";
+import { CloseIcon, SunIcon } from "@chakra-ui/icons";
 import { MdOutlineNightlight } from "react-icons/md";
 import cache from "./DataCache";
 import { useTranslation } from "react-i18next";
+import Store from "./Store";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -128,6 +129,8 @@ export default function App() {
 
   let { t, i18n } = useTranslation()
 
+  let store = new Store();
+  const [showBanner, setShowBanner] = React.useState(store.getShowBanner());
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
   const logout = () => {
@@ -173,6 +176,19 @@ export default function App() {
             }} email={user.email} />
           </span>
         </HStack>
+        {showBanner &&
+          <HStack className="banner" style={{ paddingLeft: "18px", paddingRight: "18px" }}>
+            <Box flex style={{ textAlign: "center", width: "100%" }}>Your free Ruuvi Cloud Pro subscription plan has been extended with 2 additional months until the end of February 2023. If you've received an activation code with your recently purchased Ruuvi Gateway router, you'll be able to enter and activate it in February 2023. <a href="https://f.ruuvi.com/t/ruuvi-cloud-subscription-plans/5966" style={{ textDecoration: "underline" }}>Read more / lue lisää</a></Box>
+            <Box flex style={{ width: "16px" }}>
+              <div style={{ cursor: "pointer" }} onClick={() => {
+                store.setShowBanner(false)
+                setShowBanner(false);
+              }}>
+                <CloseIcon />
+              </div>
+            </Box>
+          </HStack>
+        }
         <div>
           <Routes>
             <Route path="/:id" element={<Dashboard reloadTags={() => { forceUpdate() }} />} />

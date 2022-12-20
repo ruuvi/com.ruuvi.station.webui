@@ -82,6 +82,16 @@ export const ruuviTheme = extendTheme({
             '.topbar': {
                 bg: "#ffffff00"//colors.topbar[props.colorMode],
             },
+            '.banner': {
+                backgroundColor: "#4bc9ba",
+                color: "#ffffff",
+                minHeight: "20px",
+                paddingTop: "10px",
+                paddingBottom: "10px",
+                fontFamily: "Mulish",
+                fontWeight: 800,
+                fontStyle: "italic",
+            },
             '.content': {
                 bg: colors.contentBg[props.colorMode]
             },
@@ -135,7 +145,7 @@ export const ruuviTheme = extendTheme({
                 borderColor: props.colorMode === "light" ? "#083c3d1a" : undefined
             },
             '.imageBackgroundColor': {
-                backgroundColor: colors.imageBackgroundColor[props.colorMode] +" !important",
+                backgroundColor: colors.imageBackgroundColor[props.colorMode] + " !important",
             },
             '.imageBackgroundOverlay': {
                 opacity: props.colorMode === "dark" ? 0.75 : 0.3,
@@ -240,7 +250,7 @@ export const ruuviTheme = extendTheme({
             },
         },
         Input: {
-            defaultProps:{
+            defaultProps: {
                 focusBorderColor: colors.buttonFocus.dark,
             }
         },
