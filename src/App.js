@@ -178,7 +178,7 @@ export default function App() {
         </HStack>
         {showBanner &&
           <HStack className="banner" style={{ paddingLeft: "18px", paddingRight: "18px" }}>
-            <Box flex style={{ textAlign: "center", width: "100%" }}>Your free Ruuvi Cloud Pro subscription plan has been extended with 2 additional months until the end of February 2023. If you've received an activation code with your recently purchased Ruuvi Gateway router, you'll be able to enter and activate it in February 2023. <a href="https://f.ruuvi.com/t/ruuvi-cloud-subscription-plans/5966" style={{ textDecoration: "underline" }}>Read more / lue lisää</a></Box>
+            <Box flex style={{ textAlign: "center", width: "100%" }}>Your free Ruuvi Cloud Pro subscription plan has been extended with 2 additional months until the end of February 2023. If you've received an activation code with your recently purchased Ruuvi Gateway router, you'll be able to enter and activate it in February 2023. <a href="https://f.ruuvi.com/t/ruuvi-cloud-subscription-plans/5966" target={"_blank"} style={{ textDecoration: "underline" }} rel="noreferrer">Read more / lue lisää ⇗</a></Box>
             <Box flex style={{ width: "16px" }}>
               <div style={{ cursor: "pointer" }} onClick={() => {
                 store.setShowBanner(false)
