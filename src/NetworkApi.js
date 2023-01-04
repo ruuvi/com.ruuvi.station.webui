@@ -386,7 +386,16 @@ class NetworkApi {
         const resp = await fetch(this.url + "/subscription", {
             ...this.options,
             method: 'POST',
-            body: code
+            body: JSON.stringify({code})
+        })
+        const respData = await resp.json()
+        return respData;
+    }
+    async requestDelete(email) {
+        const resp = await fetch(this.url + "/request-delete", {
+            ...this.options,
+            method: 'POST',
+            body: JSON.stringify({email})
         })
         const respData = await resp.json()
         return respData;

@@ -134,14 +134,6 @@ export default function App() {
   const [showBanner, setShowBanner] = React.useState(store.getShowBanner());
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
-  const logout = () => {
-    new NetworkApi().removeToken()
-    localStorage.clear();
-    cache.clear();
-    window.location.replace("/#/")
-    goToLoginPage();
-    forceUpdate()
-  }
   var user = new NetworkApi().getUser()
   var sensors = [];
   if (!user) {

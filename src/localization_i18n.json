@@ -30,6 +30,7 @@
       "humidity_dew_point_name": "Dew point (°)",
       "humidity_relative_name": "Relative (%)",
       "mac_address": "MAC Address",
+      "my_ruuvi_account": "My Ruuvi Account",
       "min": "min",
       "more_info": "More info",
       "pressure_hpa_name": "Hectopascal (hPa)",
@@ -156,10 +157,16 @@
       "temperature_resolution": "Temperature resolution",
       "humidity_resolution": "Humidity resolution",
       "pressure_resolution": "Pressure resolution",
+      "delete_account": "Delete Account",
+      "account_delete_confirmation_description": "A confirmation is sent to your email. To proceed with the deletion, please check your inbox and follow the instructions.",
       "color_mode_tooltip": "Toggle color mode",
       "button_card_image_tooltip": "Show images",
       "button_card_graph_tooltip": "Show graphs",
-      "support": "Support"
+      "support": "Support",
+      "activation_code": "Activation code",
+      "activate": "Activate",
+      "expires": "Expires",
+      "current_plan": "Current plan"
     }
   },
   "fi": {
@@ -193,6 +200,7 @@
       "humidity_dew_point_name": "Kastepiste (°)",
       "humidity_relative_name": "Suhteellinen (%)",
       "mac_address": "MAC-osoite",
+      "my_ruuvi_account": "Minun Ruuvi-tili",
       "min": "min",
       "more_info": "Lisätietoa",
       "pressure_hpa_name": "Hehtopascal (hPa)",
@@ -319,10 +327,16 @@
       "temperature_resolution": "Lämpötilan resoluutio",
       "humidity_resolution": "Kosteuden resoluutio",
       "pressure_resolution": "Paineen resoluutio",
+      "delete_account": "Poista tili",
+      "account_delete_confirmation_description": "Vahvistussähköposti lähetetty. Poista tili noudattamalla sähköpostissa annettuja ohjeita.",
       "color_mode_tooltip": "Vaihda väritilaa",
       "button_card_image_tooltip": "Näytä kuvat",
       "button_card_graph_tooltip": "Näytä kaaviot",
-      "support": "Tuki"
+      "support": "Tuki",
+      "activation_code": "Aktivointikoodi",
+      "activate": "Aktivoi",
+      "expires": "Päättyy",
+      "current_plan": "Nykyinen suunnitelma"
     }
   },
   "sv": {
@@ -356,6 +370,7 @@
       "humidity_dew_point_name": "Daggpunkt (°)",
       "humidity_relative_name": "Relativ (%)",
       "mac_address": "MAC Adress",
+      "my_ruuvi_account": "Mitt Ruuvi-konto",
       "min": "min",
       "more_info": "Mer info",
       "pressure_hpa_name": "Hektopascal (hPa)",
@@ -482,10 +497,16 @@
       "temperature_resolution": "Temperaturupplösning",
       "humidity_resolution": "Fuktighetsupplösning",
       "pressure_resolution": "Tryckupplösning",
+      "delete_account": "Radera konto",
+      "account_delete_confirmation_description": "En bekräftelse skickas till din e-post. För att fortsätta med raderingen, kontrollera din inkorg och följ instruktionerna.",
       "color_mode_tooltip": "Byt färgeläge",
       "button_card_image_tooltip": "Visa bilder",
       "button_card_graph_tooltip": "Visa grafer",
-      "support": "Support"
+      "support": "Support",
+      "activation_code": "Aktiveringskod",
+      "activate": "Aktivera",
+      "expires": "Går ut",
+      "current_plan": "Nuvarande plan"
     }
   }
 }
