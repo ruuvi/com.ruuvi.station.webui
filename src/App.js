@@ -16,6 +16,7 @@ import { MdOutlineNightlight } from "react-icons/md";
 import cache from "./DataCache";
 import { useTranslation } from "react-i18next";
 import Store from "./Store";
+import { goToLoginPage } from './utils/loginUtils'
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -138,12 +139,13 @@ export default function App() {
     localStorage.clear();
     cache.clear();
     window.location.replace("/#/")
-    //window.location.href = "https://ruuvi.com/station"
+    goToLoginPage();
     forceUpdate()
   }
   var user = new NetworkApi().getUser()
   var sensors = [];
   if (!user) {
+    goToLoginPage()
     return <ChakraProvider theme={ruuviTheme} style={{ minHeight: "100%" }}>
       <HashRouter>
         <SignIn loginSuccessful={data => {
