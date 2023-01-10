@@ -386,7 +386,7 @@ class NetworkApi {
         const resp = await fetch(this.url + "/subscription", {
             ...this.options,
             method: 'POST',
-            body: JSON.stringify({code})
+            body: JSON.stringify({ code })
         })
         const respData = await resp.json()
         return respData;
@@ -395,10 +395,15 @@ class NetworkApi {
         const resp = await fetch(this.url + "/request-delete", {
             ...this.options,
             method: 'POST',
-            body: JSON.stringify({email})
+            body: JSON.stringify({ email })
         })
         const respData = await resp.json()
         return respData;
+    }
+    async getNotification() {
+        let url = "notification.json"
+        const resp = await fetch(url, this.options)
+        return await resp.json()
     }
 }
 

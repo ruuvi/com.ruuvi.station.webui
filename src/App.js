@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Routes,
   Route,
@@ -130,7 +130,18 @@ export default function App() {
   let { t, i18n } = useTranslation()
 
   let store = new Store();
-  const [showBanner, setShowBanner] = React.useState(store.getShowBanner());
+  const [showBanner, setShowBanner] = React.useState(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        let notifictaion = await new NetworkApi().getNotification();
+        if (notifictaion && !store.getHasSeenBanner(notifictaion.key)) setShowBanner(notifictaion)
+      } catch (e) {
+        console.log("Could not get notifications", e)
+      }
+    })()
+  })
+
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
   var user = new NetworkApi().getUser()
@@ -149,6 +160,10 @@ export default function App() {
     if (settings.result === "success")
       localStorage.setItem("settings", JSON.stringify(settings.data.settings))
   })
+  let getBannerContent = (notification) => {
+    let lang = i18n.language || "en"
+    return notification[lang] || notification.en
+  }
   return (
     <ChakraProvider theme={ruuviTheme}>
       <HashRouter basename="/">
@@ -177,11 +192,11 @@ export default function App() {
         </HStack>
         {showBanner &&
           <HStack className="banner" style={{ paddingLeft: "18px", paddingRight: "18px" }}>
-            <Box flex style={{ textAlign: "center", width: "100%" }}>Your free Ruuvi Cloud Pro subscription plan has been extended with 2 additional months until the end of February 2023. If you've received an activation code with your recently purchased Ruuvi Gateway router, you'll be able to enter and activate it in February 2023. <a href="https://f.ruuvi.com/t/ruuvi-cloud-subscription-plans/5966" target={"_blank"} style={{ textDecoration: "underline" }} rel="noreferrer">Read more / lue lisää ⇗</a></Box>
+            <Box flex style={{ textAlign: "center", width: "100%" }} dangerouslySetInnerHTML={{ __html: getBannerContent(showBanner) }}></Box>
             <Box flex style={{ width: "16px" }}>
               <div style={{ cursor: "pointer" }} onClick={() => {
-                store.setShowBanner(false)
-                setShowBanner(false);
+                store.setHasSeenBanner(showBanner.key, true)
+                setShowBanner(null);
               }}>
                 <CloseIcon />
               </div>
