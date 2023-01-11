@@ -495,8 +495,8 @@ class Sensor extends Component {
                                             <table style={accordionContent}>
                                                 <tbody>
                                                     <tr>
-                                                        <td width="50%">
-                                                            <div style={detailedTitle}>{t("sensor_name")}</div>
+                                                        <td style={detailedTitle}>
+                                                            {t("sensor_name")}
                                                         </td>
                                                         <td style={detailedText}>
                                                             <EditableText text={this.props.sensor.name} onClick={() => this.editName(true)} />
@@ -510,8 +510,8 @@ class Sensor extends Component {
                                             <table style={accordionContent}>
                                                 <tbody>
                                                     <tr>
-                                                        <td width="50%">
-                                                            <div style={detailedTitle}>{t("owner")}</div>
+                                                        <td style={detailedTitle}>
+                                                            {t("owner")}
                                                         </td>
                                                         <td style={detailedText}>
                                                             {this.props.sensor.owner}
@@ -527,8 +527,8 @@ class Sensor extends Component {
                                                     <table style={accordionContent}>
                                                         <tbody>
                                                             <tr>
-                                                                <td width="50%">
-                                                                    <div style={detailedTitle}>{t("share")}</div>
+                                                                <td style={detailedTitle}>
+                                                                    {t("share")}
                                                                 </td>
                                                                 <td style={detailedText}>
                                                                     {t(this.props.sensor.sharedTo.length ? "sensor_shared" : "share")}
@@ -651,8 +651,8 @@ class Sensor extends Component {
                                             <table width="100%" style={accordionContent}>
                                                 <tbody>
                                                     <tr>
-                                                        <td width="50%">
-                                                            <div style={detailedTitle}>{t("remove_this_sensor")}</div>
+                                                        <td style={detailedTitle}>
+                                                            {t("remove_this_sensor")}
                                                         </td>
                                                         <td style={detailedText}>
                                                             <Button onClick={() => this.remove()}>{t("remove")}</Button>
