@@ -145,7 +145,7 @@ export default function App() {
   var user = new NetworkApi().getUser()
   var sensors = [];
   if (!user) {
-    goToLoginPage()
+    //goToLoginPage()
     return <ChakraProvider theme={ruuviTheme} style={{ minHeight: "100%" }}>
       <HashRouter>
         <SignIn loginSuccessful={data => {
