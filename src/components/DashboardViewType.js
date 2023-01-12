@@ -8,20 +8,16 @@ import {
 } from "@chakra-ui/react"
 import { MdArrowDropDown } from "react-icons/md"
 import { useTranslation } from 'react-i18next';
-import { getUnitHelper } from "../UnitHelper";
+
 
 const detailedSubText = {
     fontFamily: "mulish",
     fontSize: "14px",
 }
 
-const opts = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"]
-
-export default function SensorTypePicker(props) {
+export default function DashboardViewType(props) {
     const { t } = useTranslation();
-    let v = props.value || "temperature";
-    let current = t(getUnitHelper(v).label);
-    if (current.length > 15) current = current.substring(0,15)+"..."
+    var opts = [{ k: "Image View", v: "image" }, { k: "Graph View", v: "graph" }];
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
             <MenuButton as={Button}
@@ -31,7 +27,7 @@ export default function SensorTypePicker(props) {
                 style={{ ...detailedSubText }}
                 mr={props.mr}
                 borderRadius='4px'>
-                {current}
+                {t(opts.find(x => x.v === props.value).k)}
             </MenuButton>
             <MenuList>
                 {opts.map((x, i) => {
@@ -40,8 +36,8 @@ export default function SensorTypePicker(props) {
                     if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
                     if (i === opts.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                     else divider = <MenuDivider />
-                    return <div key={x + "s"}>
-                        <MenuItem key={x} className={v === x ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => props.onChange(x)}>{t(getUnitHelper(x).label)}</MenuItem>
+                    return <div key={x.v + "p"}>
+                        <MenuItem key={x.v} className={props.value === x.v ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => props.onChange(x.v)}>{t(x.k)}</MenuItem>
                         {divider}
                     </div>
                 })}

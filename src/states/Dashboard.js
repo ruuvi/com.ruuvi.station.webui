@@ -14,6 +14,7 @@ import { MdEqualizer, MdImage } from "react-icons/md";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import SensorTypePicker from "../components/SensorTypePicker";
 import MyAccountModal from "../components/MyAccountModal";
+import DashboardViewType from "../components/DashboardViewType";
 
 const infoText = {
     fontFamily: "mulish",
@@ -38,7 +39,7 @@ function GraphToggle(props) {
     var { t } = useTranslation();
     const [isMobile] = useMediaQuery("(max-width: 1023px)")
     return <Tooltip label={t(props.label)} hasArrow isDisabled={isMobile}>
-        <Button variant="imageToggle" ml={2} mt={-0.5} onClick={() => props.showGraphClick()}>
+        <Button variant="imageToggle" onClick={() => props.showGraphClick()}>
             {props.showGraph ? <MdImage size="23px" /> : <MdEqualizer size="23px" />}
         </Button>
     </Tooltip>
@@ -152,6 +153,12 @@ class Dashboard extends Component {
         this.setState({ ...this.state, showGraph: showGraph })
         new Store().setDashboardShowGraph(showGraph)
     }
+    setDashboardViewType(type) {
+        console.log("setDashboardViewType", type)
+        let showGraph = type === "graph"
+        this.setState({ ...this.state, showGraph: showGraph })
+        new Store().setDashboardShowGraph(showGraph)
+    }
     setGraphType(type) {
         this.setState({ ...this.state, graphType: type })
         new Store().setDashboardGraphType(type)
@@ -195,9 +202,12 @@ class Dashboard extends Component {
                                         </div>
                                         */}
                                         <div style={{ textAlign: "end" }} >
-                                            <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
-                                            <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
+                                            { /*
                                             <GraphToggle label={this.state.showGraph ? "button_card_image_tooltip" : "button_card_graph_tooltip"} showGraph={this.state.showGraph} showGraphClick={this.showGraphClick.bind(this)} />
+                                    */ }
+                                            <DashboardViewType mr={2} value={this.state.showGraph ? "graph" : "image"} onChange={this.setDashboardViewType.bind(this)} />
+                                            <SensorTypePicker mr={2} value={this.state.graphType} onChange={type => this.setGraphType(type)} />
+                                            <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
                                         </div>
                                     </div>
                                     <DashboardGrid showGraph={this.state.showGraph}>
