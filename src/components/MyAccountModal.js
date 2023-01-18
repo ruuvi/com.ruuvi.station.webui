@@ -11,6 +11,7 @@ function MyAccountModal(props) {
     var { t } = props;
     const [subscriptions, setSubscriptions] = useState([])
     const [activationCode, setActivationCode] = useState("")
+    const [isProcessingCode, setIsProcessingCode] = useState(false)
     useEffect(() => {
         async function getSubs() {
             let resp = await new NetworkApi().getSubscription()
@@ -25,6 +26,7 @@ function MyAccountModal(props) {
         getSubs()
     }, [t])
     const activate = async () => {
+        setIsProcessingCode(true)
         let resp = await new NetworkApi().claimSubscription(activationCode)
         if (resp.result === "success") {
             notify.success(t("subscription_activated"))
@@ -35,6 +37,7 @@ function MyAccountModal(props) {
             notify.error(t("something_went_wrong"))
         }
         setActivationCode("")
+        setIsProcessingCode(false)
     }
     let user = new NetworkApi().getUser()
     let userEmail = user ? user.email : "-"
@@ -53,17 +56,21 @@ function MyAccountModal(props) {
                         <br />
                         {t("activation_code")}:
                         <Input placeholder="4F23-F45T-F3..." value={activationCode} onChange={e => setActivationCode(e.target.value)} />
-                        <Button style={{ marginTop: 4, float: "right" }} disabled={activationCode.length === 0} onClick={activate}>{t("activate")}</Button>
+                        {isProcessingCode ? (
+                            <Progress isIndeterminate style={{ marginTop: 4 }} />
+                        ) : (
+                            <Button style={{ marginTop: 4, float: "right" }} disabled={activationCode.length === 0} onClick={activate}>{t("activate")}</Button>
+                        )}
                     </>
                 )}
             </Box>
             <center>
                 <Button onClick={() => {
-                     new NetworkApi().removeToken()
-                     localStorage.clear();
-                     cache.clear();
-                     window.location.replace("/#/")
-                     goToLoginPage();
+                    new NetworkApi().removeToken()
+                    localStorage.clear();
+                    cache.clear();
+                    window.location.replace("/#/")
+                    goToLoginPage();
                 }}>{t("sign_out")}</Button>
                 <Button ml="2" onClick={async () => {
                     if (window.confirm(t("are_you_sure"))) {
