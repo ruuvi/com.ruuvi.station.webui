@@ -63,6 +63,28 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
   <script>
+    try {
+      let cookie = document.cookie;
+      if (cookie) {
+        let keys = cookie.split(";")
+        keys.forEach(key => {
+          if (key.indexOf("station_user=") !== -1) {
+            let payload = key.replace("station_user=", "")
+            //console.log("found station user cookie")
+            let parsed = JSON.parse(payload)
+            if (parsed && parsed.accessToken) {
+              let domain = ".ruuvi.com"
+              document.cookie = `station_user=;domain=${domain};Max-Age=-99999999`
+              document.cookie = `station_status=signedIn;domain=${domain}`
+              localStorage.setItem("user", JSON.stringify(parsed))
+            }
+          }
+        });
+      }
+    } catch (e) {
+      console.log("could not parse cookie", e)
+    }
+
     function goToLoginPage() {
       if (window.location.href.indexOf("loginmethod=legacy") !== -1) {
         // lets keep the old way too in case it's needed
