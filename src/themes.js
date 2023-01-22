@@ -191,6 +191,8 @@ export const ruuviTheme = extendTheme({
             info: colors.toastInfoBackground,
             success: colors.toastSuccessBackground,
         },
+        pinFieldBgColor: "#b2c2c2",
+        pinFieldBgHoverColor: "#b2c2c2aa",
     },
     components: {
         Button: {

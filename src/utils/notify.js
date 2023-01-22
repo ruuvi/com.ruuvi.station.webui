@@ -43,8 +43,8 @@ function toastIt(text, status, duration) {
 }
 
 var notify = {
-    success: (text) => {
-        toastIt(text, "success")
+    success: (text, duration) => {
+        toastIt(text, "success", duration)
     },
     error: (text) => {
         toastIt(text, "error")
