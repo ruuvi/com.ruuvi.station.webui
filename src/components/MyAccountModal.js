@@ -9,7 +9,7 @@ import RDialog from "./RDialog";
 import { ruuviTheme } from "../themes";
 
 function MyAccountModal(props) {
-    var { t } = props;
+    var { t, i18n } = props;
     const [subscriptions, setSubscriptions] = useState([])
     const [activationCode, setActivationCode] = useState("")
     const [isProcessingCode, setIsProcessingCode] = useState(false)
@@ -46,17 +46,23 @@ function MyAccountModal(props) {
     let user = new NetworkApi().getUser()
     let userEmail = user ? user.email : "-"
     const Title = (props) => {
-        return <div style={{ marginTop: 4, fontFamily: "mulish", fontSize: "16px", fontWeight: 800, width: "50%" }}>{props.children}</div>
+        return <div style={{ marginTop: 4, fontFamily: "mulish", fontSize: "16px", fontWeight: 800 }}>{props.children}</div>
     }
     const Content = (props) => {
         return <div style={{ marginBottom: 8, fontFamily: "mulish", fontSize: "15px" }}>{props.children}</div>
     }
     const dateToText = (date) => {
-        return date.toISOString().replace("T", " ").split(".")[0]
+        const month = date.toLocaleString(i18n.language || "en", { month: 'long' });
+        switch (i18n.language) {
+            case "fi":
+                return `${date.getDate()}. ${month} ${date.getFullYear()}`
+            default:
+                return `${date.getDate()} ${month} ${date.getFullYear()}`
+        }
     }
     return (
         <RDialog title={t("my_ruuvi_account")} isOpen={props.open} onClose={props.onClose}>
-            <Title>User</Title>
+            <Title>{t("user")}</Title>
             <Content>{userEmail}</Content>
             <Box minHeight="250px">
                 {subscriptions.length < 1 ? (
@@ -65,7 +71,7 @@ function MyAccountModal(props) {
                     <>
                         <Title>{t("current_plan")}</Title>
                         <Content>{subscriptions[0].subscriptionName}</Content>
-                        <Title>{t("expires")}</Title>
+                        <Title>{t("plan_expiry_date")}</Title>
                         <Content>{dateToText(new Date(subscriptions[0].endTime * 1000))}</Content>
                         <Content>{t("Bacon ipsum dolor amet ground round ham swine frankfurter leberkas tri-tip picanha strip steak pig jowl corned beef fatback flank kielbasa landjaeger. Pancetta short ribs pork burgdoggen bacon flank kielbasa. Prosciutto bacon tenderloin drumstick. Salami ball tip brisket, pork beef kielbasa ground round.")}</Content>
                         <Title>{t("activation_code")}</Title>

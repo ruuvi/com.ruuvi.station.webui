@@ -165,8 +165,9 @@
       "support": "Support",
       "activation_code": "Activation code",
       "activate": "Activate",
-      "expires": "Expires",
-      "current_plan": "Current plan"
+      "plan_expiry_date": "Plan expiry date",
+      "current_plan": "Current plan",
+      "user": "User"
     }
   },
   "fi": {
@@ -335,8 +336,9 @@
       "support": "Tuki",
       "activation_code": "Aktivointikoodi",
       "activate": "Aktivoi",
-      "expires": "Päättyy",
-      "current_plan": "Nykyinen palvelupaketti"
+      "plan_expiry_date": "Tilauksen viimeinen voimassaolopäivä",
+      "current_plan": "Nykyinen palvelupaketti",
+      "user": "Käyttäjä"
     }
   },
   "sv": {
@@ -505,8 +507,9 @@
       "support": "Support",
       "activation_code": "Aktiveringskod",
       "activate": "Aktivera",
-      "expires": "Går ut",
-      "current_plan": "Nuvarande plan"
+      "plan_expiry_date": "Planens utgångsdatum",
+      "current_plan": "Nuvarande plan",
+      "user": "Användare"
     }
   }
 }
