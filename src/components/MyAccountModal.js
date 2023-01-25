@@ -94,8 +94,10 @@ function MyAccountModal(props) {
                 new NetworkApi().removeToken()
                 localStorage.clear();
                 cache.clear();
-                window.location.replace("/#/")
-                goToLoginPage();
+                if (!goToLoginPage()) {
+                    window.location.replace("/#/")
+                    props.updateApp();
+                }
             }}>{t("sign_out")}</Button>
             <Box mt={1}></Box>
             <Button variant='link' onClick={async () => {

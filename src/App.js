@@ -16,7 +16,6 @@ import { MdOutlineNightlight } from "react-icons/md";
 import cache from "./DataCache";
 import { useTranslation } from "react-i18next";
 import Store from "./Store";
-import { goToLoginPage } from './utils/loginUtils'
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));

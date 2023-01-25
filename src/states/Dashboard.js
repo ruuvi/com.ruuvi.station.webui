@@ -219,7 +219,7 @@ class Dashboard extends Component {
                 </Box>
                 <SettingsModal open={this.showModal("settings")} onClose={() => this.closeModal()} updateUI={() => this.forceUpdate()} />
                 {this.showModal("myaccount") && 
-                    <MyAccountModal open={this.showModal("myaccount")} onClose={() => this.closeModal()} updateUI={() => this.forceUpdate()} />
+                    <MyAccountModal open={this.showModal("myaccount")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()} />
                 }
             </>
         )
