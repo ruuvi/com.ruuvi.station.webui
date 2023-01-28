@@ -28,7 +28,8 @@ function MyAccountModal(props) {
     }, [t])
     const activate = async () => {
         setIsProcessingCode(true)
-        let resp = await new NetworkApi().claimSubscription(activationCode)
+        let code = activationCode.length === 8 ? activationCode.slice(0, 4) + "-" + activationCode.slice(4) : activationCode;
+        let resp = await new NetworkApi().claimSubscription(code)
         if (resp.result === "success") {
             notify.success(t("subscription_activated"))
             setSubscriptions(resp.data.subscriptions)
