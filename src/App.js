@@ -129,19 +129,20 @@ export default function App() {
 
   let { t, i18n } = useTranslation()
 
-  let store = new Store();
   const [showBanner, setShowBanner] = React.useState(null);
   useEffect(() => {
     (async () => {
       try {
+        let store = new Store();
         let notifictaion = await new NetworkApi().getNotification();
         if (notifictaion && !store.getHasSeenBanner(notifictaion.key)) setShowBanner(notifictaion)
       } catch (e) {
         console.log("Could not get notifications", e)
       }
     })()
-  })
+  }, [])
 
+  let store = new Store();
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
   var user = new NetworkApi().getUser()
