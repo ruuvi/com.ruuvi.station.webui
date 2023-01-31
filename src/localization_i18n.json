@@ -165,14 +165,9 @@
       "support": "Support",
       "activation_code": "Activation code",
       "activate": "Activate",
-<<<<<<< HEAD
       "plan_expiry_date": "Plan expiry date",
       "current_plan": "Current plan",
       "user": "User"
-=======
-      "expires": "Expires",
-      "current_plan": "Current plan"
->>>>>>> e640877 (#262 dashboard view image ddl wip)
     }
   },
   "fi": {
@@ -341,14 +336,9 @@
       "support": "Tuki",
       "activation_code": "Aktivointikoodi",
       "activate": "Aktivoi",
-<<<<<<< HEAD
       "plan_expiry_date": "Tilauksen viimeinen voimassaolopäivä",
       "current_plan": "Nykyinen palvelupaketti",
       "user": "Käyttäjä"
-=======
-      "expires": "Päättyy",
-      "current_plan": "Nykyinen palvelupaketti"
->>>>>>> e640877 (#262 dashboard view image ddl wip)
     }
   },
   "sv": {
@@ -517,14 +507,9 @@
       "support": "Support",
       "activation_code": "Aktiveringskod",
       "activate": "Aktivera",
-<<<<<<< HEAD
       "plan_expiry_date": "Planens utgångsdatum",
       "current_plan": "Nuvarande plan",
       "user": "Användare"
-=======
-      "expires": "Går ut",
-      "current_plan": "Nuvarande plan"
->>>>>>> e640877 (#262 dashboard view image ddl wip)
     }
   }
 }

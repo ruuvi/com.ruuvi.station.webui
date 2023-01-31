@@ -17,7 +17,7 @@ const detailedSubText = {
 
 export default function DashboardViewType(props) {
     const { t } = useTranslation();
-    var opts = [{ k: "Image View", v: "image" }, { k: "Graph View", v: "graph" }];
+    var opts = [{ k: "image_view", v: "image" }, { k: "graph_view", v: "graph" }];
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
             <MenuButton as={Button}
