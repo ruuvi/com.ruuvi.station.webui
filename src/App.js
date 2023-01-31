@@ -135,7 +135,7 @@ export default function App() {
       try {
         let store = new Store();
         let notifictaion = await new NetworkApi().getNotification();
-        if (notifictaion && !store.getHasSeenBanner(notifictaion.key)) setShowBanner(notifictaion)
+        if (notifictaion && notifictaion.key && !store.getHasSeenBanner(notifictaion.key)) setShowBanner(notifictaion)
       } catch (e) {
         console.log("Could not get notifications", e)
       }
