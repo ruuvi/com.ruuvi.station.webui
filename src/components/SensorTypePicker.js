@@ -29,7 +29,6 @@ export default function SensorTypePicker(props) {
                 variant="ddl"
                 className="durationPicker"
                 style={{ ...detailedSubText }}
-                mr={props.mr}
                 borderRadius='4px'>
                 {current}
             </MenuButton>

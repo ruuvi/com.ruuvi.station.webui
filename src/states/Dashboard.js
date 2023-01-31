@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box, Link, useMediaQuery, Button, Tooltip } from "@chakra-ui/react"
+import { Spinner, Box, Link, useMediaQuery, Button, Tooltip, Flex } from "@chakra-ui/react"
 import { useTranslation, withTranslation } from 'react-i18next';
 import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
@@ -172,16 +172,6 @@ class Dashboard extends Component {
                 <Box>
                     <Box backgroundSize="cover" backgroundPosition="top" >
                         <Box backgroundSize="cover" backgroundPosition="top" >
-                            {this.state.loading &&
-                                <center>
-                                    <Spinner size="xl" />
-                                </center>
-                            }
-                            {!this.state.loading && !this.state.sensors.length &&
-                                <center style={{ margin: 32, ...infoText }}>
-                                    {t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{this.addRuuviLink(x)}<br /></div>)}
-                                </center>
-                            }
                             {this.getCurrentSensor() ? (
                                 <Sensor key={this.getCurrentSensor().sensor} sensor={this.getCurrentSensor()}
                                     close={() => this.props.navigate('/')}
@@ -192,23 +182,12 @@ class Dashboard extends Component {
                                 />
                             ) : (
                                 <Box paddingLeft={{ base: "10px", lg: "50px" }} paddingRight={{ base: "10px", lg: "50px" }}>
-                                    <div style={{ paddingLeft: 16, paddingTop: 26 }}>
-                                        {/*
-                                        <div style={{ fontFamily: "montserrat", fontSize: 48, fontWeight: 800, lineHeight: 1 }}>
-                                            Hello Friend,
-                                        </div>
-                                        <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic", color: "#51b5a5", marginBottom: 20 }} >
-                                            Randomized welcome message here.
-                                        </div>
-                                        */}
-                                        <div style={{ textAlign: "end" }} >
-                                            { /*
-                                            <GraphToggle label={this.state.showGraph ? "button_card_image_tooltip" : "button_card_graph_tooltip"} showGraph={this.state.showGraph} showGraphClick={this.showGraphClick.bind(this)} />
-                                    */ }
-                                            <DashboardViewType mr={2} value={this.state.showGraph ? "graph" : "image"} onChange={this.setDashboardViewType.bind(this)} />
-                                            <SensorTypePicker mr={2} value={this.state.graphType} onChange={type => this.setGraphType(type)} />
+                                    <div style={{ paddingTop: 26 }}>
+                                        <Flex flexFlow={"row wrap"} justifyContent={"flex-end"} gap={2}>
+                                            <DashboardViewType value={this.state.showGraph ? "graph" : "image"} onChange={this.setDashboardViewType.bind(this)} />
+                                            <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
                                             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
-                                        </div>
+                                        </Flex>
                                     </div>
                                     <DashboardGrid showGraph={this.state.showGraph}>
                                         {size => {
@@ -224,6 +203,16 @@ class Dashboard extends Component {
                                     </DashboardGrid>
                                 </Box>
                             )}
+                            {this.state.loading &&
+                                <center>
+                                    <Spinner size="xl" />
+                                </center>
+                            }
+                            {!this.state.loading && !this.state.sensors.length &&
+                                <center style={{ margin: 32, ...infoText }}>
+                                    {t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{this.addRuuviLink(x)}<br /></div>)}
+                                </center>
+                            }
                         </Box>
                     </Box>
                 </Box>

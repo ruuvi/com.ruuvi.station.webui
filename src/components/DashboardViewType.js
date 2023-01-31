@@ -25,7 +25,6 @@ export default function DashboardViewType(props) {
                 variant="ddl"
                 className="durationPicker"
                 style={{ ...detailedSubText }}
-                mr={props.mr}
                 borderRadius='4px'>
                 {t(opts.find(x => x.v === props.value).k)}
             </MenuButton>
