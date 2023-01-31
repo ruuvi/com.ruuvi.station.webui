@@ -167,7 +167,9 @@
       "activate": "Activate",
       "plan_expiry_date": "Plan expiry date",
       "current_plan": "Current plan",
-      "user": "User"
+      "user": "User",
+      "image_view": "Image View",
+      "graph_view": "Graph View"
     }
   },
   "fi": {
@@ -338,7 +340,9 @@
       "activate": "Aktivoi",
       "plan_expiry_date": "Tilauksen viimeinen voimassaolopäivä",
       "current_plan": "Nykyinen palvelupaketti",
-      "user": "Käyttäjä"
+      "user": "Käyttäjä",
+      "image_view": "Kuvanäkymä",
+      "graph_view": "Kaavionäkymä"
     }
   },
   "sv": {
@@ -509,7 +513,9 @@
       "activate": "Aktivera",
       "plan_expiry_date": "Planens utgångsdatum",
       "current_plan": "Nuvarande plan",
-      "user": "Användare"
+      "user": "Användare",
+      "image_view": "Bildvy",
+      "graph_view": "Grafvy"
     }
   }
 }
