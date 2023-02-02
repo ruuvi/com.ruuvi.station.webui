@@ -163,13 +163,17 @@
       "button_card_image_tooltip": "Show images",
       "button_card_graph_tooltip": "Show graphs",
       "support": "Support",
+      "image_view": "Image view",
       "activation_code": "Activation code",
       "activate": "Activate",
-      "plan_expiry_date": "Plan expiry date",
-      "current_plan": "Current plan",
+      "plan_expiry_date": "Ruuvi plan's expiry date",
+      "current_plan": "Current Ruuvi plan",
       "user": "User",
-      "image_view": "Image View",
-      "graph_view": "Graph View"
+      "graph_view": "Graph View",
+      "subscription_activated": "subscription activated",
+      "signed_in_user": "Signed in user",
+      "information": "Information",
+      "enter_activation_code": "Enter activation code"
     }
   },
   "fi": {
@@ -336,13 +340,17 @@
       "button_card_image_tooltip": "Näytä kuvat",
       "button_card_graph_tooltip": "Näytä kaaviot",
       "support": "Tuki",
+      "image_view": "Näytä kuvat",
       "activation_code": "Aktivointikoodi",
       "activate": "Aktivoi",
-      "plan_expiry_date": "Tilauksen viimeinen voimassaolopäivä",
-      "current_plan": "Nykyinen palvelupaketti",
+      "plan_expiry_date": "Ruuvi-tilauksen päättymispäivä",
+      "current_plan": "Nykyinen tilaus",
       "user": "Käyttäjä",
-      "image_view": "Kuvanäkymä",
-      "graph_view": "Kaavionäkymä"
+      "graph_view": "Kaavionäkymä",
+      "subscription_activated": "tilaus aktivoitu",
+      "signed_in_user": "Kirjautunut",
+      "information": "Tietoja",
+      "enter_activation_code": "Syötä aktivointikoodi"
     }
   },
   "sv": {
@@ -509,13 +517,17 @@
       "button_card_image_tooltip": "Visa bilder",
       "button_card_graph_tooltip": "Visa grafer",
       "support": "Support",
+      "image_view": "Bildvy",
       "activation_code": "Aktiveringskod",
       "activate": "Aktivera",
-      "plan_expiry_date": "Planens utgångsdatum",
+      "plan_expiry_date": "Ruuvi-prenumerationens utgångsdatum",
       "current_plan": "Nuvarande plan",
       "user": "Användare",
-      "image_view": "Bildvy",
-      "graph_view": "Grafvy"
+      "graph_view": "Grafvy",
+      "subscription_activated": "prenumeration aktiverad",
+      "signed_in_user": "Inloggad",
+      "information": "Information",
+      "enter_activation_code": "Ange aktiveringskod"
     }
   }
 }
