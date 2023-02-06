@@ -28,7 +28,7 @@ function MyAccountModal(props) {
         getSubs()
     }, [t])
     const activate = async () => {
-        if (!window.confirm(lng === "fi" ? fiConfirm : lng === "sv" ? svConfirm : enConfirm)) return
+        if (!window.confirm(t("plan_activation_confirmation"))) return
         setIsProcessingCode(true)
         let code = activationCode.length === 8 ? activationCode.slice(0, 4) + "-" + activationCode.slice(4) : activationCode;
         let resp = await new NetworkApi().claimSubscription(code)
@@ -188,21 +188,3 @@ function MyAccountModal(props) {
 }
 
 export default withTranslation()(MyAccountModal);
-
-const enConfirm = `Important!
-
-Make sure you are activating the correct type of subscription!
-
-Entering a code for a different type of Ruuvi Cloud plan than the one currently active overrides the currently active plan immediately and you will lose remaining period of the currently active plan. If your code is for same subscription type your current plan's expiration date will be extended.`
-
-const fiConfirm = `Tärkeää!
-
-Varmista, että olet aktivoimassa oikean tyyppisen tilauksen!
-
-Eri tyyppisen Ruuvi Cloud -tilauskoodin syöttäminen korvaa ja päättää nykyisen tyyppisen aktiivisen tilauksen välittömästi ja menetät aktiivisena olevan tilauksen jäljellä olevan käyttöajan. Mikäli aktivointikoodisi on nykyisen tilaustyypin mukainen koodin aktivointi siirtää nykyisen tilauksen päättymispäivää koodin mukaisesti.`
-
-const svConfirm = `Viktigt!
-
-Se till att du aktiverar rätt typ av prenumeration!
-
-Genom att ange en kod för en annan typ av Ruuvi Cloud-plan än den som för närvarande är aktiv, ersätts den aktuella planen omedelbart och du kommer att förlora den återstående tiden av den aktuella planen. Om din kod är för samma prenumerationstyp, kommer den aktuella planens utgångsdatum att förlängas.`
