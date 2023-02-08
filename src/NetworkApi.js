@@ -402,7 +402,7 @@ class NetworkApi {
     }
     async getNotification() {
         let url = "notification.json"
-        const resp = await fetch(url, this.options)
+        const resp = await fetch(url, { ...this.options, cache: "no-store" })
         return await resp.json()
     }
 }
