@@ -174,7 +174,8 @@
       "signed_in_user": "Signed in user",
       "information": "Information",
       "enter_activation_code": "Enter activation code",
-      "plan_activation_confirmation": "Important!\n\nMake sure you are activating the correct type of subscription!\n\nEntering a code for a different type of Ruuvi Cloud plan than the one currently active overrides the currently active plan immediately and you will lose remaining period of the currently active plan. If your code is for same subscription type your current plan's expiration date will be extended."
+      "plan_activation_confirmation": "Important!\n\nMake sure you are activating the correct type of subscription!\n\nEntering a code for a different type of Ruuvi Cloud plan than the one currently active overrides the currently active plan immediately and you will lose remaining period of the currently active plan. If your code is for same subscription type your current plan's expiration date will be extended.",
+      "changelog": "(changelog)"
     }
   },
   "fi": {
@@ -352,7 +353,8 @@
       "signed_in_user": "Kirjautunut",
       "information": "Tietoja",
       "enter_activation_code": "Syötä aktivointikoodi",
-      "plan_activation_confirmation": "Tärkeää!\n\nVarmista, että olet aktivoimassa oikean tyyppisen tilauksen!\n\nEri tyyppisen Ruuvi Cloud -tilauskoodin syöttäminen korvaa ja päättää nykyisen tyyppisen aktiivisen tilauksen välittömästi ja menetät aktiivisena olevan tilauksen jäljellä olevan käyttöajan. Mikäli aktivointikoodisi on nykyisen tilaustyypin mukainen koodin aktivointi siirtää nykyisen tilauksen päättymispäivää koodin mukaisesti."
+      "plan_activation_confirmation": "Tärkeää!\n\nVarmista, että olet aktivoimassa oikean tyyppisen tilauksen!\n\nEri tyyppisen Ruuvi Cloud -tilauskoodin syöttäminen korvaa ja päättää nykyisen tyyppisen aktiivisen tilauksen välittömästi ja menetät aktiivisena olevan tilauksen jäljellä olevan käyttöajan. Mikäli aktivointikoodisi on nykyisen tilaustyypin mukainen koodin aktivointi siirtää nykyisen tilauksen päättymispäivää koodin mukaisesti.",
+      "changelog": "(muutosloki))"
     }
   },
   "sv": {
@@ -530,7 +532,8 @@
       "signed_in_user": "Inloggad",
       "information": "Information",
       "enter_activation_code": "Ange aktiveringskod",
-      "plan_activation_confirmation": "Viktigt!\n\nSe till att du aktiverar rätt typ av prenumeration!\n\nGenom att ange en kod för en annan typ av Ruuvi Cloud-plan än den som för närvarande är aktiv, ersätts den aktuella planen omedelbart och du kommer att förlora den återstående tiden av den aktuella planen. Om din kod är för samma prenumerationstyp, kommer den aktuella planens utgångsdatum att förlängas."
+      "plan_activation_confirmation": "Viktigt!\n\nSe till att du aktiverar rätt typ av prenumeration!\n\nGenom att ange en kod för en annan typ av Ruuvi Cloud-plan än den som för närvarande är aktiv, ersätts den aktuella planen omedelbart och du kommer att förlora den återstående tiden av den aktuella planen. Om din kod är för samma prenumerationstyp, kommer den aktuella planens utgångsdatum att förlängas.",
+      "changelog": "(ändringslogg)"
     }
   }
 }
