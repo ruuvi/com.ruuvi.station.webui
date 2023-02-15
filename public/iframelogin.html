@@ -253,6 +253,7 @@
                 return
             }
             let token = getToken()
+            if (token.length !== 4) return
             setView("view_loading")
             fetch(apiUrl + "/verify?token=" + token).then(function (response) {
                 return response.json();
