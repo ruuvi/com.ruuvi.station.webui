@@ -2,7 +2,7 @@ import { Box, ListItem } from "@chakra-ui/layout";
 import { Switch } from "@chakra-ui/switch";
 import React, { Component, Suspense } from "react";
 import { withTranslation } from 'react-i18next';
-import { getAlertRange, getUnitHelper, localeNumber } from "../UnitHelper";
+import { getAlertRange, getUnitHelper, localeNumber, round } from "../UnitHelper";
 import EditableText from "./EditableText";
 import InputDialog from "./InputDialog";
 import RangeInputDialog from "./RangeInputDialog";
@@ -11,12 +11,6 @@ import ScreenSizeWrapper from "./ScreenSizeWrapper";
 import { ruuviTheme } from "../themes";
 const AlertSlider = React.lazy(() => import("./AlertSlider"));
 
-function alertRounding(alert) {
-    if (alert) {
-        alert.min = Math.round(alert.min * 10) / 10
-        alert.max = Math.round(alert.max * 10) / 10
-    } 
-}
 class AlertItem extends Component {
     constructor(props) {
         super(props)
@@ -25,7 +19,7 @@ class AlertItem extends Component {
             editDescription: false,
             rangeInputDialog: false,
         }
-        alertRounding(this.state.alert)
+        //alertRounding(this.state.alert)
     }
     getAlertText(alert, type) {
         if (type === "movement") {
@@ -40,6 +34,11 @@ class AlertItem extends Component {
         if (type !== "humidity") {
             min = uh.value(min)
             max = uh.value(max)
+            // workaround for F -> C -> F rounding error
+            if (type === "temperature" && uh.unit.indexOf("F") !== -1) {
+                min = round(min, 1)
+                max = round(max, 1)
+            }
         }
         min = localeNumber(min)
         max = localeNumber(max)
@@ -63,7 +62,6 @@ class AlertItem extends Component {
                 ...alert,
             }
         }
-        alertRounding(alert)
         this.setState({ ...this.state, alert: alert, editDescription: false, editMinValue: false, editMaxValue: false, rangeInputDialog: false })
         if (!dontUpdate) {
             this.props.onChange(alert, wasEnabled)
@@ -75,7 +73,13 @@ class AlertItem extends Component {
         var uh = getUnitHelper(this.props.type.toLowerCase())
         if (this.props.type.toLowerCase() === "humidity")
             return [alert.min, alert.max]
-        return [uh.value(alert.min), uh.value(alert.max)]
+        let val = [uh.value(alert.min), uh.value(alert.max)]
+        // workaround for F -> C -> F rounding error
+        if (this.props.type.toLowerCase() === "temperature" && uh.unit.indexOf("F") !== -1) {
+            val[0] = round(val[0], 1)
+            val[1] = round(val[1], 1)
+        }
+        return val
     }
     render() {
         var alert = this.state.alert;
