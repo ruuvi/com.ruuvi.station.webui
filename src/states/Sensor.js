@@ -455,7 +455,7 @@ class Sensor extends Component {
                                                 <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
                                                     <MdInfo size="16" className="buttonSideIcon" />
                                                 </IconButton>
-                                                <Button variant='link' ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
+                                                <Button disabled={this.isLoading} variant='link' ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
                                                 <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
                                             </td>
                                         </tr>
