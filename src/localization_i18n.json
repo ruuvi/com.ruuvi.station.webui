@@ -151,7 +151,7 @@
       "signal_strength_info": "Received signal strength is measured by receiver device in decibel milliwatts (dBm). The bigger the number, the stronger the received signal.\n\nTip: Every 3 dB step doubles the received radio energy, for example: -37 dBm is two times stronger than -40 dBm.",
       "measurement_sequence_number_info": "When Ruuvi sensor is refreshing its measurements (every ~2,5 seconds), the measurement sequence number is increased. Maximum value of the counter is 16 bits (65536) and when reached, it starts again from zero.\n\nTip: When the sensor is rebooting, the counter is automatically reset to zero. By examining history cycles of the measurement counter, you can see if the sensor has rebooted unintentionally.",
       "timestamp": "Timestamp",
-      "replace_battery": "Replace battery!",
+      "replace_battery": "Low battery",
       "battery_ok": "Battery OK",
       "voltage": "Voltage",
       "temperature_resolution": "Temperature resolution",
@@ -330,7 +330,7 @@
       "signal_strength_info": "Vastaanotin mittaa vastaanotettua signaalia desibelimilliwatteina (dBm). Suurempi lukema tarkoittaa vahvempaa signaalia.\n\nVinkki: Vastaanotettu radiotaajuusenergia tuplaantuu jokaisen 3 dB välein. Tämä tarkoittaa sitä, että esimerkiksi -37 dBm signaali on puolet vahvempi kuin -40 dBm.",
       "measurement_sequence_number_info": "Mittausjärjestysnumero kasvaa, koska mittauksia päivitetään jatkuvasti (~2,5 sekunnin välein). Suurin mahdollinen luku on 16 bittiä (65536) ja tämän täyttyessä laskuri nollaantuu.\n\nVinkki: Mittausjärjestysnumero alkaa nollasta myös anturin uudelleenkäynnistymisen yhteydessä. Mittaussyklien perusteella vaikuttaa siltä, että anturi on uudelleenkäynnistynyt.",
       "timestamp": "Päivämäärä",
-      "replace_battery": "Vaihda paristo!",
+      "replace_battery": "Paristo vähissä",
       "battery_ok": "Paristo OK",
       "voltage": "Jännite",
       "temperature_resolution": "Lämpötilan resoluutio",
@@ -354,7 +354,7 @@
       "information": "Tietoja",
       "enter_activation_code": "Syötä aktivointikoodi",
       "plan_activation_confirmation": "Tärkeää!\n\nVarmista, että olet aktivoimassa oikean tyyppisen tilauksen!\n\nEri tyyppisen Ruuvi Cloud -tilauskoodin syöttäminen korvaa ja päättää nykyisen tyyppisen aktiivisen tilauksen välittömästi ja menetät aktiivisena olevan tilauksen jäljellä olevan käyttöajan. Mikäli aktivointikoodisi on nykyisen tilaustyypin mukainen koodin aktivointi siirtää nykyisen tilauksen päättymispäivää koodin mukaisesti.",
-      "changelog": "(muutosloki))"
+      "changelog": "(muutosloki)"
     }
   },
   "sv": {
@@ -509,7 +509,7 @@
       "signal_strength_info": "Mottagaren mäter den mottagna signalen i decibel milliwatt (dBm). En högre avläsning betyder en starkare signal.\n\nTips: Den mottagna RF-energin fördubblas varje 3 dB. Det betyder till exempel att en signal på -37 dBm är hälften så stark som en signal på -40 dBm.",
       "measurement_sequence_number_info": "Mätsekvensnumret ökar när mätningarna ständigt uppdateras (var ~2,5 sekund). Maximalt möjliga antal är 16 bitar (65536) och när den är fylld kommer räknaren att återställas.\n\nTips: Mätsekvensnumret börjar från noll även när sensorn startas om. Baserat på mätcyklerna kan man se om sensors har starts om.",
       "timestamp": "Datum",
-      "replace_battery": "Byt batteriet!",
+      "replace_battery": "Låg batterinivå",
       "battery_ok": "Batteri OK",
       "voltage": "Spänning",
       "temperature_resolution": "Temperaturupplösning",
