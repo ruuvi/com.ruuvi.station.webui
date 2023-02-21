@@ -182,13 +182,15 @@ class Dashboard extends Component {
                                 />
                             ) : (
                                 <Box paddingLeft={{ base: "10px", lg: "50px" }} paddingRight={{ base: "10px", lg: "50px" }}>
-                                    <div style={{ paddingTop: 26 }}>
-                                        <Flex flexFlow={"row wrap"} justifyContent={"flex-end"} gap={2}>
-                                            <DashboardViewType value={this.state.showGraph ? "graph" : "image"} onChange={this.setDashboardViewType.bind(this)} />
-                                            <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
-                                            <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
-                                        </Flex>
-                                    </div>
+                                    {this.state.sensors.length !== 0 &&
+                                        <div style={{ paddingTop: 26 }}>
+                                            <Flex flexFlow={"row wrap"} justifyContent={"flex-end"} gap={2}>
+                                                <DashboardViewType value={this.state.showGraph ? "graph" : "image"} onChange={this.setDashboardViewType.bind(this)} />
+                                                <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
+                                                <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
+                                            </Flex>
+                                        </div>
+                                    }
                                     <DashboardGrid showGraph={this.state.showGraph}>
                                         {size => {
                                             return <>
