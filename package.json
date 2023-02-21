@@ -1,6 +1,6 @@
 {
   "name": "ruuvi_web_ui",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "settings": {
     "sensorNameMaxLength": 32,
     "alertDescriptionMaxLength": 100,
