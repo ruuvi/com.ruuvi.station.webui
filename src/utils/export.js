@@ -2,15 +2,14 @@ import { getUnitHelper } from "../UnitHelper";
 
 export function exportCSV(data, sensorName, t) {
     const sensorHeaders = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber", "txPower"]
-    var csvHeader = [t('timestamp')];
+    var csvHeader = [t('date')];
     let uHelp = {};
     sensorHeaders.forEach(x => {
         uHelp[x] = getUnitHelper(x, true)
         let header = t(uHelp[x].exportLabel || uHelp[x].label)
         if (x === "rssi") header = "RSSI";
-        if (["temperature", "humidity", "pressure"].indexOf(x) !== -1) {
-            header += ` (${uHelp[x].unit})`
-        }
+        if (header === "Tx Power") header = "TX Power";
+        if (uHelp[x].unit) header += ` (${uHelp[x].unit})`
         csvHeader.push(header)
     })
     data = data.measurements.map(x => {
@@ -19,7 +18,7 @@ export function exportCSV(data, sensorName, t) {
             let val = s === "humidity" ?
                 uHelp[s].value(x.parsed[s], x.parsed.temperature) :
                 uHelp[s].value(x.parsed[s]);
-            if (isNaN(val)) val = "-";
+            if (isNaN(val)) val = "";
             row.push(val)
         });
         return row;
@@ -57,12 +56,10 @@ export function exportCSV(data, sensorName, t) {
 }
 
 function toISOString(date, forFilename) {
-    var tzo = -date.getTimezoneOffset(),
-        dif = tzo >= 0 ? '+' : '-',
-        pad = function (num) {
-            var norm = Math.floor(Math.abs(num));
-            return (norm < 10 ? '0' : '') + norm;
-        };
+    var pad = function (num) {
+        var norm = Math.floor(Math.abs(num));
+        return (norm < 10 ? '0' : '') + norm;
+    };
 
     if (forFilename) {
         return date.getFullYear() +
@@ -74,9 +71,7 @@ function toISOString(date, forFilename) {
     return date.getFullYear() +
         '-' + pad(date.getMonth() + 1) +
         '-' + pad(date.getDate()) +
-        'T' + pad(date.getHours()) +
+        ' ' + pad(date.getHours()) +
         ':' + pad(date.getMinutes()) +
-        ':' + pad(date.getSeconds()) +
-        dif + pad(tzo / 60) +
-        '' + pad(tzo % 60);
+        ':' + pad(date.getSeconds());
 }
