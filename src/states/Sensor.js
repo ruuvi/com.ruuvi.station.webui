@@ -647,7 +647,7 @@ class Sensor extends Component {
                                 <hr />
                                 <AccordionPanel style={accordionPanel}>
                                     <List>
-                                        <ListItem>
+                                        <ListItem style={{ cursor: "pointer" }} onClick={() => this.remove()}>
                                             <table width="100%" style={accordionContent}>
                                                 <tbody>
                                                     <tr>
@@ -655,7 +655,7 @@ class Sensor extends Component {
                                                             {t("remove_this_sensor")}
                                                         </td>
                                                         <td style={detailedText}>
-                                                            <Button onClick={() => this.remove()}>{t("remove")}</Button>
+                                                            <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
                                                         </td>
                                                     </tr>
                                                 </tbody>
