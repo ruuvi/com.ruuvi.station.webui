@@ -195,7 +195,7 @@ class Dashboard extends Component {
                                         {size => {
                                             return <>
                                                 {this.state.sensors.map(x => {
-                                                    return <span key={x.sensor + this.state.from} style={{ width: 1000, maxWidth: "100%" }}>
+                                                    return <span key={x.sensor + this.state.from} style={{ width: 640, maxWidth: "100%" }}>
                                                         <a href={"#/" + x.sensor}>
                                                             <SensorCard sensor={x} size={size} dataFrom={this.state.from} showImage={!this.state.showGraph} showGraph={this.state.showGraph} graphType={this.state.graphType} />
                                                         </a></span>
