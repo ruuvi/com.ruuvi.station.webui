@@ -35,6 +35,7 @@ function MyAccountModal(props) {
         if (resp.result === "success") {
             notify.success(resp.data.subscriptions[0].subscriptionName + " " + t("subscription_activated"))
             setSubscriptions(resp.data.subscriptions)
+            props.updateApp()
         } else if (resp.result === "error") {
             notify.error(t(`UserApiError.${resp.code}`))
         } else {

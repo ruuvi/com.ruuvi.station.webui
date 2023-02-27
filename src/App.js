@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Routes,
   Route,
@@ -51,6 +51,13 @@ const supportLink = {
   textDecoration: "underline",
 }
 
+const subscriptionText = {
+  fontFamily: "mulish",
+  fontSize: 16,
+  color: "#8A9E9A",
+  fontWeight: "bold",
+  marginTop: -15
+}
 
 
 let currColorMode;
@@ -69,7 +76,7 @@ function ColorModeSwitch() {
   return (
     <>
       <Tooltip key="color_mode_tooltip" label={t("color_mode_tooltip")} hasArrow isDisabled={isMobile}>
-        <IconButton variant="ghost" style={{ marginRight: 16 }} onClick={() => toggleColorMode()}>
+        <IconButton variant="ghost" style={{ marginRight: 0 }} onClick={() => toggleColorMode()}>
           {colorMode === 'light' ? <MdOutlineNightlight /> : <SunIcon />}
         </IconButton>
       </Tooltip>
@@ -77,19 +84,30 @@ function ColorModeSwitch() {
   )
 }
 
-function Logo() {
+function Logo(props) {
   const { colorMode } = useColorMode()
-  if (colorMode === "light") {
-    return (
-      <a href="/#">
-        <Image alt="logo" height={30} src={logo} fit="scale-down" />
-      </a>
-    )
-  }
+  const [subscription, setSubscription] = useState("")
+  useEffect(() => {
+    async function getSubs() {
+      let resp = await new NetworkApi().getSubscription()
+      if (resp.result === "success") {
+        if (resp.data.subscriptions.length === 0) return setSubscription("none")
+        return setSubscription(resp.data.subscriptions[0].subscriptionName)
+      }
+      setTimeout(() => {
+        getSubs()
+      }, 5000)
+    }
+    getSubs()
+  }, [props.reload]);
+  let ruuviLogo = colorMode === "light" ? logo : logoDark
   return (
-    <a href="/#">
-      <Image alt="logo" height={30} src={logoDark} fit="scale-down" />
-    </a>
+    <>
+      <Image alt="logo" height={30} src={ruuviLogo} fit="scale-down" style={{ cursor: "pointer" }} onClick={() => window.location.href = "#/"} />
+      <span style={subscriptionText}>
+        {subscription.split(" ")[0]}
+      </span>
+    </>
   )
 }
 
@@ -102,7 +120,6 @@ export default function App() {
       keys.forEach(key => {
         if (key.indexOf("station_user=") !== -1) {
           let payload = key.replace("station_user=", "")
-          //console.log("found station user cookie")
           let parsed = JSON.parse(payload)
           if (parsed && parsed.accessToken) {
             let domain = ".ruuvi.com"
@@ -129,6 +146,7 @@ export default function App() {
 
   let { t, i18n } = useTranslation()
 
+  const [logoReloader, setLogoReloader] = React.useState(0);
   const [showBanner, setShowBanner] = React.useState(null);
   useEffect(() => {
     (async () => {
@@ -169,7 +187,7 @@ export default function App() {
     <ChakraProvider theme={ruuviTheme}>
       <HashRouter basename="/">
         <HStack className="topbar" style={{ paddingLeft: "18px", paddingRight: "18px" }} height="60px">
-          <Logo />
+          <Logo reload={logoReloader} />
           <Text>
             {new NetworkApi().isStaging() ? "(staging) " : ""}
           </Text>
@@ -206,8 +224,8 @@ export default function App() {
         }
         <div>
           <Routes>
-            <Route path="/:id" element={<Dashboard reloadTags={() => { forceUpdate() }} />} />
-            <Route path="/" element={<Dashboard reloadTags={() => { forceUpdate() }} />} />
+            <Route path="/:id" element={<Dashboard reloadTags={() => { setLogoReloader(logoReloader + 1); forceUpdate() }} />} />
+            <Route path="/" element={<Dashboard reloadTags={() => { setLogoReloader(logoReloader + 1); forceUpdate() }} />} />
           </Routes>
           <div style={bottomText}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi" : "https://ruuvi.com/"} target="_blank" rel="noreferrer">ruuvi.com</a></div>
           <div style={supportLink}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi/tuki" : "https://ruuvi.com/support"}>{t("support")}</a></div>
