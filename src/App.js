@@ -186,12 +186,12 @@ export default function App() {
   return (
     <ChakraProvider theme={ruuviTheme}>
       <HashRouter basename="/">
-        <HStack className="topbar" style={{ paddingLeft: "18px", paddingRight: "18px" }} height="60px">
+        <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
           <Logo reload={logoReloader} />
           <Text>
             {new NetworkApi().isStaging() ? "(staging) " : ""}
           </Text>
-          <span style={{ width: "100%", textAlign: "right" }}>
+          <span style={{ width: "100%", textAlign: "right", marginLeft:"-25px",marginRight: "-4px" }}>
             <ColorModeSwitch />
             <SensorMenu sensors={sensors} key={Math.random()} />
             <UserMenu settings={() => {
