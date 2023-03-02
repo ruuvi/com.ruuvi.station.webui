@@ -88,7 +88,11 @@ function MyAccountModal(props) {
                         <Title>{t("current_plan")}</Title>
                         <Content>{subscriptions[0].subscriptionName}</Content>
                         <Title>{t("plan_expiry_date")}</Title>
-                        <Content>{dateToText(new Date(subscriptions[0].endTime * 1000))}</Content>
+                        {subscriptions[0].endTime ? (
+                            <Content>{dateToText(new Date(subscriptions[0].endTime * 1000))}</Content>
+                        ) : (
+                            <Content>{t("no_expiry_date")}</Content>
+                        )}
                         <Title>{t("information")}</Title>
                         {lng === "en" &&
                             <Content>

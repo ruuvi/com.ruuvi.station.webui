@@ -176,7 +176,11 @@
       "information": "Information",
       "enter_activation_code": "Enter activation code",
       "plan_activation_confirmation": "Important!\n\nMake sure you are activating the correct type of subscription!\n\nEntering a code for a different type of Ruuvi Cloud plan than the one currently active overrides the currently active plan immediately and you will lose remaining period of the currently active plan. If your code is for same subscription type your current plan's expiration date will be extended.",
-      "changelog": "(changelog)"
+      "changelog": "(changelog)",
+      "graph_stat_min": "Min",
+      "graph_stat_max": "Max",
+      "graph_stat_avg": "Avg",
+      "no_expiry_date": "No expiry date"
     }
   },
   "fi": {
@@ -356,7 +360,11 @@
       "information": "Tietoja",
       "enter_activation_code": "Syötä aktivointikoodi",
       "plan_activation_confirmation": "Tärkeää!\n\nVarmista, että olet aktivoimassa oikean tyyppisen tilauksen!\n\nEri tyyppisen Ruuvi Cloud -tilauskoodin syöttäminen korvaa ja päättää nykyisen tyyppisen aktiivisen tilauksen välittömästi ja menetät aktiivisena olevan tilauksen jäljellä olevan käyttöajan. Mikäli aktivointikoodisi on nykyisen tilaustyypin mukainen koodin aktivointi siirtää nykyisen tilauksen päättymispäivää koodin mukaisesti.",
-      "changelog": "(muutosloki)"
+      "changelog": "(muutosloki)",
+      "graph_stat_min": "Min",
+      "graph_stat_max": "Max",
+      "graph_stat_avg": "Keskia.",
+      "no_expiry_date": "Ei päättymispäivää"
     }
   },
   "sv": {
@@ -536,7 +544,11 @@
       "information": "Information",
       "enter_activation_code": "Ange aktiveringskod",
       "plan_activation_confirmation": "Viktigt!\n\nSe till att du aktiverar rätt typ av prenumeration!\n\nGenom att ange en kod för en annan typ av Ruuvi Cloud-plan än den som för närvarande är aktiv, ersätts den aktuella planen omedelbart och du kommer att förlora den återstående tiden av den aktuella planen. Om din kod är för samma prenumerationstyp, kommer den aktuella planens utgångsdatum att förlängas.",
-      "changelog": "(ändringslogg)"
+      "changelog": "(ändringslogg)",
+      "graph_stat_min": "Min",
+      "graph_stat_max": "Max",
+      "graph_stat_avg": "Medelv.",
+      "no_expiry_date": "Ingen utgångsdatum"
     }
   }
 }
