@@ -104,9 +104,9 @@ function DataInfo(props) {
     let max = Math.max(...data.map(x => x.value))
     let avg = calculateAverage(data, zoom)
     return <>
-        <span style={{ marginRight: 18 }}><b>Min</b>: {localeNumber(min)}</span>
-        <span style={{ marginRight: 18 }}><b>Max</b>: {localeNumber(max)}</span>
-        <b>Average</b>: {localeNumber(avg)}
+        <span style={{ marginRight: 18 }}><b>{t("graph_stat_min")}</b>: {localeNumber(min)}</span>
+        <span style={{ marginRight: 18 }}><b>{t("graph_stat_max")}</b>: {localeNumber(max)}</span>
+        <b>{t("graph_stat_avg")}</b>: {localeNumber(avg)}
         <IconButton mt={"-3px"} variant="ghost" onClick={() => notify.info(t("graph_stats_info"))}>
             <MdInfo size="16" className="buttonSideIcon" />
         </IconButton>
