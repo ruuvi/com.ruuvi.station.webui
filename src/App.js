@@ -86,26 +86,12 @@ function ColorModeSwitch() {
 
 function Logo(props) {
   const { colorMode } = useColorMode()
-  const [subscription, setSubscription] = useState("")
-  useEffect(() => {
-    async function getSubs() {
-      let resp = await new NetworkApi().getSubscription()
-      if (resp.result === "success") {
-        if (resp.data.subscriptions.length === 0) return setSubscription("none")
-        return setSubscription(resp.data.subscriptions[0].subscriptionName)
-      }
-      setTimeout(() => {
-        getSubs()
-      }, 5000)
-    }
-    getSubs()
-  }, [props.reload]);
   let ruuviLogo = colorMode === "light" ? logo : logoDark
   return (
     <>
       <Image alt="logo" height={30} src={ruuviLogo} fit="scale-down" style={{ cursor: "pointer" }} onClick={() => window.location.href = "#/"} />
       <span style={subscriptionText}>
-        {subscription.split(" ")[0]}
+        {props.subscription.split(" ")[0]}
       </span>
     </>
   )
@@ -146,19 +132,37 @@ export default function App() {
 
   let { t, i18n } = useTranslation()
 
-  const [logoReloader, setLogoReloader] = React.useState(0);
+  const [reloadSub, setReloadSub] = React.useState(0);
+  const [subscription, setSubscription] = useState("")
+  useEffect(() => {
+    async function getSubs() {
+      let resp = await new NetworkApi().getSubscription()
+      if (resp.result === "success") {
+        if (resp.data.subscriptions.length === 0) return setSubscription("none")
+        return setSubscription(resp.data.subscriptions[0].subscriptionName)
+      }
+      setTimeout(() => {
+        getSubs()
+      }, 5000)
+    }
+    getSubs()
+  }, [reloadSub]);
   const [showBanner, setShowBanner] = React.useState(null);
   useEffect(() => {
+    if (!subscription) return
     (async () => {
       try {
         let store = new Store();
-        let notifictaion = await new NetworkApi().getNotification();
-        if (notifictaion && notifictaion.key && !store.getHasSeenBanner(notifictaion.key)) setShowBanner(notifictaion)
+        let notifications = await new NetworkApi().getNotification();
+        if (notifications) {
+          let notification = notifications.find(x => x.plan === subscription || x.plan === "")
+          if (notification && notification.key && !store.getHasSeenBanner(notification.key)) setShowBanner(notification)
+        }
       } catch (e) {
         console.log("Could not get notifications", e)
       }
     })()
-  }, [])
+  }, [subscription])
 
   let store = new Store();
   const [, updateState] = React.useState();
@@ -187,11 +191,11 @@ export default function App() {
     <ChakraProvider theme={ruuviTheme}>
       <HashRouter basename="/">
         <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
-          <Logo reload={logoReloader} />
+          <Logo subscription={subscription} />
           <Text>
             {new NetworkApi().isStaging() ? "(staging) " : ""}
           </Text>
-          <span style={{ width: "100%", textAlign: "right", marginLeft:"-25px",marginRight: "-4px" }}>
+          <span style={{ width: "100%", textAlign: "right", marginLeft: "-25px", marginRight: "-4px" }}>
             <ColorModeSwitch />
             <SensorMenu sensors={sensors} key={Math.random()} />
             <UserMenu settings={() => {
@@ -224,8 +228,8 @@ export default function App() {
         }
         <div>
           <Routes>
-            <Route path="/:id" element={<Dashboard reloadTags={() => { setLogoReloader(logoReloader + 1); forceUpdate() }} />} />
-            <Route path="/" element={<Dashboard reloadTags={() => { setLogoReloader(logoReloader + 1); forceUpdate() }} />} />
+            <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />} />
+            <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />} />
           </Routes>
           <div style={bottomText}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi" : "https://ruuvi.com/"} target="_blank" rel="noreferrer">ruuvi.com</a></div>
           <div style={supportLink}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi/tuki" : "https://ruuvi.com/support"}>{t("support")}</a></div>
