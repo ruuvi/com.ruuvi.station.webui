@@ -1,7 +1,7 @@
 import { extendTheme } from "@chakra-ui/react";
 
 const config = {
-    initialColorMode: 'system',
+    initialColorMode: localStorage.getItem("chakra-ui-color-mode") || "system",
     useSystemColorMode: false,
 }
 
@@ -38,7 +38,7 @@ Accordion icons: #fff, 30%
 */
 
 let colors = {
-    bodyBg: { light: "#edf2f2", dark: "#001b1a" },
+    bodyBg: { light: "#edf2f2 !important", dark: "#001b1a !important" },
     contentBg: { light: "white", dark: "#111111" },
     text: { light: "#1b4847", dark: "#ffffff" },
     textInactive: { light: "#1b484780", dark: "#ffffff80" },

@@ -63,6 +63,9 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
   <script>
+    let bgMode = localStorage.getItem("chakra-ui-color-mode") || "dark"
+    document.body.style.background = bgMode === "dark" ? "#001b1a" : "#edf2f2"
+
     try {
       let cookie = document.cookie;
       if (cookie) {
