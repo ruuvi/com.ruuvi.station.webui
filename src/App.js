@@ -157,6 +157,7 @@ export default function App() {
         if (notifications) {
           let notification = notifications.find(x => x.plan === subscription || x.plan === "")
           if (notification && notification.key && !store.getHasSeenBanner(notification.key)) setShowBanner(notification)
+          else if (showBanner !== null) setShowBanner(null)
         }
       } catch (e) {
         console.log("Could not get notifications", e)
