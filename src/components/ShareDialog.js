@@ -12,7 +12,7 @@ import { MdClear } from "react-icons/md";
 import NetworkApi from "../NetworkApi";
 import notify from "../utils/notify";
 import RDialog from "./RDialog";
-import { addNewlines } from "../TextHelper";
+import { addNewlines, addVariablesInString } from "../TextHelper";
 
 const maxSharesPerSensor = 10;
 
@@ -93,7 +93,7 @@ class ShareDialog extends Component {
                     <Button disabled={this.isInvalidValid()} onClick={this.share.bind(this)} mt="17px">{t("share")}</Button>
                 </div>
                 {this.props.sensor.sharedTo.length > 0 && <>
-                    <div style={{ fontWeight: "bold" }}>{t("share_sensor_already_shared")} {this.props.sensor.sharedTo.length}/{maxSharesPerSensor}</div>
+                    <div style={{ fontWeight: "bold", marginTop: 8, marginBottom: 8 }}>{addVariablesInString(t("share_sensor_already_shared"), [this.props.sensor.sharedTo.length, maxSharesPerSensor])}</div>
                     <List spacing={3}>
                         {this.props.sensor.sharedTo.map(x => {
                             return <ListItem key={x}>
