@@ -84,6 +84,7 @@ class AlertItem extends Component {
     render() {
         var alert = this.state.alert;
         var type = this.props.type.toLowerCase();
+        if (type === "signal") type = "rssi"
         var t = this.props.t
         var uh = getUnitHelper(type)
         var enabled = alert && alert.enabled;
@@ -92,13 +93,14 @@ class AlertItem extends Component {
             validRange.min = uh.value(validRange.min)
             validRange.max = uh.value(validRange.max)
         }
+        let label = type === "rssi" ? "signal_strength" : type
         var editItemMargins = { marginRight: 12, marginTop: 12, marginBottom: 12 }
         return (
             <ListItem key={type} style={{ color: alert && alert.enabled && alert.triggered ? ruuviTheme.colors.error : undefined }}>
                 <div style={{ paddingTop: 30, paddingBottom: 20 }}>
                     <div style={{ ...this.props.detailedTitle, width: undefined, display: "flex", justifyContent: "space-between" }}>
                         <span>
-                            {t(type) + (type !== "movement" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}
+                            {t(label) + (type !== "movement" && type !== "rssi" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}
                         </span>
                         <span>
                             <span style={{ ...this.props.detailedText, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="buttonIconScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />

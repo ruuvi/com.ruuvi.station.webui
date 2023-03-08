@@ -553,8 +553,8 @@ class Sensor extends Component {
                                 <hr />
                                 <AccordionPanel style={accordionPanel}>
                                     <List style={accordionContent}>
-                                        {["temperature", "humidity", "pressure", "movement"].map(x => {
-                                            let dataKey = x === "movement" ? "movementCounter" : x;
+                                        {["temperature", "humidity", "pressure", "signal", "movement"].map(x => {
+                                            let dataKey = x === "movement" ? "movementCounter" : "signal" ? "rssi" : x;
                                             if (this.getLatestReading()[dataKey] === undefined) return null;
                                             var alert = this.getAlert(x)
                                             let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description : x
