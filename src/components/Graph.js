@@ -238,7 +238,16 @@ class Graph extends Component {
                                         stroke: ruuviTheme.graph.stroke[colorMode],
                                         value: (self, rawValue) => localeNumber(rawValue)
                                     }],
-                                    cursor: { show: this.props.cursor || false, drag: { x: true, y: true, uni: 50 } },
+                                    cursor: {
+                                        show: this.props.cursor || false,
+                                        drag: { x: true, y: true, uni: 50 },
+                                        focus: { prox: 1000 },
+                                        move: (u, ml, mt) => {
+                                            let yDataVal = u.data[1][u.cursor.idx];
+                                            let yPos = u.valToPos(yDataVal, "y") || mt
+                                            return [ml, yPos]
+                                        }
+                                    },
                                     scales: {
                                         x: {
                                             time: true, auto: this.props.from === undefined, range: (_, fromX, toX) => {
