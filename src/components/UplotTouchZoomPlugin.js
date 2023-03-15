@@ -32,8 +32,13 @@ export default function UplotTouchZoomPlugin(xRange) {
                 t.y = (yMin + yMax) / 2;
                 t.x = (xMin + xMax) / 2;
 
-                t.dx = xMax - xMin;
-                t.dy = yMax - yMin;
+                const deadzone = 20
+                let newDx = xMax - xMin
+                let newDy = yMax - yMin
+                //t.dx = xMax - xMin;
+                //t.dy = yMax - yMin;
+                if (newDx > deadzone || newDx < -1 * deadzone) t.dx = newDx
+                if (newDy > deadzone || newDy < -1 * deadzone) t.dy = newDy
 
                 // dist
                 t.d = Math.sqrt(t.dx * t.dx + t.dy * t.dy);
@@ -48,13 +53,13 @@ export default function UplotTouchZoomPlugin(xRange) {
             let left = to.x;
             let top = to.y;
 
-            // non-uniform scaling, needs some work
-            //let xFactor = fr.dx / to.dx;
-            //let yFactor = fr.dy / to.dy;
+            //non-uniform scaling, needs some work
+            let xFactor = fr.dx / to.dx;
+            let yFactor = fr.dy / to.dy;
 
             // uniform x/y scaling
-            let xFactor = fr.d / to.d;
-            let yFactor = fr.d / to.d;
+            //let xFactor = fr.d / to.d;
+            //let yFactor = fr.d / to.d;
 
             let leftPct = left / rect.width;
             let btmPct = 1 - top / rect.height;
