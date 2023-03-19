@@ -140,6 +140,7 @@ export function getUnitHelper(key, plaintext) {
             }
         }
     }
+    if (key === "signal") key = "rssi"
     if (unitHelper[key])
         return unitHelper[key];
     return { label: "", unit: "", value: (value) => value, decimals: 0 };
@@ -197,7 +198,7 @@ export function getAlertRange(type) {
             return { max: 100, min: 0 }
         case "pressure":
             return { max: 110000, min: 30000 }
-        case "rssi":
+        case "signal":
             return { max: 0, min: -105 }
         default:
             return { max: 100, min: 0 }
