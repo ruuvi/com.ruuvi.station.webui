@@ -106,7 +106,7 @@ function DataInfo(props) {
     return <>
         <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_min")}</b>: {localeNumber(min)}</span>
         <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_max")}</b>: {localeNumber(max)}</span>
-        <span  className="graphLabel"><b>{t("graph_stat_avg")}</b>: {localeNumber(avg)}</span>
+        <span className="graphLabel"><b>{t("graph_stat_avg")}</b>: {localeNumber(avg)}</span>
         <IconButton mt={"-3px"} variant="ghost" onClick={() => notify.info(t("graph_stats_info"))}>
             <MdInfo size="16" className="buttonSideIcon" />
         </IconButton>
@@ -232,7 +232,7 @@ class Graph extends Component {
                                         label: this.props.dataName || this.props.t(this.props.dataKey),
                                         class: "graphLabel",
                                         spanGaps: true,
-                                        points: { show: this.props.points, size: 4, fill: ruuviTheme.graph.fill[colorMode] },
+                                        points: { show: this.props.points, size: 4, width: 3, fill: ruuviTheme.graph.fill[colorMode] },
                                         width: 1,
                                         fill: ruuviTheme.graph.fill[colorMode],
                                         stroke: ruuviTheme.graph.stroke[colorMode],
@@ -242,6 +242,8 @@ class Graph extends Component {
                                         show: this.props.cursor || false,
                                         drag: { x: true, y: true, uni: 50 },
                                         focus: { prox: 1000 },
+                                        x: false,
+                                        y: false,
                                         move: (u, ml, mt) => {
                                             let yDataVal = u.data[1][u.cursor.idx];
                                             let yPos = u.valToPos(yDataVal, "y") || mt
