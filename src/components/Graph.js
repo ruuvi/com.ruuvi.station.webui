@@ -149,6 +149,7 @@ class Graph extends Component {
         this.setState(state);
     }
     shouldComponentUpdate(nextProps) {
+        if (this.props.points !== nextProps.points) return true
         if (this.props.height !== nextProps.height) return true;
         if (nextProps.colorMode.colorMode !== this.props.colorMode.colorMode) return true;
         dataKeyChanged = this.props.dataKey !== nextProps.dataKey;
@@ -225,12 +226,14 @@ class Graph extends Component {
                                     },
                                     series: [{
                                         label: this.props.t('time'),
+                                        class: "graphLabel",
                                         value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
                                     }, {
                                         label: this.props.dataName || this.props.t(this.props.dataKey),
+                                        class: "graphLabel",
                                         spanGaps: true,
-                                        points: { show: this.props.points || false, size: 4, fill: "green" },
-                                        width: 2,
+                                        points: { show: this.props.points, size: 4, fill: ruuviTheme.graph.fill[colorMode] },
+                                        width: 1,
                                         fill: ruuviTheme.graph.fill[colorMode],
                                         stroke: ruuviTheme.graph.stroke[colorMode],
                                         value: (self, rawValue) => localeNumber(rawValue)

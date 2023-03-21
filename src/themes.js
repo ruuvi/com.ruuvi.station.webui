@@ -149,6 +149,18 @@ export const ruuviTheme = extendTheme({
             },
             '.imageBackgroundOverlay': {
                 opacity: props.colorMode === "dark" ? 0.75 : 0.3,
+            },
+            '.graphLabel': {
+                fontFamily: "Mulish",
+                fontWeight: 600,
+                fontSize: "15px",
+                height: "100%",
+            },
+            '.graphLabel > th': {
+                fontWeight: 800,
+            },
+            '.graphLabel > td': {
+                marginTop: "2px",
             }
         })
     },

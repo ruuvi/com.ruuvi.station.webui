@@ -4,6 +4,7 @@ const SENSOR_OPEN_ACCORDIONS = "sensor_open_accordions";
 const DASHBOARD_SHOW_GRAPH_KEY = "dashboard_show_graph";
 const DASHBOARD_GRAPH_TYPE_KEY = "dashboard_graph_type";
 const BANNER = "banner_seen_";
+const GRAPH_DRAW_DOTS = "graph_draw_dots";
 
 class Store {
     setGraphFrom(v) {
@@ -44,6 +45,12 @@ class Store {
         let res = localStorage.getItem(BANNER + key);
         if (res === null) return false;
         return JSON.parse(res);
+    }
+    setGraphDrawDots(v) {
+        localStorage.setItem(GRAPH_DRAW_DOTS, v)
+    }
+    getGraphDrawDots() {
+        return localStorage.getItem(GRAPH_DRAW_DOTS) === "true"
     }
 }
 

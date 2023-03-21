@@ -45,6 +45,19 @@ export function getUnitFor(key, setting) {
     }
 }
 
+export function getSetting(key, fallback) {
+    try {
+        let settings = localStorage.getItem("settings");
+        if (settings) {
+            settings = JSON.parse(settings) 
+            if (settings[key]) return settings[key]
+        }
+    } catch (error) {
+        console.log("setSettings err", error)
+    }
+    return fallback
+}
+
 export function getDisplayValue(key, value) {
     try {
         if (!["temperature", "humidity", "pressure"].includes(key)) return value

@@ -7,6 +7,7 @@ import NavClose from "../components/NavClose";
 import notify from "../utils/notify";
 import LanguageMenu from '../components/LanguageMenu';
 import { getUnitFor } from "../UnitHelper";
+import Store from "../Store";
 
 const header = {
     fontFamily: "montserrat",
@@ -43,6 +44,11 @@ let resolutionOptions = (type, unitVal) => {
     ]
 }
 
+const boolOpt = [
+    { value: true, label: "yes" },
+    { value: false, label: "no" },
+]
+
 class Settings extends Component {
     constructor(props) {
         super(props)
@@ -56,6 +62,7 @@ class Settings extends Component {
                 ACCURACY_PRESSURE: "2",
                 ACCURACY_TEMPERATURE: "2"
             },
+            CHART_DRAW_DOTS: new Store().getGraphDrawDots(),
             savingSettings: [],
         }
     }
@@ -84,7 +91,7 @@ class Settings extends Component {
                 this.setState({ ...this.state, savingSettings: saving });
                 // reload settings in the safest way possible, will be improved in another issue
                 new NetworkApi().getSettings(settings => {
-                    if (settings.result === "success"){
+                    if (settings.result === "success") {
                         localStorage.setItem("settings", JSON.stringify(settings.data.settings))
                         if (this.props.updateUI) this.props.updateUI()
                     }
@@ -97,6 +104,13 @@ class Settings extends Component {
             console.log(error);
             notify.error(this.props.t("something_went_wrong"))
         })
+    }
+    updateLocalSetting(key, value) {
+        if (key === "CHART_DRAW_DOTS") {
+            new Store().setGraphDrawDots(value)
+            this.setState({ ...this.state, CHART_DRAW_DOTS: value })
+        }
+        if (this.props.updateUI) this.props.updateUI()
     }
     render() {
         var content = <>
@@ -118,9 +132,12 @@ class Settings extends Component {
                     <br />
                     <RadioInput label={"settings_pressure_unit"} value={this.state.settings.UNIT_PRESSURE} options={pressureOptions} onChange={v => this.updateSetting("UNIT_PRESSURE", v)} loading={this.state.savingSettings.indexOf("UNIT_PRESSURE") !== -1} />
                     <br />
-                    {this.state.settings.UNIT_PRESSURE !== "0" &&
+                    {this.state.settings.UNIT_PRESSURE !== "0" && <>
                         <RadioInput label={"pressure_resolution"} style={tabbed} value={this.state.settings.ACCURACY_PRESSURE} options={resolutionOptions("pressure", this.state.settings.UNIT_PRESSURE)} onChange={v => this.updateSetting("ACCURACY_PRESSURE", v)} loading={this.state.savingSettings.indexOf("ACCURACY_PRESSURE") !== -1} />
+                        <br />
+                    </>
                     }
+                    <RadioInput label={"settings_chart_draw_dots"} value={this.state.CHART_DRAW_DOTS} options={boolOpt} onChange={v => this.updateLocalSetting("CHART_DRAW_DOTS", JSON.parse(v))} />
                 </>
             )}
         </>
