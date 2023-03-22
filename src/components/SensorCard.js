@@ -92,6 +92,7 @@ class SensorCard extends Component {
     }
     getAlert(type) {
         if (!this.props.sensor) return null
+        if (type === "rssi") type = "signal"
         var idx = this.props.sensor.alerts.findIndex(x => x.type === type)
         if (idx !== -1) {
             return this.props.sensor.alerts[idx]
