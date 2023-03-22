@@ -104,9 +104,9 @@ function DataInfo(props) {
     let max = Math.max(...data.map(x => x.value))
     let avg = calculateAverage(data, zoom)
     return <>
-        <span style={{ marginRight: 18 }}><b>{t("graph_stat_min")}</b>: {localeNumber(min)}</span>
-        <span style={{ marginRight: 18 }}><b>{t("graph_stat_max")}</b>: {localeNumber(max)}</span>
-        <b>{t("graph_stat_avg")}</b>: {localeNumber(avg)}
+        <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_min")}</b>: {localeNumber(min)}</span>
+        <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_max")}</b>: {localeNumber(max)}</span>
+        <span  className="graphLabel"><b>{t("graph_stat_avg")}</b>: {localeNumber(avg)}</span>
         <IconButton mt={"-3px"} variant="ghost" onClick={() => notify.info(t("graph_stats_info"))}>
             <MdInfo size="16" className="buttonSideIcon" />
         </IconButton>
@@ -322,7 +322,7 @@ class Graph extends Component {
                                 data={graphData}
                             />
                             {!this.props.cardView && <>
-                                <center style={{ fontFamily: "Arial", fontSize: "14px", marginTop: -50 }}>
+                                <center style={{ fontFamily: "Arial", fontSize: "14px", marginTop: -52 }}>
                                     <DataInfo graphData={graphData} t={this.props.t} zoom={this.state.zoom} />
                                 </center>
                             </>}
