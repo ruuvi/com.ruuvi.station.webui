@@ -101,8 +101,24 @@ export default function UplotTouchZoomPlugin(xRange) {
             }
         }
 
+        function touchmovepan(e) {
+            const touch = e.changedTouches[0];
+            const rect = u.over.getBoundingClientRect();
+            const offsetX = touch.clientX - rect.left;
+            const offsetY = touch.clientY - rect.top;
+            u.setCursor({
+                left: offsetX,
+                top: offsetY,
+            });
+        }
+
         over.addEventListener("touchstart", function (e) {
+            if (e.touches.length === 1) {
+                document.addEventListener("touchmove", touchmovepan, { passive: true });
+                document.getElementsByClassName("u-legend")[0].style.visibility = '';
+            }
             if (e.touches.length < 2) return;
+            document.removeEventListener("touchmove", touchmovepan, { passive: true });
             rect = over.getBoundingClientRect();
 
             storePos(fr, e);
@@ -122,6 +138,7 @@ export default function UplotTouchZoomPlugin(xRange) {
 
         over.addEventListener("touchend", function (e) {
             document.removeEventListener("touchmove", touchmove, { passive: true });
+            document.removeEventListener("touchmove", touchmovepan, { passive: true });
         });
     }
 
