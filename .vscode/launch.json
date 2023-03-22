@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Chrome",
+        "type": "chrome",
+        //"preLaunchTask": "npm: start",
+        "request": "launch",
+        "url": "http://localhost:3000",
+        "webRoot": "${workspaceFolder}/src",
+        "outFiles": ["${fileDirname}/*.js"],
+        "sourceMapPathOverrides": {
+          "webpack:///src/*": "${webRoot}/*"
+        }
+      }
+    ]
+  }
