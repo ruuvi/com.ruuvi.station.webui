@@ -232,7 +232,7 @@ class Graph extends Component {
                                         label: this.props.dataName || this.props.t(this.props.dataKey),
                                         class: "graphLabel",
                                         spanGaps: true,
-                                        points: { show: this.props.points, size: 4, width: 3, fill: ruuviTheme.graph.fill[colorMode] },
+                                        points: { show: this.props.points, size: 4, fill: ruuviTheme.graph.fill[colorMode] },
                                         width: 1,
                                         fill: ruuviTheme.graph.fill[colorMode],
                                         stroke: ruuviTheme.graph.stroke[colorMode],
@@ -242,6 +242,10 @@ class Graph extends Component {
                                         show: this.props.cursor || false,
                                         drag: { x: true, y: true, uni: 50 },
                                         focus: { prox: 1000 },
+                                        points: { 
+                                            size: 8,
+                                            fill: ruuviTheme.colors.error, 
+                                        }, 
                                         x: false,
                                         y: false,
                                         move: (u, ml, mt) => {
