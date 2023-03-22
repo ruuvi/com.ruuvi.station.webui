@@ -31,7 +31,7 @@ import DurationText from "../components/DurationText";
 import Store from "../Store";
 import ShareDialog from "../components/ShareDialog";
 import EditNameDialog from "../components/EditNameDialog";
-import { addNewlines, uppercaseFirst } from "../TextHelper";
+import { addNewlines, addVariablesInString, uppercaseFirst } from "../TextHelper";
 import AlertItem from "../components/AlertItem";
 import EditableText from "../components/EditableText";
 import OffsetDialog from "../components/OffsetDialog";
@@ -532,7 +532,7 @@ class Sensor extends Component {
                                                                     {t("share")}
                                                                 </td>
                                                                 <td style={detailedText}>
-                                                                    {t(this.props.sensor.sharedTo.length ? "sensor_shared" : "share")}
+                                                                    {addVariablesInString(t("shared_to_x"), [this.props.sensor.sharedTo.length, pjson.settings.maxSharesPerSensor])}
                                                                     <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
                                                                 </td>
                                                             </tr>

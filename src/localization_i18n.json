@@ -184,7 +184,8 @@
       "graph_stat_max": "Max",
       "graph_stat_avg": "Average",
       "graph_stats_info": "A minimum, maximum and average values in the visible timeframe are shown. You can change the visible timeframe from the dropdown menu or by using the zoom tool.",
-      "no_expiry_date": "No expiry date"
+      "no_expiry_date": "No expiry date",
+      "shared_to_x": "Shared to {%d^%1$,d}/{%d^%2$,d}"
     }
   },
   "fi": {
@@ -372,7 +373,8 @@
       "graph_stat_max": "Max",
       "graph_stat_avg": "Keskiarvo",
       "graph_stats_info": "Minimi-, maksimi- ja keskiarvot näytettävälle aikajaksolle. Voit vaihtaa näytettävän aikajakson pudotusvalikosta tai zoom-työkalua käyttämällä.",
-      "no_expiry_date": "Ei päättymispäivää"
+      "no_expiry_date": "Ei päättymispäivää",
+      "shared_to_x": "Jaettu {%d^%1$,d}/{%d^%2$,d}"
     }
   },
   "sv": {
@@ -560,7 +562,8 @@
       "graph_stat_max": "Max",
       "graph_stat_avg": "Medelvärde",
       "graph_stats_info": "Ett minimi-, maximi- och medelvärde i den synliga tidsramen visas. Du kan ändra den synliga tidsramen från rullgardinsmenyn eller genom att använda zoomverktyget.",
-      "no_expiry_date": "Ingen utgångsdatum"
+      "no_expiry_date": "Ingen utgångsdatum",
+      "shared_to_x": "Delad {%d^%1$,d}/{%d^%2$,d}"
     }
   }
 }

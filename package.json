@@ -5,7 +5,8 @@
     "sensorNameMaxLength": 32,
     "alertDescriptionMaxLength": 100,
     "dataFetchPaginationSize": 1500,
-    "dataCacheLengthInDays": 100
+    "dataCacheLengthInDays": 100,
+    "maxSharesPerSensor": 10
   },
   "private": true,
   "dependencies": {

@@ -13,8 +13,7 @@ import NetworkApi from "../NetworkApi";
 import notify from "../utils/notify";
 import RDialog from "./RDialog";
 import { addNewlines, addVariablesInString } from "../TextHelper";
-
-const maxSharesPerSensor = 10;
+import pjson from '../../package.json';
 
 class ShareDialog extends Component {
     constructor(props) {
@@ -72,7 +71,7 @@ class ShareDialog extends Component {
         this.setState({ ...this.state, email: evt.target.value });
     }
     isInvalidValid = () => {
-        return this.state.loading || this.props.sensor.sharedTo.length >= maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)
+        return this.state.loading || this.props.sensor.sharedTo.length >= pjson.settings.maxSharesPerSensor || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email)
     }
     keyDown = (e) => {
         if (e.key === 'Enter') {
@@ -93,7 +92,7 @@ class ShareDialog extends Component {
                     <Button disabled={this.isInvalidValid()} onClick={this.share.bind(this)} mt="17px">{t("share")}</Button>
                 </div>
                 {this.props.sensor.sharedTo.length > 0 && <>
-                    <div style={{ fontWeight: "bold", marginTop: 8, marginBottom: 8 }}>{addVariablesInString(t("share_sensor_already_shared"), [this.props.sensor.sharedTo.length, maxSharesPerSensor])}</div>
+                    <div style={{ fontWeight: "bold", marginTop: 8, marginBottom: 8 }}>{addVariablesInString(t("share_sensor_already_shared"), [this.props.sensor.sharedTo.length, pjson.settings.maxSharesPerSensor])}</div>
                     <List spacing={3}>
                         {this.props.sensor.sharedTo.map(x => {
                             return <ListItem key={x}>
