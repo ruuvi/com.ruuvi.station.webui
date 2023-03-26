@@ -203,7 +203,7 @@ class Graph extends Component {
         let height = this.props.height || 300;
         let graphData = this.getGraphData()
         return (
-            <div ref={this.pRef} style={{ height: height + (this.props.cardView ? 0 : 25) }}>
+            <div ref={this.pRef}>
                 {this.state.resizing ? (
                     <center style={{ width: "100%", height: height, paddingTop: height / 4 }}>
                         <span className='spinner'></span>
@@ -337,7 +337,7 @@ class Graph extends Component {
                                 data={graphData}
                             />
                             {!this.props.cardView && <>
-                                <center style={{ fontFamily: "Arial", fontSize: "14px", marginTop: -52 }}>
+                                <center style={{ fontFamily: "Arial", fontSize: "14px" }}>
                                     <DataInfo graphData={graphData} t={this.props.t} zoom={this.state.zoom} />
                                 </center>
                             </>}
