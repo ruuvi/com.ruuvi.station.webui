@@ -19,7 +19,6 @@ import { withColorMode } from "../utils/withColorMode";
 import bglayer from '../img/bg-layer.png';
 import { MdAdd, MdCameraAlt } from "react-icons/md";
 import uploadBackgroundImage from "../BackgroundUploader";
-import Store from "../Store";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -191,7 +190,7 @@ class SensorCard extends Component {
                                             {this.state.data && this.state.data.measurements.length ? (
                                                 <>
                                                     {showGraph &&
-                                                        <Graph title="" key={this.props.sensor.sensor + showImage.toString() + mainStat} points={new Store().getGraphDrawDots()} dataKey={mainStat} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
+                                                        <Graph title="" key={this.props.sensor.sensor + showImage.toString() + mainStat} dataKey={mainStat} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
                                                     }
                                                 </>
                                             ) : (
