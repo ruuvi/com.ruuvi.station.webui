@@ -1,6 +1,7 @@
 
 export default function UplotTouchZoomPlugin(xRange) {
     function init(u, opts, data) {
+        let yRange = [Math.min(...data[1]) - 0.5, Math.max(...data[1]) + 0.5]
         let over = u.over;
         let rect, oxRange, oyRange, xVal, yVal;
         let fr = { x: 0, y: 0, dx: 0, dy: 0 };
@@ -72,12 +73,11 @@ export default function UplotTouchZoomPlugin(xRange) {
             let nyMin = yVal - btmPct * nyRange;
             let nyMax = nyMin + nyRange;
 
-            if (nxMin < xRange[0]) {
-                nxMin = xRange[0]
-            }
-            if (nxMax > xRange[1]) {
-                nxMax = xRange[1]
-            }
+            if (nxMin < xRange[0] || isNaN(nxMin)) nxMin = xRange[0]
+            if (nxMax > xRange[1] || isNaN(nxMax)) nxMax = xRange[1]
+
+            if (nyMin < yRange[0] || isNaN(nyMin)) nyMin = yRange[0]
+            if (nyMax > yRange[1] || isNaN(nyMax)) nyMax = yRange[1]
 
             u.batch(() => {
                 u.setScale("x", {
