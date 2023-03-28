@@ -240,7 +240,7 @@ class Graph extends Component {
                                     }],
                                     cursor: {
                                         show: this.props.cursor || false,
-                                        drag: { x: true, y: false, uni: 50 },
+                                        drag: { x: true, y: true, uni: 50 },
                                         points: { 
                                             size: 9,
                                             fill: ruuviTheme.graph.stroke[colorMode], 
