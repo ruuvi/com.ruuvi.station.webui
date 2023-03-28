@@ -241,18 +241,10 @@ class Graph extends Component {
                                     cursor: {
                                         show: this.props.cursor || false,
                                         drag: { x: true, y: false, uni: 50 },
-                                        focus: { prox: 1000 },
                                         points: { 
                                             size: 9,
                                             fill: ruuviTheme.graph.stroke[colorMode], 
                                         }, 
-                                        x: false,
-                                        y: false,
-                                        move: (u, ml, mt) => {
-                                            let yDataVal = u.data[1][u.cursor.idx];
-                                            let yPos = u.valToPos(yDataVal, "y") || mt
-                                            return [ml, yPos]
-                                        }
                                     },
                                     scales: {
                                         x: {
