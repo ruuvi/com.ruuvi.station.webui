@@ -1,7 +1,7 @@
 const GRAPH_FROM_KEY = "graph_from";
 const DASHBOARD_FROM_KEY = "dashboard_from";
 const SENSOR_OPEN_ACCORDIONS = "sensor_open_accordions";
-const DASHBOARD_SHOW_GRAPH_KEY = "dashboard_show_graph";
+const DASHBOARD_CARD_TYPE_KEY = "dashboard_card_type";
 const DASHBOARD_GRAPH_TYPE_KEY = "dashboard_graph_type";
 const BANNER = "banner_seen_";
 const GRAPH_DRAW_DOTS = "graph_draw_dots";
@@ -26,11 +26,11 @@ class Store {
         var cache = localStorage.getItem(SENSOR_OPEN_ACCORDIONS);
         return cache ? JSON.parse(cache) : cache;
     }
-    setDashboardShowGraph(v) {
-        localStorage.setItem(DASHBOARD_SHOW_GRAPH_KEY, v)
+    setDashboardCardType(v) {
+        localStorage.setItem(DASHBOARD_CARD_TYPE_KEY, v)
     }
-    getDashboardShowGraph() {
-        return localStorage.getItem(DASHBOARD_SHOW_GRAPH_KEY) === "true"
+    getDashboardCardType() {
+        return localStorage.getItem(DASHBOARD_CARD_TYPE_KEY) || "image_view"
     }
     setDashboardGraphType(v) {
         localStorage.setItem(DASHBOARD_GRAPH_TYPE_KEY, v)

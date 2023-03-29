@@ -53,7 +53,7 @@ class Dashboard extends Component {
             loading: true,
             sensors: [],
             from: 24 * 3,
-            showGraph: store.getDashboardShowGraph(),
+            cardType: store.getDashboardCardType(),
             showBig: true,
             graphType: store.getDashboardGraphType()
         }
@@ -154,10 +154,8 @@ class Dashboard extends Component {
         new Store().setDashboardShowGraph(showGraph)
     }
     setDashboardViewType(type) {
-        console.log("setDashboardViewType", type)
-        let showGraph = type === "graph"
-        this.setState({ ...this.state, showGraph: showGraph })
-        new Store().setDashboardShowGraph(showGraph)
+        this.setState({ ...this.state, cardType: type })
+        new Store().setDashboardCardType(type)
     }
     setGraphType(type) {
         this.setState({ ...this.state, graphType: type })
@@ -185,7 +183,7 @@ class Dashboard extends Component {
                                     {this.state.sensors.length !== 0 &&
                                         <div style={{ paddingTop: 26 }}>
                                             <Flex flexFlow={"row wrap"} justifyContent={"flex-end"} gap={2}>
-                                                <DashboardViewType value={this.state.showGraph ? "graph" : "image"} onChange={this.setDashboardViewType.bind(this)} />
+                                                <DashboardViewType value={this.state.cardType} onChange={this.setDashboardViewType.bind(this)} />
                                                 <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
                                                 <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
                                             </Flex>
@@ -197,7 +195,7 @@ class Dashboard extends Component {
                                                 {this.state.sensors.map(x => {
                                                     return <span key={x.sensor + this.state.from} style={{ width: 640, maxWidth: "100%" }}>
                                                         <a href={"#/" + x.sensor}>
-                                                            <SensorCard sensor={x} size={size} dataFrom={this.state.from} showImage={!this.state.showGraph} showGraph={this.state.showGraph} graphType={this.state.graphType} />
+                                                            <SensorCard sensor={x} size={size} dataFrom={this.state.from} cardType={this.state.cardType} graphType={this.state.graphType} />
                                                         </a></span>
                                                 })}
                                             </>
@@ -219,7 +217,7 @@ class Dashboard extends Component {
                     </Box>
                 </Box>
                 <SettingsModal open={this.showModal("settings")} onClose={() => this.closeModal()} updateUI={() => this.forceUpdate()} />
-                {this.showModal("myaccount") && 
+                {this.showModal("myaccount") &&
                     <MyAccountModal open={this.showModal("myaccount")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()} />
                 }
             </>

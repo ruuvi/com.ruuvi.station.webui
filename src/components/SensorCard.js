@@ -6,6 +6,7 @@ import {
     SimpleGrid,
     GridItem,
     Avatar,
+    Flex
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "./Graph";
@@ -19,6 +20,9 @@ import { withColorMode } from "../utils/withColorMode";
 import bglayer from '../img/bg-layer.png';
 import { MdAdd, MdCameraAlt } from "react-icons/md";
 import uploadBackgroundImage from "../BackgroundUploader";
+import { isBatteryLow } from "../utils/battery";
+import { FaBatteryQuarter } from "react-icons/fa";
+import { ruuviTheme } from "../themes";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -82,7 +86,7 @@ class SensorCard extends Component {
     getLatestReading() {
         var lastParsedReading = this.props.sensor.measurements.length === 1 ? this.props.sensor.measurements[0] : null
         if (!lastParsedReading) return null;
-        return {...lastParsedReading.parsed, timestamp: lastParsedReading.timestamp};
+        return { ...lastParsedReading.parsed, timestamp: lastParsedReading.timestamp };
     }
     getTimeSinceLastUpdate() {
         if (!this.state.data || !this.state.data.measurements.length) return " - ";
@@ -114,8 +118,9 @@ class SensorCard extends Component {
     }
     render() {
         var { t } = this.props;
-        let showGraph = this.props.showGraph;
-        let showImage = this.props.showImage;
+        let showGraph = this.props.cardType === "graph_view";
+        let showImage = this.props.cardType === "image_view";
+        let simpleView = this.props.cardType === "simple_view";
         if (!showGraph && this.props.size !== "mobile") showGraph = true
         let height = showGraph ? this.props.size === "medium" ? 300 : 360 : 193;
         let graphHeight = height - 170;
@@ -127,6 +132,37 @@ class SensorCard extends Component {
         let isSmallCard = this.props.size === "mobile" && !showGraph
         let mainStat = this.props.graphType || "temperature";
         let latestReading = this.getLatestReading();
+        if (simpleView) {
+            return (
+                <div>
+                    <Box className="content sensorCard" height={105} borderRadius="lg" overflow="hidden" padding={4}>
+                        <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, lineHeight: "19px", maxHeight: "38px", marginTop: -4 }}>
+                            {this.props.sensor.name}
+                        </Heading>
+                        <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", opacity: 0.8 }}>
+                            {[...[mainStat === "temperature" ? "temperature" : undefined], "humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature" : undefined]].map(x => {
+                                let value = latestReading[x];
+                                if (value === undefined) return null;
+                                return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
+                                    <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
+                                    <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
+                                </GridItem>
+                            })}
+                        </SimpleGrid>
+                        <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%" }}>
+                            <Flex justifyContent={"space-between"}>
+                                <span>
+                                    <DurationText from={latestReading ? latestReading.timestamp : " - "} t={this.props.t} />
+                                </span>
+                                <Flex>
+                                    {isBatteryLow(this.getLatestReading().battery, this.getLatestReading().temperature) ? <>{t("low_battery")}<FaBatteryQuarter style={{ display: "inline", alignSelf: "flex-end", marginLeft: 8 }} size="13px" color={ruuviTheme.colors.error} /></> : ""}
+                                </Flex>
+                            </Flex>
+                        </div>
+                    </Box>
+                </div >
+            )
+        }
         return (
             <div>
                 <Box className="content sensorCard" height={height} borderRadius="lg" overflow="hidden">

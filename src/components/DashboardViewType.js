@@ -17,7 +17,7 @@ const detailedSubText = {
 
 export default function DashboardViewType(props) {
     const { t } = useTranslation();
-    var opts = [{ k: "image_view", v: "image" }, { k: "graph_view", v: "graph" }];
+    var opts = ["image_view", "graph_view", "simple_view"];
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
             <MenuButton as={Button}
@@ -26,7 +26,7 @@ export default function DashboardViewType(props) {
                 className="durationPicker"
                 style={{ ...detailedSubText }}
                 borderRadius='4px'>
-                {t(opts.find(x => x.v === props.value).k)}
+                {t(opts.find(x => x === props.value))}
             </MenuButton>
             <MenuList>
                 {opts.map((x, i) => {
@@ -35,8 +35,8 @@ export default function DashboardViewType(props) {
                     if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
                     if (i === opts.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                     else divider = <MenuDivider />
-                    return <div key={x.v + "p"}>
-                        <MenuItem key={x.v} className={props.value === x.v ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => props.onChange(x.v)}>{t(x.k)}</MenuItem>
+                    return <div key={x + "p"}>
+                        <MenuItem key={x} className={props.value === x ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => props.onChange(x)}>{t(x)}</MenuItem>
                         {divider}
                     </div>
                 })}
