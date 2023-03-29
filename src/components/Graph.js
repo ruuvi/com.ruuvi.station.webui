@@ -241,14 +241,14 @@ class Graph extends Component {
                                     cursor: {
                                         show: this.props.cursor || false,
                                         drag: { x: true, y: true, uni: 50 },
-                                        points: { 
+                                        points: {
                                             size: 9,
-                                            fill: ruuviTheme.graph.stroke[colorMode], 
-                                        }, 
+                                            fill: ruuviTheme.graph.stroke[colorMode],
+                                        },
                                     },
                                     scales: {
                                         x: {
-                                            time: true, auto: this.props.from === undefined, range: (_, fromX, toX) => {
+                                            time: true, range: (_, fromX, toX) => {
                                                 // redo this at some point, this will do as a workaround for now.
                                                 let allowZoom = true;
                                                 if (xRangeUpdateThottle + 20 > new Date().getTime()) {
