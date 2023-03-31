@@ -132,6 +132,18 @@ class SensorCard extends Component {
         let isSmallCard = this.props.size === "mobile" && !showGraph
         let mainStat = this.props.graphType || "temperature";
         let latestReading = this.getLatestReading();
+
+        let infoRow = <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%" }}>
+            <Flex justifyContent={"space-between"}>
+                <span>
+                    <DurationText from={latestReading ? latestReading.timestamp : " - "} t={this.props.t} />
+                </span>
+                <Flex>
+                    {isBatteryLow(this.getLatestReading().battery, this.getLatestReading().temperature) ? <>{t("low_battery")}<FaBatteryQuarter style={{ display: "inline", alignSelf: "flex-end", marginLeft: 8 }} size="13px" color={ruuviTheme.colors.error} /></> : ""}
+                </Flex>
+            </Flex>
+        </div>
+        
         if (simpleView) {
             return (
                 <div>
@@ -149,16 +161,7 @@ class SensorCard extends Component {
                                 </GridItem>
                             })}
                         </SimpleGrid>
-                        <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%" }}>
-                            <Flex justifyContent={"space-between"}>
-                                <span>
-                                    <DurationText from={latestReading ? latestReading.timestamp : " - "} t={this.props.t} />
-                                </span>
-                                <Flex>
-                                    {isBatteryLow(this.getLatestReading().battery, this.getLatestReading().temperature) ? <>{t("low_battery")}<FaBatteryQuarter style={{ display: "inline", alignSelf: "flex-end", marginLeft: 8 }} size="13px" color={ruuviTheme.colors.error} /></> : ""}
-                                </Flex>
-                            </Flex>
-                        </div>
+                        {infoRow}
                     </Box>
                 </div >
             )
@@ -251,9 +254,7 @@ class SensorCard extends Component {
                                                 </GridItem>
                                             })}
                                         </SimpleGrid>
-                                        <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%" }}>
-                                            <DurationText from={latestReading ? latestReading.timestamp : " - "} t={this.props.t} />
-                                        </div>
+                                        {infoRow}
                                     </div> : <div>
                                         <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: height / 2 - 80 }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
                                     </div>}
