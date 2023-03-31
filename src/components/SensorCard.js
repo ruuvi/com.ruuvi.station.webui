@@ -147,7 +147,7 @@ class SensorCard extends Component {
             return (
                 <div>
                     <Box className="content sensorCard" height={105} borderRadius="lg" overflow="hidden" padding={4}>
-                        <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, lineHeight: "19px", maxHeight: "38px", marginTop: -4 }}>
+                        <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: -4 }}>
                             {this.props.sensor.name}
                         </Heading>
                         <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", opacity: 0.8 }}>
