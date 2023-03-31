@@ -21,8 +21,7 @@ import bglayer from '../img/bg-layer.png';
 import { MdAdd, MdCameraAlt } from "react-icons/md";
 import uploadBackgroundImage from "../BackgroundUploader";
 import { isBatteryLow } from "../utils/battery";
-import { FaBatteryQuarter } from "react-icons/fa";
-import { ruuviTheme } from "../themes";
+import lowBattery from '../img/low_battery.svg'
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -139,11 +138,11 @@ class SensorCard extends Component {
                     <DurationText from={latestReading ? latestReading.timestamp : " - "} t={this.props.t} />
                 </span>
                 <Flex>
-                    {isBatteryLow(this.getLatestReading().battery, this.getLatestReading().temperature) ? <>{t("low_battery")}<FaBatteryQuarter style={{ display: "inline", alignSelf: "flex-end", marginLeft: 8 }} size="13px" color={ruuviTheme.colors.error} /></> : ""}
+                    {isBatteryLow(this.getLatestReading().battery, this.getLatestReading().temperature) ? <>{t("low_battery")}<img src={lowBattery} alt={t("low_battery")} style={{ display: "inline", alignSelf: "center", marginLeft: 8, height: "10px" }} /></> : ""}
                 </Flex>
             </Flex>
         </div>
-        
+
         if (simpleView) {
             return (
                 <div>
