@@ -2,15 +2,14 @@ import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box, Link, useMediaQuery, Button, Tooltip, Flex } from "@chakra-ui/react"
-import { useTranslation, withTranslation } from 'react-i18next';
+import { Spinner, Box, Link, useMediaQuery, Flex } from "@chakra-ui/react"
+import { withTranslation } from 'react-i18next';
 import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
 import SessionStore from "../SessionStore";
 import notify from "../utils/notify";
 import SettingsModal from "../components/SettingsModal";
 import { withColorMode } from "../utils/withColorMode";
-import { MdEqualizer, MdImage } from "react-icons/md";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import SensorTypePicker from "../components/SensorTypePicker";
 import MyAccountModal from "../components/MyAccountModal";
@@ -33,16 +32,6 @@ function DashboardGrid(props) {
     return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap={size === "mobile" ? "10px" : "20px"} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" : props.showGraph ? "300px" : "360px"}, max-content))`}>
         {props.children(size)}
     </Box>
-}
-
-function GraphToggle(props) {
-    var { t } = useTranslation();
-    const [isMobile] = useMediaQuery("(max-width: 1023px)")
-    return <Tooltip label={t(props.label)} hasArrow isDisabled={isMobile}>
-        <Button variant="imageToggle" onClick={() => props.showGraphClick()}>
-            {props.showGraph ? <MdImage size="23px" /> : <MdEqualizer size="23px" />}
-        </Button>
-    </Tooltip>
 }
 
 class Dashboard extends Component {
@@ -147,11 +136,6 @@ class Dashboard extends Component {
         this.props.navigate({
             search: "",
         }, { replace: true });
-    }
-    showGraphClick() {
-        let showGraph = !this.state.showGraph
-        this.setState({ ...this.state, showGraph: showGraph })
-        new Store().setDashboardShowGraph(showGraph)
     }
     setDashboardViewType(type) {
         this.setState({ ...this.state, cardType: type })
