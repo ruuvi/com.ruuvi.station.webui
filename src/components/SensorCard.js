@@ -6,7 +6,8 @@ import {
     SimpleGrid,
     GridItem,
     Avatar,
-    Flex
+    Flex,
+    Image
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "./Graph";
@@ -22,6 +23,8 @@ import { MdAdd, MdCameraAlt } from "react-icons/md";
 import uploadBackgroundImage from "../BackgroundUploader";
 import { isBatteryLow } from "../utils/battery";
 import lowBattery from '../img/low_battery.svg'
+import bell from '../img/icon-bell.svg'
+import bellAlert from '../img/icon-bell-alert.svg'
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -102,11 +105,18 @@ class SensorCard extends Component {
         }
         return null
     }
-    isAlertTriggerd(type) {
+    getAlertState(type) {
         if (type === "movementCounter") type = "movement";
         var alert = this.getAlert(type.toLocaleLowerCase())
-        if (!alert) return false
-        return alert.enabled && alert.triggered;
+        if (!alert || !alert.enabled) return -1
+        if (alert.triggered) return 1
+        return 0
+    }
+    getSensorAlertState() {
+        let alerts = this.props.sensor.alerts
+        if (alerts.find(x => x.enabled && x.triggered)) return 1
+        if (alerts.find(x => x.enabled)) return 0
+        return -1
     }
     setHover(state) {
         this.setState({
@@ -131,6 +141,10 @@ class SensorCard extends Component {
         let isSmallCard = this.props.size === "mobile" && !showGraph
         let mainStat = this.props.graphType || "temperature";
         let latestReading = this.getLatestReading();
+        let sensorAlertState = this.getSensorAlertState()
+        let alertIcon = <></>
+        if (sensorAlertState === 0) alertIcon = <Image src={bell} width="15px" mt="-1" />
+        if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} width="15px" mt="-1" className="alarmFadeInOut" />
 
         let infoRow = <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%" }}>
             <Flex justifyContent={"space-between"}>
@@ -147,14 +161,21 @@ class SensorCard extends Component {
             return (
                 <div>
                     <Box className="content sensorCard" height={105} borderRadius="lg" overflow="hidden" padding={4}>
-                        <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: -4 }}>
-                            {this.props.sensor.name}
-                        </Heading>
+                        <Flex>
+                            <Flex grow={1} width="calc(100% - 15px)">
+                                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: -4, marginRight: 2 }}>
+                                    {this.props.sensor.name}
+                                </Heading>
+                            </Flex>
+                            <Flex width="15px">
+                                {alertIcon}
+                            </Flex>
+                        </Flex>
                         <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", opacity: 0.8 }}>
                             {[...[mainStat === "temperature" ? "temperature" : undefined], "humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature" : undefined]].map(x => {
                                 let value = latestReading[x];
                                 if (value === undefined) return null;
-                                return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
+                                return <GridItem key={x} style={{ color: this.getAlertState(x) > 0 ? "#f27575" : undefined }}>
                                     <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
                                     <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
                                 </GridItem>
@@ -200,20 +221,27 @@ class SensorCard extends Component {
                         }
                         <Box padding="24px" marginLeft={showImage ? imageWidth : 0}>
                             <Box height={isSmallCard ? "98px" : ""}>
-                                {isSmallCard ? (
-                                    <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, lineHeight: "19px", maxHeight: "38px" }}>
-                                        {this.props.sensor.name}
-                                    </Heading>
-                                ) : (
-                                    <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                        {this.props.sensor.name}
-                                    </Heading>
-                                )}
+                                <Flex>
+                                    <Flex grow={1} width="calc(100% - 15px)">
+                                        {isSmallCard ? (
+                                            <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, lineHeight: "19px", maxHeight: "38px", marginRight: 2 }}>
+                                                {this.props.sensor.name}
+                                            </Heading>
+                                        ) : (
+                                            <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginRight: 2 }}>
+                                                {this.props.sensor.name}
+                                            </Heading>
+                                        )}
+                                    </Flex>
+                                    <Flex>
+                                        {alertIcon}
+                                    </Flex>
+                                </Flex>
                                 {latestReading &&
                                     <BigValue
                                         value={getDisplayValue(mainStat, localeNumber(getUnitHelper(mainStat).value(latestReading[mainStat], mainStat === "humidity" ? latestReading.temperature : undefined), getUnitHelper(mainStat).decimals))}
                                         unit={getUnitHelper(mainStat).unit}
-                                        alertActive={this.isAlertTriggerd(mainStat)}
+                                        alertActive={this.getAlertState(mainStat) > 0}
                                     />
                                 }
                             </Box>
@@ -248,7 +276,7 @@ class SensorCard extends Component {
                                                 {["humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature" : undefined]].map(x => {
                                                     let value = latestReading[x];
                                                     if (value === undefined) return null;
-                                                    return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
+                                                    return <GridItem key={x} style={{ color: this.getAlertState(x) > 0 ? "#f27575" : undefined }}>
                                                         <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
                                                         <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
                                                     </GridItem>

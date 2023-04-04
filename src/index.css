@@ -1,6 +1,6 @@
 html {
-  height:100%
-} 
+  height: 100%
+}
 
 body {
   margin: 0;
@@ -48,7 +48,7 @@ code {
 }
 
 :focus {
-  outline: none; 
+  outline: none;
   box-shadow: none !important;
 }
 
@@ -66,6 +66,23 @@ code {
 
 @keyframes spin {
   to {
-      transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.alarmFadeInOut {
+  opacity: 1;
+  animation: fade 1s cubic-bezier(1,1,0,1) infinite;
+}
+
+@keyframes fade {
+
+  0%,
+  100% {
+    opacity: 0
+  }
+
+  50% {
+    opacity: 1
   }
 }
