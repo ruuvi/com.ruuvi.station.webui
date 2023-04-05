@@ -222,13 +222,13 @@ class SensorCard extends Component {
                                     <Spinner size="xl" />
                                 </center>
                             ) : (
-                                <div style={{ maxWidth: this.props.size === "mobile" && !this.props.showGraph ? "300px" : undefined }}>
+                                <div>
                                     {latestReading ? <div>
                                         <div style={{ marginLeft: -24, marginRight: -30, marginTop: -10, marginBottom: -10, paddingBottom: -50 }}>
                                             {this.state.data && this.state.data.measurements.length ? (
                                                 <>
                                                     {showGraph &&
-                                                        <Graph title="" key={this.props.sensor.sensor + showImage.toString() + mainStat} dataKey={mainStat} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
+                                                        <Graph title="" key={this.props.sensor.sensor + this.props.cardType + mainStat} dataKey={mainStat} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
                                                     }
                                                 </>
                                             ) : (
@@ -243,16 +243,18 @@ class SensorCard extends Component {
                                                 </>
                                             )}
                                         </div>
-                                        <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 0 0" }}>
-                                            {["humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature" : undefined]].map(x => {
-                                                let value = latestReading[x];
-                                                if (value === undefined) return null;
-                                                return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
-                                                    <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
-                                                    <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
-                                                </GridItem>
-                                            })}
-                                        </SimpleGrid>
+                                        <div style={{ maxWidth: this.props.size === "mobile" && !this.props.showGraph ? "300px" : undefined }}>
+                                            <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 0 0" }}>
+                                                {["humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature" : undefined]].map(x => {
+                                                    let value = latestReading[x];
+                                                    if (value === undefined) return null;
+                                                    return <GridItem key={x} style={{ color: this.isAlertTriggerd(x) ? "#f27575" : undefined }}>
+                                                        <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
+                                                        <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
+                                                    </GridItem>
+                                                })}
+                                            </SimpleGrid>
+                                        </div>
                                         {infoRow}
                                     </div> : <div>
                                         <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: height / 2 - 80 }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
