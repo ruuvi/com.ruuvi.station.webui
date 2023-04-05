@@ -2,12 +2,10 @@ import React, { Component } from "react";
 import NetworkApi from '../NetworkApi'
 import {
     Heading,
-    Stack,
     Button,
     IconButton,
     Box,
     Avatar,
-    Progress,
     List,
     ListItem,
     Accordion,
@@ -17,6 +15,7 @@ import {
     AccordionIcon,
     useMediaQuery,
     CircularProgress,
+    Spinner,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
@@ -357,7 +356,8 @@ class Sensor extends Component {
         }
     }
     updateFrom(v) {
-        this.setState({ ...this.state, data: null, from: v }, () => this.loadData(true))
+        this.isLoading = false
+        this.setState({ ...this.state, data: null, from: v, loading: false }, () => this.loadData(false))
         new Store().setGraphFrom(v)
     }
     share(state) {
@@ -463,23 +463,23 @@ class Sensor extends Component {
                                     </tbody>
                                 </table>
                             </div>
-                            {this.state.loading ? (
-                                <Stack style={{ marginTop: "30px", marginBottom: "30px" }}>
-                                    <Progress isIndeterminate={true} color="#e6f6f2" />
-                                </Stack>
-                            ) : (
-                                <> {!this.state.data || !this.state.data.measurements.length ? (
-                                    <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", margin: 100 }}>{t("no_data_in_range")}</center>
+                            <Box height={520}>
+                                {this.state.loading ? (
+                                    <div style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: "100%", textAlign: "center" }}><div style={{ position: "relative", top: "45%" }}><Spinner size="xl" /></div></div>
                                 ) : (
-                                    <Box ml={-5} mr={-5}>
-                                        <Graph key={"sensor_graph"} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
-                                    </Box>
+                                    <> {!this.state.data || !this.state.data.measurements.length ? (
+                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", paddingTop: 240, height: 450 }}>{t("no_data_in_range")}</center>
+                                    ) : (
+                                        <Box ml={-5} mr={-5}>
+                                            <Graph key={"sensor_graph"} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                        </Box>
+                                    )}
+                                    </>
                                 )}
-                                </>
-                            )}
+                            </Box>
                         </div>
                     </Box>
-                    {this.state.data && <Box>
+                    <Box>
                         <div style={{ height: "20px" }} />
                         <Accordion allowMultiple defaultIndex={this.openAccodrions} onChange={v => this.setOpenAccordion(v)}>
                             <AccordionItem onChange={v => console.log(v)}>
@@ -580,11 +580,11 @@ class Sensor extends Component {
                                         {["Temperature", "Humidity", "Pressure"].map(x => {
                                             if (this.getLatestReading()[x.toLowerCase()] === undefined) return null;
                                             var uh = getUnitHelper(x.toLocaleLowerCase());
-                                            var value = uh.value(this.state.data["offset" + x], true);
+                                            var value = uh.value(this.props.sensor["offset" + x], true);
                                             var unit = uh.unit;
                                             if (x === "Humidity") {
                                                 // humidity offset is always %
-                                                value = this.state.data["offset" + x]
+                                                value = this.props.sensor["offset" + x]
                                                 unit = "%"
                                             }
                                             return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, offsetDialog: x })}>
@@ -666,10 +666,10 @@ class Sensor extends Component {
                                 </AccordionPanel>
                             </AccordionItem>
                         </Accordion>
-                    </Box>}
+                    </Box>
                     <EditNameDialog open={this.state.editName} onClose={() => this.editName(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
                     <ShareDialog open={this.state.showShare} onClose={() => this.share(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
-                    {this.state.data && <OffsetDialog open={this.state.offsetDialog} onClose={() => this.setState({ ...this.state, offsetDialog: null })} sensor={this.props.sensor} offsets={{ "Humidity": this.state.data.offsetHumidity, "Pressure": this.state.data.offsetPressure, "Temperature": this.state.data.offsetTemperature }} lastReading={this.getLatestReading()} updateSensor={this.props.updateSensor} />}
+                    <OffsetDialog open={this.state.offsetDialog} onClose={() => this.setState({ ...this.state, offsetDialog: null })} sensor={this.props.sensor} offsets={{ "Humidity": this.props.sensor.offsetHumidity, "Pressure": this.props.sensor.offsetPressure, "Temperature": this.props.sensor.offsetTemperature }} lastReading={this.getLatestReading()} updateSensor={this.props.updateSensor} />
                 </Box>
             </Box>
         )
