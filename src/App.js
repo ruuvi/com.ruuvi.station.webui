@@ -234,7 +234,7 @@ export default function App() {
           </Routes>
           <div style={bottomText}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi" : "https://ruuvi.com/"} target="_blank" rel="noreferrer">ruuvi.com</a></div>
           <div style={supportLink}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi/tuki" : "https://ruuvi.com/support"}>{t("support")}</a></div>
-          <div style={versionText}>v{pjson.version} <a href="https://f.ruuvi.com/t/5039" target="_blank" rel="noreferrer">{t("changelog")}</a></div>
+          <div style={versionText}>v{pjson.version} <a href="https://f.ruuvi.com/t/5039/9999" target="_blank" rel="noreferrer">{t("changelog")}</a></div>
         </div>
       </HashRouter>
     </ChakraProvider>
