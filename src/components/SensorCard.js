@@ -152,7 +152,10 @@ class SensorCard extends Component {
                     <DurationText from={latestReading ? latestReading.timestamp : " - "} t={this.props.t} />
                 </span>
                 <Flex>
-                    {isBatteryLow(this.getLatestReading().battery, this.getLatestReading().temperature) ? <>{t("low_battery")}<img src={lowBattery} alt={t("low_battery")} style={{ display: "inline", alignSelf: "center", marginLeft: 8, height: "10px" }} /></> : ""}
+                    {latestReading && <>
+                        {isBatteryLow(latestReading.battery, latestReading.temperature) ? <>{t("low_battery")}<img src={lowBattery} alt={t("low_battery")} style={{ display: "inline", alignSelf: "center", marginLeft: 8, height: "10px" }} /></> : ""}
+                    </>
+                    }
                 </Flex>
             </Flex>
         </div>
