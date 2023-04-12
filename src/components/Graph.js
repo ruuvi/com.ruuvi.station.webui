@@ -135,7 +135,7 @@ class Graph extends Component {
         if (!this.props.data) return [[], []];
         var d = JSON.parse(JSON.stringify(this.props.data));
         d = d.reverse();
-        d = d.filter(x => x.parsed[this.props.dataKey] !== undefined)
+        d = d.filter(x => x.parsed && x.parsed[this.props.dataKey] !== undefined)
         d.sort((a, b) => a.timestamp > b.timestamp)
         return [
             d.map(x => x.timestamp),

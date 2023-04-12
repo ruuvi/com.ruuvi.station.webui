@@ -174,8 +174,9 @@ class SensorCard extends Component {
                                 {alertIcon}
                             </Flex>
                         </Flex>
-                        <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", opacity: 0.8 }}>
+                        <SimpleGrid columns={2} style={{ width: "100%", height: "49px", overflow: "hidden", whiteSpace: "nowrap", opacity: 0.8 }}>
                             {[...[mainStat === "temperature" ? "temperature" : undefined], "humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature" : undefined]].map(x => {
+                                if (!latestReading) return null
                                 let value = latestReading[x];
                                 if (value === undefined) return null;
                                 return <GridItem key={x} style={{ color: this.getAlertState(x) > 0 ? "#f27575" : undefined }}>
