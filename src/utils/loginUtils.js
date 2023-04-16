@@ -1,3 +1,6 @@
+import cache from "../DataCache"
+import NetworkApi from "../NetworkApi"
+
 export function goToLoginPage() {
     if (window.location.href.indexOf("loginmethod=legacy") !== -1) {
         // lets keep the old way too in case it's needed
@@ -13,4 +16,14 @@ export function goToLoginPage() {
     }
     window.location.href = "https://ruuvi.com/station"
     return true
+}
+
+export function logout(updateCb) {
+    new NetworkApi().removeToken()
+    localStorage.clear();
+    cache.clear();
+    if (!goToLoginPage()) {
+        window.location.replace("/#/")
+        if (updateCb) updateCb()
+    }
 }

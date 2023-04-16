@@ -1,9 +1,8 @@
 import { Box, Button, PinInput, PinInputField, Progress } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { withTranslation } from 'react-i18next';
-import cache from "../DataCache";
 import NetworkApi from "../NetworkApi";
-import { goToLoginPage } from "../utils/loginUtils";
+import { logout } from "../utils/loginUtils";
 import notify from "../utils/notify";
 import RDialog from "./RDialog";
 import { ruuviTheme } from "../themes";
@@ -168,13 +167,7 @@ function MyAccountModal(props) {
             </Box>
             <Box mt={16}></Box>
             <Button variant='link' onClick={() => {
-                new NetworkApi().removeToken()
-                localStorage.clear();
-                cache.clear();
-                if (!goToLoginPage()) {
-                    window.location.replace("/#/")
-                    props.updateApp();
-                }
+                logout(props.updateApp)
             }}>{t("sign_out")}</Button>
             <Box mt={1}></Box>
             <Button variant='link' onClick={async () => {

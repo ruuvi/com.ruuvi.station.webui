@@ -16,6 +16,7 @@ import { MdOutlineNightlight } from "react-icons/md";
 import cache from "./DataCache";
 import { useTranslation } from "react-i18next";
 import Store from "./Store";
+import { logout } from "./utils/loginUtils";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -132,14 +133,17 @@ export default function App() {
 
   let { t, i18n } = useTranslation()
 
+  var user = new NetworkApi().getUser()
   const [reloadSub, setReloadSub] = React.useState(0);
   const [subscription, setSubscription] = useState("")
   useEffect(() => {
     async function getSubs() {
-      let resp = await new NetworkApi().getSubscription()
-      if (resp.result === "success") {
-        if (resp.data.subscriptions.length === 0) return setSubscription("none")
-        return setSubscription(resp.data.subscriptions[0].subscriptionName)
+      if (user) {
+        let resp = await new NetworkApi().getSubscription()
+        if (resp.result === "success") {
+          if (resp.data.subscriptions.length === 0) return setSubscription("none")
+          return setSubscription(resp.data.subscriptions[0].subscriptionName)
+        }
       }
       setTimeout(() => {
         getSubs()
@@ -168,7 +172,6 @@ export default function App() {
   let store = new Store();
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
-  var user = new NetworkApi().getUser()
   var sensors = [];
   if (!user) {
     //goToLoginPage()
@@ -181,8 +184,11 @@ export default function App() {
     </ChakraProvider>
   }
   new NetworkApi().getSettings(settings => {
-    if (settings.result === "success")
+    if (settings.result === "success") {
       localStorage.setItem("settings", JSON.stringify(settings.data.settings))
+    } else if (settings.result === "error" && settings.code === "ER_UNAUTHORIZED") {
+      logout(forceUpdate)
+    }
   })
   let getBannerContent = (notification) => {
     let lang = i18n.language || "en"
