@@ -142,9 +142,12 @@ class SensorCard extends Component {
         let mainStat = this.props.graphType || "temperature";
         let latestReading = this.getLatestReading();
         let sensorAlertState = this.getSensorAlertState()
+        let sensorSubscription = this.props.sensor?.subscription.subscriptionName
         let alertIcon = <></>
-        if (sensorAlertState === 0) alertIcon = <Image src={bell} width="15px" mt="-1" />
-        if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} width="15px" mt="-1" className="alarmFadeInOut" />
+        if (sensorSubscription !== "Free") {
+            if (sensorAlertState === 0) alertIcon = <Image src={bell} width="15px" mt="-1" />
+            if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} width="15px" mt="-1" className="alarmFadeInOut" />
+        }
 
         let infoRow = <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%" }}>
             <Flex justifyContent={"space-between"}>
