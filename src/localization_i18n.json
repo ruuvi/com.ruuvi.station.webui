@@ -187,7 +187,10 @@
       "graph_stat_avg": "Average",
       "graph_stats_info": "A minimum, maximum and average values in the visible timeframe are shown. You can change the visible timeframe from the dropdown menu or by using the zoom tool.",
       "no_expiry_date": "No expiry date",
-      "shared_to_x": "Shared to {%d^%1$,d}/{%d^%2$,d}"
+      "shared_to_x": "Shared to {%d^%1$,d}/{%d^%2$,d}",
+      "sensor_alert_free_info": "This sensor is in Free mode. You will be able to receive local alerts via Bluetooth when using Ruuvi Station mobile and your sensor is within Bluetooth signal range. Email and push notifications are available in paid subscriptions. View subscription packages at cloud.ruuvi.com.",
+      "cloud_ruuvi_link": "cloud.ruuvi.com",
+      "cloud_ruuvi_link_url": "https://cloud.ruuvi.com"
     }
   },
   "fi": {
@@ -378,7 +381,10 @@
       "graph_stat_avg": "Keskiarvo",
       "graph_stats_info": "Minimi-, maksimi- ja keskiarvot näytettävälle aikajaksolle. Voit vaihtaa näytettävän aikajakson pudotusvalikosta tai zoom-työkalua käyttämällä.",
       "no_expiry_date": "Ei päättymispäivää",
-      "shared_to_x": "Jaettu {%d^%1$,d}/{%d^%2$,d}"
+      "shared_to_x": "Jaettu {%d^%1$,d}/{%d^%2$,d}",
+      "sensor_alert_free_info": "Tämä anturi on Free tilassa. Voit vastaanottaa paikallisia hälytyksiä Bluetoothin kautta käyttäessäsi Ruuvi Station -mobiilisovellusta ja anturi on Bluetooth-signaalin kantaman sisällä. Sähköposti- ja push-ilmoitukset ovat saatavilla maksullisissa tilauksissa. Katso tilauspaketteja osoitteessa cloud.ruuvi.com/fi.",
+      "cloud_ruuvi_link": "cloud.ruuvi.com/fi",
+      "cloud_ruuvi_link_url": "https://cloud.ruuvi.com/fi"
     }
   },
   "sv": {
@@ -569,7 +575,10 @@
       "graph_stat_avg": "Medelvärde",
       "graph_stats_info": "Ett minimi-, maximi- och medelvärde i den synliga tidsramen visas. Du kan ändra den synliga tidsramen från rullgardinsmenyn eller genom att använda zoomverktyget.",
       "no_expiry_date": "Ingen utgångsdatum",
-      "shared_to_x": "Delad {%d^%1$,d}/{%d^%2$,d}"
+      "shared_to_x": "Delad {%d^%1$,d}/{%d^%2$,d}",
+      "sensor_alert_free_info": "Den här sensorn är i Free läge. Du kommer kunna ta emot lokala varningar via Bluetooth när du använder Ruuvi Station appen och din sensor är inom Bluetooth signalräckvidd. E-post och push-meddelanden är tillgängliga i betalda prenumerationer. Visa prenumerationspaket på cloud.ruuvi.com.",
+      "cloud_ruuvi_link": "cloud.ruuvi.com",
+      "cloud_ruuvi_link_url": "https://cloud.ruuvi.com"
     }
   }
 }

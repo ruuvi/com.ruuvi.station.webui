@@ -412,6 +412,7 @@ class Sensor extends Component {
     render() {
         var { t } = this.props
         let lastReading = this.getLatestReading()
+        let sensorSubscription = this.props.sensor?.subscription.subscriptionName
         return (
             <Box>
                 <Box minHeight={1500}>
@@ -554,6 +555,13 @@ class Sensor extends Component {
                                 <hr />
                                 <AccordionPanel style={accordionPanel}>
                                     <List style={accordionContent}>
+                                        {sensorSubscription === "Free" && <Box pt={6} style={detailedSubText}>
+                                            {(() => {
+                                                let text = t("sensor_alert_free_info")
+                                                let parts = text.split(t("cloud_ruuvi_link"))
+                                                return <div>{parts[0]}<a style={{ color: "teal" }} target="blank" href={t("cloud_ruuvi_link_url")}>{t("cloud_ruuvi_link")}</a>{parts[1]}</div>
+                                            })()}
+                                        </Box>}
                                         {["temperature", "humidity", "pressure", "signal", "movement"].map(x => {
                                             let dataKey = x === "movement" ? "movementCounter" : "signal" ? "rssi" : x;
                                             if (this.getLatestReading()[dataKey] === undefined) return null;
