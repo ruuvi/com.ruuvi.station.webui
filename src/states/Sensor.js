@@ -104,6 +104,21 @@ const accordionButton = {
     paddingRight: 21,
 }
 
+const graphLoadingOverlay = {
+    position: "absolute",
+    width: "100%",
+    height: "450px",
+    zIndex: 1,
+}
+
+const graph = {
+    position: "relative",
+    zIndex: 0,
+    float: "left",
+    width: "100%",
+    height: "450px"
+}
+
 function AccordionText(props) {
     const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
     let tstyle = JSON.parse(JSON.stringify(collapseText));
@@ -397,6 +412,7 @@ class Sensor extends Component {
         notify.info(addNewlines(this.props.t("zoom_info")))
     }
     getGraphData() {
+        if (!this.state.data?.measurements?.length) return []
         let data = this.state.data.measurements;
         if (this.getDataMode() === "dense") return data;
         let latestDP = this.state.lastestDatapoint;
@@ -465,18 +481,23 @@ class Sensor extends Component {
                                 </table>
                             </div>
                             <Box height={520}>
-                                {this.state.loading ? (
-                                    <div style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: "100%", textAlign: "center" }}><div style={{ position: "relative", top: "45%" }}><Spinner size="xl" /></div></div>
+                                <> {!this.isLoading && (!this.state.data || !this.state.data?.measurements?.length) ? (
+                                    <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", paddingTop: 240, height: 450 }}>{t("no_data_in_range")}</center>
                                 ) : (
-                                    <> {!this.state.data || !this.state.data.measurements.length ? (
-                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", paddingTop: 240, height: 450 }}>{t("no_data_in_range")}</center>
-                                    ) : (
-                                        <Box ml={-5} mr={-5}>
-                                            <Graph key={"sensor_graph"} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
-                                        </Box>
-                                    )}
-                                    </>
+                                    <Box ml={-5} mr={-5}>
+                                        {this.isLoading &&
+                                            <div style={graphLoadingOverlay}>
+                                                <div style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: "100%", textAlign: "center" }}><div style={{ position: "relative", top: "45%" }}><Spinner size="xl" /></div></div>
+                                            </div>
+                                        }
+                                        <div style={graph}>
+                                            {this.state.data?.measurements?.length &&
+                                                <Graph key={"sensor_graph"} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                            }
+                                        </div>
+                                    </Box>
                                 )}
+                                </>
                             </Box>
                         </div>
                     </Box>
