@@ -65,7 +65,7 @@ let currColorMode;
 function ColorModeSwitch() {
   const { t } = useTranslation();
   const { colorMode, toggleColorMode } = useColorMode()
-  const [isMobile] = useMediaQuery("(max-width: 1023px)")
+  const [isMobile] = useMediaQuery("(max-width: 1023px)", { ssr: false })
 
   if (currColorMode !== colorMode) {
     currColorMode = colorMode;

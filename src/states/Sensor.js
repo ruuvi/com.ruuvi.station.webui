@@ -120,7 +120,7 @@ const graph = {
 }
 
 function AccordionText(props) {
-    const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
+    const [isLargeDisplay] = useMediaQuery("(min-width: 766px)", { ssr: false })
     let tstyle = JSON.parse(JSON.stringify(collapseText));
     if (!isLargeDisplay) tstyle.fontSize = "18px";
     return <Box flex="1" textAlign="left" style={tstyle}>
@@ -129,7 +129,7 @@ function AccordionText(props) {
 }
 
 function SensorHeader(props) {
-    const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
+    const [isLargeDisplay] = useMediaQuery("(min-width: 766px)", { ssr: false })
     if (isLargeDisplay) {
         return <div style={{ display: "flex", justifyContent: "space-between" }}>
             <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
@@ -190,7 +190,7 @@ function SensorHeader(props) {
 }
 
 function SensorValueGrid(props) {
-    const [isLargeDisplay] = useMediaQuery("(min-width: 766px)")
+    const [isLargeDisplay] = useMediaQuery("(min-width: 766px)", { ssr: false })
     return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap="10px" gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "220px" : "45%"}, max-content))`}>
         {props.children}
     </Box>

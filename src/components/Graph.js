@@ -215,119 +215,121 @@ class Graph extends Component {
                         </center>
                     }>
                         <>
-                            <UplotReact
-                                options={{
-                                    title: this.props.title,
-                                    width: width,
-                                    height: height,
-                                    plugins: plugins,
-                                    legend: {
-                                        show: this.props.legend === undefined ? true : this.props.legend,
-                                    },
-                                    series: [{
-                                        label: this.props.t('time'),
-                                        class: "graphLabel",
-                                        value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
-                                    }, {
-                                        label: this.props.dataName || this.props.t(this.props.dataKey),
-                                        class: "graphLabel",
-                                        spanGaps: true,
-                                        points: { show: this.props.points, size: 4, fill: ruuviTheme.graph.fill[colorMode] },
-                                        width: 1,
-                                        fill: ruuviTheme.graph.fill[colorMode],
-                                        stroke: ruuviTheme.graph.stroke[colorMode],
-                                        value: (self, rawValue) => localeNumber(rawValue)
-                                    }],
-                                    cursor: {
-                                        show: this.props.cursor || false,
-                                        drag: { x: true, y: true, uni: 50 },
-                                        points: {
-                                            size: 9,
-                                            fill: ruuviTheme.graph.stroke[colorMode],
+                            <div style={{ height: height }}>
+                                <UplotReact
+                                    options={{
+                                        title: this.props.title,
+                                        width: width,
+                                        height: height,
+                                        plugins: plugins,
+                                        legend: {
+                                            show: this.props.legend === undefined ? true : this.props.legend,
                                         },
-                                    },
-                                    scales: {
-                                        x: {
-                                            time: true, range: (_, fromX, toX) => {
-                                                // redo this at some point, this will do as a workaround for now.
-                                                let allowZoom = true;
-                                                if (xRangeUpdateThottle + 20 > new Date().getTime()) {
-                                                    //console.log("throttle x-range updates")
-                                                    allowZoom = false;
-                                                }
-                                                xRangeUpdateThottle = new Date().getTime();
-                                                let zoom = this.state.zoom;;
-                                                if (allowZoom) {
-                                                    if (zoom && (dataKeyChanged || dataUpdated)) {
-                                                        // keep zoom range
-                                                        //console.log("keep zoom")
-                                                        dataKeyChanged = false
-                                                        dataUpdated = false;
-                                                        return zoom
-                                                    }
-                                                    if (Number.isInteger(fromX) && Number.isInteger(toX) && !dataKeyChanged) {
-                                                        // reset zoom
-                                                        //console.log("reset zoom")
-                                                        this.setStateVar("zoom", undefined)
-                                                        zoom = undefined;
-                                                    } else if (!dataUpdated && !dataKeyChanged) {
-                                                        // set zoom
-                                                        //console.log("set zoom")
-                                                        this.setStateVar("zoom", [fromX, toX])
-                                                        zoom = [fromX, toX]
-                                                    }
-                                                }
-                                                dataKeyChanged = false
-                                                if (this.props.from && !zoom) {
-                                                    //console.log("update x range")
-                                                    dataUpdated = false;
-                                                    return this.getXRange()
-                                                }
-                                                return [fromX, toX]
-                                            }
-                                        },
-                                        y: {
-                                            range: (_, fromY, toY) => {
-                                                fromY -= 0.5
-                                                toY += 0.5
-                                                return [fromY, toY]
-                                            }
-                                        }
-                                    },
-                                    axes: [
-                                        {
-                                            grid: { show: false },
-                                            font: "12px Arial",
-                                            stroke: ruuviTheme.graph.axisLabels[colorMode],
-                                            values: (_, ticks) => {
-                                                var xRange = ticks[ticks.length - 1] - ticks[0]
-                                                var xRangeHours = xRange / 60 / 60
-                                                var prevRaw = null;
-                                                var useDates = xRangeHours >= 72;
-                                                return ticks.map(raw => {
-                                                    var out = useDates ? ddmm(raw) : hhmm(raw);
-                                                    if (prevRaw === out) {
-                                                        if (useDates) return hhmm(raw);
-                                                        return null;
-                                                    }
-                                                    prevRaw = out;
-                                                    return out;
-                                                })
-                                            }
+                                        series: [{
+                                            label: this.props.t('time'),
+                                            class: "graphLabel",
+                                            value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
                                         }, {
-                                            grid: { stroke: ruuviTheme.graph.grid[colorMode], width: 2 },
-                                            stroke: ruuviTheme.graph.axisLabels[colorMode],
-                                            size: 55,
-                                            ticks: {
-                                                size: 0
+                                            label: this.props.dataName || this.props.t(this.props.dataKey),
+                                            class: "graphLabel",
+                                            spanGaps: true,
+                                            points: { show: this.props.points, size: 4, fill: ruuviTheme.graph.fill[colorMode] },
+                                            width: 1,
+                                            fill: ruuviTheme.graph.fill[colorMode],
+                                            stroke: ruuviTheme.graph.stroke[colorMode],
+                                            value: (self, rawValue) => localeNumber(rawValue)
+                                        }],
+                                        cursor: {
+                                            show: this.props.cursor || false,
+                                            drag: { x: true, y: true, uni: 50 },
+                                            points: {
+                                                size: 9,
+                                                fill: ruuviTheme.graph.stroke[colorMode],
                                             },
-                                            font: "12px Arial",
-                                            values: (_, ticks) => ticks.map(rawValue => localeNumber(rawValue)),
-                                        }
-                                    ],
-                                }}
-                                data={graphData}
-                            />
+                                        },
+                                        scales: {
+                                            x: {
+                                                time: true, range: (_, fromX, toX) => {
+                                                    // redo this at some point, this will do as a workaround for now.
+                                                    let allowZoom = true;
+                                                    if (xRangeUpdateThottle + 20 > new Date().getTime()) {
+                                                        //console.log("throttle x-range updates")
+                                                        allowZoom = false;
+                                                    }
+                                                    xRangeUpdateThottle = new Date().getTime();
+                                                    let zoom = this.state.zoom;;
+                                                    if (allowZoom) {
+                                                        if (zoom && (dataKeyChanged || dataUpdated)) {
+                                                            // keep zoom range
+                                                            //console.log("keep zoom")
+                                                            dataKeyChanged = false
+                                                            dataUpdated = false;
+                                                            return zoom
+                                                        }
+                                                        if (Number.isInteger(fromX) && Number.isInteger(toX) && !dataKeyChanged) {
+                                                            // reset zoom
+                                                            //console.log("reset zoom")
+                                                            this.setStateVar("zoom", undefined)
+                                                            zoom = undefined;
+                                                        } else if (!dataUpdated && !dataKeyChanged) {
+                                                            // set zoom
+                                                            //console.log("set zoom")
+                                                            this.setStateVar("zoom", [fromX, toX])
+                                                            zoom = [fromX, toX]
+                                                        }
+                                                    }
+                                                    dataKeyChanged = false
+                                                    if (this.props.from && !zoom) {
+                                                        //console.log("update x range")
+                                                        dataUpdated = false;
+                                                        return this.getXRange()
+                                                    }
+                                                    return [fromX, toX]
+                                                }
+                                            },
+                                            y: {
+                                                range: (_, fromY, toY) => {
+                                                    fromY -= 0.5
+                                                    toY += 0.5
+                                                    return [fromY, toY]
+                                                }
+                                            }
+                                        },
+                                        axes: [
+                                            {
+                                                grid: { show: false },
+                                                font: "12px Arial",
+                                                stroke: ruuviTheme.graph.axisLabels[colorMode],
+                                                values: (_, ticks) => {
+                                                    var xRange = ticks[ticks.length - 1] - ticks[0]
+                                                    var xRangeHours = xRange / 60 / 60
+                                                    var prevRaw = null;
+                                                    var useDates = xRangeHours >= 72;
+                                                    return ticks.map(raw => {
+                                                        var out = useDates ? ddmm(raw) : hhmm(raw);
+                                                        if (prevRaw === out) {
+                                                            if (useDates) return hhmm(raw);
+                                                            return null;
+                                                        }
+                                                        prevRaw = out;
+                                                        return out;
+                                                    })
+                                                }
+                                            }, {
+                                                grid: { stroke: ruuviTheme.graph.grid[colorMode], width: 2 },
+                                                stroke: ruuviTheme.graph.axisLabels[colorMode],
+                                                size: 55,
+                                                ticks: {
+                                                    size: 0
+                                                },
+                                                font: "12px Arial",
+                                                values: (_, ticks) => ticks.map(rawValue => localeNumber(rawValue)),
+                                            }
+                                        ],
+                                    }}
+                                    data={graphData}
+                                />
+                            </div>
                             {!this.props.cardView && <>
                                 <center style={{ fontFamily: "Arial", fontSize: "14px" }}>
                                     <DataInfo graphData={graphData} t={this.props.t} zoom={this.state.zoom} />
