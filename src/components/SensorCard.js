@@ -227,7 +227,7 @@ class SensorCard extends Component {
                             </Box>
                         }
                         <Box padding="24px" marginLeft={showImage ? imageWidth : 0}>
-                            <Box height={isSmallCard ? "98px" : ""}>
+                            <Box height={isSmallCard && latestReading ? "98px" : ""}>
                                 <Flex>
                                     <Flex grow={1} width="calc(100% - 15px)">
                                         {isSmallCard ? (
@@ -292,7 +292,7 @@ class SensorCard extends Component {
                                         </div>
                                         {infoRow}
                                     </div> : <div>
-                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: height / 2 - 80 }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
+                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: height / (isSmallCard ? 6 : 4) }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
                                     </div>}
                                 </div>
                             )}
