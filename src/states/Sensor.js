@@ -138,8 +138,8 @@ function SensorHeader(props) {
                     <Avatar style={{ cursor: "pointer" }} size="xl" name={props.sensor.name} src={props.testImgSrc || props.sensor.picture} />
                 }
             </label>
-            <span style={{ width: "100%", marginLeft: 18 }}>
-                <Heading style={sensorName}>
+            <span style={{ width: "calc(100% - 250px - 18px)", marginLeft: 18 }}>
+                <Heading style={{ ...sensorName, textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden", }}>
                     {props.sensor.name}
                 </Heading>
                 <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }} className="subtitle">
