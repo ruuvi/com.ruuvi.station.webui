@@ -238,6 +238,10 @@ class Sensor extends Component {
         return "mixed"
     }
     async loadData(showLoading, clearLast) {
+        if (this.props.sensor.subscription.maxHistoryDays === 0) {
+            this.isLoading = false;
+            return
+        }
         if (this.isLoading) return
         clearTimeout(this.latestDataUpdate);
         this.latestDataUpdate = setTimeout(() => {

@@ -63,6 +63,10 @@ class SensorCard extends Component {
         clearTimeout(this.fetchDataLoop);
     }
     async loadGraphData(graphDataMode) {
+        if (this.props.sensor.subscription.maxHistoryDays === 0) {
+            this.setState({ ...this.state, loading: false, loadingHistory: false })
+            return
+        }
         var graphData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), null, { mode: graphDataMode })
         if (graphData.result === "success") {
             let d = parse(graphData.data);
@@ -142,9 +146,9 @@ class SensorCard extends Component {
         let mainStat = this.props.graphType || "temperature";
         let latestReading = this.getLatestReading();
         let sensorAlertState = this.getSensorAlertState()
-        let sensorSubscription = this.props.sensor?.subscription.subscriptionName
+        let sensorSubscription = this.props.sensor.subscription
         let alertIcon = <></>
-        if (sensorSubscription !== "Free") {
+        if (sensorSubscription.emailAlertAllowed) {
             if (sensorAlertState === 0) alertIcon = <Image src={bell} width="15px" mt="-1" />
             if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} width="15px" mt="-1" className="alarmFadeInOut" />
         }
