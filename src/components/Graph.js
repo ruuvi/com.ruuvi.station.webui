@@ -331,7 +331,7 @@ class Graph extends Component {
                                 />
                             </div>
                             {!this.props.cardView && <>
-                                <center style={{ fontFamily: "Arial", fontSize: "14px" }}>
+                                <center style={{ fontFamily: "Arial", fontSize: "14px", marginTop: 33 }}>
                                     <DataInfo graphData={graphData} t={this.props.t} zoom={this.state.zoom} />
                                 </center>
                             </>}
