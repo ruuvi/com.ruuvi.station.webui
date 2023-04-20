@@ -122,10 +122,10 @@
             <div id="activationCodeLabel">
                 Check your email for an activation code.
             </div>
-            <input maxlength=1 id="pin_1" type="pin" onkeyup="moveOnMax(this,event,1)" />
-            <input maxlength=1 id="pin_2" type="pin" onkeyup="moveOnMax(this,event,2)" />
-            <input maxlength=1 id="pin_3" type="pin" onkeyup="moveOnMax(this,event,3)" />
-            <input maxlength=1 id="pin_4" type="pin" onkeyup="verify(event)" />
+            <input maxlength=1 id="pin_1" type="pin" autocomplete="off" onkeyup="moveOnMax(this,event,1)" />
+            <input maxlength=1 id="pin_2" type="pin" autocomplete="off" onkeyup="moveOnMax(this,event,2)" />
+            <input maxlength=1 id="pin_3" type="pin" autocomplete="off" onkeyup="moveOnMax(this,event,3)" />
+            <input maxlength=1 id="pin_4" type="pin" autocomplete="off" onkeyup="verify(event)" />
         </div>
         <div id="view_link">
             <button id="openButton" onClick="sendOpenPage()">Open Ruuvi Station</button>
