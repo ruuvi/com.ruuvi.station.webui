@@ -161,7 +161,7 @@ class Graph extends Component {
         }
         if (this.state.zoom && this.props.data.length && nextProps.data.length && this.props.data[0].timestamp !== nextProps.data[0].timestamp) console.log("Should NOT")
         if (this.state.zoom && this.props.data.length && nextProps.data.length && this.props.data[0].timestamp !== nextProps.data[0].timestamp) return false
-        return dataKeyChanged || this.props.data.length !== nextProps.data.length
+        return dataKeyChanged || this.props.data.length !== nextProps.data.length || dataUpdated
     }
     getXRange() {
         return [this.props.from / 1000, new Date().getTime() / 1000]

@@ -129,6 +129,11 @@ class SensorCard extends Component {
             avatarHover: false
         });
     }
+    getMeasurements() {
+        let measurements = JSON.parse(JSON.stringify(this.state.data.measurements));
+        if (measurements && this.props.sensor.measurements.length) measurements = [this.props.sensor.measurements[0], ...measurements]
+        return measurements
+    }
     render() {
         var { t } = this.props;
         let showGraph = this.props.cardType === "graph_view";
@@ -267,7 +272,7 @@ class SensorCard extends Component {
                                             {this.state.data && this.state.data.measurements.length ? (
                                                 <>
                                                     {showGraph &&
-                                                        <Graph title="" key={this.props.sensor.sensor + this.props.cardType + mainStat} dataKey={mainStat} data={this.state.data.measurements} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
+                                                        <Graph title="" key={this.props.sensor.sensor + this.props.cardType + mainStat} dataKey={mainStat} data={this.getMeasurements()} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
                                                     }
                                                 </>
                                             ) : (
