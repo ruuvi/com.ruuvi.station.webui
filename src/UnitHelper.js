@@ -210,7 +210,7 @@ export function getAlertRange(type) {
         case "humidity":
             return { max: 100, min: 0 }
         case "pressure":
-            return { max: 110000, min: 30000 }
+            return { max: 115500, min: 50000 }
         case "signal":
             return { max: 0, min: -105 }
         default:
