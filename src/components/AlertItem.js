@@ -14,8 +14,18 @@ const AlertSlider = React.lazy(() => import("./AlertSlider"));
 class AlertItem extends Component {
     constructor(props) {
         super(props)
+        let alert = this.props.alert
+        if (alert) {
+            try {
+                var { min, max } = getAlertRange(this.props.type.toLowerCase())
+                if (alert.min < min) alert.min = min
+                if (alert.max > max) alert.max = max
+            } catch {
+                // not a big deal
+            }
+        }
         this.state = {
-            alert: this.props.alert,
+            alert: alert,
             editDescription: false,
             rangeInputDialog: false,
         }
