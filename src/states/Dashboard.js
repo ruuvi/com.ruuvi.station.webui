@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box, Link, useMediaQuery, Flex } from "@chakra-ui/react"
+import { Spinner, Box, Link, useMediaQuery, Flex, Input, InputGroup, InputRightElement, Show } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
@@ -14,6 +14,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from "react-rout
 import SensorTypePicker from "../components/SensorTypePicker";
 import MyAccountModal from "../components/MyAccountModal";
 import DashboardViewType from "../components/DashboardViewType";
+import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
 
 const infoText = {
     fontFamily: "mulish",
@@ -29,7 +30,7 @@ function DashboardGrid(props) {
     else if (isMediumDisplay) size = "medium"
     else size = "mobile"
     //this.state.showBig ? "550px" : "400px"
-    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap={size === "mobile" ? "10px" : "20px"} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" : props.showGraph ? "300px" : "360px"}, max-content))`}>
+    return <Box style={{ marginBottom: 30, marginTop: size === "mobile" ? 10 : 30 }} justifyItems="start" display="grid" gap={size === "mobile" ? "10px" : "20px"} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" : props.showGraph ? "300px" : "360px"}, max-content))`}>
         {props.children(size)}
     </Box>
 }
@@ -44,7 +45,8 @@ class Dashboard extends Component {
             from: 24 * 3,
             cardType: store.getDashboardCardType(),
             showBig: true,
-            graphType: store.getDashboardGraphType()
+            graphType: store.getDashboardGraphType(),
+            search: ""
         }
         var from = store.getDashboardFrom();
         if (from) {
@@ -149,6 +151,22 @@ class Dashboard extends Component {
         var { t } = this.props;
         if (this.props.params.id) SessionStore.setBackRoute(`/${this.props.params.id}`)
         else SessionStore.setBackRoute("/")
+        const dropdowns = <>
+            <DashboardViewType value={this.state.cardType} onChange={this.setDashboardViewType.bind(this)} />
+            <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
+            <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
+        </>
+        const search = width => {
+            return <InputGroup className="searchInput" width={width}>
+                <InputRightElement className="buttonSideIcon" style={{ cursor: this.state.search ? "pointer" : undefined }} onClick={() => this.setState({ ...this.state, search: "" })}>
+                    {this.state.search ? <CloseIcon /> : <SearchIcon />}
+                </InputRightElement>
+                <Input placeholder={t("sensor_search_placeholder")}
+                    value={this.state.search}
+                    onChange={e => this.setState({ ...this.state, search: e.target.value })}
+                />
+            </InputGroup>
+        }
         return (
             <>
                 <Box>
@@ -167,9 +185,13 @@ class Dashboard extends Component {
                                     {this.state.sensors.length !== 0 &&
                                         <div style={{ paddingTop: 26 }}>
                                             <Flex flexFlow={"row wrap"} justifyContent={"flex-end"} gap={2}>
-                                                <DashboardViewType value={this.state.cardType} onChange={this.setDashboardViewType.bind(this)} />
-                                                <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
-                                                <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
+                                                <Show breakpoint='(max-width: 800px)'>
+                                                    {search(undefined)}
+                                                </Show>
+                                                <Show breakpoint='(min-width: 800px)'>
+                                                    {search("300px")}
+                                                </Show>
+                                                {dropdowns}
                                             </Flex>
                                         </div>
                                     }
@@ -177,6 +199,12 @@ class Dashboard extends Component {
                                         {size => {
                                             return <>
                                                 {this.state.sensors.map(x => {
+                                                    if (this.state.search !== "") {
+                                                        let searchTerm = this.state.search.toLowerCase()
+                                                        if (x.name.toLowerCase().indexOf(searchTerm) === -1 && x.sensor.toLowerCase().indexOf(searchTerm) === -1) {
+                                                            return null
+                                                        }
+                                                    }
                                                     return <span key={x.sensor + this.state.from} style={{ width: 640, maxWidth: "100%" }}>
                                                         <a href={"#/" + x.sensor}>
                                                             <SensorCard sensor={x} size={size} dataFrom={this.state.from} cardType={this.state.cardType} graphType={this.state.graphType} />

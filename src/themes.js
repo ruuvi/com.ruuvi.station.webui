@@ -51,6 +51,7 @@ let colors = {
     sensorValueBoxIcon: { light: "rgba(68, 201, 185, 0.3)", dark: "#00ae9480" },
     sensorValueBoxActiveBorder: { light: "#1f9385", dark: "#1f9385" },
     menuButtonBg: { light: "white", dark: "#003434 !important" },
+    searchBg: { light: "white", dark: "#00343440 !important" },
     navButtonBg: { light: "#ffffff", dark: "#083c3d" },
     navButtonColor: { light: "#1f9385 !important", dark: "white !important" },
     graphFill: { dark: "rgba(68, 201, 185, 0.3)", light: "rgba(68, 201, 185, 0.3)" },
@@ -97,6 +98,10 @@ export const ruuviTheme = extendTheme({
             },
             '.durationPicker': {
                 bg: colors.menuButtonBg[props.colorMode],
+            },
+            '.searchInput': {
+                bg: colors.searchBg[props.colorMode],
+                border: "0px #00000000 !important",
             },
             '.navButton': {
                 bg: colors.navButtonBg[props.colorMode] + " !important",
