@@ -199,13 +199,14 @@ class Dashboard extends Component {
                                         {size => {
                                             return <>
                                                 {this.state.sensors.map(x => {
+                                                    let hide = false
                                                     if (this.state.search !== "") {
                                                         let searchTerm = this.state.search.toLowerCase()
                                                         if (x.name.toLowerCase().indexOf(searchTerm) === -1 && x.sensor.toLowerCase().indexOf(searchTerm) === -1) {
-                                                            return null
+                                                            hide = true
                                                         }
                                                     }
-                                                    return <span key={x.sensor + this.state.from} style={{ width: 640, maxWidth: "100%" }}>
+                                                    return <span key={x.sensor + this.state.from} style={{ width: 640, maxWidth: "100%", display: hide ? "none" : undefined }}>
                                                         <a href={"#/" + x.sensor}>
                                                             <SensorCard sensor={x} size={size} dataFrom={this.state.from} cardType={this.state.cardType} graphType={this.state.graphType} />
                                                         </a></span>
