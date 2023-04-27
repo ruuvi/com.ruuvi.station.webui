@@ -19,7 +19,9 @@ class AlertItem extends Component {
             try {
                 var { min, max } = getAlertRange(this.props.type.toLowerCase())
                 if (alert.min < min) alert.min = min
+                else if (alert.min > max) alert.min = max
                 if (alert.max > max) alert.max = max
+                else if (alert.max < min) alert.max = min
             } catch {
                 // not a big deal
             }
