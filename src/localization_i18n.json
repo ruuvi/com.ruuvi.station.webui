@@ -386,7 +386,7 @@
       "sensor_alert_free_info": "Tämä anturi on Free tilassa. Voit vastaanottaa paikallisia hälytyksiä Bluetoothin kautta käyttäessäsi Ruuvi Station -mobiilisovellusta ja anturi on Bluetooth-signaalin kantaman sisällä. Sähköposti- ja push-ilmoitukset ovat saatavilla maksullisissa tilauksissa. Katso tilauspaketteja osoitteessa cloud.ruuvi.com/fi.",
       "cloud_ruuvi_link": "cloud.ruuvi.com/fi",
       "cloud_ruuvi_link_url": "https://cloud.ruuvi.com/fi",
-      "sensor_search_placeholder": "Etsi..."
+      "sensor_search_placeholder": "Hae..."
     }
   },
   "sv": {
