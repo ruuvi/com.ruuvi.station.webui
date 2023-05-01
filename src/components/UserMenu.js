@@ -22,7 +22,7 @@ class UserMenu extends Component {
                 <MenuButton as={Button} variant="topbar" rightIcon={<MdArrowDropDown className="buttonSideIcon" size={26} style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", paddingRight: 0, paddingLeft: 10 }}>
                     <FaUserAlt />
                 </MenuButton>
-                <MenuList mt="2">
+                <MenuList mt="2" zIndex={10}>
                     <MenuItem isDisabled={true} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, cursor: "unset", borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>{this.props.email}</MenuItem>
                     <MenuDivider />
                     {/**

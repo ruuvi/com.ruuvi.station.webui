@@ -41,7 +41,7 @@ class SensorMenu extends Component {
                         <MenuButton as={Button} variant="topbar" rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 15, fontWeight: 800, paddingRight: 0, paddingLeft: 4 }}>
                             {t("sensors")}
                         </MenuButton>
-                        <MenuList mt="2">
+                        <MenuList mt="2" zIndex={10}>
                             {this.state.sensors.map((x, i) => {
                                 let divider = <></>
                                 let borderStyle = {};
