@@ -100,11 +100,12 @@ class Dashboard extends Component {
     nextIndex(direction) {
         var current = this.getCurrentSensor().sensor;
         var setNext = current;
-        var indexOfCurrent = this.state.sensors.findIndex(x => x.sensor === current)
+        let sensors = this.getSensors()
+        var indexOfCurrent = sensors.findIndex(x => x.sensor === current)
         if (indexOfCurrent === -1) return;
-        if (direction === 1 && indexOfCurrent === this.state.sensors.length - 1) setNext = this.state.sensors[0].sensor
-        else if (direction === -1 && indexOfCurrent === 0) setNext = this.state.sensors[this.state.sensors.length - 1].sensor
-        else setNext = this.state.sensors[indexOfCurrent + direction].sensor
+        if (direction === 1 && indexOfCurrent === sensors.length - 1) setNext = sensors[0].sensor
+        else if (direction === -1 && indexOfCurrent === 0) setNext = sensors[sensors.length - 1].sensor
+        else setNext = sensors[indexOfCurrent + direction].sensor
         this.props.navigate('/' + setNext)
     }
     removeSensor() {
@@ -146,6 +147,18 @@ class Dashboard extends Component {
     setGraphType(type) {
         this.setState({ ...this.state, graphType: type })
         new Store().setDashboardGraphType(type)
+    }
+    getSensors() {
+        if (this.state.search === "") return this.state.sensors
+        let sensors = [];
+        for (let i = 0; i < this.state.sensors.length; i++) {
+            let x = this.state.sensors[i]
+            let searchTerm = this.state.search.toLowerCase()
+            if (x.name.toLowerCase().indexOf(searchTerm) !== -1 || x.sensor.toLowerCase().indexOf(searchTerm) !== -1) {
+                sensors.push(x)
+            }
+        }
+        return sensors
     }
     render() {
         var { t } = this.props;
@@ -197,15 +210,10 @@ class Dashboard extends Component {
                                     }
                                     <DashboardGrid showGraph={this.state.showGraph}>
                                         {size => {
+                                            let sensorsInSearch = this.getSensors()
                                             return <>
                                                 {this.state.sensors.map(x => {
-                                                    let hide = false
-                                                    if (this.state.search !== "") {
-                                                        let searchTerm = this.state.search.toLowerCase()
-                                                        if (x.name.toLowerCase().indexOf(searchTerm) === -1 && x.sensor.toLowerCase().indexOf(searchTerm) === -1) {
-                                                            hide = true
-                                                        }
-                                                    }
+                                                    let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
                                                     return <span key={x.sensor + this.state.from} style={{ width: 640, maxWidth: "100%", display: hide ? "none" : undefined }}>
                                                         <a href={"#/" + x.sensor}>
                                                             <SensorCard sensor={x} size={size} dataFrom={this.state.from} cardType={this.state.cardType} graphType={this.state.graphType} />
