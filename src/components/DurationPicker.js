@@ -50,6 +50,7 @@ export default function DurationPicker(props) {
                 variant="ddl"
                 className="durationPicker"
                 style={{ ...detailedSubText }}
+                disabled={props.disabled}
                 borderRadius='4px'>
                 {ts.k} {t(ts.t).toLowerCase()}
             </MenuButton>

@@ -29,6 +29,7 @@ function DashboardGrid(props) {
     if (isLargeDisplay) size = "large"
     else if (isMediumDisplay) size = "medium"
     else size = "mobile"
+    if (props.currSize !== size) props.onSizeChange(size)
     //this.state.showBig ? "550px" : "400px"
     return <Box style={{ marginBottom: 30, marginTop: size === "mobile" ? 10 : 30 }} justifyItems="start" display="grid" gap={size === "mobile" ? "10px" : "20px"} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" : props.showGraph ? "300px" : "360px"}, max-content))`}>
         {props.children(size)}
@@ -46,7 +47,8 @@ class Dashboard extends Component {
             cardType: store.getDashboardCardType(),
             showBig: true,
             graphType: store.getDashboardGraphType(),
-            search: ""
+            search: "",
+            currSize: ''
         }
         var from = store.getDashboardFrom();
         if (from) {
@@ -160,6 +162,10 @@ class Dashboard extends Component {
         }
         return sensors
     }
+    shouldDurationBeDisabled() {
+        if (this.state.currSize === 'mobile' && this.state.cardType === 'image_view') return true
+        return this.state.cardType === "simple_view"
+    }
     render() {
         var { t } = this.props;
         if (this.props.params.id) SessionStore.setBackRoute(`/${this.props.params.id}`)
@@ -167,7 +173,7 @@ class Dashboard extends Component {
         const dropdowns = <>
             <DashboardViewType value={this.state.cardType} onChange={this.setDashboardViewType.bind(this)} />
             <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
-            <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard />
+            <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard disabled={this.shouldDurationBeDisabled()} />
         </>
         const search = width => {
             return <InputGroup className="searchInput" width={width}>
@@ -208,7 +214,7 @@ class Dashboard extends Component {
                                             </Flex>
                                         </div>
                                     }
-                                    <DashboardGrid showGraph={this.state.showGraph}>
+                                    <DashboardGrid showGraph={this.state.showGraph} currSize={this.state.currSize} onSizeChange={s => this.setState({...this.state, currSize: s})}>
                                         {size => {
                                             let sensorsInSearch = this.getSensors()
                                             return <>
