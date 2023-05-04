@@ -173,6 +173,11 @@ class SensorCard extends Component {
         </div>
 
         if (simpleView) {
+            let stats = [mainStat]
+            if (mainStat !== "humidity") stats.push("humidity")
+            if (mainStat !== "pressure") stats.push("pressure")
+            if (mainStat !== "temperature") stats.push("temperature")
+            if (stats.lenght !== 4) stats.push("movementCounter")
             return (
                 <div>
                     <Box className="content sensorCard" height={105} borderRadius="lg" overflow="hidden" padding={4}>
@@ -187,11 +192,11 @@ class SensorCard extends Component {
                             </Flex>
                         </Flex>
                         <SimpleGrid columns={2} style={{ width: "100%", height: "49px", overflow: "hidden", whiteSpace: "nowrap", opacity: 0.8 }}>
-                            {[...[mainStat === "temperature" ? "temperature" : undefined], "humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature" : undefined]].map(x => {
+                            {stats.map(x => {
                                 if (!latestReading) return null
                                 let value = latestReading[x];
                                 if (value === undefined) return null;
-                                return <GridItem key={x} style={{ color: this.getAlertState(x) > 0 ? "#f27575" : undefined }}>
+                                return <GridItem key={Math.random()} style={{ color: this.getAlertState(x) > 0 ? "#f27575" : undefined }}>
                                     <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
                                     <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
                                 </GridItem>
