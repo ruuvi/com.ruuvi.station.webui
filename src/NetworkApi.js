@@ -198,6 +198,9 @@ class NetworkApi {
         respData.data?.sensors.forEach(x => {
             parse(x)
         })
+        if (respData.data && respData.data.sensors.length > 0) {
+            respData.data.sensors = sortSensors(respData.data.sensors)
+        }
         return respData;
     }
     share(mac, email, success) {
@@ -253,6 +256,14 @@ class NetworkApi {
             .then(response => {
                 success(response);
             })
+    }
+    async claim(mac) {
+        let res = await fetch(this.url + "/claim", {
+            ...this.options,
+            method: 'POST',
+            body: JSON.stringify({ sensor: mac }),
+        })
+        return await res.json()
     }
     unclaim(mac, success) {
         fetch(this.url + "/unclaim", {

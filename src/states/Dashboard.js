@@ -15,6 +15,7 @@ import SensorTypePicker from "../components/SensorTypePicker";
 import MyAccountModal from "../components/MyAccountModal";
 import DashboardViewType from "../components/DashboardViewType";
 import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
+import AddSensorModal from "../components/AddSensorModal";
 
 const infoText = {
     fontFamily: "mulish",
@@ -214,7 +215,7 @@ class Dashboard extends Component {
                                             </Flex>
                                         </div>
                                     }
-                                    <DashboardGrid showGraph={this.state.showGraph} currSize={this.state.currSize} onSizeChange={s => this.setState({...this.state, currSize: s})}>
+                                    <DashboardGrid showGraph={this.state.showGraph} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })}>
                                         {size => {
                                             let sensorsInSearch = this.getSensors()
                                             return <>
@@ -247,6 +248,7 @@ class Dashboard extends Component {
                 {this.showModal("myaccount") &&
                     <MyAccountModal open={this.showModal("myaccount")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()} />
                 }
+                <AddSensorModal open={this.showModal("addsensor")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()}  />
             </>
         )
     }

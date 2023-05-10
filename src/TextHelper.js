@@ -4,7 +4,10 @@ export function uppercaseFirst(string) {
 }
 
 export function addNewlines(str, newlineChar) {
-    return str.split(newlineChar || "\n").map((x, i) => <p style={{ marginTop: i > 0 ? 10 : undefined }} key={Math.random()}>{x}</p>)
+    return str.split(newlineChar || "\n").map((x, i, all) => {
+        if (i === all.length-1) return <>{x}</>
+        return <p style={{ marginTop: i > 0 ? 10 : undefined }} key={Math.random()}>{x}</p>
+    })
 }
 
 export function addVariablesInString(str, variables) {

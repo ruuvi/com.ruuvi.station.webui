@@ -13,7 +13,7 @@ import { MdClose } from "react-icons/md";
 export default function RDialog(props) {
     return (
         <>
-            <Modal isOpen={props.isOpen} onClose={props.onClose} size="xl" >
+            <Modal isOpen={props.isOpen} onClose={props.onClose} size={props.size || "xl"} >
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader style={{ marginTop: 15 }}>{props.title}</ModalHeader>

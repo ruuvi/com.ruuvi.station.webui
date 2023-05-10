@@ -42,10 +42,11 @@ class SensorMenu extends Component {
                             {t("sensors")}
                         </MenuButton>
                         <MenuList mt="2" zIndex={10}>
+                            <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => this.props.addSensor()}>{t('add_new_sensor')}</MenuItem>
+                            <MenuDivider />
                             {this.state.sensors.map((x, i) => {
                                 let divider = <></>
                                 let borderStyle = {};
-                                if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
                                 if (i === this.state.sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                                 else divider = <MenuDivider />
                                 return <div key={x.sensor + "div"}>
