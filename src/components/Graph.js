@@ -137,10 +137,18 @@ class Graph extends Component {
         d = d.reverse();
         d = d.filter(x => x.parsed && x.parsed[this.props.dataKey] !== undefined)
         d.sort((a, b) => a.timestamp > b.timestamp)
-        return [
+        let out = [
             d.map(x => x.timestamp),
             d.map(x => getUnitHelper(this.props.dataKey).value(x.parsed[this.props.dataKey], x.parsed.temperature))
         ]
+        for (let i = 1; i < out[0].length; i++) {
+            if (out[0][i] - out[0][i - 1] >= 3600) {
+                out[0].splice(i, 0, out[0][i - 1] + 3600)
+                out[1].splice(i, 0, null)
+                i++
+            }
+        }
+        return out
     }
     setStateVar(k, v) {
         if (k === "zoom") zoomData.a = v
@@ -232,7 +240,7 @@ class Graph extends Component {
                                         }, {
                                             label: this.props.dataName || this.props.t(this.props.dataKey),
                                             class: "graphLabel",
-                                            spanGaps: true,
+                                            spanGaps: false,
                                             points: { show: this.props.points, size: 4, fill: ruuviTheme.graph.fill[colorMode] },
                                             width: 1,
                                             fill: ruuviTheme.graph.fill[colorMode],
