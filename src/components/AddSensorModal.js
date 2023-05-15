@@ -37,8 +37,10 @@ function AddSensorModal(props) {
             return macGroups.join(':');
         }
         let addr = addColonsToMacAddress(macAddess)
+        let splitMac = addr.split(":")
+        let name = "Ruuvi " + splitMac[4] + splitMac[5]
         try {
-            let res = await new NetworkApi().claim(addr)
+            let res = await new NetworkApi().claim(addr, name)
             if (res.result === "success") {
                 notify.success(t("sensor_added_successfully"))
                 setTimeout(() => {

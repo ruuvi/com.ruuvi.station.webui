@@ -257,11 +257,11 @@ class NetworkApi {
                 success(response);
             })
     }
-    async claim(mac) {
+    async claim(sensor, name) {
         let res = await fetch(this.url + "/claim", {
             ...this.options,
             method: 'POST',
-            body: JSON.stringify({ sensor: mac }),
+            body: JSON.stringify({ sensor, name }),
         })
         return await res.json()
     }
