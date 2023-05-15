@@ -177,11 +177,14 @@ class Dashboard extends Component {
             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard disabled={this.shouldDurationBeDisabled()} />
         </>
         const search = width => {
-            return <InputGroup className="searchInput" width={width}>
+            return <InputGroup width={width}>
                 <InputRightElement className="buttonSideIcon" style={{ cursor: this.state.search ? "pointer" : undefined }} onClick={() => this.setState({ ...this.state, search: "" })}>
                     {this.state.search ? <CloseIcon /> : <SearchIcon />}
                 </InputRightElement>
                 <Input placeholder={t("sensor_search_placeholder")}
+                    className="searchInput"
+                    borderRadius={5}
+                    
                     value={this.state.search}
                     onChange={e => this.setState({ ...this.state, search: e.target.value })}
                 />
@@ -248,7 +251,7 @@ class Dashboard extends Component {
                 {this.showModal("myaccount") &&
                     <MyAccountModal open={this.showModal("myaccount")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()} />
                 }
-                <AddSensorModal open={this.showModal("addsensor")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()}  />
+                <AddSensorModal open={this.showModal("addsensor")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()} />
             </>
         )
     }
