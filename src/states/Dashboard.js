@@ -157,7 +157,7 @@ class Dashboard extends Component {
         for (let i = 0; i < this.state.sensors.length; i++) {
             let x = this.state.sensors[i]
             let searchTerm = this.state.search.toLowerCase()
-            if (x.name.toLowerCase().indexOf(searchTerm) !== -1 || x.sensor.toLowerCase().indexOf(searchTerm) !== -1) {
+            if (x.name.toLowerCase().indexOf(searchTerm) !== -1) {
                 sensors.push(x)
             }
         }
