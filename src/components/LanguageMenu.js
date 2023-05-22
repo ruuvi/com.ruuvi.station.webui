@@ -14,6 +14,15 @@ import { withTranslation } from 'react-i18next';
 import { uppercaseFirst } from "../TextHelper";
 import RadioInput from "./RadioInput";
 
+const langs = ["en", "fi", "sv", "fr", "de"];
+const radioLangs = [
+    {label: "language_english", value: "en"}, 
+    {label: "language_finnish", value: "fi"}, 
+    {label: "language_swedish", value: "sv"},
+    {label: "language_french", value: "fr"},
+    {label: "language_german", value: "de"}
+];
+
 class LanguageMenu extends Component {
     langChange = (lng) => {
         localStorage.setItem("selected_language", lng)
@@ -21,8 +30,6 @@ class LanguageMenu extends Component {
     }
     render() {
         const { i18n } = this.props;
-        const langs = ["en", "fi", "sv"];
-        const radioLangs = [{label: "language_english", value: "en"}, {label: "language_finnish", value: "fi"}, {label: "language_swedish", value: "sv"}];
         if (this.props.loginPage) {
             return (
                 <>
