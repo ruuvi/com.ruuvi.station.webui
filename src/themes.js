@@ -162,6 +162,7 @@ export const ruuviTheme = extendTheme({
                 fontWeight: 600,
                 fontSize: "15px",
                 height: "100%",
+                lineHeight: "0px",
             },
             '.graphLabel > th': {
                 fontWeight: 800,
