@@ -97,8 +97,8 @@ class OffsetDialog extends Component {
                     }
                     <ModalFooter display="flex" justifyContent="center">
                         {this.state.saving ? <Spinner /> : <>
-                            <Button mr="2" onClick={() => this.setState({ ...this.state, correctionInput: true })}>Calibrate</Button>
-                            {this.getOffset() !== 0 && <Button ml="2"  onClick={() => this.clearCalibration()}>Clear</Button>}
+                            <Button mr="2" onClick={() => this.setState({ ...this.state, correctionInput: true })}>{t("calibrate")}</Button>
+                            {this.getOffset() !== 0 && <Button ml="2"  onClick={() => this.clearCalibration()}>{t("clear")}</Button>}
                         </>}
                     </ModalFooter>
                 </RDialog>
