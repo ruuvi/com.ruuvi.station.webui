@@ -446,6 +446,9 @@ class Sensor extends Component {
         var { t } = this.props
         let lastReading = this.getLatestReading()
         let sensorSubscription = this.props.sensor?.subscription.subscriptionName
+        let noHistoryStrKey = "no_data_in_range"
+        if (this.props.sensor?.subscription.maxHistoryDays === 0) noHistoryStrKey = "no_data_free_mode"
+        let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
         return (
             <Box>
                 <Box minHeight={1500}>
@@ -499,7 +502,7 @@ class Sensor extends Component {
                             </div>
                             <Box height={520}>
                                 <> {!this.isLoading && (!this.state.data || !this.state.data?.measurements?.length) ? (
-                                    <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", paddingTop: 240, height: 450 }}>{t("no_data_in_range")}</center>
+                                    <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", paddingTop: 240, height: 450 }}>{noHistoryStr}</center>
                                 ) : (
                                     <Box ml={-5} mr={-5}>
                                         {this.isLoading &&

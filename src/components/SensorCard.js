@@ -260,6 +260,9 @@ class SensorCard extends Component {
                 </div >
             )
         }
+        let noHistoryStrKey = "no_data_in_range"
+        if (this.props.sensor?.subscription.maxHistoryDays === 0) noHistoryStrKey = "no_data_free_mode"
+        let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
         return (
             <div>
                 {altFileUplaod}
@@ -348,7 +351,7 @@ class SensorCard extends Component {
                                                             {this.state.loadingHistory ? (
                                                                 <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}><Spinner size="xl" /></div></center>
                                                             ) : showGraph && (
-                                                                <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{t("no_data_in_range").split("\n").map(x => <div key={x}>{x}</div>)}</div></center>
+                                                                <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{noHistoryStr}</div></center>
                                                             )}
                                                         </>}
                                                     </>
