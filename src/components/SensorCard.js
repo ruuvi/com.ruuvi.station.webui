@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import NetworkApi from '../NetworkApi'
 import {
     Heading,
@@ -7,24 +7,31 @@ import {
     GridItem,
     Avatar,
     Flex,
-    Image
+    Image,
+    IconButton,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
+    MenuDivider
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "./Graph";
 import parse from "../decoder/parser";
 import { Spinner } from "@chakra-ui/react"
-import { withTranslation } from 'react-i18next';
+import { useTranslation, withTranslation } from 'react-i18next';
 import { getDisplayValue, getUnitHelper, localeNumber } from "../UnitHelper";
 import DurationText from "./DurationText";
 import BigValue from "./BigValue";
 import { withColorMode } from "../utils/withColorMode";
 import bglayer from '../img/bg-layer.png';
-import { MdAdd, MdCameraAlt } from "react-icons/md";
+import { MdAdd, MdCameraAlt, MdMoreVert } from "react-icons/md";
 import uploadBackgroundImage from "../BackgroundUploader";
 import { isBatteryLow } from "../utils/battery";
 import lowBattery from '../img/low_battery.svg'
 import bell from '../img/icon-bell.svg'
 import bellAlert from '../img/icon-bell-alert.svg'
+import { useNavigate } from 'react-router-dom';
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -42,6 +49,35 @@ const lastUpdatedText = {
     fontFamily: "mulish",
     fontWeight: 600,
     fontSize: 12,
+}
+
+function MoreMenu(props) {
+    const navigate = useNavigate();
+    const { t } = useTranslation();
+    const [isOpen, setIsOpen] = useState(false)
+    const handleButtonClick = (e) => {
+        setIsOpen(!isOpen)
+    }
+    const doAction = (e, action) => {
+        e.preventDefault()
+        if (action === "share") props.share()
+        else if (action === "change_background") props.uploadBg()
+        else navigate('/' + props.sensor + "?scrollTo=" + action);
+    }
+    const itemStyle = { fontFamily: "mulish", fontSize: 15, fontWeight: 800 }
+    return <Menu autoSelect={false} isOpen={isOpen} onOpen={handleButtonClick} onClose={handleButtonClick} >
+        <MenuButton as={IconButton} onClick={(e) => e.preventDefault() || handleButtonClick()} icon={<MdMoreVert size={23} />} variant="topbar" style={{ backgroundColor: "transparent" }} height={15} mt={props.mt}>
+        </MenuButton>
+        <MenuList mt="2" zIndex={10}>
+            <MenuItem style={itemStyle} onClick={e => doAction(e, "history")}>{t("history_view")}</MenuItem>
+            <MenuDivider />
+            <MenuItem style={itemStyle} onClick={e => doAction(e, "settings")}>{t("settings_and_alerts")}</MenuItem>
+            <MenuDivider />
+            <MenuItem style={itemStyle} onClick={e => doAction(e, "change_background")}>{t("change_background")}</MenuItem>
+            <MenuDivider />
+            <MenuItem style={itemStyle} onClick={e => doAction(e, "share")}>{t("share")}</MenuItem>
+        </MenuList>
+    </Menu>
 }
 
 class SensorCard extends Component {
@@ -172,6 +208,19 @@ class SensorCard extends Component {
             </Flex>
         </div>
 
+        const moreDropdonw = <MoreMenu mt={simpleView ? -0.5 : -0.1} sensor={this.props.sensor.sensor} share={() => this.props.share()} uploadBg={() => {
+            document.getElementById("fileinputlabel" + this.props.sensor.sensor).click()
+        }} />
+
+        const altFileUplaod = <label htmlFor={"altup" + this.props.sensor.sensor} id={"fileinputlabel" + this.props.sensor.sensor}>
+            <input type="file" accept="image/*" style={{ display: "none" }} id={"altup" + this.props.sensor.sensor} onChange={f => {
+                this.setState({ ...this.state, loadingImage: true })
+                uploadBackgroundImage(this.props.sensor, f, t, res => {
+                    this.setState({ ...this.state, loadingImage: false })
+                })
+            }} />
+        </label>
+
         if (simpleView) {
             let stats = [mainStat]
             if (mainStat !== "humidity") stats.push("humidity")
@@ -180,15 +229,19 @@ class SensorCard extends Component {
             if (stats.lenght !== 4) stats.push("movementCounter")
             return (
                 <div>
+                    {altFileUplaod}
                     <Box className="content sensorCard" height={105} borderRadius="lg" overflow="hidden" padding={4}>
                         <Flex>
-                            <Flex grow={1} width="calc(100% - 15px)">
+                            <Flex grow={1} width="calc(100% - 40px)">
                                 <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: -4, marginRight: 2 }}>
                                     {this.props.sensor.name}
                                 </Heading>
                             </Flex>
                             <Flex width="15px">
                                 {alertIcon}
+                            </Flex>
+                            <Flex width="25px">
+                                {moreDropdonw}
                             </Flex>
                         </Flex>
                         <SimpleGrid columns={2} style={{ width: "100%", height: "49px", overflow: "hidden", whiteSpace: "nowrap", opacity: 0.8 }}>
@@ -209,6 +262,7 @@ class SensorCard extends Component {
         }
         return (
             <div>
+                {altFileUplaod}
                 <Box className="content sensorCard" height={height} borderRadius="lg" overflow="hidden">
                     <Box height="100%" margin="auto">
                         {showImage &&
@@ -244,27 +298,34 @@ class SensorCard extends Component {
                             <Box height={isSmallCard && latestReading ? "98px" : ""}>
                                 <Flex>
                                     <Flex grow={1} width="calc(100% - 15px)">
-                                        {isSmallCard ? (
-                                            <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, lineHeight: "19px", maxHeight: "38px", marginRight: 2 }}>
-                                                {this.props.sensor.name}
-                                            </Heading>
-                                        ) : (
-                                            <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginRight: 2 }}>
-                                                {this.props.sensor.name}
-                                            </Heading>
-                                        )}
+                                        <a href={"#/" + this.props.sensor.sensor}>
+                                            {isSmallCard ? (
+                                                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, lineHeight: "19px", maxHeight: "38px", marginRight: 2 }}>
+                                                    {this.props.sensor.name}
+                                                </Heading>
+                                            ) : (
+                                                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginRight: 2 }}>
+                                                    {this.props.sensor.name}
+                                                </Heading>
+                                            )}
+                                        </a>
                                     </Flex>
                                     <Flex>
                                         {alertIcon}
                                     </Flex>
+                                    <Flex>
+                                        {moreDropdonw}
+                                    </Flex>
                                 </Flex>
-                                {latestReading &&
-                                    <BigValue
-                                        value={getDisplayValue(mainStat, localeNumber(getUnitHelper(mainStat).value(latestReading[mainStat], mainStat === "humidity" ? latestReading.temperature : undefined), getUnitHelper(mainStat).decimals))}
-                                        unit={getUnitHelper(mainStat).unit}
-                                        alertActive={this.getAlertState(mainStat) > 0}
-                                    />
-                                }
+                                <a href={"#/" + this.props.sensor.sensor}>
+                                    {latestReading &&
+                                        <BigValue
+                                            value={getDisplayValue(mainStat, localeNumber(getUnitHelper(mainStat).value(latestReading[mainStat], mainStat === "humidity" ? latestReading.temperature : undefined), getUnitHelper(mainStat).decimals))}
+                                            unit={getUnitHelper(mainStat).unit}
+                                            alertActive={this.getAlertState(mainStat) > 0}
+                                        />
+                                    }
+                                </a>
                             </Box>
                             {this.state.loading ? (
                                 <center style={{ position: "relative", top: "50%", marginTop: isSmallCard ? 0 : height / 3, transform: "translateY(-50%)" }}>
@@ -272,42 +333,44 @@ class SensorCard extends Component {
                                 </center>
                             ) : (
                                 <div>
-                                    {latestReading ? <div>
-                                        <div style={{ marginLeft: -24, marginRight: -30, marginTop: -10, marginBottom: -10, paddingBottom: -50 }}>
-                                            {this.state.data && this.state.data.measurements.length ? (
-                                                <>
-                                                    {showGraph &&
-                                                        <Graph title="" key={this.props.sensor.sensor + this.props.cardType + mainStat} dataKey={mainStat} data={this.getMeasurements()} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
-                                                    }
-                                                </>
-                                            ) : (
-                                                <>
-                                                    {showGraph && <>
-                                                        {this.state.loadingHistory ? (
-                                                            <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}><Spinner size="xl" /></div></center>
-                                                        ) : showGraph && (
-                                                            <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{t("no_data_in_range").split("\n").map(x => <div key={x}>{x}</div>)}</div></center>
-                                                        )}
-                                                    </>}
-                                                </>
-                                            )}
-                                        </div>
-                                        <div style={{ maxWidth: this.props.size === "mobile" && !this.props.showGraph ? "300px" : undefined }}>
-                                            <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 0 0" }}>
-                                                {["humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature" : undefined]].map(x => {
-                                                    let value = latestReading[x];
-                                                    if (value === undefined) return null;
-                                                    return <GridItem key={x} style={{ color: this.getAlertState(x) > 0 ? "#f27575" : undefined }}>
-                                                        <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
-                                                        <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
-                                                    </GridItem>
-                                                })}
-                                            </SimpleGrid>
-                                        </div>
-                                        {infoRow}
-                                    </div> : <div>
-                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: height / (isSmallCard ? 6 : 4) }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
-                                    </div>}
+                                    <a href={"#/" + this.props.sensor.sensor}>
+                                        {latestReading ? <div>
+                                            <div style={{ marginLeft: -24, marginRight: -30, marginTop: -10, marginBottom: -10, paddingBottom: -50 }}>
+                                                {this.state.data && this.state.data.measurements.length ? (
+                                                    <>
+                                                        {showGraph &&
+                                                            <Graph title="" key={this.props.sensor.sensor + this.props.cardType + mainStat} dataKey={mainStat} data={this.getMeasurements()} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
+                                                        }
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {showGraph && <>
+                                                            {this.state.loadingHistory ? (
+                                                                <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}><Spinner size="xl" /></div></center>
+                                                            ) : showGraph && (
+                                                                <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{t("no_data_in_range").split("\n").map(x => <div key={x}>{x}</div>)}</div></center>
+                                                            )}
+                                                        </>}
+                                                    </>
+                                                )}
+                                            </div>
+                                            <div style={{ maxWidth: this.props.size === "mobile" && !this.props.showGraph ? "300px" : undefined }}>
+                                                <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 0 0" }}>
+                                                    {["humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature" : undefined]].map(x => {
+                                                        let value = latestReading[x];
+                                                        if (value === undefined) return null;
+                                                        return <GridItem key={x} style={{ color: this.getAlertState(x) > 0 ? "#f27575" : undefined }}>
+                                                            <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
+                                                            <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
+                                                        </GridItem>
+                                                    })}
+                                                </SimpleGrid>
+                                            </div>
+                                            {infoRow}
+                                        </div> : <div>
+                                            <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: height / (isSmallCard ? 6 : 4) }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
+                                        </div>}
+                                    </a>
                                 </div>
                             )}
                         </Box>

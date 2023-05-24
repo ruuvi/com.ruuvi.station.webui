@@ -16,6 +16,7 @@ import MyAccountModal from "../components/MyAccountModal";
 import DashboardViewType from "../components/DashboardViewType";
 import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
 import AddSensorModal from "../components/AddSensorModal";
+import ShareDialog from "../components/ShareDialog";
 
 const infoText = {
     fontFamily: "mulish",
@@ -49,7 +50,8 @@ class Dashboard extends Component {
             showBig: true,
             graphType: store.getDashboardGraphType(),
             search: "",
-            currSize: ''
+            currSize: '',
+            showShare: null
         }
         var from = store.getDashboardFrom();
         if (from) {
@@ -226,7 +228,7 @@ class Dashboard extends Component {
                                                     let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
                                                     return <span key={x.sensor + this.state.from} style={{ width: 640, maxWidth: "100%", display: hide ? "none" : undefined }}>
                                                         <a href={"#/" + x.sensor}>
-                                                            <SensorCard sensor={x} size={size} dataFrom={this.state.from} cardType={this.state.cardType} graphType={this.state.graphType} />
+                                                            <SensorCard sensor={x} size={size} dataFrom={this.state.from} cardType={this.state.cardType} graphType={this.state.graphType} share={() => this.setState({...this.state, showShareFor: x})} />
                                                         </a></span>
                                                 })}
                                             </>
@@ -252,6 +254,7 @@ class Dashboard extends Component {
                     <MyAccountModal open={this.showModal("myaccount")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()} />
                 }
                 <AddSensorModal open={this.showModal("addsensor")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()} />
+                <ShareDialog open={this.state.showShareFor} onClose={() => this.setState({...this.state, showShareFor: null})} sensor={this.state.showShareFor} updateSensor={this.updateSensor} />
             </>
         )
     }

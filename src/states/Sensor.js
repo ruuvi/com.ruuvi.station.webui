@@ -218,7 +218,20 @@ class Sensor extends Component {
         this.openAccodrions = new Store().getOpenAccordions() || [0];
     }
     componentDidMount() {
-        window.scrollTo(0, 0)
+        const queryParams = new URLSearchParams(this.props.router.location.search);
+        const paramValue = queryParams.get('scrollTo');
+        if (paramValue) {
+            setTimeout(() => {
+            const targetElement = document.getElementById(paramValue);
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop,
+                    behavior: 'smooth',
+                });
+            }
+            },100)
+        }
+        else window.scrollTo(0, 0)
         if (this.props.sensor) {
             this.loadData(true)
         }
@@ -460,7 +473,7 @@ class Sensor extends Component {
                                         onClick={() => this.setGraphKey(x)} />
                                 })}
                             </SensorValueGrid>
-                            <div style={{ marginTop: 30, marginBottom: 20 }}>
+                            <div style={{ marginTop: 30, marginBottom: 20 }} id="history">
                                 <table width="100%">
                                     <tbody>
                                         <tr>
@@ -505,7 +518,7 @@ class Sensor extends Component {
                             </Box>
                         </div>
                     </Box>
-                    <Box>
+                    <Box id="settings">
                         <div style={{ height: "20px" }} />
                         <Accordion allowMultiple defaultIndex={this.openAccodrions} onChange={v => this.setOpenAccordion(v)}>
                             <AccordionItem onChange={v => console.log(v)}>
