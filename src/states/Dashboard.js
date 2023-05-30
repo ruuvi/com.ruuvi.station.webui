@@ -186,7 +186,6 @@ class Dashboard extends Component {
                 <Input placeholder={t("sensor_search_placeholder")}
                     className="searchInput"
                     borderRadius={5}
-                    
                     value={this.state.search}
                     onChange={e => this.setState({ ...this.state, search: e.target.value })}
                 />

@@ -62,7 +62,7 @@ function MoreMenu(props) {
         e.preventDefault()
         if (action === "share") props.share()
         else if (action === "change_background") props.uploadBg()
-        else navigate('/' + props.sensor + "?scrollTo=" + action);
+        else navigate('/' + props.sensor.sensor + "?scrollTo=" + action);
     }
     const itemStyle = { fontFamily: "mulish", fontSize: 15, fontWeight: 800 }
     return <Menu autoSelect={false} isOpen={isOpen} onOpen={handleButtonClick} onClose={handleButtonClick} >
@@ -74,8 +74,10 @@ function MoreMenu(props) {
             <MenuItem style={itemStyle} onClick={e => doAction(e, "settings")}>{t("settings_and_alerts")}</MenuItem>
             <MenuDivider />
             <MenuItem style={itemStyle} onClick={e => doAction(e, "change_background")}>{t("change_background")}</MenuItem>
-            <MenuDivider />
-            <MenuItem style={itemStyle} onClick={e => doAction(e, "share")}>{t("share")}</MenuItem>
+            {props.sensor.canShare && <>
+                <MenuDivider />
+                <MenuItem style={itemStyle} onClick={e => doAction(e, "share")}>{t("share")}</MenuItem>
+            </>}
         </MenuList>
     </Menu>
 }
@@ -208,7 +210,7 @@ class SensorCard extends Component {
             </Flex>
         </div>
 
-        const moreDropdonw = <MoreMenu mt={simpleView ? -0.5 : -0.1} sensor={this.props.sensor.sensor} share={() => this.props.share()} uploadBg={() => {
+        const moreDropdonw = <MoreMenu mt={simpleView ? -0.5 : -0.1} sensor={this.props.sensor} share={() => this.props.share()} uploadBg={() => {
             document.getElementById("fileinputlabel" + this.props.sensor.sensor).click()
         }} />
 
