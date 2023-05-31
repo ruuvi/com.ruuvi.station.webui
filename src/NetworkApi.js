@@ -119,7 +119,8 @@ class NetworkApi {
     async getAsync(mac, since, until, settings) {
         if (!this.options) return null;
         var mode = settings.mode || "mixed";
-        const cacheGapLimit = mode === "sparse" ? 60 * 20 : 60 * 2;
+        let cacheGapLimit = mode === "sparse" ? 60 * 30 : 60 * 2;
+        if (until < ((new Date().getTime() / 1000) - 24 * 60 * 60)) cacheGapLimit = 60 * 30;
         const minAmountForCachedDatapointFromCache = 10;
         var useCache = false;
         var cachedData;
@@ -158,15 +159,13 @@ class NetworkApi {
                         }
                     }
                 }
-                if (!until) {
-                    if (since > newest || since < oldest - 60 * 15) {
-                        //console.log("Will not use cache")
-                    } else {
-                        cachedData = cachedData.filter(x => x.timestamp >= since)
-                        if (cachedData[cachedData.length - 1].timestamp - since < cacheGapLimit) {
-                            since = newest
-                            useCache = true
-                        }
+                if (until < newest || until > oldest - cacheGapLimit) {
+                    //console.log("Will not use cache")
+                } else {
+                    cachedData = cachedData.filter(x => x.timestamp >= since)
+                    if (cachedData[cachedData.length - 1].timestamp - since < cacheGapLimit) {
+                        since = newest
+                        useCache = true
                     }
                 }
             }

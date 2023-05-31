@@ -12,6 +12,7 @@ var cache = {
         let version = await localForage.getItem("cacheVersion")
         // eslint-disable-next-line eqeqeq
         if (version != DB_VERSION) localForage.clear();
+        await localForage.setItem("cacheVersion", DB_VERSION)
     },
     clear:  () => {
         localForage.clear();
