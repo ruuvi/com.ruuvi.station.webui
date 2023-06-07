@@ -253,7 +253,7 @@ class Dashboard extends Component {
                     <MyAccountModal open={this.showModal("myaccount")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()} />
                 }
                 <AddSensorModal open={this.showModal("addsensor")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()} />
-                <ShareDialog open={this.state.showShareFor} onClose={() => this.setState({ ...this.state, showShareFor: null })} sensor={this.state.showShareFor} updateSensor={this.updateSensor} />
+                <ShareDialog open={this.state.showShareFor} onClose={() => this.setState({ ...this.state, showShareFor: null })} sensor={this.state.showShareFor} updateSensor={(s) => this.updateSensor(s)} />
             </>
         )
     }
