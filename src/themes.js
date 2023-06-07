@@ -56,6 +56,8 @@ let colors = {
     navButtonColor: { light: "#1f9385 !important", dark: "white !important" },
     graphFill: { dark: "rgba(68, 201, 185, 0.3)", light: "rgba(68, 201, 185, 0.3)" },
     graphStroke: { dark: "#34ad9f", light: "#1f9385" },
+    graphFillAlert: { dark: "#ff954d7f", light: "#ff954d7f" },
+    graphStrokeAlert: { dark: "#f15a24", light: "#f15a24" },
     graphGrid: { dark: "rgba(68, 201, 185, 0.1)", light: "#083c3d1a" },
     sensorCardBackground: { light: undefined, dark: "#003434 !important" },
     signinInputBg: { light: "white", dark: undefined },
@@ -177,6 +179,10 @@ export const ruuviTheme = extendTheme({
         stroke: colors.graphStroke,
         grid: colors.graphGrid,
         axisLabels: colors.text,
+        alert: {
+            fill: colors.graphFillAlert,
+            stroke: colors.graphStrokeAlert,
+        }
     },
     newColors: colors,
     colors: {

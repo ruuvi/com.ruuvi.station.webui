@@ -196,6 +196,7 @@ class Graph extends Component {
         window.removeEventListener('resize', this.resize)
     }
     render() {
+        let alert = this.props.alert
         let width = this.pRef?.current?.offsetWidth
         setTimeout(() => {
             if (!width) {
@@ -210,6 +211,105 @@ class Graph extends Component {
         let colorMode = this.props.colorMode.colorMode;
         let height = this.props.height || 300;
         let graphData = this.getGraphData()
+
+        function scaleGradient(u, scaleKey, ori, scaleStops, discrete = false) {
+            try {
+                let scale = u.scales[scaleKey];
+
+                // we want the stop below or at the scaleMax
+                // and the stop below or at the scaleMin, else the stop above scaleMin
+                let minStopIdx;
+                let maxStopIdx;
+
+                for (let i = 0; i < scaleStops.length; i++) {
+                    let stopVal = scaleStops[i][0];
+
+                    if (stopVal <= scale.min || minStopIdx == null)
+                        minStopIdx = i;
+
+                    maxStopIdx = i;
+
+                    if (stopVal >= scale.max)
+                        break;
+                }
+
+                if (minStopIdx == maxStopIdx)
+                    return scaleStops[minStopIdx][1];
+
+                let minStopVal = scaleStops[minStopIdx][0];
+                let maxStopVal = scaleStops[maxStopIdx][0];
+
+                if (minStopVal == -Infinity)
+                    minStopVal = scale.min;
+
+                if (maxStopVal == Infinity)
+                    maxStopVal = scale.max;
+
+                let minStopPos = u.valToPos(minStopVal, scaleKey, true);
+                let maxStopPos = u.valToPos(maxStopVal, scaleKey, true);
+
+                let range = minStopPos - maxStopPos;
+
+                let x0, y0, x1, y1;
+
+                if (ori == 1) {
+                    x0 = x1 = 0;
+                    y0 = minStopPos;
+                    y1 = maxStopPos;
+                }
+                else {
+                    y0 = y1 = 0;
+                    x0 = minStopPos;
+                    x1 = maxStopPos;
+                }
+
+                let grd = u.ctx.createLinearGradient(x0, y0, x1, y1);
+
+                let prevColor;
+
+                for (let i = minStopIdx; i <= maxStopIdx; i++) {
+                    let s = scaleStops[i];
+                    let stopPos = i == minStopIdx ? minStopPos : i == maxStopIdx ? maxStopPos : u.valToPos(s[0], scaleKey, true);
+                    let pct = (minStopPos - stopPos) / range;
+                    if (discrete && i > minStopIdx)
+                        grd.addColorStop(pct, prevColor);
+                    grd.addColorStop(pct, prevColor = s[1]);
+                }
+
+                return grd;
+            } catch {
+                return null
+            }
+        }
+
+        let fillGrad = [
+            [-100000, ruuviTheme.graph.alert.fill[colorMode]],
+            [alert?.min, ruuviTheme.graph.fill[colorMode]],
+            [alert?.max, ruuviTheme.graph.alert.fill[colorMode]],
+        ];
+        let strokeGrad = [
+            [-1000, ruuviTheme.graph.alert.stroke[colorMode]],
+            [alert?.min, ruuviTheme.graph.stroke[colorMode]],
+            [alert?.max, ruuviTheme.graph.alert.stroke[colorMode]],
+        ];
+
+        const alertColor = () => {
+            if (alert && alert.enabled) {
+                return {
+                    fill: (u, seriesIdx) => {
+                        return scaleGradient(u, 'y', 1, fillGrad, true);
+                    },
+                    stroke: (u, seriesIdx) => {
+                        return scaleGradient(u, 'y', 1, strokeGrad, true);
+                    }
+                }
+            }
+            return {
+                fill: ruuviTheme.graph.fill[colorMode],
+                stroke: ruuviTheme.graph.stroke[colorMode]
+            }
+        }
+
         return (
             <div ref={this.pRef}>
                 {this.state.resizing ? (
@@ -243,10 +343,42 @@ class Graph extends Component {
                                             spanGaps: false,
                                             points: { show: this.props.points, size: 4, fill: ruuviTheme.graph.fill[colorMode] },
                                             width: 1,
-                                            fill: ruuviTheme.graph.fill[colorMode],
-                                            stroke: ruuviTheme.graph.stroke[colorMode],
+                                            ...alertColor(),
                                             value: (self, rawValue) => localeNumber(rawValue)
                                         }],
+                                        hooks: {
+                                            drawSeries: [
+                                                (u, si) => {
+                                                    if (!alert || !alert.enabled) return
+                                                    let ctx = u.ctx;
+                                                    ctx.save();
+                                                    let s = u.series[si];
+                                                    let xd = u.data[0];
+                                                    let [i0, i1] = s.idxs;
+                                                    const lineAt = (val) => {
+                                                        let x0 = u.valToPos(xd[i0], 'x', true);
+                                                        let y0 = u.valToPos(val, 'y', true);
+                                                        let x1 = u.valToPos(xd[i1], 'x', true);
+                                                        let y1 = u.valToPos(val, 'y', true);
+                                                        ctx.moveTo(x0, y0);
+                                                        ctx.lineTo(x1, y1);
+                                                        ctx.stroke();
+                                                    }
+
+                                                    const offset = (s.width % 2) / 2;
+
+                                                    ctx.translate(offset, offset);
+
+                                                    ctx.beginPath();
+                                                    ctx.strokeStyle = ruuviTheme.graph.alert.stroke[colorMode];
+                                                    lineAt(alert.max)
+                                                    lineAt(alert.min)
+                                                    ctx.translate(-offset, -offset);
+
+                                                    ctx.restore();
+                                                }
+                                            ],
+                                        },
                                         cursor: {
                                             show: this.props.cursor || false,
                                             drag: { x: true, y: true, uni: 50 },

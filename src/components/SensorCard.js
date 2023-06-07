@@ -196,6 +196,12 @@ class SensorCard extends Component {
             if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} width="15px" mt="-1" className="alarmFadeInOut" />
         }
 
+        let tnpGetAlert = (x) => {
+            let dataKey = x === "movement" ? "movementCounter" : "signal" ? "rssi" : x;
+            if (this.getLatestReading()[dataKey] === undefined) return null;
+            return this.getAlert(x)
+        }
+
         let infoRow = <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%" }}>
             <Flex justifyContent={"space-between"}>
                 <span>
@@ -344,7 +350,7 @@ class SensorCard extends Component {
                                                 {this.state.data && this.state.data.measurements.length ? (
                                                     <>
                                                         {showGraph &&
-                                                            <Graph title="" key={this.props.sensor.sensor + this.props.cardType + mainStat} dataKey={mainStat} data={this.getMeasurements()} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
+                                                            <Graph title="" key={this.props.sensor.sensor + this.props.cardType + mainStat} alert={tnpGetAlert(mainStat)} dataKey={mainStat} data={this.getMeasurements()} height={graphHeight} legend={false} cardView={true} from={new Date().getTime() - 60 * 60 * 1000 * this.props.dataFrom} />
                                                         }
                                                     </>
                                                 ) : (

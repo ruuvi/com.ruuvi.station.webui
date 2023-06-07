@@ -210,6 +210,7 @@ class Sensor extends Component {
             showShare: false,
             offsetDialog: null,
             loadingImage: false,
+            updateGraphKey: 0
         }
         this.isLoading = false;
         this.applyAccordionSetting()
@@ -222,14 +223,14 @@ class Sensor extends Component {
         const paramValue = queryParams.get('scrollTo');
         if (paramValue) {
             setTimeout(() => {
-            const targetElement = document.getElementById(paramValue);
-            if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop,
-                    behavior: 'smooth',
-                });
-            }
-            },100)
+                const targetElement = document.getElementById(paramValue);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop,
+                        behavior: 'smooth',
+                    });
+                }
+            }, 100)
         }
         else window.scrollTo(0, 0)
         if (this.props.sensor) {
@@ -407,6 +408,7 @@ class Sensor extends Component {
             sensor.alerts[alertIdx] = alert
             this.props.updateSensor(sensor)
         }
+        this.setState({...this.state, updateGraphKey: this.state.updateGraphKey+1})
         new NetworkApi().setAlert({ ...alert, sensor: this.props.sensor.sensor }, resp => {
             switch (resp.result) {
                 case "success":
@@ -449,6 +451,12 @@ class Sensor extends Component {
         let noHistoryStrKey = "no_data_in_range"
         if (this.props.sensor?.subscription.maxHistoryDays === 0) noHistoryStrKey = "no_data_free_mode"
         let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
+
+        let tnpGetAlert = (x) => {
+            let dataKey = x === "movement" ? "movementCounter" : "signal" ? "rssi" : x;
+            if (this.getLatestReading()[dataKey] === undefined) return null;
+            return this.getAlert(x)
+        }
         return (
             <Box>
                 <Box minHeight={1500}>
@@ -512,7 +520,7 @@ class Sensor extends Component {
                                         }
                                         <div style={graph}>
                                             {this.state.data?.measurements?.length &&
-                                                <Graph key={"sensor_graph"} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                                <Graph key={"sensor_graph"+this.state.updateGraphKey} alert={tnpGetAlert(this.state.graphKey)} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
                                             }
                                         </div>
                                     </Box>
