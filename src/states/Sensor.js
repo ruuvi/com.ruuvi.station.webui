@@ -42,7 +42,7 @@ import pjson from '../../package.json';
 import { isBatteryLow } from "../utils/battery";
 import uploadBackgroundImage from "../BackgroundUploader";
 
-var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"];
+var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber", "pm1p0","pm2p5","pm4p0","pm10p0","co2","voc","nox"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
 
 const graphInfo = {

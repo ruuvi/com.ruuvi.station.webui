@@ -172,6 +172,12 @@ class SensorCard extends Component {
         if (measurements && this.props.sensor.measurements.length) measurements = [this.props.sensor.measurements[0], ...measurements]
         return measurements
     }
+    getSmallDataFields() {
+        let arr = ["humidity", "pressure", "movementCounter"]
+        if (this.getLatestReading().dataFormat === 6) arr = ["pm1p0", "co2", "voc"]
+        if ((this.props.graphType || "temperature") !== "temperature") arr.push("temperature")
+        return arr
+    }
     render() {
         var { t } = this.props;
         let showGraph = this.props.cardType === "graph_view";
@@ -367,7 +373,7 @@ class SensorCard extends Component {
                                             </div>
                                             <div style={{ maxWidth: this.props.size === "mobile" && !this.props.showGraph ? "300px" : undefined }}>
                                                 <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 0 0" }}>
-                                                    {["humidity", "pressure", "movementCounter", ...[mainStat !== "temperature" ? "temperature" : undefined]].map(x => {
+                                                    {this.getSmallDataFields().map(x => {
                                                         let value = latestReading[x];
                                                         if (value === undefined) return null;
                                                         return <GridItem key={x} style={{ color: this.getAlertState(x) > 0 ? "#f27575" : undefined }}>

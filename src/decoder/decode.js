@@ -1,5 +1,6 @@
 import df3 from './3';
 import df5 from './5';
+import df6 from './6';
 import df2and4 from './2and4';
 
 const ruu_vi = "ruu.vi/#"
@@ -28,6 +29,8 @@ function decoder(data) {
                 return df3.parse(rData)
             case "05":
                 return df5.parse(inBytes)
+            case "06":
+                return df6.parse(inBytes)
             default:
                 return null;
         }

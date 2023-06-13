@@ -14,6 +14,13 @@ const unitHelper = {
     "mac": { label: "mac_address", unit: "", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: false },
     "dataFormat": { label: "data_format", unit: "", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: false },
     "measurementSequenceNumber": { label: "measurement_sequence_number", unit: "", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: true },
+    "pm1p0": { label: "pm1.0", unit: "ppm", value: (value) => value, fromUser: (value) => value, decimals: 2, graphable: true },
+    "pm2p5": { label: "pm2.5", unit: "ppm", value: (value) => value, fromUser: (value) => value, decimals: 2, graphable: true },
+    "pm4p0": { label: "pm4.0", unit: "ppm", value: (value) => value, fromUser: (value) => value, decimals: 2, graphable: true },
+    "pm10p0": { label: "pm10.0", unit: "ppm", value: (value) => value, fromUser: (value) => value, decimals: 2, graphable: true },
+    "co2": { label: "co2", unit: "CO2 ppm", value: (value) => value, fromUser: (value) => value, decimals: 2, graphable: true },
+    "voc": { label: "voc", unit: "VOC index", value: (value) => value, fromUser: (value) => value, decimals: 2, graphable: true },
+    "nox": { label: "nox", unit: "NOx index", value: (value) => value, fromUser: (value) => value, decimals: 2, graphable: true },
 }
 
 export function getUnitFor(key, setting) {
