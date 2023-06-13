@@ -282,15 +282,28 @@ class Graph extends Component {
             }
         }
 
+        let alertMin = alert?.min
+        let alertMax = alert?.max
+        try {
+            var uh = getUnitHelper(alert?.type)
+            if (alert?.type === "humidity" && uh.unit !== "%") {
+                alertMin = -1000000
+                alertMax = 1000000
+            } else {
+                alertMin = uh.valu0e(alertMin)
+                alertMax = uh.value(alertMax)
+            }
+        } catch { }
+
         let fillGrad = [
             [-100000, ruuviTheme.graph.alert.fill[colorMode]],
-            [alert?.min, ruuviTheme.graph.fill[colorMode]],
-            [alert?.max, ruuviTheme.graph.alert.fill[colorMode]],
+            [alertMin, ruuviTheme.graph.fill[colorMode]],
+            [alertMax, ruuviTheme.graph.alert.fill[colorMode]],
         ];
         let strokeGrad = [
             [-1000, ruuviTheme.graph.alert.stroke[colorMode]],
-            [alert?.min, ruuviTheme.graph.stroke[colorMode]],
-            [alert?.max, ruuviTheme.graph.alert.stroke[colorMode]],
+            [alertMin, ruuviTheme.graph.stroke[colorMode]],
+            [alertMax, ruuviTheme.graph.alert.stroke[colorMode]],
         ];
 
         const alertColor = () => {
@@ -371,8 +384,8 @@ class Graph extends Component {
 
                                                     ctx.beginPath();
                                                     ctx.strokeStyle = ruuviTheme.graph.alert.stroke[colorMode];
-                                                    lineAt(alert.max)
-                                                    lineAt(alert.min)
+                                                    lineAt(alertMax)
+                                                    lineAt(alertMin)
                                                     ctx.translate(-offset, -offset);
 
                                                     ctx.restore();
