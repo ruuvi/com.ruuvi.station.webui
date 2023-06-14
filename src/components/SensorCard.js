@@ -66,7 +66,7 @@ function MoreMenu(props) {
     }
     const itemStyle = { fontFamily: "mulish", fontSize: 15, fontWeight: 800 }
     return <Menu autoSelect={false} isOpen={isOpen} onOpen={handleButtonClick} onClose={handleButtonClick} >
-        <MenuButton as={IconButton} onClick={(e) => e.preventDefault() || handleButtonClick()} icon={<MdMoreVert size={23} />} variant="topbar" style={{ backgroundColor: "transparent" }} height={15} mt={props.mt}>
+        <MenuButton as={IconButton} onClick={(e) => e.preventDefault() || handleButtonClick()} icon={<MdMoreVert size={23} />} variant="topbar" style={{ backgroundColor: "transparent" }} top={-4} right={props.simpleView ? 0 : -4} height={55} mt={props.mt}>
         </MenuButton>
         <MenuList mt="2" zIndex={10}>
             <MenuItem style={itemStyle} onClick={e => doAction(e, "history")}>{t("history_view")}</MenuItem>
@@ -198,8 +198,8 @@ class SensorCard extends Component {
         let sensorSubscription = this.props.sensor.subscription
         let alertIcon = <></>
         if (sensorSubscription.emailAlertAllowed) {
-            if (sensorAlertState === 0) alertIcon = <Image src={bell} width="15px" mt="-1" />
-            if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} width="15px" mt="-1" className="alarmFadeInOut" />
+            if (sensorAlertState === 0) alertIcon = <Image src={bell} width="15px" />
+            if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} width="15px" className="alarmFadeInOut" />
         }
 
         let tnpGetAlert = (x) => {
@@ -222,7 +222,7 @@ class SensorCard extends Component {
             </Flex>
         </div>
 
-        const moreDropdonw = <MoreMenu mt={simpleView ? -0.5 : -0.1} sensor={this.props.sensor} share={() => this.props.share()} uploadBg={() => {
+        const moreDropdonw = <MoreMenu simpleView sensor={this.props.sensor} share={() => this.props.share()} uploadBg={() => {
             document.getElementById("fileinputlabel" + this.props.sensor.sensor).click()
         }} />
 
@@ -244,17 +244,17 @@ class SensorCard extends Component {
             return (
                 <div>
                     {altFileUplaod}
-                    <Box className="content sensorCard" height={105} borderRadius="lg" overflow="hidden" padding={4}>
+                    <Box className="content sensorCard" height={105} borderRadius="lg" overflow="hidden" padding={4} pt={3}>
                         <Flex>
-                            <Flex grow={1} width="calc(100% - 40px)">
-                                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: -4, marginRight: 2 }}>
+                            <Flex grow={1} width="calc(100%)">
+                                <Heading size="xs" style={{ lineHeight: 1, fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginRight: 2 }}>
                                     {this.props.sensor.name}
                                 </Heading>
                             </Flex>
-                            <Flex width="15px">
+                            <Flex width="15px" mt={1}>
                                 {alertIcon}
                             </Flex>
-                            <Flex width="25px">
+                            <Flex width="25px" height={'20px'}>
                                 {moreDropdonw}
                             </Flex>
                         </Flex>
@@ -314,23 +314,23 @@ class SensorCard extends Component {
                         <Box padding="24px" marginLeft={showImage ? imageWidth : 0}>
                             <Box height={isSmallCard && latestReading ? "98px" : ""}>
                                 <Flex>
-                                    <Flex grow={1} width="calc(100% - 15px)">
+                                    <Flex grow={1} width="calc(100%)">
                                         <a href={"#/" + this.props.sensor.sensor}>
                                             {isSmallCard ? (
                                                 <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, lineHeight: "19px", maxHeight: "38px", marginRight: 2 }}>
                                                     {this.props.sensor.name}
                                                 </Heading>
                                             ) : (
-                                                <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginRight: 2 }}>
+                                                <Heading size="xs" style={{ lineHeight: 1, fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginRight: 2 }}>
                                                     {this.props.sensor.name}
                                                 </Heading>
                                             )}
                                         </a>
                                     </Flex>
-                                    <Flex>
+                                    <Flex mt={1}>
                                         {alertIcon}
                                     </Flex>
-                                    <Flex>
+                                    <Flex width="21px" height={'20px'}>
                                         {moreDropdonw}
                                     </Flex>
                                 </Flex>
