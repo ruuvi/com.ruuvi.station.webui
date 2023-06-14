@@ -290,7 +290,7 @@ class Graph extends Component {
                 alertMin = -1000000
                 alertMax = 1000000
             } else {
-                alertMin = uh.valu0e(alertMin)
+                alertMin = uh.value(alertMin)
                 alertMax = uh.value(alertMax)
             }
         } catch { }
