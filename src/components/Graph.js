@@ -216,15 +216,13 @@ class Graph extends Component {
             try {
                 let scale = u.scales[scaleKey];
 
-                // we want the stop below or at the scaleMax
-                // and the stop below or at the scaleMin, else the stop above scaleMin
                 let minStopIdx;
                 let maxStopIdx;
 
                 for (let i = 0; i < scaleStops.length; i++) {
                     let stopVal = scaleStops[i][0];
 
-                    if (stopVal <= scale.min || minStopIdx == null)
+                    if (stopVal <= scale.min || minStopIdx === null)
                         minStopIdx = i;
 
                     maxStopIdx = i;
@@ -233,16 +231,16 @@ class Graph extends Component {
                         break;
                 }
 
-                if (minStopIdx == maxStopIdx)
+                if (minStopIdx === maxStopIdx)
                     return scaleStops[minStopIdx][1];
 
                 let minStopVal = scaleStops[minStopIdx][0];
                 let maxStopVal = scaleStops[maxStopIdx][0];
 
-                if (minStopVal == -Infinity)
+                if (minStopVal === -Infinity)
                     minStopVal = scale.min;
 
-                if (maxStopVal == Infinity)
+                if (maxStopVal === Infinity)
                     maxStopVal = scale.max;
 
                 let minStopPos = u.valToPos(minStopVal, scaleKey, true);
@@ -252,7 +250,7 @@ class Graph extends Component {
 
                 let x0, y0, x1, y1;
 
-                if (ori == 1) {
+                if (ori === 1) {
                     x0 = x1 = 0;
                     y0 = minStopPos;
                     y1 = maxStopPos;
@@ -269,7 +267,7 @@ class Graph extends Component {
 
                 for (let i = minStopIdx; i <= maxStopIdx; i++) {
                     let s = scaleStops[i];
-                    let stopPos = i == minStopIdx ? minStopPos : i == maxStopIdx ? maxStopPos : u.valToPos(s[0], scaleKey, true);
+                    let stopPos = i === minStopIdx ? minStopPos : i === maxStopIdx ? maxStopPos : u.valToPos(s[0], scaleKey, true);
                     let pct = (minStopPos - stopPos) / range;
                     if (discrete && i > minStopIdx)
                         grd.addColorStop(pct, prevColor);
@@ -296,12 +294,12 @@ class Graph extends Component {
         } catch { }
 
         let fillGrad = [
-            [-100000, ruuviTheme.graph.alert.fill[colorMode]],
+            [-10000, ruuviTheme.graph.alert.fill[colorMode]],
             [alertMin, ruuviTheme.graph.fill[colorMode]],
             [alertMax, ruuviTheme.graph.alert.fill[colorMode]],
         ];
         let strokeGrad = [
-            [-1000, ruuviTheme.graph.alert.stroke[colorMode]],
+            [-10000, ruuviTheme.graph.alert.stroke[colorMode]],
             [alertMin, ruuviTheme.graph.stroke[colorMode]],
             [alertMax, ruuviTheme.graph.alert.stroke[colorMode]],
         ];
