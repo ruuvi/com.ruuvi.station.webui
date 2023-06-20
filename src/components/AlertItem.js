@@ -9,6 +9,7 @@ import RangeInputDialog from "./RangeInputDialog";
 import pjson from '../../package.json';
 import ScreenSizeWrapper from "./ScreenSizeWrapper";
 import { ruuviTheme } from "../themes";
+import { getAlertIcon } from "../utils/alertHelper";
 const AlertSlider = React.lazy(() => import("./AlertSlider"));
 
 class AlertItem extends Component {
@@ -114,6 +115,7 @@ class AlertItem extends Component {
                             {t(label) + (type !== "movement" && type !== "signal" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}
                         </span>
                         <span>
+                            <span style={{display: "inline-block", marginRight: 24, marginBottom: -4}}>{getAlertIcon(this.props.sensor, type)}</span>
                             <span style={{ ...this.props.detailedSubText, fontWeight: 400, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="buttonIconScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
                         </span>
                     </div>

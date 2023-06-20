@@ -7,7 +7,6 @@ import {
     GridItem,
     Avatar,
     Flex,
-    Image,
     IconButton,
     Menu,
     MenuButton,
@@ -29,9 +28,8 @@ import { MdAdd, MdCameraAlt, MdMoreVert } from "react-icons/md";
 import uploadBackgroundImage from "../BackgroundUploader";
 import { isBatteryLow } from "../utils/battery";
 import lowBattery from '../img/low_battery.svg'
-import bell from '../img/icon-bell.svg'
-import bellAlert from '../img/icon-bell-alert.svg'
 import { useNavigate } from 'react-router-dom';
+import { getAlertIcon } from "../utils/alertHelper";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -154,12 +152,6 @@ class SensorCard extends Component {
         if (alert.triggered) return 1
         return 0
     }
-    getSensorAlertState() {
-        let alerts = this.props.sensor.alerts
-        if (alerts.find(x => x.enabled && x.triggered)) return 1
-        if (alerts.find(x => x.enabled)) return 0
-        return -1
-    }
     setHover(state) {
         this.setState({
             ...this.state,
@@ -194,13 +186,8 @@ class SensorCard extends Component {
         let isSmallCard = this.props.size === "mobile" && !showGraph
         let mainStat = this.props.graphType || "temperature";
         let latestReading = this.getLatestReading();
-        let sensorAlertState = this.getSensorAlertState()
-        let sensorSubscription = this.props.sensor.subscription
-        let alertIcon = <></>
-        if (sensorSubscription.emailAlertAllowed) {
-            if (sensorAlertState === 0) alertIcon = <Image src={bell} width="15px" />
-            if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} width="15px" className="alarmFadeInOut" />
-        }
+        let alertIcon = getAlertIcon(this.props.sensor)
+
 
         let tnpGetAlert = (x) => {
             let dataKey = x === "movement" ? "movementCounter" : "signal" ? "rssi" : x;
@@ -315,7 +302,7 @@ class SensorCard extends Component {
                             <Box height={isSmallCard && latestReading ? "98px" : ""}>
                                 <Flex>
                                     <Flex grow={1} width="calc(100% - 41px)">
-                                        <a href={"#/" + this.props.sensor.sensor} style={{width: "100%"}}>
+                                        <a href={"#/" + this.props.sensor.sensor} style={{ width: "100%" }}>
                                             {isSmallCard ? (
                                                 <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, lineHeight: "19px", maxHeight: "38px", marginRight: 2 }}>
                                                     {this.props.sensor.name}
