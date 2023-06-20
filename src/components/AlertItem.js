@@ -114,7 +114,7 @@ class AlertItem extends Component {
                             {t(label) + (type !== "movement" && type !== "signal" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}
                         </span>
                         <span>
-                            <span style={{ ...this.props.detailedText, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="buttonIconScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
+                            <span style={{ ...this.props.detailedSubText, fontWeight: 400, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="buttonIconScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
                         </span>
                     </div>
                     <ScreenSizeWrapper>
