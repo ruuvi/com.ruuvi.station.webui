@@ -108,7 +108,7 @@ class AlertItem extends Component {
         let label = type === "signal" ? "signal_strength" : type
         var editItemMargins = { marginRight: 12, marginTop: 12, marginBottom: 12 }
         return (
-            <ListItem key={type} style={{ color: alert && alert.enabled && alert.triggered ? ruuviTheme.colors.error : undefined }}>
+            <ListItem key={type}>
                 <div style={{ paddingTop: 30, paddingBottom: 20 }}>
                     <div style={{ ...this.props.detailedTitle, width: undefined, display: "flex", justifyContent: "space-between" }}>
                         <span>
