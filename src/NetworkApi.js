@@ -118,75 +118,112 @@ class NetworkApi {
     }
     async getAsync(mac, since, until, settings) {
         if (!this.options) return null;
-        var mode = settings.mode || "mixed";
+
+        const mode = settings?.mode || "mixed";
         let cacheGapLimit = mode === "sparse" ? 60 * 30 : 60 * 2;
-        if (until < ((new Date().getTime() / 1000) - 24 * 60 * 60)) cacheGapLimit = 60 * 30;
+
+        if (until < (Date.now() / 1000 - 24 * 60 * 60)) {
+            cacheGapLimit = 60 * 30;
+        }
+
         const minAmountForCachedDatapointFromCache = 10;
-        var useCache = false;
-        var cachedData;
-        var saveCache = false;
+        let useCache = false;
+        let cachedData;
+        let saveCache = false;
+
         if (!settings || settings.limit !== 1) {
             saveCache = true;
-            cachedData = await DataCache.getData(mac, mode)
+            cachedData = await DataCache.getData(mac, mode);
+
             if (cachedData && cachedData.length) {
-                let newest = cachedData[0].timestamp;
-                let oldest = cachedData[cachedData.length - 1].timestamp;
-                if (until && (since >= oldest || (since <= oldest)) && until <= newest) {
-                    let dataToBe = cachedData.filter(x => x.timestamp <= until && x.timestamp >= since)
+                const newest = cachedData[0].timestamp;
+                const oldest = cachedData[cachedData.length - 1].timestamp;
+
+                if (until && (since >= oldest || since <= oldest) && until <= newest) {
+                    const dataToBe = cachedData.filter(
+                        (x) => x.timestamp <= until && x.timestamp >= since
+                    );
+
                     if (dataToBe.length > 1) {
-                        // validate that there is no gaps
+                        // Validate that there are no gaps
                         let cacheIsValid = true;
                         let validUntil = -1;
-                        for (var i = 1; i < dataToBe.length; i++) {
-                            if ((dataToBe[i - 1].timestamp - dataToBe[i].timestamp) > cacheGapLimit) {
+
+                        for (let i = 1; i < dataToBe.length; i++) {
+                            if (dataToBe[i - 1].timestamp - dataToBe[i].timestamp > cacheGapLimit) {
                                 validUntil = i;
-                                //console.log(`gap in cached data at ${dataToBe[i - 1].timestamp} ${(dataToBe[i - 1].timestamp - dataToBe[i].timestamp)}s, ${validUntil} ok datapoints`);
                                 cacheIsValid = false;
                                 break;
                             }
                         }
+
                         if (cacheIsValid || validUntil > minAmountForCachedDatapointFromCache) {
-                            var d = await this.getLastestDataAsync(mac)
+                            const d = await this.getLastestDataAsync(mac);
+
                             if (d.result === "success") {
                                 if (validUntil <= minAmountForCachedDatapointFromCache) {
-                                    d.data.measurements = dataToBe
+                                    d.data.measurements = dataToBe;
                                 } else {
-                                    d.data.measurements = dataToBe.splice(0, validUntil)
+                                    d.data.measurements = dataToBe.splice(0, validUntil);
                                 }
+
                                 d.data.fromCache = true;
                                 return d;
                             }
                         }
                     }
                 }
+
                 if (until < newest || until > oldest - cacheGapLimit) {
-                    //console.log("Will not use cache")
+                    // Do not use cache
                 } else {
-                    cachedData = cachedData.filter(x => x.timestamp >= since)
+                    cachedData = cachedData.filter((x) => x.timestamp >= since);
+
                     if (cachedData[cachedData.length - 1].timestamp - since < cacheGapLimit) {
-                        since = newest
-                        useCache = true
+                        since = newest;
+                        useCache = true;
                     }
                 }
             }
         }
-        var q = "?sensor=" + encodeURIComponent(mac)
-        q += "&mode=" + encodeURIComponent(mode)
-        if (since) q += "&since=" + since
-        if (until) q += "&until=" + until
-        else q += "&until=" + parseInt(new Date().getTime() / 1000)
-        q += "&limit=" + (settings.limit || 100000)
-        if (settings.sort) q += "&sort=" + settings.sort
-        const resp = await fetch(this.url + "/get" + q, this.options)
-        const respData = await resp.json()
-        if (cachedData && respData.result === "success" && useCache) {
-            respData.data.measurements.push(...cachedData)
-            if (saveCache) DataCache.setData(mac, mode, respData.data.measurements)
-        } else if (respData.result === "success") {
-            if (saveCache) DataCache.setData(mac, mode, respData.data.measurements)
+
+        let q = "?sensor=" + encodeURIComponent(mac);
+        q += "&mode=" + encodeURIComponent(mode);
+
+        if (since) {
+            q += "&since=" + since;
         }
+
+        if (until) {
+            q += "&until=" + until;
+        } else {
+            q += "&until=" + parseInt(Date.now() / 1000);
+        }
+
+        q += "&limit=" + (settings?.limit || 100000);
+
+        if (settings?.sort) {
+            q += "&sort=" + settings.sort;
+        }
+
+        const resp = await fetch(this.url + "/get" + q, this.options);
+        const respData = await resp.json();
+
+        if (cachedData && respData.result === "success" && useCache) {
+            respData.data.measurements.push(...cachedData);
+
+            if (saveCache) {
+                DataCache.setData(mac, mode, respData.data.measurements);
+            }
+        } else if (respData.result === "success") {
+            if (saveCache) {
+                DataCache.setData(mac, mode, respData.data.measurements);
+            }
+        }
+
         return respData;
-    };
+    }
+
     async getAllSensorsAsync() {
         var q = "?sharedToMe=true"
         q += "&measurements=true"
