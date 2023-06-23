@@ -285,21 +285,24 @@ class Graph extends Component {
         try {
             var uh = getUnitHelper(alert?.type)
             if (alert?.type === "humidity" && uh.unit !== "%") {
-                alertMin = -1000000
-                alertMax = 1000000
+                alertMin = -70000
+                alertMax = 70000
             } else {
                 alertMin = uh.value(alertMin)
                 alertMax = uh.value(alertMax)
             }
         } catch { }
 
+        let dataMin = Math.min(...graphData[1].map(x => x))
+        if (isNaN(dataMin)) dataMin = -70000;
+        dataMin -= 10;
         let fillGrad = [
-            [-10000, ruuviTheme.graph.alert.fill[colorMode]],
+            [dataMin, ruuviTheme.graph.alert.fill[colorMode]],
             [alertMin, ruuviTheme.graph.fill[colorMode]],
             [alertMax, ruuviTheme.graph.alert.fill[colorMode]],
         ];
         let strokeGrad = [
-            [-10000, ruuviTheme.graph.alert.stroke[colorMode]],
+            [dataMin, ruuviTheme.graph.alert.stroke[colorMode]],
             [alertMin, ruuviTheme.graph.stroke[colorMode]],
             [alertMax, ruuviTheme.graph.alert.stroke[colorMode]],
         ];
