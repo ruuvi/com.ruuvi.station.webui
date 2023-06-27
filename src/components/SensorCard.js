@@ -30,6 +30,7 @@ import { isBatteryLow } from "../utils/battery";
 import lowBattery from '../img/low_battery.svg'
 import { useNavigate } from 'react-router-dom';
 import { getAlertIcon } from "../utils/alertHelper";
+import { ruuviTheme } from "../themes";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -250,7 +251,7 @@ class SensorCard extends Component {
                                 if (!latestReading) return null
                                 let value = latestReading[x];
                                 if (value === undefined) return null;
-                                return <GridItem key={Math.random()} style={{ color: this.getAlertState(x) > 0 ? "#f27575" : undefined }}>
+                                return <GridItem key={Math.random()} style={{ color: this.getAlertState(x) > 0 ? ruuviTheme.colors.sensorCardValueAlertState : undefined }}>
                                     <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
                                     <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
                                 </GridItem>
@@ -363,7 +364,7 @@ class SensorCard extends Component {
                                                     {this.getSmallDataFields().map(x => {
                                                         let value = latestReading[x];
                                                         if (value === undefined) return null;
-                                                        return <GridItem key={x} style={{ color: this.getAlertState(x) > 0 ? "#f27575" : undefined }}>
+                                                        return <GridItem key={x} style={{ color: this.getAlertState(x) > 0 ? ruuviTheme.colors.sensorCardValueAlertState : undefined }}>
                                                             <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
                                                             <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
                                                         </GridItem>

@@ -5,38 +5,6 @@ const config = {
     useSystemColorMode: false,
 }
 
-/*
-
-Menu bg: #001d1b, 95%
-
-Subtitle aqua: #00cebb, 80%
-
-Arrows: #fff, opacity 100%
-Arrows, circle:
-bg: #00413f
-border: #fff
-opacity: 30%
-
-Boxes:
-bg: #00cdb9
-icon: #00ae94, 50%
-active border: #00cdb9, 100%
-
-Date selection button:
-bg: #00413f
-border: #fff
-opacity: 30%
-
-Graph:
-Lines on the background: #fff, 30%
-Graph bg: #00cdb9, 30%
-
-Accordion bg: #003434
-Accordion open area bg: #003434, 50%
-Accordion icons: #fff, 30%
-
-*/
-
 let colors = {
     bodyBg: { light: "#edf2f2 !important", dark: "#001b1a !important" },
     contentBg: { light: "white", dark: "#111111" },
@@ -57,7 +25,7 @@ let colors = {
     graphFill: { dark: "rgba(68, 201, 185, 0.3)", light: "rgba(68, 201, 185, 0.3)" },
     graphStroke: { dark: "#34ad9f", light: "#1f9385" },
     graphFillAlert: { dark: "#ff954d7f", light: "#ff954d7f" },
-    graphStrokeAlert: { dark: "#f15a24", light: "#f15a24" },
+    graphStrokeAlert: { dark: "rgba(241, 90, 36, 0.8)", light: "rgba(241, 90, 36, 0.8)" },
     graphGrid: { dark: "rgba(68, 201, 185, 0.1)", light: "#083c3d1a" },
     sensorCardBackground: { light: undefined, dark: "#003434 !important" },
     signinInputBg: { light: "white", dark: undefined },
@@ -104,8 +72,8 @@ export const ruuviTheme = extendTheme({
             '.searchInput': {
                 bg: colors.searchBg[props.colorMode],
                 borderColor: "#00000000 !important",
-                _hover: { borderColor: ruuviTheme.colors.inputFocus + " !important"},
-                _focus: { borderColor: ruuviTheme.colors.inputFocus + " !important"}
+                _hover: { borderColor: ruuviTheme.colors.inputFocus + " !important" },
+                _focus: { borderColor: ruuviTheme.colors.inputFocus + " !important" }
             },
             '.navButton': {
                 bg: colors.navButtonBg[props.colorMode] + " !important",
@@ -220,6 +188,7 @@ export const ruuviTheme = extendTheme({
         pinFieldBgColor: "#b2c2c2",
         pinFieldBgHoverColor: "#b2c2c2aa",
         inputFocus: colors.buttonFocus.dark,
+        sensorCardValueAlertState: "#ff8700",
     },
     components: {
         Button: {

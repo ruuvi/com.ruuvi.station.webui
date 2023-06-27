@@ -1,3 +1,5 @@
+import { ruuviTheme } from "../themes";
+
 const valueStyle = {
     fontFamily: "oswald",
     fontSize: 38,
@@ -15,7 +17,7 @@ const unitStyle = {
 export default function BigValue(props) {
     return (
         <div>
-            <div style={{ position: "relative", color: props.alertActive ? "#f27575" : undefined }}>
+            <div style={{ position: "relative", color: props.alertActive ? ruuviTheme.colors.sensorCardValueAlertState : undefined }}>
                 <span style={valueStyle}>
                     {props.value}
                 </span>
