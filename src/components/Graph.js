@@ -88,6 +88,7 @@ function DataInfo(props) {
     // convert to an easier to work with format
     let data = [];
     for (let i = 0; i < graphData[1].length; i++) {
+        if (graphData[1][i] === null) continue
         data.push({ timestamp: graphData[0][i], value: graphData[1][i] })
     }
 
