@@ -376,7 +376,6 @@ class Graph extends Component {
                                                         let y1 = u.valToPos(val, 'y', true);
                                                         ctx.moveTo(x0, y0);
                                                         ctx.lineTo(x1, y1);
-                                                        ctx.stroke();
                                                     }
 
                                                     const offset = (s.width % 2) / 2;
@@ -387,6 +386,7 @@ class Graph extends Component {
                                                     ctx.strokeStyle = ruuviTheme.graph.alert.stroke[colorMode];
                                                     lineAt(alertMax)
                                                     lineAt(alertMin)
+                                                    ctx.stroke();
                                                     ctx.translate(-offset, -offset);
 
                                                     ctx.restore();
