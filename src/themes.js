@@ -159,8 +159,8 @@ export const ruuviTheme = extendTheme({
         primaryLight: "rgba(68, 201, 185, 0.3)",
         primaryLighter: "rgba(68, 201, 185, 0.1)",
         infoIcon: "rgba(68, 201, 185, 0.6)",
-        error: "#f15a24",
-        errorBackground: "rgb(241,90,36,0.3)",
+        error: "rgba(241, 90, 36, 0.8)",
+        errorBackground: "#ff954d7f",
         inactive: "#d4ede8",
         graphGrid: "rgba(212,237,232,0.5)",
         gray: {
