@@ -206,24 +206,27 @@ export default function App() {
             <ColorModeSwitch />
             <SensorMenu sensors={sensors} key={Math.random()}
               addSensor={() => {
+                let q = window.location.href.indexOf("?") === -1 ? "?addsensor" : "&addsensor"
                 if (window.location.href.indexOf("#") !== -1) {
-                  window.location.href += "?addsensor"
+                  window.location.href += q
                 } else {
-                  window.location.href += "#/?addsensor"
+                  window.location.href += "#/" + q
                 }
               }}
             />
             <UserMenu settings={() => {
+              let q = window.location.href.indexOf("?") === -1 ? "?settings" : "&settings"
               if (window.location.href.indexOf("#") !== -1) {
-                window.location.href += "?settings"
+                window.location.href += q
               } else {
-                window.location.href += "#/?settings"
+                window.location.href += "#/" + q
               }
             }} myAccount={() => {
+              let q = window.location.href.indexOf("?") === -1 ? "?myaccount" : "&myaccount"
               if (window.location.href.indexOf("#") !== -1) {
-                window.location.href += "?myaccount"
+                window.location.href += q
               } else {
-                window.location.href += "#/?myaccount"
+                window.location.href += "#/" + q
               }
             }} email={user.email} />
           </span>
