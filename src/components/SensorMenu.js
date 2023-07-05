@@ -36,27 +36,25 @@ class SensorMenu extends Component {
         const { t } = this.props;
         return (
             <>
-                {this.state.sensors.length > 0 &&
-                    <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
-                        <MenuButton as={Button} variant="topbar" rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 15, fontWeight: 800, paddingRight: 0, paddingLeft: 4 }}>
-                            {t("sensors")}
-                        </MenuButton>
-                        <MenuList mt="2" zIndex={10}>
-                            <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => this.props.addSensor()}>{t('add_new_sensor')}</MenuItem>
-                            <MenuDivider />
-                            {this.state.sensors.map((x, i) => {
-                                let divider = <></>
-                                let borderStyle = {};
-                                if (i === this.state.sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
-                                else divider = <MenuDivider />
-                                return <div key={x.sensor + "div"}>
-                                    <MenuItem key={x.sensor} className={this.getCurrentSensor() === x.sensor ? "menuActive" : undefined} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, ...borderStyle }} onClick={() => this.props.navigate('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
-                                    {divider}
-                                </div>
-                            })}
-                        </MenuList>
-                    </Menu>
-                }
+                <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
+                    <MenuButton as={Button} variant="topbar" rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 15, fontWeight: 800, paddingRight: 0, paddingLeft: 4 }}>
+                        {t("sensors")}
+                    </MenuButton>
+                    <MenuList mt="2" zIndex={10}>
+                        <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => this.props.addSensor()}>{t('add_new_sensor')}</MenuItem>
+                        <MenuDivider />
+                        {this.state.sensors.map((x, i) => {
+                            let divider = <></>
+                            let borderStyle = {};
+                            if (i === this.state.sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
+                            else divider = <MenuDivider />
+                            return <div key={x.sensor + "div"}>
+                                <MenuItem key={x.sensor} className={this.getCurrentSensor() === x.sensor ? "menuActive" : undefined} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, ...borderStyle }} onClick={() => this.props.navigate('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
+                                {divider}
+                            </div>
+                        })}
+                    </MenuList>
+                </Menu>
             </>
         )
     }
