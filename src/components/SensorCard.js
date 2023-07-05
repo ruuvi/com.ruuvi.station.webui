@@ -118,7 +118,7 @@ class SensorCard extends Component {
         this.fetchDataLoop = setTimeout(() => {
             this.loadData()
         }, 60 * 1000 * (this.props.dataFrom > 1 ? 5 : 1));
-        var graphDataMode = this.props.dataFrom <= 3 ? "mixed" : "sparse";
+        var graphDataMode = this.props.dataFrom <= 12 ? "mixed" : "sparse";
         try {
             this.loadGraphData(graphDataMode);
         } catch (e) {
