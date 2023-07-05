@@ -353,7 +353,7 @@ class SensorCard extends Component {
                                                             {this.state.loadingHistory ? (
                                                                 <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}><Spinner size="xl" /></div></center>
                                                             ) : showGraph && (
-                                                                <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight, padding: 10 }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{noHistoryStr}</div></center>
+                                                                <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", color: "rgba(255,255,255,0.5)", height: graphHeight, marginLeft: 24, marginRight: 30, paddingTop: 10}}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}>{noHistoryStr}</div></div>
                                                             )}
                                                         </>}
                                                     </>
