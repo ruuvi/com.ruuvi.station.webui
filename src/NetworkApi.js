@@ -123,7 +123,7 @@ class NetworkApi {
         let cacheGapLimit = mode === "sparse" ? 60 * 30 : 60 * 2;
 
         if (until < (Date.now() / 1000 - 24 * 60 * 60)) {
-            cacheGapLimit = 60 * 30;
+            cacheGapLimit = 2 * 60 * 30;
         }
 
         const minAmountForCachedDatapointFromCache = 10;
@@ -145,28 +145,20 @@ class NetworkApi {
                     );
 
                     if (dataToBe.length > 1) {
-                        // Validate that there are no gaps
-                        let cacheIsValid = true;
-                        let validUntil = -1;
+                        let validUntil = dataToBe.length;
 
                         for (let i = 1; i < dataToBe.length; i++) {
                             if (dataToBe[i - 1].timestamp - dataToBe[i].timestamp > cacheGapLimit) {
                                 validUntil = i;
-                                cacheIsValid = false;
                                 break;
                             }
                         }
 
-                        if (cacheIsValid || validUntil > minAmountForCachedDatapointFromCache) {
+                        if (validUntil > minAmountForCachedDatapointFromCache) {
                             const d = await this.getLastestDataAsync(mac);
 
                             if (d.result === "success") {
-                                if (validUntil <= minAmountForCachedDatapointFromCache) {
-                                    d.data.measurements = dataToBe;
-                                } else {
-                                    d.data.measurements = dataToBe.splice(0, validUntil);
-                                }
-
+                                d.data.measurements = dataToBe.splice(0, validUntil);
                                 d.data.fromCache = true;
                                 return d;
                             }
