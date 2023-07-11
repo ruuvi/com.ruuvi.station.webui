@@ -124,9 +124,10 @@ export default function App() {
   const params = Object.fromEntries(urlSearchParams.entries());
   if (params.lng) {
     const supportedLangs = ["en", "fi", "sv"]
-    if (supportedLangs.indexOf(params.lng) > -1) {
-      localStorage.setItem("selected_language", params.lng)
-      i18next.changeLanguage(params.lng)
+    let lng = params.lng.split("-")[0]
+    if (supportedLangs.indexOf(lng) > -1) {
+      localStorage.setItem("selected_language", lng)
+      i18next.changeLanguage(lng)
       window.location.href = window.location.href.split("?")[0];
     }
   }
