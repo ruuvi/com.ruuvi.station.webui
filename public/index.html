@@ -112,6 +112,10 @@
       return window.location.href.indexOf("/staging") !== -1
     }
     if (!isStaging() && !getUser()) {
+      localStorage.removeItem(this.getUserKey())
+      let domain = ".ruuvi.com"
+      document.cookie = `station_status=signedIn;domain=${domain};Max-Age=-99999999`
+      localStorage.clear();
       goToLoginPage()
     }
   </script>
