@@ -203,7 +203,8 @@
       "add_sensor_dialog_text": "Fill the sensor MAC address to the fields.\n\nFor more information about adding your sensors to Ruuvi Station visit ruuvi.com/support",
       "add": "Add",
       "sensor_added_successfully": "Sensor added successfully!",
-      "no_data_free_mode": "No data. This sensor is in Free mode."
+      "no_data_free_mode": "No data. This sensor is in Free mode.",
+      "owners_plan": "Owner's Ruuvi Plan"
     }
   },
   "fi": {
@@ -410,7 +411,8 @@
       "add_sensor_dialog_text": "Täytä anturin MAC-osoite kenttiin.\n\nLisätietoja antureiden lisäämisestä Ruuvi Stationiin löydät osoitteesta ruuvi.com/fi/tuki",
       "add": "Lisää",
       "sensor_added_successfully": "Anturi lisättiin onnistuneesti!",
-      "no_data_free_mode": "Ei tietoja. Tämä anturi on Free tilassa."
+      "no_data_free_mode": "Ei tietoja. Tämä anturi on Free tilassa.",
+      "owners_plan": "Omistajan Ruuvi-tilas"
     }
   },
   "sv": {
@@ -617,7 +619,8 @@
       "add_sensor_dialog_text": "Fyll i sensorns MAC-adress i fälten.\n\nFör mer information om hur du lägger till dina sensorer i Ruuvi Station, besök ruuvi.com/support",
       "add": "Lägg till",
       "sensor_added_successfully": "Sensorn har lagts till!",
-      "no_data_free_mode": "Ingen data. Denna sensor är i Free läge."
+      "no_data_free_mode": "Ingen data. Denna sensor är i Free läge.",
+      "owners_plan": "Ägarens Ruuvi-plan"
     }
   },
   "fr": {
@@ -824,7 +827,8 @@
       "add_sensor_dialog_text": "Remplissez l'adresse MAC du capteur aux champs.\n\nPour plus d'informations sur l'ajout de vos capteurs à la station Ruuvi, visitez ruuvi.com/Support",
       "add": "Ajouter",
       "sensor_added_successfully": "Le capteur a ajouté avec succès!",
-      "no_data_free_mode": "Aucune donnée. Ce capteur est en mode Free."
+      "no_data_free_mode": "Aucune donnée. Ce capteur est en mode Free.",
+      "owners_plan": "Plan Ruuvi du propriétaire"
     }
   },
   "de": {
@@ -1031,7 +1035,8 @@
       "add_sensor_dialog_text": "Füllen Sie die Sensor -MAC -Adresse in die Felder.\n\nWeitere Informationen zum Hinzufügen Ihrer Sensoren zur Ruuvi Station finden Sie unter ruuvi.com/support",
       "add": "Hinzufügen",
       "sensor_added_successfully": "Sensor erfolgreich hinzugefügt!",
-      "no_data_free_mode": "Keine Daten. Dieser Sensor befindet sich im Free-Modus."
+      "no_data_free_mode": "Keine Daten. Dieser Sensor befindet sich im Free-Modus.",
+      "owners_plan": "Ruuvi-Plan des Eigentümers"
     }
   }
 }

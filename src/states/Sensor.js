@@ -42,7 +42,7 @@ import pjson from '../../package.json';
 import { isBatteryLow } from "../utils/battery";
 import uploadBackgroundImage from "../BackgroundUploader";
 
-var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber", "pm1p0","pm2p5","pm4p0","pm10p0","co2","voc","nox"];
+var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "co2", "voc", "nox"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
 
 const graphInfo = {
@@ -408,7 +408,7 @@ class Sensor extends Component {
             sensor.alerts[alertIdx] = alert
             this.props.updateSensor(sensor)
         }
-        this.setState({...this.state, updateGraphKey: this.state.updateGraphKey+1})
+        this.setState({ ...this.state, updateGraphKey: this.state.updateGraphKey + 1 })
         new NetworkApi().setAlert({ ...alert, sensor: this.props.sensor.sensor }, resp => {
             switch (resp.result) {
                 case "success":
@@ -520,7 +520,7 @@ class Sensor extends Component {
                                         }
                                         <div style={graph}>
                                             {this.state.data?.measurements?.length &&
-                                                <Graph key={"sensor_graph"+this.state.updateGraphKey} alert={tnpGetAlert(this.state.graphKey)} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                                <Graph key={"sensor_graph" + this.state.updateGraphKey} alert={tnpGetAlert(this.state.graphKey)} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
                                             }
                                         </div>
                                     </Box>
@@ -571,25 +571,38 @@ class Sensor extends Component {
                                                 </tbody>
                                             </table>
                                         </ListItem>
-                                        {this.props.sensor.canShare &&
-                                            <>
-                                                <hr />
-                                                <ListItem style={{ cursor: "pointer" }} onClick={() => this.share(true)}>
-                                                    <table style={accordionContent}>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style={detailedTitle}>
-                                                                    {t("share")}
-                                                                </td>
-                                                                <td style={detailedText}>
-                                                                    {addVariablesInString(t("shared_to_x"), [this.props.sensor.sharedTo.length, pjson.settings.maxSharesPerSensor])}
-                                                                    <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </ListItem>
-                                            </>
+                                        <hr />
+                                        {this.props.sensor.canShare ?
+                                            <ListItem style={{ cursor: "pointer" }} onClick={() => this.share(true)}>
+                                                <table style={accordionContent}>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style={detailedTitle}>
+                                                                {t("share")}
+                                                            </td>
+                                                            <td style={detailedText}>
+                                                                {addVariablesInString(t("shared_to_x"), [this.props.sensor.sharedTo.length, pjson.settings.maxSharesPerSensor])}
+                                                                <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </ListItem>
+                                            :
+                                            <ListItem>
+                                                <table style={accordionContent}>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style={detailedTitle}>
+                                                                {t("owners_plan")}
+                                                            </td>
+                                                            <td style={detailedText}>
+                                                               {sensorSubscription}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </ListItem>
                                         }
                                     </List>
                                 </AccordionPanel>
