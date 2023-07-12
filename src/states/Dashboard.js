@@ -209,7 +209,7 @@ class Dashboard extends Component {
                                     {this.state.sensors.length !== 0 &&
                                         <div style={{ paddingTop: 26 }}>
                                             <Flex flexFlow={"row wrap"} justifyContent={"flex-end"} gap={2}>
-                                                <Show breakpoint='(max-width: 800px)'>
+                                                <Show breakpoint='(max-width: 799px)'>
                                                     {search(undefined)}
                                                 </Show>
                                                 <Show breakpoint='(min-width: 800px)'>
