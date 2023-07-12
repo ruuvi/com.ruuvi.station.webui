@@ -25,7 +25,7 @@ class NetworkApi {
     constructor() {
         this.url = "https://network.ruuvi.com"
         if (this.isStaging()) {
-            this.url = "https://j9ul2pfmol.execute-api.eu-central-1.amazonaws.com"
+            this.url = "https://testnet.ruuvi.com"
         }
         var user = localStorage.getItem(this.getUserKey());
         if (user) {
