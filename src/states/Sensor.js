@@ -490,10 +490,10 @@ class Sensor extends Component {
                                         <tr>
                                             <td>
                                                 <div style={graphLengthText}>
-                                                    {t("history")}
+                                                    {t(getUnitHelper(this.state.graphKey).label)}
                                                 </div>
                                                 <div style={graphInfo}>
-                                                    {t("selected")}: {t(getUnitHelper(this.state.graphKey).label)} {this.getSelectedUnit()}
+                                                    {this.getSelectedUnit()}
                                                 </div>
                                             </td>
                                             <td style={{ textAlign: "right" }}>
@@ -597,7 +597,7 @@ class Sensor extends Component {
                                                                 {t("owners_plan")}
                                                             </td>
                                                             <td style={detailedText}>
-                                                               {sensorSubscription}
+                                                                {sensorSubscription}
                                                             </td>
                                                         </tr>
                                                     </tbody>
