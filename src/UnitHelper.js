@@ -220,6 +220,8 @@ export function getAlertRange(type) {
             return { max: 115500, min: 50000 }
         case "signal":
             return { max: 0, min: -105 }
+        case "offline":
+            return { max: +Infinity, min: 120 }
         default:
             return { max: 100, min: 0 }
     }

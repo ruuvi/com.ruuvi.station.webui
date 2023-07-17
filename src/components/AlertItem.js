@@ -8,8 +8,8 @@ import InputDialog from "./InputDialog";
 import RangeInputDialog from "./RangeInputDialog";
 import pjson from '../../package.json';
 import ScreenSizeWrapper from "./ScreenSizeWrapper";
-import { ruuviTheme } from "../themes";
 import { getAlertIcon } from "../utils/alertHelper";
+import { addVariablesInString } from "../TextHelper";
 const AlertSlider = React.lazy(() => import("./AlertSlider"));
 
 class AlertItem extends Component {
@@ -17,15 +17,7 @@ class AlertItem extends Component {
         super(props)
         let alert = this.props.alert
         if (alert) {
-            try {
-                var { min, max } = getAlertRange(this.props.type.toLowerCase())
-                if (alert.min < min) alert.min = min
-                else if (alert.min > max) alert.min = max
-                if (alert.max > max) alert.max = max
-                else if (alert.max < min) alert.max = min
-            } catch {
-                // not a big deal
-            }
+            this.checkAlertLimits(alert)
         }
         this.state = {
             alert: alert,
@@ -42,6 +34,9 @@ class AlertItem extends Component {
         if (alert) {
             min = alert.min
             max = alert.max
+        }
+        if (type === "offline") {
+            return addVariablesInString(this.props.t("alert_offline_description"), [max/60]);
         }
         var uh = getUnitHelper(type)
         if (type !== "humidity") {
@@ -63,6 +58,18 @@ class AlertItem extends Component {
         alertText = alertText.replace(match[0], `<b>${max}</b>`)
         return alertText;
     }
+    checkAlertLimits(alert) {
+        console.log("checking", alert)
+        try {
+            var { min, max } = getAlertRange(this.props.type.toLowerCase())
+            if (alert.min < min) alert.min = min
+            else if (alert.min > max) alert.min = max
+            if (alert.max > max) alert.max = max
+            else if (alert.max < min) alert.max = min
+        } catch {
+            // not a big deal
+        }
+    }
     setAlert(alert, type, enabled, dontUpdate) {
         var wasEnabled = alert && alert.enabled
         if (alert && alert.type) {
@@ -75,6 +82,8 @@ class AlertItem extends Component {
                 ...alert,
             }
         }
+        if (alert.max === +Infinity) alert.max = 900
+        this.checkAlertLimits(alert)
         this.setState({ ...this.state, alert: alert, editDescription: false, editMinValue: false, editMaxValue: false, rangeInputDialog: false })
         if (!dontUpdate) {
             this.props.onChange(alert, wasEnabled)
@@ -106,36 +115,38 @@ class AlertItem extends Component {
             validRange.max = uh.value(validRange.max)
         }
         let label = type === "signal" ? "signal_strength" : type
+        if (type === "offline") label = "alert_offline_title"
         var editItemMargins = { marginRight: 12, marginTop: 12, marginBottom: 12 }
+        const asText = (mobile) => <>
+            <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
+                <EditableText spread={mobile} onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText }} opacity={alert && alert.description ? null : 0.5} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
+            </div>
+            <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
+                <span style={{ ...this.props.detailedSubText, width: mobile ? "100%" : undefined }}>
+                    {type === "movement" ? <span>{this.getAlertText(alert, type)}</span> : <EditableText spread={mobile} text={this.getAlertText(alert, type)} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}
+                </span>
+            </div>
+        </>
+
         return (
             <ListItem key={type}>
                 <div style={{ paddingTop: 30, paddingBottom: 20 }}>
                     <div style={{ ...this.props.detailedTitle, width: undefined, display: "flex", justifyContent: "space-between" }}>
                         <span>
-                            {t(label) + (type !== "movement" && type !== "signal" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}
+                            {t(label) + (type !== "movement" && type !== "signal" && type !== "offline" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}
                         </span>
                         <span>
-                            <span style={{display: "inline-block", marginRight: 24, marginBottom: -4}}>{getAlertIcon(this.props.sensor, type)}</span>
+                            <span style={{ display: "inline-block", marginRight: 24, marginBottom: -4 }}>{getAlertIcon(this.props.sensor, type)}</span>
                             <span style={{ ...this.props.detailedSubText, fontWeight: 400, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="buttonIconScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
                         </span>
                     </div>
                     <ScreenSizeWrapper>
-                        <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
-                            <EditableText onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText }} opacity={alert && alert.description ? null : 0.5} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
-                        </div>
-                        <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
-                            <span style={this.props.detailedSubText}>{type === "movement" ? <span>{this.getAlertText(alert, type)}</span> : <EditableText text={this.getAlertText(alert, type)} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</span>
-                        </div>
+                        {asText()}
                     </ScreenSizeWrapper>
                     <ScreenSizeWrapper isMobile>
-                        <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
-                            <EditableText spread onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText }} opacity={alert && alert.description ? null : 0.5} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
-                        </div>
-                        <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
-                            <span style={{ ...this.props.detailedSubText, width: "100%" }}>{type === "movement" ? <span>{this.getAlertText(alert, type)}</span> : <EditableText spread text={this.getAlertText(alert, type)} onClick={() => this.setState({ ...this.state, rangeInputDialog: true })} />}</span>
-                        </div>
+                        {asText(true)}
                     </ScreenSizeWrapper>
-                    {type !== "movement" &&
+                    {type !== "movement" && type !== "offline" &&
                         <Box mt="4">
                             <Suspense fallback={
                                 <center style={{ width: "100%", marginTop: 100 }}>
@@ -162,6 +173,15 @@ class AlertItem extends Component {
                             if (type === "humidity") return "%";
                             return uh.unit;
                         }}
+                    />
+                }
+                {type === "offline" &&
+                    <InputDialog number open={this.state.rangeInputDialog} value={alert ? alert.max / 60 : 15}
+                        onClose={(save, value) => save ? this.setAlert({ ...alert, min: 0, max: value * 60 }, type, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}
+                        title={t("alert_offline_title")}
+                        description={t("alert_offline_dialog_description")}
+                        buttonText={t("update")}
+                        maxLength={pjson.settings.alertDescriptionMaxLength}
                     />
                 }
             </ListItem>
