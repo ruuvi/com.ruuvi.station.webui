@@ -36,6 +36,7 @@ class AlertItem extends Component {
             max = alert.max
         }
         if (type === "offline") {
+            if (max === +Infinity) max = 900
             return addVariablesInString(this.props.t("alert_offline_description"), [max/60]);
         }
         var uh = getUnitHelper(type)
@@ -59,7 +60,6 @@ class AlertItem extends Component {
         return alertText;
     }
     checkAlertLimits(alert) {
-        console.log("checking", alert)
         try {
             var { min, max } = getAlertRange(this.props.type.toLowerCase())
             if (alert.min < min) alert.min = min
