@@ -185,7 +185,7 @@ class AlertItem extends Component {
                 {type === "offline" &&
                     <InputDialog number open={this.state.rangeInputDialog} value={alert ? alert.max / 60 : 15}
                         onClose={(save, value) => save ? this.setAlert({ ...alert, min: 0, max: value * 60 }, type, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}
-                        title={t("alert_offline_title")}
+                        title={t("alert_offline_dialog_title")}
                         description={t("alert_offline_dialog_description")}
                         buttonText={t("update")}
                         maxLength={pjson.settings.alertDescriptionMaxLength}
