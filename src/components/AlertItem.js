@@ -37,7 +37,7 @@ class AlertItem extends Component {
         }
         if (type === "offline") {
             if (max === +Infinity) max = 900
-            return addVariablesInString(this.props.t("alert_offline_description"), [max/60]);
+            return addVariablesInString(this.props.t("alert_offline_description"), [max / 60]);
         }
         var uh = getUnitHelper(type)
         if (type !== "humidity") {
@@ -61,11 +61,18 @@ class AlertItem extends Component {
     }
     checkAlertLimits(alert) {
         try {
-            var { min, max } = getAlertRange(this.props.type.toLowerCase())
-            if (alert.min < min) alert.min = min
-            else if (alert.min > max) alert.min = max
-            if (alert.max > max) alert.max = max
-            else if (alert.max < min) alert.max = min
+            let type = this.props.type.toLowerCase();
+            var { min, max } = getAlertRange(type)
+            if (type === "offline") {
+                if (alert.max < min) alert.max = min
+                if (alert.max > max) alert.max = max
+                alert.min = 0;
+            } else {
+                if (alert.min < min) alert.min = min
+                else if (alert.min > max) alert.min = max
+                if (alert.max > max) alert.max = max
+                else if (alert.max < min) alert.max = min
+            }
         } catch {
             // not a big deal
         }
