@@ -521,7 +521,7 @@ class Sensor extends Component {
                                 </div>
                             </ScreenSizeWrapper>
                             <ScreenSizeWrapper isMobile>
-                                <div style={{ marginTop: 30, marginBottom: -20 }} id="history">
+                                <div style={{ marginTop: 30, marginBottom: -10 }} id="history">
                                     <table width="100%">
                                         <tbody>
                                             <tr>
