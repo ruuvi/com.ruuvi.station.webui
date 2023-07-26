@@ -41,6 +41,7 @@ import notify from "../utils/notify"
 import pjson from '../../package.json';
 import { isBatteryLow } from "../utils/battery";
 import uploadBackgroundImage from "../BackgroundUploader";
+import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "co2", "voc", "nox"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
@@ -48,8 +49,6 @@ var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
 const graphInfo = {
     fontFamily: "mulish",
     fontSize: 14,
-    marginLeft: "30px",
-    marginBottom: "-20px",
 }
 const sensorName = {
     fontFamily: "montserrat",
@@ -63,9 +62,7 @@ const sensorNameMobile = {
 }
 const graphLengthText = {
     fontFamily: "montserrat",
-    fontSize: "24px",
     fontWeight: 800,
-    marginLeft: "30px"
 }
 const collapseText = {
     fontFamily: "montserrat",
@@ -457,6 +454,28 @@ class Sensor extends Component {
             if (this.getLatestReading()[dataKey] === undefined) return null;
             return this.getAlert(x)
         }
+
+        let graphCtrl = () => {
+            return <><span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
+                <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
+                    <MdInfo size="16" className="buttonSideIcon" />
+                </IconButton>
+                <Button disabled={this.isLoading} variant='link' ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
+                <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
+            </>
+        }
+
+        let graphTitle = (mobile) => {
+            return <div style={{ marginLeft: 30 }}>
+                <span style={{ ...graphLengthText, fontSize: mobile ? "20px" : "24px" }}>
+                    {t(getUnitHelper(this.state.graphKey).label)}
+                </span>
+                {!mobile && <br />}
+                <span style={{ ...graphInfo, marginLeft: mobile ? 6 : undefined }}>
+                    {this.getSelectedUnit()}
+                </span>
+            </div>
+        }
         return (
             <Box>
                 <Box minHeight={1500}>
@@ -484,30 +503,37 @@ class Sensor extends Component {
                                         onClick={() => this.setGraphKey(x)} />
                                 })}
                             </SensorValueGrid>
-                            <div style={{ marginTop: 30, marginBottom: 20 }} id="history">
-                                <table width="100%">
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <div style={graphLengthText}>
-                                                    {t(getUnitHelper(this.state.graphKey).label)}
-                                                </div>
-                                                <div style={graphInfo}>
-                                                    {this.getSelectedUnit()}
-                                                </div>
-                                            </td>
-                                            <td style={{ textAlign: "right" }}>
-                                                <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
-                                                <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
-                                                    <MdInfo size="16" className="buttonSideIcon" />
-                                                </IconButton>
-                                                <Button disabled={this.isLoading} variant='link' ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
-                                                <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+
+                            <ScreenSizeWrapper>
+                                <div style={{ marginTop: 30 }} id="history">
+                                    <table width="100%">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    {graphTitle()}
+                                                </td>
+                                                <td style={{ textAlign: "right" }}>
+                                                    {graphCtrl()}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </ScreenSizeWrapper>
+                            <ScreenSizeWrapper isMobile>
+                                <div style={{ marginTop: 30, marginBottom: -20 }} id="history">
+                                    <table width="100%">
+                                        <tbody>
+                                            <tr>
+                                                <td style={{ textAlign: "center" }}>
+                                                    {graphCtrl()}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    {graphTitle(true)}
+                                </div>
+                            </ScreenSizeWrapper>
                             <Box height={520}>
                                 <> {!this.isLoading && (!this.state.data || !this.state.data?.measurements?.length) ? (
                                     <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", paddingTop: 240, height: 450 }}>{noHistoryStr}</center>
