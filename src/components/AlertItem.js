@@ -23,6 +23,7 @@ class AlertItem extends Component {
             alert: alert,
             editDescription: false,
             rangeInputDialog: false,
+            delayInputDialog: false,
         }
         //alertRounding(this.state.alert)
     }
@@ -59,6 +60,12 @@ class AlertItem extends Component {
         alertText = alertText.replace(match[0], `<b>${max}</b>`)
         return alertText;
     }
+    getDelayText(alert) {
+        let delay = alert?.delay || 0
+        let text = this.props.t("alert_delay_description")
+        text = addVariablesInString(text, [delay / 60])
+        return text;
+    }
     checkAlertLimits(alert) {
         try {
             let type = this.props.type.toLowerCase();
@@ -91,7 +98,7 @@ class AlertItem extends Component {
         }
         if (alert.max === +Infinity) alert.max = 900
         this.checkAlertLimits(alert)
-        this.setState({ ...this.state, alert: alert, editDescription: false, editMinValue: false, editMaxValue: false, rangeInputDialog: false })
+        this.setState({ ...this.state, alert: alert, editDescription: false, editMinValue: false, editMaxValue: false, rangeInputDialog: false, delayInputDialog: false })
         if (!dontUpdate) {
             this.props.onChange(alert, wasEnabled)
         }
@@ -134,6 +141,13 @@ class AlertItem extends Component {
                 </span>
             </div>
         </>
+        const delaySetting = (mobile) => <>
+            <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
+                <span style={{ ...this.props.detailedSubText, width: mobile ? "100%" : undefined }}>
+                    <EditableText spread={mobile} text={this.getDelayText(alert)} onClick={() => this.setState({ ...this.state, delayInputDialog: true })} />
+                </span>
+            </div>
+        </>
 
         return (
             <ListItem key={type}>
@@ -164,6 +178,16 @@ class AlertItem extends Component {
                             </Suspense>
                         </Box>
                     }
+                    {this.props.showDelay &&
+                        <>
+                            <ScreenSizeWrapper>
+                                {delaySetting()}
+                            </ScreenSizeWrapper>
+                            <ScreenSizeWrapper isMobile>
+                                {delaySetting(true)}
+                            </ScreenSizeWrapper>
+                        </>
+                    }
                 </div>
                 <InputDialog open={this.state.editDescription} value={alert ? alert.description : ""}
                     onClose={(save, description) => save ? this.setAlert({ ...alert, description: description }, type, null, false) : this.setState({ ...this.state, editDescription: false })}
@@ -191,6 +215,12 @@ class AlertItem extends Component {
                         maxLength={pjson.settings.alertDescriptionMaxLength}
                     />
                 }
+                <InputDialog number open={this.state.delayInputDialog} value={alert && alert.delay ? alert.delay / 60 : 0}
+                    onClose={(save, value) => save ? this.setAlert({ ...alert, delay: value * 60 }, type, null, false) : this.setState({ ...this.state, delayInputDialog: false })}
+                    title={t("alert_delay")}
+                    description={t("alert_delay_dialog_description")}
+                    buttonText={t("update")}
+                />
             </ListItem>
         )
     }

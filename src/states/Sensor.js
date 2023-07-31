@@ -657,6 +657,7 @@ class Sensor extends Component {
                                             var alert = this.getAlert(x)
                                             let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description : x
                                             return <AlertItem key={key} alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
+                                                showDelay={sensorSubscription === "Business Starter"}
                                                 detailedTitle={detailedTitle}
                                                 detailedText={detailedText} detailedSubText={detailedSubText}
                                                 type={x} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />

@@ -10,7 +10,7 @@ class InputDialog extends Component {
     constructor(props) {
         super(props)
         this.state = { value: "" }
-        if (props.value) this.state.value = props.value;
+        if (props.value != null) this.state.value = props.value;
     }
     update() {
         var value = this.state.value;
