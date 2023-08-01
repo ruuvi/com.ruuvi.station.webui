@@ -385,8 +385,11 @@ class Graph extends Component {
 
                                                     ctx.beginPath();
                                                     ctx.strokeStyle = ruuviTheme.graph.alert.stroke[colorMode];
-                                                    lineAt(alertMax)
-                                                    lineAt(alertMin)
+                                                    let yAxisVals = u.data[1]
+                                                    let graphYMax = Math.max(...yAxisVals) + 0.5
+                                                    let graphYMin = Math.min(...yAxisVals) - 0.5
+                                                    if (alertMax < graphYMax) lineAt(alertMax)
+                                                    if (alertMin > graphYMin) lineAt(alertMin)
                                                     ctx.stroke();
                                                     ctx.translate(-offset, -offset);
 
