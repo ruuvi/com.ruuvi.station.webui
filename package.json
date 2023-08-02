@@ -6,7 +6,8 @@
     "alertDescriptionMaxLength": 100,
     "dataFetchPaginationSize": 1500,
     "dataCacheLengthInDays": 730,
-    "maxSharesPerSensor": 10
+    "maxSharesPerSensor": 10,
+    "uploadImageMaxSize": 3000
   },
   "private": true,
   "dependencies": {

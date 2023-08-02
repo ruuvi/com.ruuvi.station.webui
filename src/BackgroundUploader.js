@@ -1,5 +1,6 @@
 import NetworkApi from "./NetworkApi";
 import notify from "./utils/notify";
+import pjson from '../package.json';
 
 let uploadBackgroundImage = (sensor, f, t, doneCB) => {
     let file = f.target.files[0]
@@ -9,17 +10,28 @@ let uploadBackgroundImage = (sensor, f, t, doneCB) => {
             let image = new Image();
             image.onload = () => {
                 let canvas = document.createElement('canvas'),
-                    max_size = 1440,
+                    max_size = pjson.settings.uploadImageMaxSize,
                     width = image.width,
                     height = image.height;
-                if (height > max_size) {
+                if (height > max_size && width > max_size) {
+                    if (height > width) {
+                        width *= max_size / height;
+                        height = max_size;
+                    } else {
+                        height *= max_size / width;
+                        width = max_size;
+                    }
+                } else if (height > max_size) {
                     width *= max_size / height;
                     height = max_size;
+                } else if (width > max_size) {
+                    height *= max_size / width;
+                    width = max_size;
                 }
                 canvas.width = width;
                 canvas.height = height;
                 canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-                let dataUrl = canvas.toDataURL('image/jpeg');
+                let dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                 let api = new NetworkApi();
                 api.prepareUpload(sensor.sensor, 'image/jpeg', ya => {
                     if (ya.result === "success") {
