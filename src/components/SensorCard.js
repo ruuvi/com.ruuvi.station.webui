@@ -34,9 +34,8 @@ import { ruuviTheme } from "../themes";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: 600,
-    opacity: 0.8,
 }
 
 const smallSensorValueUnit = {
