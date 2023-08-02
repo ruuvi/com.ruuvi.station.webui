@@ -34,14 +34,16 @@ import { ruuviTheme } from "../themes";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: 600,
+    opacity: 0.8,
 }
 
 const smallSensorValueUnit = {
     fontFamily: "mulish",
     fontWeight: 600,
-    fontSize: 14,
+    fontSize: 12,
+    opacity: 0.8,
 }
 
 const lastUpdatedText = {
@@ -63,19 +65,18 @@ function MoreMenu(props) {
         else if (action === "change_background") props.uploadBg()
         else navigate('/' + props.sensor.sensor + "?scrollTo=" + action);
     }
-    const itemStyle = { fontFamily: "mulish", fontSize: 15, fontWeight: 800 }
     return <Menu autoSelect={false} isOpen={isOpen} onOpen={handleButtonClick} onClose={handleButtonClick} >
         <MenuButton as={IconButton} onClick={(e) => e.preventDefault() || handleButtonClick()} icon={<MdMoreVert size={23} />} variant="topbar" style={{ backgroundColor: "transparent" }} top={-4} right={props.simpleView ? 0 : -4} height={55} mt={props.mt}>
         </MenuButton>
         <MenuList mt="2" zIndex={10}>
-            <MenuItem style={itemStyle} onClick={e => doAction(e, "history")}>{t("history_view")}</MenuItem>
+            <MenuItem className="ddlItem" onClick={e => doAction(e, "history")}>{t("history_view")}</MenuItem>
             <MenuDivider />
-            <MenuItem style={itemStyle} onClick={e => doAction(e, "settings")}>{t("settings_and_alerts")}</MenuItem>
+            <MenuItem className="ddlItem" onClick={e => doAction(e, "settings")}>{t("settings_and_alerts")}</MenuItem>
             <MenuDivider />
-            <MenuItem style={itemStyle} onClick={e => doAction(e, "change_background")}>{t("change_background")}</MenuItem>
+            <MenuItem className="ddlItem" onClick={e => doAction(e, "change_background")}>{t("change_background")}</MenuItem>
             {props.sensor.canShare && <>
                 <MenuDivider />
-                <MenuItem style={itemStyle} onClick={e => doAction(e, "share")}>{t("share")}</MenuItem>
+                <MenuItem className="ddlItem" onClick={e => doAction(e, "share")}>{t("share")}</MenuItem>
             </>}
         </MenuList>
     </Menu>

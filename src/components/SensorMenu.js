@@ -13,6 +13,7 @@ import withRouter from "../utils/withRouter"
 import { withTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 
+
 class SensorMenu extends Component {
     constructor(props) {
         super(props)
@@ -41,7 +42,7 @@ class SensorMenu extends Component {
                         {t("sensors")}
                     </MenuButton>
                     <MenuList mt="2" zIndex={10}>
-                        <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => this.props.addSensor()}>{t('add_new_sensor')}</MenuItem>
+                        <MenuItem className="ddlItem" style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6, fontWeight: 800 }} onClick={() => this.props.addSensor()}>{t('add_new_sensor')}</MenuItem>
                         <MenuDivider />
                         {this.state.sensors.map((x, i) => {
                             let divider = <></>
@@ -49,7 +50,7 @@ class SensorMenu extends Component {
                             if (i === this.state.sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                             else divider = <MenuDivider />
                             return <div key={x.sensor + "div"}>
-                                <MenuItem key={x.sensor} className={this.getCurrentSensor() === x.sensor ? "menuActive" : undefined} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, ...borderStyle }} onClick={() => this.props.navigate('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
+                                <MenuItem key={x.sensor} className={(this.getCurrentSensor() === x.sensor ? "menuActive" : undefined)+ " ddlItem"} style={{ ...borderStyle }} onClick={() => this.props.navigate('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
                                 {divider}
                             </div>
                         })}

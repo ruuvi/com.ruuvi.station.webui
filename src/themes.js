@@ -142,6 +142,10 @@ export const ruuviTheme = extendTheme({
             },
             ".nodatatext": {
                 color: props.colorMode === "light" ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)"
+            },
+            ".ddlItem": {
+                fontFamily: "mulish",
+                fontSize: "14px",
             }
         })
     },
