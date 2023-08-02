@@ -24,7 +24,7 @@ const infoText = {
 }
 
 function DashboardGrid(props) {
-    const [isLargeDisplay] = useMediaQuery("(min-width: 1600px)", { ssr: false })
+    const [isLargeDisplay] = useMediaQuery("(min-width: 1700px)", { ssr: false })
     const [isMediumDisplay] = useMediaQuery("(min-width: 1024px)", { ssr: false })
     //const isMobileDisplay = !isLargeDisplay && !isMediumDisplay
     let size = ""
