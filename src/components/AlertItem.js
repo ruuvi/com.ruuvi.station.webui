@@ -178,7 +178,7 @@ class AlertItem extends Component {
                             </Suspense>
                         </Box>
                     }
-                    {this.props.showDelay &&
+                    {this.props.showDelay &&  type !== "offline" &&
                         <>
                             <ScreenSizeWrapper>
                                 {delaySetting()}
@@ -199,7 +199,7 @@ class AlertItem extends Component {
                     <RangeInputDialog open={this.state.rangeInputDialog} value={this.getMinMaxArr()}
                         onClose={(save, value) => save ? this.setAlert({ ...alert, min: uh.fromUser(value[0]), max: uh.fromUser(value[1]) }, type, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}
                         range={validRange}
-                        title={t("alert_dialog_title_"+type)}
+                        title={t("alert_dialog_title_" + type)}
                         buttonText={t("update")}
                         unit={() => {
                             if (type === "humidity") return "%";
