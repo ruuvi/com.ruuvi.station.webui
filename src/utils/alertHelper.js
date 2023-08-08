@@ -6,7 +6,7 @@ export function getAlertIcon(sensor, type) {
     function getSensorAlertState() {
         let alerts = sensor.alerts
         if (type) alerts = alerts.filter(x => x.type === type)
-        if (alerts.find(x => x.enabled && x.triggered)) return 1
+        if (isAlerting(sensor, type)) return 1
         if (alerts.find(x => x.enabled)) return 0
         return -1
     }
@@ -19,4 +19,31 @@ export function getAlertIcon(sensor, type) {
         if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} width="15px" className="alarmFadeInOut" />
     }
     return alertIcon
+}
+
+export function isAlerting(sensor, type) {
+    let alerts = sensor.alerts
+    if (type) alerts = alerts.filter(x => x.type === type)
+    if (!alerts.find(x => x.enabled)) return false
+    let data = sensor.measurements.length === 1 ? sensor.measurements[0] : null
+    if (data && data.parsed) {
+        let dp = type === "offline" ? data.timestamp : type === "signal" ? data.rssi : data.parsed[type]
+        if (alerts.find(x => checkIfShouldBeAlerting(x, dp))) return true
+    } else {
+        if (alerts.find(x => x.enabled && x.triggered)) return true
+    }
+    return false
+}
+
+function checkIfShouldBeAlerting(alert, data) {
+    if (!data) return alert.enabled && alert.triggered
+    if (!alert.enabled) return false
+    switch (alert.type) {
+        case "movement":
+            return alert.triggered
+        case "offline":
+            return alert.max > (Date.now() / 1000 - data)
+        default:
+            return (data > alert.max || data < alert.min)
+    }
 }

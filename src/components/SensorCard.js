@@ -29,7 +29,7 @@ import uploadBackgroundImage from "../BackgroundUploader";
 import { isBatteryLow } from "../utils/battery";
 import lowBattery from '../img/low_battery.svg'
 import { useNavigate } from 'react-router-dom';
-import { getAlertIcon } from "../utils/alertHelper";
+import { getAlertIcon, isAlerting } from "../utils/alertHelper";
 import { ruuviTheme } from "../themes";
 
 const smallSensorValue = {
@@ -150,7 +150,7 @@ class SensorCard extends Component {
         if (type === "movementCounter") type = "movement";
         var alert = this.getAlert(type.toLocaleLowerCase())
         if (!alert || !alert.enabled) return -1
-        if (alert.triggered) return 1
+        if (isAlerting(this.props.sensor, type)) return 1
         return 0
     }
     setHover(state) {

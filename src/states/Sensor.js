@@ -42,6 +42,7 @@ import pjson from '../../package.json';
 import { isBatteryLow } from "../utils/battery";
 import uploadBackgroundImage from "../BackgroundUploader";
 import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
+import { isAlerting } from "../utils/alertHelper";
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "co2", "voc", "nox"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
@@ -359,7 +360,7 @@ class Sensor extends Component {
         if (type === "movementCounter") type = "movement";
         var alert = this.getAlert(type.toLocaleLowerCase())
         if (!alert) return false
-        return alert.enabled && alert.triggered;
+        return isAlerting(this.props.sensor, type)
     }
     isSharedSensor() {
         var user = new NetworkApi().getUser().email
