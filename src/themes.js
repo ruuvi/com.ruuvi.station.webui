@@ -19,6 +19,7 @@ let colors = {
     sensorValueBoxIcon: { light: "rgba(68, 201, 185, 0.3)", dark: "#00ae9480" },
     sensorValueBoxActiveBorder: { light: "#1f9385", dark: "#1f9385" },
     menuButtonBg: { light: "white", dark: "#003434 !important" },
+    menuItemBg: { light: "white", dark: "#003434" },
     searchBg: { light: "#ffffff7F !important", dark: "#0034347F !important" },
     navButtonBg: { light: "#ffffff", dark: "#083c3d" },
     navButtonColor: { light: "#1f9385 !important", dark: "white !important" },
@@ -112,7 +113,7 @@ export const ruuviTheme = extendTheme({
                 color: colors.dashboardUpdatedAtColor[props.colorMode]
             },
             '.menuActive': {
-                bg: colors.colorMenuActive[props.colorMode],
+                bg: colors.colorMenuActive[props.colorMode] + " !important",
                 color: colors.textInactive[props.colorMode] + " !important",
             },
             '.buttonSideIcon': {
@@ -285,6 +286,7 @@ export const ruuviTheme = extendTheme({
                 },
                 item: {
                     overflow: "none",
+                    bg: colors.menuItemBg[props.colorMode],
                     _hover: { bg: colors.colorMenuActive[props.colorMode] },
                     padding: 3
                 },
