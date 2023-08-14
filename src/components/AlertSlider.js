@@ -48,7 +48,7 @@ class AlertSlider extends React.Component {
             min = uh.value(min)
         }
         var sliderValues = [min, max]
-        return <div style={{ display: 'flex', alignItems: 'center' }}>
+        return <div style={{ display: 'flex', alignItems: 'center', marginLeft: 4, marginRight: 4 }}>
             <Range {...this.state} values={sliderValues}
                 step={this.props.type === "pressure" && uh.unit === "Pa" ? 100 : 1}
                 disabled={this.props.disabled}

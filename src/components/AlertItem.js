@@ -130,7 +130,7 @@ class AlertItem extends Component {
         }
         let label = type === "signal" ? "signal_strength" : type
         if (type === "offline") label = "alert_offline_title"
-        var editItemMargins = { marginRight: 12, marginTop: 12, marginBottom: 12 }
+        var editItemMargins = { marginRight: 0, marginTop: 12, marginBottom: 12 }
         const asText = (mobile) => <>
             <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
                 <EditableText spread={mobile} onClick={() => this.setState({ ...this.state, editDescription: true })} style={{ ...this.props.detailedSubText }} opacity={alert && alert.description ? null : 0.5} text={alert ? alert.description || t("alarm_custom_title_hint") : t("alarm_custom_title_hint")} />
@@ -179,14 +179,14 @@ class AlertItem extends Component {
                         </Box>
                     }
                     {this.props.showDelay &&  type !== "offline" &&
-                        <>
+                        <Box mt={5}>
                             <ScreenSizeWrapper>
                                 {delaySetting()}
                             </ScreenSizeWrapper>
                             <ScreenSizeWrapper isMobile>
                                 {delaySetting(true)}
                             </ScreenSizeWrapper>
-                        </>
+                        </Box>
                     }
                 </div>
                 <InputDialog open={this.state.editDescription} value={alert ? alert.description : ""}
