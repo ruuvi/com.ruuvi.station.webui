@@ -5,8 +5,15 @@ import { Image } from '@chakra-ui/react'
 export function getAlertIcon(sensor, type) {
     function getSensorAlertState() {
         let alerts = sensor.alerts
-        if (type) alerts = alerts.filter(x => x.type === type)
-        if (isAlerting(sensor, type)) return 1
+        if (type) {
+            alerts = alerts.filter(x => x.type === type)
+            if (isAlerting(sensor, type)) return 1
+        } else {
+            const alertTypes = ["temperature", "humidity", "pressure", "offline"]
+            for (let i = 0; i < alertTypes.length; i++) {
+                if (isAlerting(sensor, alertTypes[i])) return 1
+            }
+        }
         if (alerts.find(x => x.enabled)) return 0
         return -1
     }
