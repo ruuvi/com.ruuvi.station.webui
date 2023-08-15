@@ -261,7 +261,7 @@
                 .then(response => {
                     if (response.result === "success") {
                         console.log(response)
-                        document.cookie = `station_user=${JSON.stringify(response.data)};domain=${domain}`
+                        document.cookie = `station_user=${JSON.stringify(response.data)};domain=${domain};Max-Age=99999999`
                         setView("view_link")
                         sendOpenPage(response.data)
                     } else {

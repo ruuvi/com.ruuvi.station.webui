@@ -79,7 +79,7 @@
             if (parsed && parsed.accessToken) {
               let domain = ".ruuvi.com"
               document.cookie = `station_user=;domain=${domain};Max-Age=-99999999`
-              document.cookie = `station_status=signedIn;domain=${domain}`
+              document.cookie = `station_status=signedIn;domain=${domain};Max-Age=99999999`
               localStorage.setItem("user", JSON.stringify(parsed))
             }
           }
