@@ -120,7 +120,7 @@ class Settings extends Component {
                 </>
             ) : (
                 <>
-                    <LanguageMenu />
+                    <LanguageMenu onChange={v => this.updateSetting("PROFILE_LANGUAGE_CODE", v)} loading={this.state.savingSettings.indexOf("PROFILE_LANGUAGE_CODE") !== -1} />
                     <br />
                     <RadioInput label={"settings_temperature_unit"} value={this.state.settings.UNIT_TEMPERATURE} options={temperatureOptions} onChange={v => this.updateSetting("UNIT_TEMPERATURE", v)} loading={this.state.savingSettings.indexOf("UNIT_TEMPERATURE") !== -1} />
                     <br />

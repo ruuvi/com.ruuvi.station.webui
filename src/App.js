@@ -98,6 +98,21 @@ function Logo(props) {
   )
 }
 
+function loadInitalSettings(forceUpdate, browserLang) {
+  new NetworkApi().getSettings(settings => {
+    if (settings.result === "success") {
+      localStorage.setItem("settings", JSON.stringify(settings.data.settings))
+      let settingsLng = settings.data.settings.PROFILE_LANGUAGE_CODE
+      i18next.changeLanguage(settingsLng || browserLang)
+      if (!settingsLng) {
+        new NetworkApi().setSetting("PROFILE_LANGUAGE_CODE", browserLang)
+      }
+    } else if (settings.result === "error" && settings.code === "ER_UNAUTHORIZED") {
+      logout(forceUpdate)
+    }
+  })
+}
+
 export default function App() {
   cache.init()
   try {
@@ -123,14 +138,19 @@ export default function App() {
   const urlSearchParams = new URLSearchParams(window.location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
   if (params.lng) {
+    window.location.href = window.location.href.split("?")[0];
+    /*
     const supportedLangs = ["en", "fi", "sv"]
     let lng = params.lng.split("-")[0]
     if (supportedLangs.indexOf(lng) > -1) {
       localStorage.setItem("selected_language", lng)
       i18next.changeLanguage(lng)
-      window.location.href = window.location.href.split("?")[0];
     }
+    */
   }
+
+  let browserLanguage = navigator.language || navigator.userLanguage;
+  browserLanguage = browserLanguage.substring(0, 2)
 
   let { t, i18n } = useTranslation()
 
@@ -170,9 +190,15 @@ export default function App() {
     })()
   }, [subscription])
 
+  const forceUpdate = React.useCallback(() => updateState({}), []);
+
+  useEffect(() => {
+    if (!user) return
+    loadInitalSettings(forceUpdate, browserLanguage)
+  }, []);
+
   let store = new Store();
   const [, updateState] = React.useState();
-  const forceUpdate = React.useCallback(() => updateState({}), []);
   var sensors = [];
   if (!user) {
     //goToLoginPage()
@@ -180,17 +206,12 @@ export default function App() {
       <HashRouter>
         <SignIn loginSuccessful={data => {
           forceUpdate()
+          loadInitalSettings(forceUpdate, browserLanguage)
         }} />
       </HashRouter>
     </ChakraProvider>
   }
-  new NetworkApi().getSettings(settings => {
-    if (settings.result === "success") {
-      localStorage.setItem("settings", JSON.stringify(settings.data.settings))
-    } else if (settings.result === "error" && settings.code === "ER_UNAUTHORIZED") {
-      logout(forceUpdate)
-    }
-  })
+
   let getBannerContent = (notification) => {
     let lang = i18n.language || "en"
     return notification[lang] || notification.en

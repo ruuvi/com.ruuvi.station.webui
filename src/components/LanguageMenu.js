@@ -27,6 +27,7 @@ class LanguageMenu extends Component {
     langChange = (lng) => {
         localStorage.setItem("selected_language", lng)
         this.props.i18n.changeLanguage(lng);
+        this.props.onChange(lng)
     }
     render() {
         const { i18n } = this.props;
@@ -40,7 +41,7 @@ class LanguageMenu extends Component {
             )
         }
         return (
-            <RadioInput label={"language"} value={i18n.language || "en"} options={radioLangs} onChange={v => this.langChange(v)} />
+            <RadioInput label={"language"} value={i18n.language || "en"} options={radioLangs} onChange={v => this.langChange(v)} loading={this.props.loading} />
         )
         /*
         return (
