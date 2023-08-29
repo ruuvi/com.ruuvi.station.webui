@@ -36,29 +36,34 @@ const legendHider = ({
 });
 
 function calculateAverage(data, zoom) {
-    let duration = 0;
-    let totalValue = 0;
-    let previousData = null;
-    for (const d of data) {
-        if (previousData !== null) {
-            const timeDiff = (d.timestamp - previousData.timestamp);
-
-            // interpolate missing values between the previous and current data points
-            const valueDiff = d.value - previousData.value;
-            const valuePerSecond = valueDiff / timeDiff;
-            for (let i = 1; i < timeDiff; i++) {
-                totalValue += previousData.value + i * valuePerSecond;
-                duration++;
-            }
-        }
-
-        totalValue += d.value;
-        duration++;
-
-        previousData = d;
+    if (data.length === 0) {
+        return 0.0;
     }
-    const averageValue = totalValue / duration;
-    return round(averageValue, 2);
+
+    let totalArea = 0.0;
+    // Compute the area under the curve for each pair of consecutive points.
+    for (let i = 1; i < data.length; i++) {
+        const x1 = data[i - 1].timestamp;
+        const y1 = data[i - 1].value;
+        const x2 = data[i].timestamp;
+        const y2 = data[i].value;
+
+        // Calculate the area of the trapezium formed by two consecutive data points.
+        const area = (x2 - x1) * (y1 + y2) / 2.0;
+        totalArea += area;
+    }
+
+    // Calculate the width of the x-range.
+    const timeSpan = data[data.length - 1].timestamp - data[0].timestamp;
+
+    // If all data points have the same x-value, simply return the average of their y-values.
+    if (timeSpan === 0) {
+        const sumYValues = data.reduce((sum, entry) => sum + entry.value, 0);
+        return sumYValues / data.length;
+    }
+
+    // Compute the average using the trapezoidal rule.
+    return round(totalArea / timeSpan, 2);
 }
 
 let zoomData = {
@@ -77,7 +82,7 @@ let zoomData = {
 }
 
 function DataInfo(props) {
-    const { graphData, t, zoom } = props
+    const { graphData, t } = props
     const [currZoom, setCurrZoom] = useState(null);
     useEffect(() => {
         zoomData.registerListener(v => {
@@ -103,7 +108,7 @@ function DataInfo(props) {
     }
     let min = Math.min(...data.map(x => x.value))
     let max = Math.max(...data.map(x => x.value))
-    let avg = calculateAverage(data, zoom)
+    let avg = calculateAverage(data)
     return <>
         <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_min")}</b>: {localeNumber(min)}</span>
         <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_max")}</b>: {localeNumber(max)}</span>
