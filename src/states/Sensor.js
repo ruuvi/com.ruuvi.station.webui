@@ -358,6 +358,7 @@ class Sensor extends Component {
     }
     isAlertTriggerd(type) {
         if (type === "movementCounter") type = "movement";
+        if (type === "rssi") type = "signal";
         var alert = this.getAlert(type.toLocaleLowerCase())
         if (!alert) return false
         return isAlerting(this.props.sensor, type)
