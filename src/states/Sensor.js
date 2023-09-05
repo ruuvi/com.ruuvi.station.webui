@@ -716,6 +716,9 @@ class Sensor extends Component {
                                     <List>
                                         {sensorInfoOrder.map((order, i) => {
                                             var x = this.getLatestReading(true).find(x => x.key === order);
+                                            if (order === "mac") {
+                                                x = { key: "mac", value: this.props.sensor.sensor }
+                                            }
                                             if (!x) return null
                                             let uh = getUnitHelper(x.key)
                                             return (
