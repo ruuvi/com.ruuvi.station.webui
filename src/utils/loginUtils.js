@@ -23,7 +23,7 @@ export function logout(updateCb) {
     localStorage.clear();
     cache.clear();
     if (!goToLoginPage()) {
-        window.location.replace("/#/")
+        window.location.replace("/")
         if (updateCb) updateCb()
     }
 }

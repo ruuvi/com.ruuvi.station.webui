@@ -138,12 +138,10 @@ class Dashboard extends Component {
         return out;
     }
     showModal(name) {
-        return this.props.searchParams[0].has(name);
+        return this.props.showDialog === name
     }
     closeModal() {
-        this.props.navigate({
-            search: "",
-        }, { replace: true });
+        this.props.closeDialog()
     }
     setDashboardViewType(type) {
         this.setState({ ...this.state, cardType: type })
@@ -226,7 +224,7 @@ class Dashboard extends Component {
                                                 {this.state.sensors.map(x => {
                                                     let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
                                                     return <span key={x.sensor + this.state.from} style={{ width: 640, maxWidth: "100%", display: hide ? "none" : undefined }}>
-                                                        <a href={"#/" + x.sensor}>
+                                                        <a href={"/" + x.sensor}>
                                                             <SensorCard sensor={x} size={size} dataFrom={this.state.from} cardType={this.state.cardType} graphType={this.state.graphType} share={() => this.setState({ ...this.state, showShareFor: x })} />
                                                         </a></span>
                                                 })}

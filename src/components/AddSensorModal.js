@@ -44,7 +44,7 @@ function AddSensorModal(props) {
             if (res.result === "success") {
                 notify.success(t("sensor_added_successfully"))
                 setTimeout(() => {
-                    window.location.href = "#/" + addr
+                    window.location.href = "/" + addr
                     window.location.reload();
                 }, 1000)
             } else if (res.result === "error") {

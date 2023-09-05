@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   Routes,
   Route,
-  HashRouter,
+  BrowserRouter,
 } from "react-router-dom";
 import NetworkApi from "./NetworkApi";
 import logo from './img/ruuvi-vector-logo.svg'
@@ -90,7 +90,7 @@ function Logo(props) {
   let ruuviLogo = colorMode === "light" ? logo : logoDark
   return (
     <>
-      <Image alt="logo" height={30} src={ruuviLogo} fit="scale-down" style={{ cursor: "pointer" }} onClick={() => window.location.href = "#/"} />
+      <Image alt="logo" height={30} src={ruuviLogo} fit="scale-down" style={{ cursor: "pointer" }} onClick={() => window.location.href = "/"} />
       <span style={subscriptionText}>
         {props.subscription.split(" ")[0]}
       </span>
@@ -154,6 +154,8 @@ export default function App() {
 
   let { t, i18n } = useTranslation()
 
+  const [showDialog, setShowDialog] = useState("")
+
   var user = new NetworkApi().getUser()
   const [reloadSub, setReloadSub] = React.useState(0);
   const [subscription, setSubscription] = useState("")
@@ -203,12 +205,12 @@ export default function App() {
   if (!user) {
     //goToLoginPage()
     return <ChakraProvider theme={ruuviTheme} style={{ minHeight: "100%" }}>
-      <HashRouter>
+      <BrowserRouter>
         <SignIn loginSuccessful={data => {
           forceUpdate()
           loadInitalSettings(forceUpdate, browserLanguage)
         }} />
-      </HashRouter>
+      </BrowserRouter>
     </ChakraProvider>
   }
 
@@ -218,7 +220,7 @@ export default function App() {
   }
   return (
     <ChakraProvider theme={ruuviTheme}>
-      <HashRouter basename="/">
+      <BrowserRouter basename="/">
         <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
           <Logo subscription={subscription} />
           <Text>
@@ -228,28 +230,13 @@ export default function App() {
             <ColorModeSwitch />
             <SensorMenu sensors={sensors} key={Math.random()}
               addSensor={() => {
-                let q = window.location.href.indexOf("?") === -1 ? "?addsensor" : "&addsensor"
-                if (window.location.href.indexOf("#") !== -1) {
-                  window.location.href += q
-                } else {
-                  window.location.href += "#/" + q
-                }
+                setShowDialog("addsensor")
               }}
             />
             <UserMenu settings={() => {
-              let q = window.location.href.indexOf("?") === -1 ? "?settings" : "&settings"
-              if (window.location.href.indexOf("#") !== -1) {
-                window.location.href += q
-              } else {
-                window.location.href += "#/" + q
-              }
+              setShowDialog("settings")
             }} myAccount={() => {
-              let q = window.location.href.indexOf("?") === -1 ? "?myaccount" : "&myaccount"
-              if (window.location.href.indexOf("#") !== -1) {
-                window.location.href += q
-              } else {
-                window.location.href += "#/" + q
-              }
+              setShowDialog("myaccount")
             }} email={user.email} />
           </span>
         </HStack>
@@ -268,14 +255,14 @@ export default function App() {
         }
         <div>
           <Routes>
-            <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />} />
-            <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />} />
+            <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }}  showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
+            <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }}  showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
           </Routes>
           <div style={bottomText}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi" : "https://ruuvi.com/"} target="_blank" rel="noreferrer">ruuvi.com</a></div>
           <div style={supportLink}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi/tuki" : "https://ruuvi.com/support"}>{t("support")}</a></div>
           <div style={versionText}>v{pjson.version} <a href="https://f.ruuvi.com/t/5039/9999" target="_blank" rel="noreferrer">{t("changelog")}</a></div>
         </div>
-      </HashRouter>
+      </BrowserRouter>
     </ChakraProvider>
   );
 }

@@ -28,7 +28,7 @@ import { MdAdd, MdCameraAlt, MdMoreVert } from "react-icons/md";
 import uploadBackgroundImage from "../BackgroundUploader";
 import { isBatteryLow } from "../utils/battery";
 import lowBattery from '../img/low_battery.svg'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getAlertIcon, isAlerting } from "../utils/alertHelper";
 import { ruuviTheme } from "../themes";
 
@@ -304,7 +304,7 @@ class SensorCard extends Component {
                             <Box height={isSmallCard && latestReading ? "98px" : ""}>
                                 <Flex>
                                     <Flex grow={1} width="calc(100% - 41px)">
-                                        <a href={"#/" + this.props.sensor.sensor} style={{ width: "100%" }}>
+                                        <Link to={`/${this.props.sensor.sensor}`} style={{ width: "100%" }}>
                                             {isSmallCard ? (
                                                 <Heading size="xs" style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", maxLines: 2, lineHeight: "19px", maxHeight: "38px", marginRight: 2 }}>
                                                     {this.props.sensor.name}
@@ -314,7 +314,7 @@ class SensorCard extends Component {
                                                     {this.props.sensor.name}
                                                 </Heading>
                                             )}
-                                        </a>
+                                        </Link>
                                     </Flex>
                                     <Flex width="20px" mt={1}>
                                         {alertIcon}
@@ -323,7 +323,7 @@ class SensorCard extends Component {
                                         {moreDropdonw}
                                     </Flex>
                                 </Flex>
-                                <a href={"#/" + this.props.sensor.sensor}>
+                                <Link to={`/${this.props.sensor.sensor}`}>
                                     {latestReading &&
                                         <BigValue
                                             value={getDisplayValue(mainStat, localeNumber(getUnitHelper(mainStat).value(latestReading[mainStat], mainStat === "humidity" ? latestReading.temperature : undefined), getUnitHelper(mainStat).decimals))}
@@ -331,7 +331,7 @@ class SensorCard extends Component {
                                             alertActive={this.getAlertState(mainStat) > 0}
                                         />
                                     }
-                                </a>
+                                </Link>
                             </Box>
                             {this.state.loading ? (
                                 <center style={{ position: "relative", top: "50%", marginTop: isSmallCard ? 0 : height / 3, transform: "translateY(-50%)" }}>
@@ -339,7 +339,7 @@ class SensorCard extends Component {
                                 </center>
                             ) : (
                                 <div>
-                                    <a href={"#/" + this.props.sensor.sensor}>
+                                    <Link to={`/${this.props.sensor.sensor}`} >
                                         {latestReading ? <div>
                                             <div style={{ marginLeft: -24, marginRight: -30, marginTop: -10, marginBottom: -10, paddingBottom: -50 }}>
                                                 {this.state.data && this.state.data.measurements.length ? (
@@ -378,7 +378,7 @@ class SensorCard extends Component {
                                         </div> : <div>
                                             <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: height / (isSmallCard ? 6 : 4) }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
                                         </div>}
-                                    </a>
+                                    </Link>
                                 </div>
                             )}
                         </Box>
