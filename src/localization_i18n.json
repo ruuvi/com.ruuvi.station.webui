@@ -53,6 +53,7 @@
       "settings_pressure_unit": "Pressure Unit",
       "settings_temperature_unit": "Temperature Unit",
       "something_went_wrong": "Something went wrong",
+      "remove_sensor": "Remove sensor",
       "temperature_celsius_name": "Celsius (℃)",
       "temperature_fahrenheit_name": "Fahrenheit (℉)",
       "temperature_kelvin_name": "Kelvin (K)",
@@ -221,7 +222,11 @@
       "move_up": "Move up",
       "move_down": "Move down",
       "share_pending": "Share pending",
-      "share_pending_message": "Shared successfully! This email address isn't linked to a Ruuvi account yet. An invite to create a free account has been sent. Once created, you'll see it in the sharee listing."
+      "share_pending_message": "Shared successfully! This email address isn't linked to a Ruuvi account yet. An invite to create a free account has been sent. Once created, you'll see it in the sharee listing.",
+      "remove_sensor_confirmation_dialog": "This operation cannot be undone.",
+      "remove_cloud_history_switch": "Remove cloud history",
+      "remove_cloud_history_description": "I also want to remove sensor history data from Ruuvi Cloud.",
+      "remove_sensor_description": "By removing the sensor, your sensor ownership status will be revoked and sensor settings, such as name, background image, calibration settings and alert settings will be removed. After removal, someone else can claim ownership of the sensor. Each Ruuvi sensor can have only one owner."
     }
   },
   "fi": {
@@ -278,6 +283,7 @@
       "settings_pressure_unit": "Paineyksikkö",
       "settings_temperature_unit": "Lämpötilayksikkö",
       "something_went_wrong": "Tapahtui virhe",
+      "remove_sensor": "Poista",
       "temperature_celsius_name": "Celsius (℃)",
       "temperature_fahrenheit_name": "Fahrenheit (℉)",
       "temperature_kelvin_name": "Kelvin (K)",
@@ -446,7 +452,11 @@
       "move_up": "Siirrä ylös",
       "move_down": "Siirrä alas",
       "share_pending": "Jakamista odotetaan",
-      "share_pending_message": "Jako onnistui! Tämä sähköpostiosoite ei ole vielä liitetty Ruuvi-tiliin. Kutsu ilmaisen tilin luomiseen on lähetetty. Kun tili on luotu, näet sen jakolistanäkymässä."
+      "share_pending_message": "Jako onnistui! Tämä sähköpostiosoite ei ole vielä liitetty Ruuvi-tiliin. Kutsu ilmaisen tilin luomiseen on lähetetty. Kun tili on luotu, näet sen jakolistanäkymässä.",
+      "remove_sensor_confirmation_dialog": "Tätä toimenpidettä ei voi perua.",
+      "remove_cloud_history_switch": "Poista pilvihistoria",
+      "remove_cloud_history_description": "Haluan myös poistaa anturihistoriatiedot Ruuvi Cloudista.",
+      "remove_sensor_description": "Poistamalla anturin omistusoikeutesi peruutetaan, ja anturin asetukset, kuten nimi, taustakuva, kalibrointiasetukset ja hälytysasetukset poistetaan. Poiston jälkeen joku toinen voi ottaa anturin omistukseensa. Jokaisella Ruuvi-anturilla voi olla vain yksi omistaja."
     }
   },
   "sv": {
@@ -503,6 +513,7 @@
       "settings_pressure_unit": "Tryckenhet",
       "settings_temperature_unit": "Temperaturenhet",
       "something_went_wrong": "Något gick fel",
+      "remove_sensor": "Ta bort sensor",
       "temperature_celsius_name": "Celsius (℃)",
       "temperature_fahrenheit_name": "Fahrenheit (℉)",
       "temperature_kelvin_name": "Kelvin (K)",
@@ -671,7 +682,11 @@
       "move_up": "Flytta upp",
       "move_down": "Flytta ner",
       "share_pending": "Delning pågår",
-      "share_pending_message": "Delat framgångsrikt! Den här e-postadressen är ännu inte kopplad till ett Ruuvi-konto. En inbjudan att skapa ett gratis konto har skickats. När kontot har skapats kommer du att se det i delningslistan."
+      "share_pending_message": "Delat framgångsrikt! Den här e-postadressen är ännu inte kopplad till ett Ruuvi-konto. En inbjudan att skapa ett gratis konto har skickats. När kontot har skapats kommer du att se det i delningslistan.",
+      "remove_sensor_confirmation_dialog": "Denna åtgärd kan inte ångras.",
+      "remove_cloud_history_switch": "Ta bort molnhistorik",
+      "remove_cloud_history_description": "Jag vill också ta bort sensorhistorikdata från Ruuvi Cloud.",
+      "remove_sensor_description": "Genom att ta bort sensorn kommer den inte längre synas i ditt konto och sensorinställningar som namn, bakgrundsbild, kalibreringsinställningar och larminställningar kommer att tas bort. Efter borttagning kan någon annan ta ägande om sensorn. Varje Ruuvi-sensor kan bara ha en ägare."
     }
   },
   "fr": {
@@ -728,6 +743,7 @@
       "settings_pressure_unit": "Unité de pression",
       "settings_temperature_unit": "Unité de température",
       "something_went_wrong": "Erreur",
+      "remove_sensor": "Supprimer le capteur",
       "temperature_celsius_name": "Celsius (℃)",
       "temperature_fahrenheit_name": "Fahrenheit (℉)",
       "temperature_kelvin_name": "Kelvin (K)",
@@ -896,7 +912,11 @@
       "move_up": "Monter",
       "move_down": "Descendre",
       "share_pending": "Partage en attente",
-      "share_pending_message": "Partagé avec succès ! Cette adresse e-mail n'est pas encore liée à un compte Ruuvi. Une invitation pour créer un compte gratuit a été envoyée. Une fois créé, vous le verrez dans la liste des partages."
+      "share_pending_message": "Partagé avec succès ! Cette adresse e-mail n'est pas encore liée à un compte Ruuvi. Une invitation pour créer un compte gratuit a été envoyée. Une fois créé, vous le verrez dans la liste des partages.",
+      "remove_sensor_confirmation_dialog": "Cette opération ne peut pas être annulée.",
+      "remove_cloud_history_switch": "Supprimer l'historique cloud",
+      "remove_cloud_history_description": "Je veux également supprimer les données d'historique du capteur de Ruuvi Cloud.",
+      "remove_sensor_description": "En supprimant le capteur, votre statut de propriétaire du capteur sera révoqué, et les paramètres du capteur, tels que le nom, l'image d'arrière-plan, les paramètres de calibration et les paramètres d'alerte, seront supprimés. Après la suppression, quelqu'un d'autre peut revendiquer la propriété du capteur. Chaque capteur Ruuvi ne peut avoir qu'un seul propriétaire."
     }
   },
   "de": {
@@ -953,6 +973,7 @@
       "settings_pressure_unit": "Druckeinheit",
       "settings_temperature_unit": "Temperatureinheit",
       "something_went_wrong": "Something went wrong",
+      "remove_sensor": "Sensor entfernen",
       "temperature_celsius_name": "Celsius (℃)",
       "temperature_fahrenheit_name": "Fahrenheit (℉)",
       "temperature_kelvin_name": "Kelvin (K)",
@@ -1121,7 +1142,11 @@
       "move_up": "Nach oben bewegen",
       "move_down": "Nach unten bewegen",
       "share_pending": "Freigabe ausstehend",
-      "share_pending_message": "Erfolgreich geteilt! Diese E-Mail-Adresse ist noch nicht mit einem Ruuvi-Konto verknüpft. Eine Einladung zur Erstellung eines kostenlosen Kontos wurde gesendet. Nach der Erstellung werden Sie es in der Freigabeliste sehen."
+      "share_pending_message": "Erfolgreich geteilt! Diese E-Mail-Adresse ist noch nicht mit einem Ruuvi-Konto verknüpft. Eine Einladung zur Erstellung eines kostenlosen Kontos wurde gesendet. Nach der Erstellung werden Sie es in der Freigabeliste sehen.",
+      "remove_sensor_confirmation_dialog": "Dieser Vorgang kann nicht rückgängig gemacht werden.",
+      "remove_cloud_history_switch": "Cloud-Historie entfernen",
+      "remove_cloud_history_description": "Ich möchte auch die Sensorverlaufsdaten aus Ruuvi Cloud entfernen.",
+      "remove_sensor_description": "Durch das Entfernen des Sensors wird Ihr Sensor-Eigentumsstatus aufgehoben, und Sensor-Einstellungen wie Name, Hintergrundbild, Kalibrierungseinstellungen und Alarmeinstellungen werden entfernt. Nach der Entfernung kann jemand anderes das Eigentum am Sensor beanspruchen. Jeder Ruuvi-Sensor kann nur einen Besitzer haben."
     }
   }
 }

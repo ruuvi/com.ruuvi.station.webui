@@ -43,6 +43,7 @@ import { isBatteryLow } from "../utils/battery";
 import uploadBackgroundImage from "../BackgroundUploader";
 import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
 import { isAlerting } from "../utils/alertHelper";
+import RemoveSensorDialog from "../components/RemoveSensorDialog";
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "co2", "voc", "nox"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
@@ -369,23 +370,7 @@ class Sensor extends Component {
         return user !== owner;
     }
     remove() {
-        var confirmText = this.props.t("remove_claimed_sensor")
-        if (this.isSharedSensor()) {
-            confirmText = this.props.t("remove_shared_sensor")
-        }
-        var mac = this.props.sensor.sensor
-        if (window.confirm(confirmText)) {
-            new NetworkApi().unclaim(mac, resp => {
-                if (resp.result === "success") {
-                    this.props.remove();
-                } else {
-                    notify.error(`UserApiError.${this.props.t(resp.code)}`)
-                }
-            }, fail => {
-                notify.error(this.props.t("something_went_wrong"))
-                console.log(fail)
-            })
-        }
+        this.setState({...this.state, removeSensor: true})
     }
     updateFrom(v) {
         this.isLoading = false
@@ -773,6 +758,7 @@ class Sensor extends Component {
                     <EditNameDialog open={this.state.editName} onClose={() => this.editName(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
                     <ShareDialog open={this.state.showShare} onClose={() => this.share(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
                     <OffsetDialog open={this.state.offsetDialog} onClose={() => this.setState({ ...this.state, offsetDialog: null })} sensor={this.props.sensor} offsets={{ "Humidity": this.props.sensor.offsetHumidity, "Pressure": this.props.sensor.offsetPressure, "Temperature": this.props.sensor.offsetTemperature }} lastReading={this.getLatestReading()} updateSensor={this.props.updateSensor} />
+                    <RemoveSensorDialog open={this.state.removeSensor} onClose={() => this.setState({ ...this.state, removeSensor: null })} sensor={this.props.sensor} updateSensor={this.props.updateSensor} t={t} remove={() => this.props.remove()} />
                 </Box>
             </Box>
         )

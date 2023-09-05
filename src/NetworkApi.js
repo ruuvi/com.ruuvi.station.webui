@@ -293,11 +293,11 @@ class NetworkApi {
         })
         return await res.json()
     }
-    unclaim(mac, success) {
+    unclaim(mac, deleteData, success) {
         fetch(this.url + "/unclaim", {
             ...this.options,
             method: 'POST',
-            body: JSON.stringify({ sensor: mac }),
+            body: JSON.stringify({ sensor: mac, deleteData: deleteData }),
         })
             .then(function (response) {
                 if (response.status === 200) {
