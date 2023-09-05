@@ -645,7 +645,7 @@ class Sensor extends Component {
                                 <hr />
                                 <AccordionPanel style={accordionPanel}>
                                     <List style={accordionContent}>
-                                        {sensorSubscription === "Free" && <Box pt={6} style={detailedSubText}>
+                                        {sensorSubscription === "Free" && <Box pt={6} pb={6} style={detailedSubText}>
                                             {(() => {
                                                 let text = t("sensor_alert_free_info")
                                                 let parts = text.split(t("cloud_ruuvi_link"))
