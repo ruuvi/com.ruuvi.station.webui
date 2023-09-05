@@ -9,7 +9,7 @@ export function getAlertIcon(sensor, type) {
             alerts = alerts.filter(x => x.type === type)
             if (isAlerting(sensor, type)) return 1
         } else {
-            const alertTypes = ["temperature", "humidity", "pressure", "offline", "signal"]
+            const alertTypes = ["temperature", "humidity", "pressure", "offline", "signal", "movement"]
             for (let i = 0; i < alertTypes.length; i++) {
                 if (isAlerting(sensor, alertTypes[i])) return 1
             }

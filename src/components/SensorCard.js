@@ -148,6 +148,7 @@ class SensorCard extends Component {
     }
     getAlertState(type) {
         if (type === "movementCounter") type = "movement";
+        if (type === "rssi") type = "signal";
         var alert = this.getAlert(type.toLocaleLowerCase())
         if (!alert || !alert.enabled) return -1
         if (isAlerting(this.props.sensor, type)) return 1
