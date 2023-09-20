@@ -393,8 +393,8 @@ class Graph extends Component {
                                                     let yAxisVals = u.data[1]
                                                     let graphYMax = Math.max(...yAxisVals) + 0.5
                                                     let graphYMin = Math.min(...yAxisVals) - 0.5
-                                                    if (alertMax < graphYMax) lineAt(alertMax)
-                                                    if (alertMin > graphYMin) lineAt(alertMin)
+                                                    if (alertMax < graphYMax && alertMax > graphYMin) lineAt(alertMax)
+                                                    if (alertMin > graphYMin && alertMin < graphYMax) lineAt(alertMin)
                                                     ctx.stroke();
                                                     ctx.translate(-offset, -offset);
 
