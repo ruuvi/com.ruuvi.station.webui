@@ -49,7 +49,7 @@ function checkIfShouldBeAlerting(alert, data) {
         case "movement":
             return alert.triggered
         case "offline":
-            return alert.max > (Date.now() / 1000 - data)
+            return data + alert.max < Date.now() / 1000
         default:
             return (data > alert.max || data < alert.min)
     }
