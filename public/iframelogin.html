@@ -135,6 +135,7 @@
     <script>
         const apiUrl = "https://network.ruuvi.com"
         const domain = ".ruuvi.com"
+        var language = "en"
 
         const locals = {
             'emailInput':
@@ -162,8 +163,15 @@
                     'sv': 'Öppna Ruuvi Station',
                 }],
         }
-
+        const strLocals = {
+            'ER_THROTTLED': {
+                "en": "Too many requests",
+                "fi": "Liian monta pyyntöä",
+                "sv": "För många förfrågningar",
+            }
+        }
         function setLanguage(lang) {
+            language = lang || "en"
             let elements = Object.keys(locals)
             elements.map(l => {
                 let el = document.getElementById(l)
@@ -226,7 +234,7 @@
                 body: JSON.stringify({ email: email }),
             })
                 .then(function (response) {
-                    if (response.status === 200 || response.status === 400) {
+                    if (response.status === 200 || response.status === 400 || response.status === 429) {
                         return response.json();
                     }
                     throw (response)
@@ -236,7 +244,11 @@
                     if (response.result === "success") {
                         setView("view_code")
                     } else {
-                        alert(response.error)
+                        if (response.code === "ER_THROTTLED") {
+                            alert(strLocals.ER_THROTTLED[language])
+                        } else {
+                            alert(response.error)
+                        }
                         setView("view_email")
                     }
                 })
