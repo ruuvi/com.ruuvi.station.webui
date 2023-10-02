@@ -9,6 +9,7 @@ import NetworkApi from "../NetworkApi";
 import pjson from "../../package.json";
 import notify from "../utils/notify";
 import RDialog from "./RDialog";
+import { getSetting } from "../UnitHelper";
 
 class EditNameDialog extends Component {
     constructor(props) {
@@ -52,14 +53,26 @@ class EditNameDialog extends Component {
             this.update();
         }
     }
+    showOrderInfo() {
+        let order = getSetting("SENSOR_ORDER", null)
+        if (order) {
+            order = JSON.parse(order)
+            if (order) {
+                return false
+            }
+        }
+        return true
+    }
     render() {
         if (!this.props.sensor) return <></>
         var { t } = this.props;
         return (
             <RDialog title={t("sensor_name")} isOpen={this.props.open} onClose={this.props.onClose}>
-                <p style={{marginBottom: "8px"}}>
-                    {t("rename_sensor_message")}
-                </p>
+                {this.showOrderInfo() &&
+                    <p style={{marginBottom: "8px"}}>
+                        {t("rename_sensor_message")}
+                    </p>
+                }
                 <Input autoFocus placeholder={t("sensor_name")} value={this.state.name} onChange={e => this.updateName(e.target.value)} onKeyDown={this.keyDown.bind(this)} />
                 <div style={{ textAlign: "right" }}>
                     <Button disabled={this.state.loading || !this.state.name} onClick={this.update.bind(this)} mt="17px">{t("update")}</Button>

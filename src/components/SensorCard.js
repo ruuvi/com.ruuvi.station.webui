@@ -31,6 +31,7 @@ import lowBattery from '../img/low_battery.svg'
 import { Link, useNavigate } from 'react-router-dom';
 import { getAlertIcon, isAlerting } from "../utils/alertHelper";
 import { ruuviTheme } from "../themes";
+import { ArrowDownIcon, ArrowUpIcon } from "@chakra-ui/icons";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -64,6 +65,10 @@ function MoreMenu(props) {
         else if (action === "change_background") props.uploadBg()
         else navigate('/' + props.sensor.sensor + "?scrollTo=" + action);
     }
+    const moveCard = (e, dir) => {
+        e.preventDefault()
+        props.move(dir)
+    }
     return <Menu autoSelect={false} isOpen={isOpen} onOpen={handleButtonClick} onClose={handleButtonClick} >
         <MenuButton as={IconButton} onClick={(e) => e.preventDefault() || handleButtonClick()} icon={<MdMoreVert size={23} />} variant="topbar" style={{ backgroundColor: "transparent" }} top={-4} right={props.simpleView ? 0 : -4} height={55} mt={props.mt}>
         </MenuButton>
@@ -77,6 +82,10 @@ function MoreMenu(props) {
                 <MenuDivider />
                 <MenuItem className="ddlItem" onClick={e => doAction(e, "share")}>{t("share")}</MenuItem>
             </>}
+            <MenuDivider />
+            <MenuItem className="ddlItem" onClick={(e) => moveCard(e, 1)}><ArrowUpIcon mr={2} /> {t("move_up")}</MenuItem>
+            <MenuDivider />
+            <MenuItem className="ddlItem" onClick={(e) => moveCard(e, -1)}><ArrowDownIcon mr={2} /> {t("move_down")}</MenuItem>
         </MenuList>
     </Menu>
 }
@@ -211,7 +220,7 @@ class SensorCard extends Component {
             </Flex>
         </div>
 
-        const moreDropdonw = <MoreMenu simpleView sensor={this.props.sensor} share={() => this.props.share()} uploadBg={() => {
+        const moreDropdonw = <MoreMenu move={this.props.move} simpleView sensor={this.props.sensor} share={() => this.props.share()} uploadBg={() => {
             document.getElementById("fileinputlabel" + this.props.sensor.sensor).click()
         }} />
 

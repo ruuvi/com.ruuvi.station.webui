@@ -17,6 +17,7 @@ import DashboardViewType from "../components/DashboardViewType";
 import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
 import AddSensorModal from "../components/AddSensorModal";
 import ShareDialog from "../components/ShareDialog";
+import { getSetting } from "../UnitHelper";
 
 const infoText = {
     fontFamily: "mulish",
@@ -51,13 +52,21 @@ class Dashboard extends Component {
             graphType: store.getDashboardGraphType(),
             search: "",
             currSize: '',
-            showShare: null
+            showShare: null,
+            order: null
         }
         var from = store.getDashboardFrom();
         if (from) {
             // apply new dashboard history length limit to old stored value
             if (from > 24 * 7) from = 24 * 7;
             this.state.from = from;
+        }
+        let order = getSetting("SENSOR_ORDER", null)
+        if (order) {
+            order = JSON.parse(order)
+            if (order) {
+                this.state.order = order
+            }
         }
     }
     getCurrentSensor() {
@@ -167,6 +176,24 @@ class Dashboard extends Component {
         if (this.state.currSize === 'mobile' && this.state.cardType === 'image_view') return true
         return this.state.cardType === "simple_view"
     }
+    updateOrder(order) {
+        new NetworkApi().setSetting("SENSOR_ORDER", JSON.stringify(order), b => {
+            if (b.result === "success") {
+                //notify.success(this.props.t("successfully_saved"))
+                new NetworkApi().getSettings(settings => {
+                    if (settings.result === "success") {
+                        localStorage.setItem("settings", JSON.stringify(settings.data.settings))
+                        if (this.props.updateUI) this.props.updateUI()
+                    }
+                })
+            } else if (b.result === "error") {
+                notify.error(`UserApiError.${this.props.t(b.code)}`)
+            }
+        }, error => {
+            console.log(error);
+            notify.error(this.props.t("something_went_wrong"))
+        })
+    }
     render() {
         var { t } = this.props;
         if (this.props.params.id) SessionStore.setBackRoute(`/${this.props.params.id}`)
@@ -188,6 +215,36 @@ class Dashboard extends Component {
                     onChange={e => this.setState({ ...this.state, search: e.target.value })}
                 />
             </InputGroup>
+        }
+        const sensorCard = (x, size, sensorsInSearch) => {
+            if (!x) return <></>
+            let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
+            return <span key={x.sensor + this.state.from} style={{ width: 640, maxWidth: "100%", display: hide ? "none" : undefined }}>
+                <a href={"/" + x.sensor}>
+                    <SensorCard sensor={x}
+                        size={size}
+                        dataFrom={this.state.from}
+                        cardType={this.state.cardType}
+                        graphType={this.state.graphType}
+                        share={() => this.setState({ ...this.state, showShareFor: x })}
+                        move={dir => {
+                            let order = this.state.order
+                            if (!order) {
+                                order = this.state.sensors.map(y => y.sensor)
+                            }
+                            let idx = order.findIndex(y => y === x.sensor)
+                            let toIdx = idx - dir
+                            if (!order[toIdx]) {
+                                return
+                            }
+                            let b = order[idx]
+                            order[idx] = order[toIdx]
+                            order[toIdx] = b
+                            this.updateOrder(order)
+                            this.setState({ ...this.state, order: order })
+                        }}
+                    />
+                </a></span>
         }
         return (
             <>
@@ -220,13 +277,16 @@ class Dashboard extends Component {
                                     <DashboardGrid showGraph={this.state.showGraph} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })}>
                                         {size => {
                                             let sensorsInSearch = this.getSensors()
+                                            if (this.state.order) {
+                                                return <>
+                                                    {this.state.order.map(m => {
+                                                        return sensorCard(this.state.sensors.find(x => x.sensor === m), size, sensorsInSearch)
+                                                    })}
+                                                </>
+                                            }
                                             return <>
                                                 {this.state.sensors.map(x => {
-                                                    let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
-                                                    return <span key={x.sensor + this.state.from} style={{ width: 640, maxWidth: "100%", display: hide ? "none" : undefined }}>
-                                                        <a href={"/" + x.sensor}>
-                                                            <SensorCard sensor={x} size={size} dataFrom={this.state.from} cardType={this.state.cardType} graphType={this.state.graphType} share={() => this.setState({ ...this.state, showShareFor: x })} />
-                                                        </a></span>
+                                                    return sensorCard(x, size, sensorsInSearch)
                                                 })}
                                             </>
                                         }}

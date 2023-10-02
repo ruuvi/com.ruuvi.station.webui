@@ -215,7 +215,9 @@
       "alert_offline_dialog_title": "Set cloud connection alert",
       "alert_delay": "Alert delay",
       "alert_delay_description": "Alert delay {%d^%1$,d} minutes.",
-      "alert_delay_dialog_description": "Enter the desired delay to be used in minutes before alert is triggered. To disable the delay use value 0."
+      "alert_delay_dialog_description": "Enter the desired delay to be used in minutes before alert is triggered. To disable the delay use value 0.",
+      "move_up": "Move up",
+      "move_down": "Move down"
     }
   },
   "fi": {
@@ -434,7 +436,9 @@
       "alert_offline_dialog_title": "Aseta pilviyhteyden hälytys",
       "alert_delay": "Hälytyksen viive",
       "alert_delay_description": "Hälytyksen viive {%d^%1$,d} minuuttia.",
-      "alert_delay_dialog_description": "Anna haluttu viive käytettäväksi minuutteina ennen hälytyksen laukeamista. Poistaaksesi viiveen käytöstä, käytä arvoa 0."
+      "alert_delay_dialog_description": "Anna haluttu viive käytettäväksi minuutteina ennen hälytyksen laukeamista. Poistaaksesi viiveen käytöstä, käytä arvoa 0.",
+      "move_up": "Siirrä ylös",
+      "move_down": "Siirrä alas"
     }
   },
   "sv": {
@@ -653,7 +657,9 @@
       "alert_offline_dialog_title": "Ställ in molnanslutningsvarning",
       "alert_delay": "Fördröjning av alarm",
       "alert_delay_description": "Väntetid för alarm {%d^%1$,d} minuter.",
-      "alert_delay_dialog_description": "Ange önskad fördröjning i minuter innan alarm utlöses. För att inaktivera fördröjningen, använd värdet 0."
+      "alert_delay_dialog_description": "Ange önskad fördröjning i minuter innan alarm utlöses. För att inaktivera fördröjningen, använd värdet 0.",
+      "move_up": "Flytta upp",
+      "move_down": "Flytta ner"
     }
   },
   "fr": {
@@ -872,7 +878,9 @@
       "alert_offline_dialog_title": "Définir une alerte de connexion au cloud",
       "alert_delay": "Délai d'alerte",
       "alert_delay_description": "Délai d'alerte {%d^%1$,d} minutes.",
-      "alert_delay_dialog_description": "Entrez le délai souhaité en minutes avant que l'alerte ne soit déclenchée. Pour désactiver le délai, utilisez la valeur 0."
+      "alert_delay_dialog_description": "Entrez le délai souhaité en minutes avant que l'alerte ne soit déclenchée. Pour désactiver le délai, utilisez la valeur 0.",
+      "move_up": "Monter",
+      "move_down": "Descendre"
     }
   },
   "de": {
@@ -1091,7 +1099,9 @@
       "alert_offline_dialog_title": "Cloud-Verbindungsalarm einstellen",
       "alert_delay": "Alarmverzögerung",
       "alert_delay_description": "Alarmverzögerung {%d^%1$,d} Minuten.",
-      "alert_delay_dialog_description": "Geben Sie die gewünschte Verzögerung in Minuten ein, bevor der Alarm ausgelöst wird. Um die Verzögerung zu deaktivieren, verwenden Sie den Wert 0."
+      "alert_delay_dialog_description": "Geben Sie die gewünschte Verzögerung in Minuten ein, bevor der Alarm ausgelöst wird. Um die Verzögerung zu deaktivieren, verwenden Sie den Wert 0.",
+      "move_up": "Nach oben bewegen",
+      "move_down": "Nach unten bewegen"
     }
   }
 }
