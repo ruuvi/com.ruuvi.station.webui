@@ -75,6 +75,7 @@ class Dashboard extends Component {
     }
     componentDidUpdate() {
         document.title = "Ruuvi Station"
+        this.checkSensorOrder()
     }
     componentWillUnmount() {
         clearTimeout(this.alertUpdateLoop);
@@ -177,6 +178,7 @@ class Dashboard extends Component {
         return this.state.cardType === "simple_view"
     }
     updateOrder(order) {
+        this.setState({ ...this.state, order: order })
         new NetworkApi().setSetting("SENSOR_ORDER", JSON.stringify(order), b => {
             if (b.result === "success") {
                 //notify.success(this.props.t("successfully_saved"))
@@ -193,6 +195,24 @@ class Dashboard extends Component {
             console.log(error);
             notify.error(this.props.t("something_went_wrong"))
         })
+    }
+    checkSensorOrder() {
+        let order = JSON.parse(JSON.stringify(this.state.order))
+        if (order && order.length) {
+            let sensors = this.state.sensors.map(x => x.sensor)
+            for (let i = 0; i < sensors.length; i++) {
+                let found = false
+                for (let j = 0; j < order.length; j++) {
+                    if (sensors[i] === order[j]) found = true
+                }
+                if (!found) {
+                    order = [sensors[i], ...order]
+                }
+            }
+            if (order.length !== this.state.order.length) {
+                this.updateOrder(order)
+            }
+        }
     }
     render() {
         var { t } = this.props;
@@ -241,7 +261,6 @@ class Dashboard extends Component {
                             order[idx] = order[toIdx]
                             order[toIdx] = b
                             this.updateOrder(order)
-                            this.setState({ ...this.state, order: order })
                         }}
                     />
                 </a></span>
