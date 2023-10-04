@@ -183,7 +183,7 @@ class Dashboard extends Component {
                 new NetworkApi().getSettings(settings => {
                     if (settings.result === "success") {
                         localStorage.setItem("settings", JSON.stringify(settings.data.settings))
-                        if (this.props.updateUI) this.props.updateUI()
+                        if (this.props.reloadTags) this.props.reloadTags()
                     }
                 })
             } else if (b.result === "error") {
