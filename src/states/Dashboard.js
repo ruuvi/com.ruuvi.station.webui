@@ -18,6 +18,7 @@ import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
 import AddSensorModal from "../components/AddSensorModal";
 import ShareDialog from "../components/ShareDialog";
 import { getSetting } from "../UnitHelper";
+import EditNameDialog from "../components/EditNameDialog";
 
 const infoText = {
     fontFamily: "mulish",
@@ -53,7 +54,8 @@ class Dashboard extends Component {
             search: "",
             currSize: '',
             showShare: null,
-            order: null
+            order: null,
+            rename: null
         }
         var from = store.getDashboardFrom();
         if (from) {
@@ -247,6 +249,7 @@ class Dashboard extends Component {
                         cardType={this.state.cardType}
                         graphType={this.state.graphType}
                         share={() => this.setState({ ...this.state, showShareFor: x })}
+                        rename={() => this.setState({ ...this.state, rename: x })}
                         move={dir => {
                             let order = this.state.order
                             if (!order) {
@@ -331,6 +334,7 @@ class Dashboard extends Component {
                 }
                 <AddSensorModal open={this.showModal("addsensor")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()} />
                 <ShareDialog open={this.state.showShareFor} onClose={() => this.setState({ ...this.state, showShareFor: null })} sensor={this.state.showShareFor} updateSensor={(s) => this.updateSensor(s)} />
+                <EditNameDialog open={this.state.rename} onClose={() => this.setState({ ...this.state, rename: null })} sensor={this.state.rename} updateSensor={(s) => this.updateSensor(s)} />
             </>
         )
     }

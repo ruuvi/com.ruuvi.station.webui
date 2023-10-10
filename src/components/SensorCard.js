@@ -63,6 +63,7 @@ function MoreMenu(props) {
         e.preventDefault()
         if (action === "share") props.share()
         else if (action === "change_background") props.uploadBg()
+        else if (action === "rename") props.rename()
         else navigate('/' + props.sensor.sensor + "?scrollTo=" + action);
     }
     const moveCard = (e, dir) => {
@@ -78,6 +79,8 @@ function MoreMenu(props) {
             <MenuItem className="ddlItem" onClick={e => doAction(e, "settings")}>{t("settings_and_alerts")}</MenuItem>
             <MenuDivider />
             <MenuItem className="ddlItem" onClick={e => doAction(e, "change_background")}>{t("change_background")}</MenuItem>
+            <MenuDivider />
+            <MenuItem className="ddlItem" onClick={e => doAction(e, "rename")}>{t("rename")}</MenuItem>
             {props.sensor.canShare && <>
                 <MenuDivider />
                 <MenuItem className="ddlItem" onClick={e => doAction(e, "share")}>{t("share")}</MenuItem>
@@ -222,7 +225,7 @@ class SensorCard extends Component {
 
         const moreDropdonw = <MoreMenu move={this.props.move} simpleView sensor={this.props.sensor} share={() => this.props.share()} uploadBg={() => {
             document.getElementById("fileinputlabel" + this.props.sensor.sensor).click()
-        }} />
+        }} rename={this.props.rename} />
 
         const altFileUplaod = <label htmlFor={"altup" + this.props.sensor.sensor} id={"fileinputlabel" + this.props.sensor.sensor}>
             <input type="file" accept="image/*" style={{ display: "none" }} id={"altup" + this.props.sensor.sensor} onChange={f => {
