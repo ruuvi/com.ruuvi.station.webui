@@ -220,7 +220,7 @@ export default function App() {
   }
   return (
     <ChakraProvider theme={ruuviTheme}>
-      <BrowserRouter basename="/">
+      <BrowserRouter basename={new NetworkApi().isStaging() ? "/staging/" : "/"}>
         <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
           <Logo subscription={subscription} />
           <Text>
@@ -255,8 +255,8 @@ export default function App() {
         }
         <div>
           <Routes>
-            <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }}  showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
-            <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }}  showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
+            <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
+            <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
           </Routes>
           <div style={bottomText}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi" : "https://ruuvi.com/"} target="_blank" rel="noreferrer">ruuvi.com</a></div>
           <div style={supportLink}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi/tuki" : "https://ruuvi.com/support"}>{t("support")}</a></div>
