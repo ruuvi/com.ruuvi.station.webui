@@ -54,7 +54,6 @@ class Dashboard extends Component {
             search: "",
             currSize: '',
             showShare: null,
-            order: null,
             rename: null
         }
         var from = store.getDashboardFrom();
@@ -63,13 +62,16 @@ class Dashboard extends Component {
             if (from > 24 * 7) from = 24 * 7;
             this.state.from = from;
         }
+    }
+    getOrder() {
         let order = getSetting("SENSOR_ORDER", null)
         if (order) {
             order = JSON.parse(order)
             if (order) {
-                this.state.order = order
+                return order
             }
         }
+        return null
     }
     getCurrentSensor() {
         let id = this.props.params.id;
@@ -199,7 +201,7 @@ class Dashboard extends Component {
         })
     }
     checkSensorOrder() {
-        let order = JSON.parse(JSON.stringify(this.state.order))
+        let order = JSON.parse(JSON.stringify(this.getOrder()))
         if (order && order.length) {
             let sensors = this.state.sensors.map(x => x.sensor)
             for (let i = 0; i < sensors.length; i++) {
@@ -211,13 +213,14 @@ class Dashboard extends Component {
                     order = [sensors[i], ...order]
                 }
             }
-            if (order.length !== this.state.order.length) {
+            if (order.length !== this.getOrder().length) {
                 this.updateOrder(order)
             }
         }
     }
     render() {
         var { t } = this.props;
+        let order = this.getOrder()
         if (this.props.params.id) SessionStore.setBackRoute(`/${this.props.params.id}`)
         else SessionStore.setBackRoute("/")
         const dropdowns = <>
@@ -251,7 +254,6 @@ class Dashboard extends Component {
                         share={() => this.setState({ ...this.state, showShareFor: x })}
                         rename={() => this.setState({ ...this.state, rename: x })}
                         move={dir => {
-                            let order = this.state.order
                             if (!order) {
                                 order = this.state.sensors.map(y => y.sensor)
                             }
@@ -299,9 +301,9 @@ class Dashboard extends Component {
                                     <DashboardGrid showGraph={this.state.showGraph} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })}>
                                         {size => {
                                             let sensorsInSearch = this.getSensors()
-                                            if (this.state.order) {
+                                            if (order) {
                                                 return <>
-                                                    {this.state.order.map(m => {
+                                                    {order.map(m => {
                                                         return sensorCard(this.state.sensors.find(x => x.sensor === m), size, sensorsInSearch)
                                                     })}
                                                 </>
