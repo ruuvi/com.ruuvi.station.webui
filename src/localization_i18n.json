@@ -40,6 +40,7 @@
       "min": "min",
       "more_info": "More info",
       "no": "No",
+      "ok": "OK",
       "pressure_hpa_name": "Hectopascal (hPa)",
       "pressure_inhg_name": "Inch of mercury (inHg)",
       "pressure_mmhg_name": "Millimetre of mercury (mmHg)",
@@ -218,7 +219,9 @@
       "alert_delay_description": "Alert delay {%d^%1$,d} minutes.",
       "alert_delay_dialog_description": "Enter the desired delay to be used in minutes before alert is triggered. To disable the delay use value 0.",
       "move_up": "Move up",
-      "move_down": "Move down"
+      "move_down": "Move down",
+      "share_pending": "Share pending",
+      "share_pending_message": "Shared successfully! This email address isn't linked to a Ruuvi account yet. An invite to create a free account has been sent. Once created, you'll see it in the sharee listing."
     }
   },
   "fi": {
@@ -262,6 +265,7 @@
       "min": "min",
       "more_info": "Lisätietoa",
       "no": "Ei",
+      "ok": "OK",
       "pressure_hpa_name": "Hehtopascal (hPa)",
       "pressure_inhg_name": "Elohopeatuuma (inHg)",
       "pressure_mmhg_name": "Elohopeamillimetri (mmHg)",
@@ -440,7 +444,9 @@
       "alert_delay_description": "Hälytyksen viive {%d^%1$,d} minuuttia.",
       "alert_delay_dialog_description": "Anna haluttu viive käytettäväksi minuutteina ennen hälytyksen laukeamista. Poistaaksesi viiveen käytöstä, käytä arvoa 0.",
       "move_up": "Siirrä ylös",
-      "move_down": "Siirrä alas"
+      "move_down": "Siirrä alas",
+      "share_pending": "Jakamista odotetaan",
+      "share_pending_message": "Jako onnistui! Tämä sähköpostiosoite ei ole vielä liitetty Ruuvi-tiliin. Kutsu ilmaisen tilin luomiseen on lähetetty. Kun tili on luotu, näet sen jakolistanäkymässä."
     }
   },
   "sv": {
@@ -484,6 +490,7 @@
       "min": "min",
       "more_info": "Mer info",
       "no": "Nej",
+      "ok": "OK",
       "pressure_hpa_name": "Hektopascal (hPa)",
       "pressure_inhg_name": "Tum kvicksilver (inHg)",
       "pressure_mmhg_name": "Millimeter kvicksilver (mmHg)",
@@ -662,7 +669,9 @@
       "alert_delay_description": "Väntetid för alarm {%d^%1$,d} minuter.",
       "alert_delay_dialog_description": "Ange önskad fördröjning i minuter innan alarm utlöses. För att inaktivera fördröjningen, använd värdet 0.",
       "move_up": "Flytta upp",
-      "move_down": "Flytta ner"
+      "move_down": "Flytta ner",
+      "share_pending": "Delning pågår",
+      "share_pending_message": "Delat framgångsrikt! Den här e-postadressen är ännu inte kopplad till ett Ruuvi-konto. En inbjudan att skapa ett gratis konto har skickats. När kontot har skapats kommer du att se det i delningslistan."
     }
   },
   "fr": {
@@ -706,6 +715,7 @@
       "min": "min",
       "more_info": "Plus d'infos",
       "no": "Non",
+      "ok": "OK",
       "pressure_hpa_name": "Hectopascal (hPa)",
       "pressure_inhg_name": "Pouce de mercure (inHg)",
       "pressure_mmhg_name": "Millimètre de mercure (mmHg)",
@@ -884,7 +894,9 @@
       "alert_delay_description": "Délai d'alerte {%d^%1$,d} minutes.",
       "alert_delay_dialog_description": "Entrez le délai souhaité en minutes avant que l'alerte ne soit déclenchée. Pour désactiver le délai, utilisez la valeur 0.",
       "move_up": "Monter",
-      "move_down": "Descendre"
+      "move_down": "Descendre",
+      "share_pending": "Partage en attente",
+      "share_pending_message": "Partagé avec succès ! Cette adresse e-mail n'est pas encore liée à un compte Ruuvi. Une invitation pour créer un compte gratuit a été envoyée. Une fois créé, vous le verrez dans la liste des partages."
     }
   },
   "de": {
@@ -928,6 +940,7 @@
       "min": "min",
       "more_info": "Mehr info",
       "no": "Nein",
+      "ok": "OK",
       "pressure_hpa_name": "Hektopascal (hPa)",
       "pressure_inhg_name": "Zoll Quecksilber (inHg)",
       "pressure_mmhg_name": "Millimeter Quecksilbersäule (mmHg)",
@@ -1106,7 +1119,9 @@
       "alert_delay_description": "Alarmverzögerung {%d^%1$,d} Minuten.",
       "alert_delay_dialog_description": "Geben Sie die gewünschte Verzögerung in Minuten ein, bevor der Alarm ausgelöst wird. Um die Verzögerung zu deaktivieren, verwenden Sie den Wert 0.",
       "move_up": "Nach oben bewegen",
-      "move_down": "Nach unten bewegen"
+      "move_down": "Nach unten bewegen",
+      "share_pending": "Freigabe ausstehend",
+      "share_pending_message": "Erfolgreich geteilt! Diese E-Mail-Adresse ist noch nicht mit einem Ruuvi-Konto verknüpft. Eine Einladung zur Erstellung eines kostenlosen Kontos wurde gesendet. Nach der Erstellung werden Sie es in der Freigabeliste sehen."
     }
   }
 }
