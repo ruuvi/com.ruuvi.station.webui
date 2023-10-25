@@ -30,10 +30,10 @@ class ShareDialog extends Component {
                         var sensor = this.props.sensor;
                         sensor.sharedTo.push(this.state.email);
                         this.props.updateSensor(sensor)
+                        notify.success(this.props.t("successfully_shared"))
                     } else {
                         newState.userInvited = true
                     }
-                    notify.success(this.props.t("successfully_shared"))
                     newState.email = "";
                     break
                 case "error":
