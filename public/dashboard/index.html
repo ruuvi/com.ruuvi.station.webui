@@ -1,0 +1,21 @@
+<html>
+
+<body>
+    <script>
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isDesktop = !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+        if (isDesktop) {
+            let isStaging = window.location.href.indexOf("/staging/") !== -1
+            let isDevstation = window.location.href.indexOf("devstation") !== -1
+            window.location.href = `https://${isDevstation ? "devstation" : "station"}.ruuvi.com${isStaging ? "/staging/" : ""}`
+        } else if (isIOS) {
+            // Redirect to the App Store for iOS.
+            window.location.href = 'https://apps.apple.com/us/app/id1384475885';
+        } else {
+            // Redirect to the Google Play Store for Android.
+            window.location.href = 'market://details?id=com.ruuvi.station';
+        }
+    </script>
+</body>
+
+</html>
