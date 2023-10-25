@@ -24,12 +24,13 @@ class EditNameDialog extends Component {
     }
     update() {
         this.setState({ ...this.state, loading: true })
-        new NetworkApi().update(this.props.sensor.sensor, this.state.name, resp => {
+        let name = this.state.name || this.getDefaultName()
+        new NetworkApi().update(this.props.sensor.sensor, name, resp => {
             var newState = this.state;
             switch (resp.result) {
                 case "success":
                     var sensor = this.props.sensor;
-                    sensor.name = this.state.name;
+                    sensor.name = name;
                     notify.success(this.props.t("successfully_saved"))
                     this.props.updateSensor(sensor)
                     break
@@ -49,7 +50,7 @@ class EditNameDialog extends Component {
     }
     keyDown = (e) => {
         if (e.key === 'Enter') {
-            if (this.state.loading || !this.state.name) return
+            if (this.state.loading) return
             this.update();
         }
     }
@@ -63,6 +64,11 @@ class EditNameDialog extends Component {
         }
         return true
     }
+    getDefaultName() {
+        if (!this.props.sensor) return ""
+        let splitMac = this.props.sensor.sensor.split(":")
+        return "Ruuvi " + splitMac[4] + splitMac[5]
+    }
     render() {
         if (!this.props.sensor) return <></>
         var { t } = this.props;
@@ -73,11 +79,11 @@ class EditNameDialog extends Component {
                         {t("rename_sensor_message")}
                     </p>
                 }
-                <Input autoFocus placeholder={t("sensor_name")} value={this.state.name} onChange={e => this.updateName(e.target.value)} onKeyDown={this.keyDown.bind(this)} />
+                <Input autoFocus placeholder={this.getDefaultName()} value={this.state.name} onChange={e => this.updateName(e.target.value)} onKeyDown={this.keyDown.bind(this)} />
                 <div style={{ textAlign: "right" }}>
-                    <Button disabled={this.state.loading || !this.state.name} onClick={this.update.bind(this)} mt="17px">{t("update")}</Button>
+                    <Button disabled={this.state.loading} onClick={this.update.bind(this)} mt="17px">{t("update")}</Button>
                 </div>
-                {this.state.loading && <Progress isIndeterminate={true} color="#e6f6f2" />}
+                {this.state.loading && <Progress isIndeterminate={true} color="#e6f6f2" mt={4} />}
             </RDialog>
         )
     }
