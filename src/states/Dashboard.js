@@ -79,7 +79,6 @@ class Dashboard extends Component {
     }
     componentDidUpdate() {
         document.title = "Ruuvi Station"
-        this.checkSensorOrder()
     }
     componentWillUnmount() {
         clearTimeout(this.alertUpdateLoop);
@@ -99,7 +98,9 @@ class Dashboard extends Component {
                     sensors[i] = { ...x, ...newSensor }
                 }
             })
-            this.setState({ ...this.state, sensors: sensors, loading: false })
+            this.setState({ ...this.state, sensors: sensors, loading: false }, () => {
+                this.checkSensorOrder()
+            })
         }
     }
     updateFrom(v) {
@@ -119,12 +120,16 @@ class Dashboard extends Component {
     nextIndex(direction) {
         var current = this.getCurrentSensor().sensor;
         var setNext = current;
-        let sensors = this.getSensors()
-        var indexOfCurrent = sensors.findIndex(x => x.sensor === current)
+        let sensors = this.state.sensors.map(x => x.sensor)
+        let order = this.getOrder()
+        if (order) {
+            sensors = order
+        }
+        var indexOfCurrent = sensors.findIndex(x => x === current)
         if (indexOfCurrent === -1) return;
-        if (direction === 1 && indexOfCurrent === sensors.length - 1) setNext = sensors[0].sensor
-        else if (direction === -1 && indexOfCurrent === 0) setNext = sensors[sensors.length - 1].sensor
-        else setNext = sensors[indexOfCurrent + direction].sensor
+        if (direction === 1 && indexOfCurrent === sensors.length - 1) setNext = sensors[0]
+        else if (direction === -1 && indexOfCurrent === 0) setNext = sensors[sensors.length - 1]
+        else setNext = sensors[indexOfCurrent + direction]
         this.props.navigate('/' + setNext)
     }
     removeSensor() {
@@ -202,7 +207,7 @@ class Dashboard extends Component {
     }
     checkSensorOrder() {
         let order = JSON.parse(JSON.stringify(this.getOrder()))
-        if (order && order.length) {
+        if (order) {
             let sensors = this.state.sensors.map(x => x.sensor)
             for (let i = 0; i < sensors.length; i++) {
                 let found = false
@@ -210,7 +215,13 @@ class Dashboard extends Component {
                     if (sensors[i] === order[j]) found = true
                 }
                 if (!found) {
-                    order = [sensors[i], ...order]
+                    order = [...order, sensors[i]]
+                }
+            }
+            for (let i = 0; i < order.length; i++) {
+                if (sensors.findIndex(x => x === order[i]) === -1) {
+                    order.splice(i,1)
+                    i--
                 }
             }
             if (order.length !== this.getOrder().length) {
