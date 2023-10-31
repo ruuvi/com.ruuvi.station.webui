@@ -62,11 +62,16 @@ function toISOString(date, forFilename) {
     };
 
     if (forFilename) {
+        let tzo = -date.getTimezoneOffset()
+        let dif = tzo >= 0 ? '+' : '-'
         return date.getFullYear() +
             pad(date.getMonth() + 1) +
             pad(date.getDate()) +
-            '-' + pad(date.getHours()) +
-            pad(date.getMinutes())
+            'T' + pad(date.getHours()) +
+            pad(date.getMinutes()) +
+            pad(date.getSeconds()) +
+            dif + pad(Math.floor(Math.abs(tzo) / 60)) +
+            pad(Math.abs(tzo) % 60);
     }
     return date.getFullYear() +
         '-' + pad(date.getMonth() + 1) +
