@@ -301,6 +301,7 @@ class NetworkApi {
         })
             .then(function (response) {
                 if (response.status === 200) {
+                    DataCache.removeData(mac)
                     return response.json();
                 }
                 throw (response)

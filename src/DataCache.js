@@ -14,7 +14,7 @@ var cache = {
         if (version != DB_VERSION) localForage.clear();
         await localForage.setItem("cacheVersion", DB_VERSION)
     },
-    clear:  () => {
+    clear: () => {
         localForage.clear();
     },
     getData: async (sensor, mode, from) => {
@@ -27,6 +27,16 @@ var cache = {
             console.log(e);
         }
         return null;
+    },
+    removeData: async (sensor) => {
+        let toRemove = [getKey(sensor, "sparse"), getKey(sensor, "mixed"), getKey(sensor, "dense")]
+        toRemove.forEach(x => {
+            try {
+                localForage.removeItem(x)
+            } catch {
+                console.log("failed to remove cache for key", x)
+            }
+        })
     },
     setData: async (sensor, mode, data) => {
         try {
@@ -41,7 +51,7 @@ var cache = {
             }
             if (!data) return
             let oldData = await cache.getData(sensor, mode, 0)
-            data = [...data, ...(oldData || [])]
+            data = [...data, ...(oldData || [])]
             data.sort(compare)
             // remove duplicates
             data = data.filter(function (item, pos, ary) {
