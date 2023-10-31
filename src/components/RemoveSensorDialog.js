@@ -8,6 +8,7 @@ import {
 import RDialog from "./RDialog";
 import NetworkApi from "../NetworkApi";
 import notify from "../utils/notify";
+import { addNewlines } from "../TextHelper";
 
 function RemoveSensorDialog(props) {
     const [deleteData, setdeleteData] = useState(false)
@@ -33,7 +34,7 @@ function RemoveSensorDialog(props) {
     return (
         <RDialog title={props.t("remove_sensor")} isOpen={props.open} onClose={() => props.onClose()}>
             {isSharedSensor ? (
-                <Box mb="4">{props.t("remove_shared_sensor")}</Box>
+                <Box mb="4">{addNewlines(props.t("remove_shared_sensor_description"), '\\n')}</Box>
             ) : (
                 <Box mb="4">{props.t("remove_sensor_description")}</Box>
             )}
