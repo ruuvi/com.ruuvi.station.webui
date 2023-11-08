@@ -56,7 +56,7 @@ class Dashboard extends Component {
             currSize: '',
             showShare: null,
             rename: null,
-            showResetOrderConfirmation: true
+            showResetOrderConfirmation: false
         }
         var from = store.getDashboardFrom();
         if (from) {
