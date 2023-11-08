@@ -19,6 +19,7 @@ import AddSensorModal from "../components/AddSensorModal";
 import ShareDialog from "../components/ShareDialog";
 import { getSetting } from "../UnitHelper";
 import EditNameDialog from "../components/EditNameDialog";
+import ConfirmationDialog from "../components/ConfirmationDialog";
 
 const infoText = {
     fontFamily: "mulish",
@@ -54,7 +55,8 @@ class Dashboard extends Component {
             search: "",
             currSize: '',
             showShare: null,
-            rename: null
+            rename: null,
+            showResetOrderConfirmation: true
         }
         var from = store.getDashboardFrom();
         if (from) {
@@ -220,7 +222,7 @@ class Dashboard extends Component {
             }
             for (let i = 0; i < order.length; i++) {
                 if (sensors.findIndex(x => x === order[i]) === -1) {
-                    order.splice(i,1)
+                    order.splice(i, 1)
                     i--
                 }
             }
@@ -229,13 +231,18 @@ class Dashboard extends Component {
             }
         }
     }
+    resetOrder(yes) {
+        this.setState({ ...this.state, showResetOrderConfirmation: false }, () => {
+            if (yes) this.updateOrder(null)
+        })
+    }
     render() {
         var { t } = this.props;
         let order = this.getOrder()
         if (this.props.params.id) SessionStore.setBackRoute(`/${this.props.params.id}`)
         else SessionStore.setBackRoute("/")
         const dropdowns = <>
-            <DashboardViewType value={this.state.cardType} onChange={this.setDashboardViewType.bind(this)} />
+            <DashboardViewType value={this.state.cardType} onChange={this.setDashboardViewType.bind(this)} showResetOrder={this.getOrder() !== null} resetOrder={() => this.setState({ ...this.state, showResetOrderConfirmation: true })} />
             <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard disabled={this.shouldDurationBeDisabled()} />
         </>
@@ -348,6 +355,7 @@ class Dashboard extends Component {
                 <AddSensorModal open={this.showModal("addsensor")} onClose={() => this.closeModal()} updateApp={() => this.props.reloadTags()} />
                 <ShareDialog open={this.state.showShareFor} onClose={() => this.setState({ ...this.state, showShareFor: null })} sensor={this.state.showShareFor} updateSensor={(s) => this.updateSensor(s)} />
                 <EditNameDialog open={this.state.rename} onClose={() => this.setState({ ...this.state, rename: null })} sensor={this.state.rename} updateSensor={(s) => this.updateSensor(s)} />
+                <ConfirmationDialog open={this.state.showResetOrderConfirmation} title="dialog_are_you_sure" description='reset_order_confirmation' onClose={(yes) => this.resetOrder(yes)} />
             </>
         )
     }
