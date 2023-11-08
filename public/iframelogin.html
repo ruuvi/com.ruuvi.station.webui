@@ -168,6 +168,11 @@
                 "en": "Too many requests",
                 "fi": "Liian monta pyyntöä",
                 "sv": "För många förfrågningar",
+            },
+            'sign_in_check_email': {
+                "en": "We've sent a one-time password to your email {%@^%1$s}. Sign in by entering it here:",
+                "fi": "Olemme lähettäneet sähköpostiisi kertakäyttöisen salasanan {%@^%1$s}. Kirjaudu syöttämällä se tähän:",
+                "sv": "Vi har skickat ett engångslösenord till din e-post {%@^%1$s}. Logga in genom att ange den här:",
             }
         }
         function setLanguage(lang) {
@@ -242,7 +247,7 @@
                 .then(response => {
                     console.log("resp", response)
                     if (response.result === "success") {
-                        setView("view_code")
+                        setView("view_code", email)
                     } else {
                         if (response.code === "ER_THROTTLED") {
                             alert(strLocals.ER_THROTTLED[language])
@@ -295,13 +300,15 @@
         function sendData(data) {
             window.parent.postMessage(JSON.stringify(data), "*")
         }
-        function setView(view) {
+        function setView(view, data) {
             const views = ["view_email", "view_code", "view_link", "view_loading"]
             views.forEach(v => {
                 let isThisView = v === view
                 document.getElementById(v).style.display = isThisView ? "block" : "none";
                 if (isThisView && view === "view_code") {
                     document.getElementById("pin_1").focus();
+                    let str = strLocals.sign_in_check_email[language].replace(/{(.*?)}/, data)
+                    document.getElementById('activationCodeLabel').innerText = str
                 }
             });
         }
