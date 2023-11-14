@@ -236,6 +236,10 @@ class SensorCard extends Component {
             }} />
         </label>
 
+        let noHistoryStrKey = "no_data_in_range"
+        if (this.props.sensor?.subscription.maxHistoryDays === 0) noHistoryStrKey = "no_data_free_mode"
+        let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
+
         if (simpleView) {
             let stats = [mainStat]
             if (mainStat !== "humidity") stats.push("humidity")
@@ -259,25 +263,25 @@ class SensorCard extends Component {
                                 {moreDropdonw}
                             </Flex>
                         </Flex>
-                        <SimpleGrid columns={2} style={{ width: "100%", height: "49px", overflow: "hidden", whiteSpace: "nowrap", opacity: 0.8 }}>
-                            {stats.map(x => {
-                                if (!latestReading) return null
-                                let value = latestReading[x];
-                                if (value === undefined) return null;
-                                return <GridItem key={Math.random()} style={{ color: this.getAlertState(x) > 0 ? ruuviTheme.colors.sensorCardValueAlertState : undefined }}>
-                                    <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
-                                    <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
-                                </GridItem>
-                            })}
-                        </SimpleGrid>
+                        {latestReading ? <>
+                            <SimpleGrid columns={2} style={{ width: "100%", height: "49px", overflow: "hidden", whiteSpace: "nowrap", opacity: 0.8 }}>
+                                {stats.map(x => {
+                                    let value = latestReading[x];
+                                    if (value === undefined) return null;
+                                    return <GridItem key={Math.random()} style={{ color: this.getAlertState(x) > 0 ? ruuviTheme.colors.sensorCardValueAlertState : undefined }}>
+                                        <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
+                                        <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
+                                    </GridItem>
+                                })}
+                            </SimpleGrid>
+                        </> : <>
+                            <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
+                        </>}
                         {infoRow}
                     </Box>
                 </div >
             )
         }
-        let noHistoryStrKey = "no_data_in_range"
-        if (this.props.sensor?.subscription.maxHistoryDays === 0) noHistoryStrKey = "no_data_free_mode"
-        let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
         return (
             <div>
                 {altFileUplaod}
