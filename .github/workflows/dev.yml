@@ -1,0 +1,41 @@
+name: Build and Deploy DEV
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build
+  
+#  deploy:
+#    runs-on: ubuntu-latest
+#    
+#    needs: build
+#  
+#    steps:
+#      - name: Copy build artifacts to server
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.DEV_SERVER_HOST }}
+#          username: ${{ secrets.DEV_SERVER_USERNAME }}
+#          key: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+#          port: ${{ secrets.DEV_SERVER_SSH_PORT }}
+#          script: |
+#            sudo cp -r $GITHUB_WORKSPACE/build/* /var/www/html/
