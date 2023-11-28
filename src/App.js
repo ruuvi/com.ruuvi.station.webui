@@ -174,7 +174,7 @@ export default function App() {
     }
     getSubs()
   }, [reloadSub]);
-  const [showBanner, setShowBanner] = React.useState(null);
+  const [banners, setBanners] = React.useState(null);
   useEffect(() => {
     if (!subscription) return
     (async () => {
@@ -182,9 +182,10 @@ export default function App() {
         let store = new Store();
         let notifications = await new NetworkApi().getNotification();
         if (notifications) {
-          let notification = notifications.find(x => x.plan === subscription || x.plan === "")
-          if (notification && notification.key && !store.getHasSeenBanner(notification.key)) setShowBanner(notification)
-          else if (showBanner !== null) setShowBanner(null)
+          let notification = notifications.filter(x => x.plan === subscription || x.plan === "")
+          notification = notification.filter(x => x.key && !store.getHasSeenBanner(x.key))
+          if (notification && notification.length) setBanners(notification)
+          else if (banners !== null) setBanners(null)
         }
       } catch (e) {
         console.log("Could not get notifications", e)
@@ -240,19 +241,20 @@ export default function App() {
             }} email={user.email} />
           </span>
         </HStack>
-        {showBanner &&
-          <HStack className="banner" style={{ paddingLeft: "18px", paddingRight: "18px" }}>
-            <Box flex style={{ textAlign: "center", width: "100%" }} dangerouslySetInnerHTML={{ __html: getBannerContent(showBanner) }}></Box>
+        {banners && banners.map(x => {
+          return <HStack className="banner" style={{ paddingLeft: "18px", paddingRight: "18px" }}>
+            <Box flex style={{ textAlign: "center", width: "100%" }} dangerouslySetInnerHTML={{ __html: getBannerContent(x) }}></Box>
             <Box flex style={{ width: "16px" }}>
               <div style={{ cursor: "pointer" }} onClick={() => {
-                store.setHasSeenBanner(showBanner.key, true)
-                setShowBanner(null);
+                store.setHasSeenBanner(x.key, true)
+                let rest = banners.filter(y => y.key !== x.key)
+                setBanners(rest);
               }}>
                 <CloseIcon />
               </div>
             </Box>
           </HStack>
-        }
+        })}
         <div>
           <Routes>
             <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
