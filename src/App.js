@@ -180,7 +180,7 @@ export default function App() {
     (async () => {
       try {
         let store = new Store();
-        let notifications = await new NetworkApi().getNotification();
+        let notifications = await new NetworkApi().getBanners();
         if (notifications) {
           let notification = notifications.filter(x => x.plan === subscription || x.plan === "")
           notification = notification.filter(x => x.key && !store.getHasSeenBanner(x.key))

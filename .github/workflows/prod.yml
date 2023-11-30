@@ -1,14 +1,14 @@
-name: Build and Deploy DEV
+name: Build and Deploy PROD
 
 on:
   push:
     branches:
-      - dev
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: dev
+    environment: prod
     
     steps:
     - name: Checkout repository
@@ -23,7 +23,7 @@ jobs:
       run: npm install
 
     - name: Build
-      run: make dev
+      run: make prod
   
     - name: Depoly
       run: |
