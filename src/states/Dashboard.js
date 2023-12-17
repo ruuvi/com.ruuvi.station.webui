@@ -220,12 +220,6 @@ class Dashboard extends Component {
                     order = [...order, sensors[i]]
                 }
             }
-            for (let i = 0; i < order.length; i++) {
-                if (sensors.findIndex(x => x === order[i]) === -1) {
-                    order.splice(i, 1)
-                    i--
-                }
-            }
             if (order.length !== this.getOrder().length) {
                 this.updateOrder(order)
             }
@@ -273,17 +267,31 @@ class Dashboard extends Component {
                         rename={() => this.setState({ ...this.state, rename: x })}
                         move={dir => {
                             if (!order) {
-                                order = this.state.sensors.map(y => y.sensor)
+                                order = this.state.sensors.map(y => y.sensor);
                             }
-                            let idx = order.findIndex(y => y === x.sensor)
-                            let toIdx = idx - dir
+
+                            let idx = order.findIndex(y => y === x.sensor);
+                            let toIdx = idx - dir;
+
                             if (!order[toIdx]) {
-                                return
+                                return;
                             }
-                            let b = order[idx]
-                            order[idx] = order[toIdx]
-                            order[toIdx] = b
-                            this.updateOrder(order)
+
+                            const sensorExistsAtIndex = (targetIndex) => {
+                                return this.state.sensors.some(y => y.sensor === order[targetIndex]);
+                            };
+
+                            while (!sensorExistsAtIndex(toIdx)) {
+                                if (dir && toIdx === order.length - 1) return
+                                if (!dir && toIdx === 0) return
+                                toIdx = toIdx - dir;
+                            }
+
+                            let b = order[idx];
+                            order[idx] = order[toIdx];
+                            order[toIdx] = b;
+
+                            this.updateOrder(order);
                         }}
                     />
                 </a></span>
