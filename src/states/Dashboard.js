@@ -147,6 +147,7 @@ class Dashboard extends Component {
             sensors[idx] = sensor
             this.setState({ ...this.state, sensors: sensors })
         }
+        this.props.reloadTags()
     }
     addRuuviLink(text) {
         var splitted = text.split("ruuvi.com")

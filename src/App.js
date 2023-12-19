@@ -229,7 +229,7 @@ export default function App() {
           </Text>
           <span style={{ width: "100%", textAlign: "right", marginLeft: "-25px", marginRight: "-4px" }}>
             <ColorModeSwitch />
-            <SensorMenu sensors={sensors} key={Math.random()}
+            <SensorMenu sensors={sensors} key={reloadSub}
               addSensor={() => {
                 setShowDialog("addsensor")
               }}
