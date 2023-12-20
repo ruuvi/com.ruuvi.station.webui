@@ -109,15 +109,25 @@ class Dashboard extends Component {
         this.setState({ ...this.state, from: v })
         new Store().setDashboardFrom(v)
     }
-    async componentDidMount() {
-        var api = new NetworkApi();
-        api.user(uresp => {
+    loadSensors() {
+        new NetworkApi().user(uresp => {
             if (uresp.result === "success") {
                 this.fetchData(uresp.data.sensors)
+                return
             } else if (uresp.result === "error") {
                 notify.error(this.props.t(`UserApiError.${uresp.code}`))
             }
+            setTimeout(() => {
+                this.loadSensors()
+            }, 2000)
+        }, () => {
+            setTimeout(() => {
+                this.loadSensors()
+            }, 2000)
         })
+    }
+    async componentDidMount() {
+      this.loadSensors()
     }
     nextIndex(direction) {
         var current = this.getCurrentSensor().sensor;
