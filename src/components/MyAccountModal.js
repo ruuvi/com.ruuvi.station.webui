@@ -6,6 +6,7 @@ import { logout } from "../utils/loginUtils";
 import notify from "../utils/notify";
 import RDialog from "./RDialog";
 import { ruuviTheme } from "../themes";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 function MyAccountModal(props) {
     var { t, i18n } = props;
@@ -13,6 +14,8 @@ function MyAccountModal(props) {
     const [subscriptions, setSubscriptions] = useState([])
     const [activationCode, setActivationCode] = useState("")
     const [isProcessingCode, setIsProcessingCode] = useState(false)
+    const [showDeleteAccount, setShowDeleteAccount] = useState(false)
+    const [loadingDelete, setLoadingDelete] = useState(false)
     useEffect(() => {
         async function getSubs() {
             let resp = await new NetworkApi().getSubscription()
@@ -74,6 +77,15 @@ function MyAccountModal(props) {
                 updateValidationCode(code)
             })
         }
+    }
+    const deleteAccount = async () => {
+        let resp = await new NetworkApi().requestDelete(userEmail)
+        if (resp && resp.result === "success") {
+            return notify.success(t("account_delete_confirmation_description"), 10 * 1000)
+        } else if (resp.result === "error") {
+            return notify.error(t(`UserApiError.${resp.code}`))
+        }
+        notify.error(t("something_went_wrong"))
     }
     return (
         <RDialog title={t("my_ruuvi_account")} isOpen={props.open} onClose={props.onClose}>
@@ -171,16 +183,9 @@ function MyAccountModal(props) {
             }}>{t("sign_out")}</Button>
             <Box mt={1}></Box>
             <Button variant='link' onClick={async () => {
-                if (window.confirm(t("delete_account") + "?")) {
-                    let resp = await new NetworkApi().requestDelete(userEmail)
-                    if (resp && resp.result === "success") {
-                        return notify.success(t("account_delete_confirmation_description"), 10 * 1000)
-                    } else if (resp.result === "error") {
-                        return notify.error(t(`UserApiError.${resp.code}`))
-                    }
-                    notify.error(t("something_went_wrong"))
-                }
+                setShowDeleteAccount(true)
             }}>{t("delete_account")}</Button>
+            <ConfirmationDialog open={showDeleteAccount} title="delete_account" loading={true} description='account_delete_description' onClose={(yes) => yes ? deleteAccount() : setShowDeleteAccount(false)} />
         </RDialog>
     )
 }
