@@ -1,6 +1,7 @@
 import pjson from '../package.json';
 import DataCache from './DataCache';
 import parse from './decoder/parser';
+import { logout } from './utils/loginUtils';
 
 // api docs: https://docs.ruuvi.com/communication/ruuvi-network/backends/serverless/user-api
 
@@ -19,6 +20,11 @@ function sortSensors(sensors) {
         return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
     });
     return sensors
+}
+
+function checkStatusCode(response) {
+    let status = response?.status
+    if (status === 401) logout()
 }
 
 class NetworkApi {
@@ -77,6 +83,7 @@ class NetworkApi {
     user(success, fail) {
         if (!this.options) return fail("Not signed in")
         fetch(this.url + "/user", this.options).then(function (response) {
+            checkStatusCode(response)
             return response.json();
         })
             .then(response => {
@@ -90,6 +97,7 @@ class NetworkApi {
     sensors(success, fail) {
         if (!this.options) return fail("Not signed in")
         fetch(this.url + "/sensors", this.options).then(function (response) {
+            checkStatusCode(response)
             return response.json();
         })
             .then(response => {
@@ -199,6 +207,7 @@ class NetworkApi {
         }
 
         const resp = await fetch(this.url + "/get" + q, this.options);
+        checkStatusCode(resp)
         const respData = await resp.json();
 
         if (cachedData && respData.result === "success" && useCache) {
@@ -222,6 +231,7 @@ class NetworkApi {
         q += "&alerts=true"
         q += "&sharedToOthers=true"
         const resp = await fetch(this.url + "/sensors-dense" + q, this.options)
+        checkStatusCode(resp)
         const respData = await resp.json()
         respData.data?.sensors.forEach(x => {
             parse(x)
@@ -237,6 +247,7 @@ class NetworkApi {
             method: 'POST',
             body: JSON.stringify({ sensor: mac, user: email }),
         }).then(function (response) {
+            checkStatusCode(response)
             return response.json();
         }).then(response => {
             success(response);
@@ -248,6 +259,7 @@ class NetworkApi {
             method: 'POST',
             body: JSON.stringify({ sensor: mac, user: email }),
         }).then(function (response) {
+            checkStatusCode(response)
             return response.json();
         }).then(response => {
             success(response);
@@ -260,6 +272,7 @@ class NetworkApi {
             body: JSON.stringify({ sensor: mac, name: name }),
         })
             .then(function (response) {
+                checkStatusCode(response)
                 if (response.status === 200) {
                     return response.json();
                 }
@@ -276,6 +289,7 @@ class NetworkApi {
             body: JSON.stringify({ ...data, sensor: mac }),
         })
             .then(function (response) {
+                checkStatusCode(response)
                 //if (response.status === 200) {
                 return response.json();
                 //}
@@ -291,6 +305,7 @@ class NetworkApi {
             method: 'POST',
             body: JSON.stringify({ sensor, name }),
         })
+        checkStatusCode(res)
         return await res.json()
     }
     unclaim(mac, deleteData, success) {
@@ -300,6 +315,7 @@ class NetworkApi {
             body: JSON.stringify({ sensor: mac, deleteData: deleteData }),
         })
             .then(function (response) {
+                checkStatusCode(response)
                 if (response.status === 200) {
                     DataCache.removeData(mac)
                     return response.json();
@@ -312,6 +328,7 @@ class NetworkApi {
     }
     getSettings(success) {
         fetch(this.url + "/settings", this.options).then(function (response) {
+            checkStatusCode(response)
             return response.json();
         })
             .then(response => success(response))
@@ -323,6 +340,7 @@ class NetworkApi {
             body: JSON.stringify({ name, value }),
         })
             .then(function (response) {
+                checkStatusCode(response)
                 if (response.status === 200) {
                     return response.json()
                 }
@@ -338,6 +356,7 @@ class NetworkApi {
         let url = this.url + "/alerts";
         if (mac) url += "?sensor=" + mac
         fetch(url, this.options).then(function (response) {
+            checkStatusCode(response)
             return response.json();
         })
             .then(response => success(response))
@@ -348,6 +367,7 @@ class NetworkApi {
             method: 'POST',
             body: JSON.stringify(data)
         }).then(function (response) {
+            checkStatusCode(response)
             return response.json();
         })
             .then(response => success(response))
@@ -359,6 +379,7 @@ class NetworkApi {
             body: JSON.stringify({ action: "reset", sensor }),
         })
             .then(function (response) {
+                checkStatusCode(response)
                 if (response.status === 200) {
                     return response.json()
                 }
@@ -377,6 +398,7 @@ class NetworkApi {
             body: JSON.stringify({ sensor, type }),
         })
             .then(function (response) {
+                checkStatusCode(response)
                 if (response.status === 200) {
                     return response.json()
                 }
@@ -406,6 +428,7 @@ class NetworkApi {
             body: dataURItoBlob(file),
         })
             .then(function (response) {
+                checkStatusCode(response)
                 if (response.status === 200) {
                     return
                 }
@@ -419,6 +442,7 @@ class NetworkApi {
     }
     async getSubscription() {
         const resp = await fetch(this.url + "/subscription", this.options)
+        checkStatusCode(resp)
         const respData = await resp.json()
         return respData;
     }
