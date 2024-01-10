@@ -288,7 +288,7 @@ class Sensor extends Component {
                     let d = parse(resp.data);
                     var stateData = that.state.data;
                     // no data
-                    if (!stateData && d.measurements.length === 0) {
+                    if (!stateData && !d.nextUp && d.measurements.length === 0) {
                         that.setState({ ...that.state, data: d, loading: false })
                         return
                     }
@@ -303,7 +303,7 @@ class Sensor extends Component {
                         stateData.measurements = [...d.measurements, ...stateData.measurements]
                     }
                     that.setState({ ...that.state, data: stateData, loading: false, table: d.table, resolvedMode: d.resolvedMode })
-                    if (initialLoad && (d.fromCache || returndDataLength >= pjson.settings.dataFetchPaginationSize)) load(d.measurements[d.measurements.length - 1].timestamp, initialLoad)
+                    if (initialLoad && (d.nextUp || d.fromCache || returndDataLength >= pjson.settings.dataFetchPaginationSize)) load(d.nextUp || d.measurements[d.measurements.length - 1].timestamp, initialLoad)
                 } else if (resp.result === "error") {
                     notify.error(that.props.t(`UserApiError.${resp.code}`))
                     that.setState({ ...that.state, loading: false })
