@@ -139,7 +139,7 @@ class NetworkApi {
         }
         const getClosestCacheD = async () => {
             let d = await DataCache.getData(mac, mode) || {};
-            let tss = Object.keys(d).map(x => parseInt(x)).filter(x => x <= until).sort()
+            let tss = Object.keys(d).map(x => parseInt(x)).filter(x => x <= until && x > since).sort()
             for (let i = tss.length - 1; i >= 0; i--) {
                 if (tss[i] <= until) {
                     d[tss[i]].fromCache = true
@@ -151,6 +151,12 @@ class NetworkApi {
 
         let closestCache = await getClosestCacheD()
         if (closestCache && closestCache.until === until) {
+            let fromCacheLength = closestCache.data.measurements.length
+            closestCache.data.measurements = closestCache.data.measurements.filter(x => x.timestamp >= since)
+            if (fromCacheLength > closestCache.data.measurements.length) {
+                // pretend this is not from cache to stop fetching data as we have reached the end
+                closestCache.data.fromCache = false
+            }
             return { result: "success", data: closestCache.data }
         }
         else if (closestCache) {
