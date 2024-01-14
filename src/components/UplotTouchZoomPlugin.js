@@ -1,7 +1,15 @@
 
 export default function UplotTouchZoomPlugin(xRange) {
     function init(u, opts, data) {
-        let yRange = [Math.min(...data[1]) - 0.5, Math.max(...data[1]) + 0.5]
+        let min = Number.POSITIVE_INFINITY;
+        let max = Number.NEGATIVE_INFINITY;
+    
+        for (let i = 0; i < data[1].length; i++) {
+            const value = data[1][i];
+            if (value < min) min = value;
+            if (value > max) max = value;
+        }
+        let yRange = [min - 0.5, max + 0.5]
         let over = u.over;
         let rect, oxRange, oyRange, xVal, yVal;
         let fr = { x: 0, y: 0, dx: 0, dy: 0 };

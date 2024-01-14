@@ -106,8 +106,14 @@ function DataInfo(props) {
             }
         }
     }
-    let min = Math.min(...data.map(x => x.value))
-    let max = Math.max(...data.map(x => x.value))
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+
+    for (let i = 0; i < data.length; i++) {
+        const value = data[i].value;
+        if (value < min) min = value;
+        if (value > max) max = value;
+    }
     let avg = calculateAverage(data)
     return <>
         <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_min")}</b>: {localeNumber(min)}</span>
@@ -139,22 +145,41 @@ class Graph extends Component {
     }
     getGraphData() {
         if (!this.props.data) return [[], []];
-        var d = JSON.parse(JSON.stringify(this.props.data));
-        d = d.reverse();
-        d = d.filter(x => x.parsed && x.parsed[this.props.dataKey] !== undefined)
-        d.sort((a, b) => a.timestamp > b.timestamp)
-        let out = [
-            d.map(x => x.timestamp),
-            d.map(x => getUnitHelper(this.props.dataKey).value(x.parsed[this.props.dataKey], x.parsed.temperature))
-        ]
-        for (let i = 1; i < out[0].length; i++) {
-            if (out[0][i] - out[0][i - 1] >= 3600) {
-                out[0].splice(i, 0, out[0][i - 1] + 3600)
-                out[1].splice(i, 0, null)
-                i++
+    
+        const dataKey = this.props.dataKey;
+        const unitHelper = getUnitHelper(dataKey);
+    
+        // Filter and sort the data
+        const filteredData = [];
+        for (let i = 0; i < this.props.data.length; i++) {
+            const x = this.props.data[i];
+            if (x.parsed && x.parsed[dataKey] !== undefined) {
+                filteredData.push(x);
             }
         }
-        return out
+    
+        filteredData.sort((a, b) => b.timestamp < a.timestamp);
+    
+        // Process the sorted data
+        const timestamps = [];
+        const values = [];
+        for (let i = 0; i < filteredData.length; i++) {
+            const x = filteredData[i];
+            timestamps.push(x.timestamp);
+            values.push(unitHelper.value(x.parsed[dataKey], x.parsed.temperature));
+        }
+    
+        // Insert null values for time gaps
+        for (let i = 1; i < timestamps.length; i++) {
+            const timeDifference = timestamps[i] - timestamps[i - 1];
+            if (timeDifference >= 3600) {
+                const insertTime = timestamps[i - 1] + 3600;
+                timestamps.splice(i, 0, insertTime);
+                values.splice(i, 0, null);
+            }
+        }
+    
+        return [timestamps, values];
     }
     setStateVar(k, v) {
         if (k === "zoom") zoomData.a = v
@@ -173,7 +198,6 @@ class Graph extends Component {
             dataUpdated = ts !== lastDataPointTs || this.props.data.length !== nextProps.data.length;
             lastDataPointTs = ts;
         }
-        if (this.state.zoom && this.props.data.length && nextProps.data.length && this.props.data[0].timestamp !== nextProps.data[0].timestamp) console.log("Should NOT")
         if (this.state.zoom && this.props.data.length && nextProps.data.length && this.props.data[0].timestamp !== nextProps.data[0].timestamp) return false
         return dataKeyChanged || this.props.data.length !== nextProps.data.length || dataUpdated
     }
@@ -299,7 +323,13 @@ class Graph extends Component {
             }
         } catch { }
 
-        let dataMin = Math.min(...graphData[1].map(x => x))
+        let dataMin = Number.POSITIVE_INFINITY;
+
+        for (let i = 0; i < graphData[1].length; i++) {
+            if (graphData[1][i] < dataMin) {
+                dataMin = graphData[1][i];
+            }
+        }
         if (isNaN(dataMin)) dataMin = -70000;
         dataMin -= 10;
         let fillGrad = [
@@ -391,8 +421,16 @@ class Graph extends Component {
                                                     ctx.beginPath();
                                                     ctx.strokeStyle = ruuviTheme.graph.alert.stroke[colorMode];
                                                     let yAxisVals = u.data[1]
-                                                    let graphYMax = Math.max(...yAxisVals) + 0.5
-                                                    let graphYMin = Math.min(...yAxisVals) - 0.5
+                                                    let graphYMin = Number.POSITIVE_INFINITY;
+                                                    let graphYMax = Number.NEGATIVE_INFINITY;
+
+                                                    for (let i = 0; i < yAxisVals.length; i++) {
+                                                        const value = yAxisVals[i];
+                                                        if (value < graphYMin) graphYMin = value;
+                                                        if (value > graphYMax) graphYMax = value;
+                                                    }
+                                                    graphYMax = graphYMax + 0.5
+                                                    graphYMin = graphYMin - 0.5
                                                     if (alertMax < graphYMax && alertMax > graphYMin) lineAt(alertMax)
                                                     if (alertMin > graphYMin && alertMin < graphYMax) lineAt(alertMin)
                                                     ctx.stroke();
