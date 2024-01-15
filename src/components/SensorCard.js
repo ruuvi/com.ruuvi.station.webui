@@ -118,6 +118,9 @@ class SensorCard extends Component {
         }
         var graphData = await new NetworkApi().getAsync(this.props.sensor.sensor, parseInt(((new Date().getTime()) / 1000) - 60 * 60 * this.props.dataFrom), null, { mode: graphDataMode })
         if (graphData.result === "success") {
+            Object.keys(this.props.sensor).filter(x => x.startsWith("offset")).forEach(x => {
+                graphData.data[x] = this.props.sensor[x]
+            })
             let d = parse(graphData.data);
             this.setState({ data: d, loading: false, loadingHistory: false, table: d.table, resolvedMode: d.resolvedMode })
         } else if (graphData.result === "error") {

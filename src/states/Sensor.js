@@ -285,6 +285,9 @@ class Sensor extends Component {
                 if (that.state.from !== thisFrom) return;
                 if (resp.result === "success") {
                     let returndDataLength = resp.data.measurements.length
+                    Object.keys(that.props.sensor).filter(x => x.startsWith("offset")).forEach(x => {
+                        resp.data[x] = that.props.sensor[x]
+                    })
                     let d = parse(resp.data);
                     var stateData = that.state.data;
                     // no data
