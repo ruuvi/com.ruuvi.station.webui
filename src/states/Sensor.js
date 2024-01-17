@@ -142,7 +142,7 @@ function SensorHeader(props) {
                     {props.sensor.name}
                 </Heading>
                 <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }} className="subtitle">
-                    <DurationText from={props.lastUpdateTime} t={props.t} />
+                    <DurationText from={props.lastUpdateTime} t={props.t} isAlerting={props.isAlertTriggerd("offline")} />
                 </div>
             </span>
             <span style={{ minWidth: 135, justifyContent: "flex-end" }}>
@@ -180,7 +180,7 @@ function SensorHeader(props) {
                         {props.sensor.name}
                     </Heading>
                     <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic" }} className="subtitle">
-                        <DurationText from={props.lastUpdateTime} t={props.t} />
+                        <DurationText from={props.lastUpdateTime} t={props.t} isAlerting={props.isAlertTriggerd("offline")} />
                     </div>
                 </div>
             </Box>
@@ -472,6 +472,7 @@ class Sensor extends Component {
                 <Box minHeight={1500}>
                     <Box overflow="hidden" pt={{ base: "5px", md: "35px" }} backgroundPosition="center" paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
                         <SensorHeader {...this.props} lastUpdateTime={lastReading ? lastReading.timestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}
+                            isAlertTriggerd={this.isAlertTriggerd.bind(this)}
                             loadingImage={this.state.loadingImage}
                             fileUploadChange={f => {
                                 this.setState({ ...this.state, loadingImage: true })

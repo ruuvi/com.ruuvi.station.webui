@@ -215,7 +215,7 @@ class SensorCard extends Component {
         let infoRow = <div className="dashboardUpdatedAt" style={{ ...lastUpdatedText, width: "100%" }}>
             <Flex justifyContent={"space-between"}>
                 <span>
-                    <DurationText from={latestReading ? latestReading.timestamp : " - "} t={this.props.t} />
+                    <DurationText from={latestReading ? latestReading.timestamp : " - "} t={this.props.t} isAlerting={this.getAlertState("offline") > 0} />
                 </span>
                 <Flex>
                     {latestReading && <>
