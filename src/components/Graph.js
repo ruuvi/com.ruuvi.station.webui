@@ -158,7 +158,7 @@ class Graph extends Component {
             }
         }
     
-        filteredData.sort((a, b) => b.timestamp < a.timestamp);
+        filteredData.sort((a, b) => a.timestamp - b.timestamp);
     
         // Process the sorted data
         const timestamps = [];
