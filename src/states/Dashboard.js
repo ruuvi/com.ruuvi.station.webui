@@ -69,7 +69,7 @@ class Dashboard extends Component {
         let order = getSetting("SENSOR_ORDER", null)
         if (order) {
             order = JSON.parse(order)
-            if (order) {
+            if (order && order.length) {
                 return order
             }
         }
@@ -238,7 +238,7 @@ class Dashboard extends Component {
     }
     resetOrder(yes) {
         this.setState({ ...this.state, showResetOrderConfirmation: false }, () => {
-            if (yes) this.updateOrder(null)
+            if (yes) this.updateOrder([])
         })
     }
     render() {
