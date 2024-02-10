@@ -6,7 +6,6 @@ import df2and4 from './2and4';
 
 const ruu_vi = "ruu.vi/#"
 function decoder(data) {
-    console.log(data)
     try {
         var companyIndex = data.indexOf("FF9904");
         if (companyIndex === -1) {
