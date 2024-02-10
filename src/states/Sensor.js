@@ -374,7 +374,7 @@ class Sensor extends Component {
         return user !== owner;
     }
     remove() {
-        this.setState({...this.state, removeSensor: true})
+        this.setState({ ...this.state, removeSensor: true })
     }
     updateFrom(v) {
         this.isLoading = false
@@ -496,36 +496,39 @@ class Sensor extends Component {
                                 })}
                             </SensorValueGrid>
 
-                            <ScreenSizeWrapper>
-                                <div style={{ marginTop: 30 }} id="history">
-                                    <table width="100%">
-                                        <tbody>
-                                            <tr>
-                                                <td>
-                                                    {graphTitle()}
-                                                </td>
-                                                <td style={{ textAlign: "right" }}>
-                                                    {graphCtrl()}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </ScreenSizeWrapper>
-                            <ScreenSizeWrapper isMobile>
-                                <div style={{ marginTop: 30, marginBottom: -10 }} id="history">
-                                    <table width="100%">
-                                        <tbody>
-                                            <tr>
-                                                <td style={{ textAlign: "center" }}>
-                                                    {graphCtrl()}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    {graphTitle(true)}
-                                </div>
-                            </ScreenSizeWrapper>
+                            {this.props.sensor.subscription.maxHistoryDays !== 0 &&
+                                <>
+                                    <ScreenSizeWrapper>
+                                        <div style={{ marginTop: 30 }} id="history">
+                                            <table width="100%">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            {graphTitle()}
+                                                        </td>
+                                                        <td style={{ textAlign: "right" }}>
+                                                            {graphCtrl()}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </ScreenSizeWrapper>
+                                    <ScreenSizeWrapper isMobile>
+                                        <div style={{ marginTop: 30, marginBottom: -10 }} id="history">
+                                            <table width="100%">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style={{ textAlign: "center" }}>
+                                                            {graphCtrl()}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            {graphTitle(true)}
+                                        </div>
+                                    </ScreenSizeWrapper>
+                                </>}
                             <Box height={520}>
                                 <> {!this.isLoading && (!this.state.data || !this.state.data?.measurements?.length) ? (
                                     <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", paddingTop: 240, height: 450 }}>{noHistoryStr}</center>
