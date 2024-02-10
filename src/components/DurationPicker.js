@@ -23,7 +23,8 @@ var timespans = [
     { k: "3", t: "months", v: 24 * 7 * 4 * 3 },
     { k: "6", t: "months", v: 24 * 7 * 4 * 6 },
     { k: "1", t: "year", v: 24 * 7 * 4 * 12 },
-    { k: "2", t: "years", v: 24 * 7 * 4 * 12 * 2 }
+    { k: "2", t: "years", v: 24 * 7 * 4 * 12 * 2 },
+    { k: "3", t: "years", v: 24 * 7 * 4 * 12 * 3 }
 ]
 
 export function getTimespans() { return timespans };
