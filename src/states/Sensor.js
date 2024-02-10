@@ -452,7 +452,7 @@ class Sensor extends Component {
                     <MdInfo size="16" className="buttonSideIcon" />
                 </IconButton>
                 <Button disabled={this.isLoading} variant='link' ml="10px" mr="24px" style={detailedSubText} onClick={() => this.export()}>{`${uppercaseFirst(t("export"))} CSV`}</Button>
-                <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} />
+                <DurationPicker value={this.state.from} showMaxHours={this.props.sensor.subscription.maxHistoryDays * 24} onChange={v => this.updateFrom(v)} />
             </>
         }
 

@@ -44,6 +44,7 @@ export default function DurationPicker(props) {
     var ts = getTimespan(props.value)
     var renderTimespans = timespans;
     if (props.dashboard) renderTimespans = renderTimespans.filter(x => x.v <= 24 * 7)
+    if (props.showMaxHours !== undefined) renderTimespans = renderTimespans.filter(x => x.v <= props.showMaxHours)
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
             <MenuButton as={Button}
@@ -51,7 +52,7 @@ export default function DurationPicker(props) {
                 variant="ddl"
                 className="durationPicker"
                 style={{ ...detailedSubText }}
-                disabled={props.disabled}
+                isDisabled={props.disabled || renderTimespans.length === 0}
                 borderRadius='4px'>
                 {ts.k} {t(ts.t).toLowerCase()}
             </MenuButton>
