@@ -56,7 +56,7 @@ export default function DurationPicker(props) {
                 borderRadius='4px'>
                 {ts.k} {t(ts.t).toLowerCase()}
             </MenuButton>
-            <MenuList>
+            <MenuList zIndex={2}>
                 {renderTimespans.map((x, i) => {
                     let divider = <></>
                     let borderStyle = {};
