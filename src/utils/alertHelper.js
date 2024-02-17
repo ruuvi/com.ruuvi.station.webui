@@ -42,6 +42,21 @@ export function isAlerting(sensor, type) {
     return false
 }
 
+export function hasAlertBeenHit(alerts, measurements, type) {
+    if (type) alerts = alerts.filter(x => x.type === type)
+    if (!alerts.find(x => x.enabled)) return false
+    for (let i = 0; measurements && i < measurements.length; i++) {
+        let data = measurements[i]
+        if (data && data.parsed) {
+            let dp = type === "offline" ? data.timestamp : type === "signal" ? data.rssi : data.parsed[type]
+            if (alerts.find(x => checkIfShouldBeAlerting(x, dp))) return true
+        } else {
+            if (alerts.find(x => x.enabled && x.triggered)) return true
+        }
+    }
+    return false
+}
+
 function checkIfShouldBeAlerting(alert, data) {
     if (!data) return alert.enabled && alert.triggered
     if (!alert.enabled) return false

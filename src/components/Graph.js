@@ -8,6 +8,7 @@ import { withColorMode } from "../utils/withColorMode";
 import { IconButton } from "@chakra-ui/react";
 import { MdInfo } from "react-icons/md";
 import notify from "../utils/notify";
+import { calculateAverage } from "../utils/dataMath";
 const UplotReact = React.lazy(() => import('uplot-react'));
 
 function ddmm(ts) {
@@ -34,37 +35,6 @@ const legendHider = ({
         }
     }
 });
-
-function calculateAverage(data, zoom) {
-    if (data.length === 0) {
-        return 0.0;
-    }
-
-    let totalArea = 0.0;
-    // Compute the area under the curve for each pair of consecutive points.
-    for (let i = 1; i < data.length; i++) {
-        const x1 = data[i - 1].timestamp;
-        const y1 = data[i - 1].value;
-        const x2 = data[i].timestamp;
-        const y2 = data[i].value;
-
-        // Calculate the area of the trapezium formed by two consecutive data points.
-        const area = (x2 - x1) * (y1 + y2) / 2.0;
-        totalArea += area;
-    }
-
-    // Calculate the width of the x-range.
-    const timeSpan = data[data.length - 1].timestamp - data[0].timestamp;
-
-    // If all data points have the same x-value, simply return the average of their y-values.
-    if (timeSpan === 0) {
-        const sumYValues = data.reduce((sum, entry) => sum + entry.value, 0);
-        return sumYValues / data.length;
-    }
-
-    // Compute the average using the trapezoidal rule.
-    return round(totalArea / timeSpan, 2);
-}
 
 let zoomData = {
     value: undefined,
@@ -191,6 +161,7 @@ class Graph extends Component {
         if (this.props.points !== nextProps.points) return true
         if (this.props.height !== nextProps.height) return true;
         if (nextProps.colorMode.colorMode !== this.props.colorMode.colorMode) return true;
+        if (nextProps.overrideColorMode !== this.props.overrideColorMode) return true;
         dataKeyChanged = this.props.dataKey !== nextProps.dataKey;
         if (this.state.zoom && !dataKeyChanged) return false;
         if (this.props.data && this.props.data.length) {
@@ -220,6 +191,7 @@ class Graph extends Component {
         }, 100)
     }
     componentDidMount() {
+        if (this.props.setRef) this.props.setRef(this.pRef)
         window.addEventListener('resize', this.resize)
     }
     componentWillUnmount() {
@@ -227,7 +199,7 @@ class Graph extends Component {
     }
     render() {
         let alert = this.props.alert
-        let width = this.pRef?.current?.offsetWidth
+        let width = this.props.width || this.pRef?.current?.offsetWidth
         setTimeout(() => {
             if (!width) {
                 this.forceUpdate()
@@ -238,7 +210,7 @@ class Graph extends Component {
             plugins.push(UplotTouchZoomPlugin(this.getXRange()))
             plugins.push(legendHider)
         }
-        let colorMode = this.props.colorMode.colorMode;
+        let colorMode = this.props.overrideColorMode ? this.props.overrideColorMode : this.props.colorMode.colorMode;
         let height = this.props.height || 300;
         let graphData = this.getGraphData()
 

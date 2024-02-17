@@ -11,3 +11,9 @@ export function durationToText(seconds, t) {
     var restHours = hours - days * 24;
     return `${days} ${t(days > 1 ? "days" : "day").toLowerCase()} ${restHours} ${t("h")}`
 }
+
+export function getTimestamp(date) {
+    let part_date = `${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()}`
+    let part_time = `${("0" + date.getHours()).slice(-2)}:${("0" + date.getMinutes()).slice(-2)}`
+    return part_date + " " + part_time
+}

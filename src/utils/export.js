@@ -1,6 +1,7 @@
 import { getUnitHelper } from "../UnitHelper";
+import * as XLSX from 'xlsx';
 
-export function exportCSV(data, sensorName, t) {
+function processData(data, t) {
     const sensorHeaders = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber", "txPower"]
     var csvHeader = [t('date')];
     let uHelp = {};
@@ -28,7 +29,12 @@ export function exportCSV(data, sensorName, t) {
     data = data.filter(function (item, pos, ary) {
         return !pos || item[0] !== ary[pos - 1][0];
     });
+    
+    return {csvHeader, data}
+}
 
+export function exportCSV(dataIn, sensorName, t) {
+    let {csvHeader, data} = processData(dataIn, t)
     var csv = csvHeader.toString() + "\n"
     for (var i = data.length - 1; i >= 0; i--) {
         csv += data[i].toString() + "\n"
@@ -53,6 +59,25 @@ export function exportCSV(data, sensorName, t) {
             document.body.removeChild(link)
         }
     }
+}
+
+export function exportXLSX(dataIn, sensorName, t) {
+    let {csvHeader, data} = processData(dataIn, t)
+   
+    data = [csvHeader].concat(data)
+
+    var now = toISOString(new Date(), true);
+    var exportedFilename = `${sensorName}_${now}.xlsx`
+
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(wb, ws, sensorName);
+
+    // Save the workbook as an Excel file
+    XLSX.writeFile(wb, exportedFilename);
 }
 
 function toISOString(date, forFilename) {
