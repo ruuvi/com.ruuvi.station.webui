@@ -14,7 +14,7 @@ const detailedSubText = {
     fontSize: "14px",
 }
 
-export default function UniversalMenu(props) {
+export default function ExportMenu(props) {
     return (
         <Menu autoSelect={false}>
             <MenuButton as={Button}
@@ -26,15 +26,11 @@ export default function UniversalMenu(props) {
                 {props.buttonText}
             </MenuButton>
             <MenuList>
-                {props.items?.map((x, i) => {
-                    let style = { ...detailedSubText }
-                    if (i === 0) style = { ...style, borderTopLeftRadius: 6, borderTopRightRadius: 6 }
-                    else if (i === props.items.length - 1) style = { ...style, borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
-                    return <>
-                        <MenuItem style={style} onClick={() => props.onClick(x)}>{x}</MenuItem>
-                        {i !== props.items.length - 1 && <MenuDivider />}
-                    </>
-                })}
+                <MenuItem style={{ ...detailedSubText, borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => props.onClick("CSV")}>CSV</MenuItem>
+                <MenuDivider />
+                <MenuItem style={{ ...detailedSubText }} onClick={() => props.onClick("XLSX")}>XLSX</MenuItem>
+                <MenuDivider />
+                <MenuItem isDisabled={!props.enablePDF} style={{ ...detailedSubText, borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => props.onClick("PDF")}>PDF {props.enablePDF ? "" : "(Business Starter Plan)"}</MenuItem>
             </MenuList>
         </Menu>
     )

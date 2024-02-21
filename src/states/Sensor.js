@@ -43,7 +43,7 @@ import uploadBackgroundImage from "../BackgroundUploader";
 import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
 import { isAlerting } from "../utils/alertHelper";
 import RemoveSensorDialog from "../components/RemoveSensorDialog";
-import UniversalMenu from "../components/UniversalMenu";
+import ExportMenu from "../components/ExportMenu";
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "co2", "voc", "nox"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
@@ -462,7 +462,7 @@ class Sensor extends Component {
                 <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
                     <MdInfo size="16" className="buttonSideIcon" />
                 </IconButton>
-                <UniversalMenu items={["CSV", "XLSX", "PDF"]} buttonText={uppercaseFirst(t("export"))} onClick={val => {
+                <ExportMenu buttonText={uppercaseFirst(t("export"))} enablePDF={sensorSubscription === "Business Starter"} onClick={val => {
                     switch (val) {
                         case "XLSX":
                             this.export_XLSX()
