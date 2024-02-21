@@ -255,7 +255,7 @@ export function exportPDF(sensor, data, graphData, type, from, chartRef, t, done
 
         img.onload = () => {
             doc.addImage(img, 'PNG', padding - 1, linePos + 35, width - padding * 2, 75);
-            doc.save(sensor.name + ".pdf");
+            doc.save(getFilename(sensor.name, "pdf"));
             done()
         };
 
