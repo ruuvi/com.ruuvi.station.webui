@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import NetworkApi from '../NetworkApi'
 import {
     Heading,
-    Button,
     IconButton,
     Box,
     Avatar,
@@ -23,8 +22,8 @@ import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
 import { MdChevronRight, MdInfo } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
-import { getDisplayValue, getUnitHelper, localeNumber, round } from "../UnitHelper";
-import { exportCSV, exportXLSX } from "../utils/export";
+import { getUnitHelper, localeNumber } from "../UnitHelper";
+import { exportCSV, exportPDF, exportXLSX } from "../utils/export";
 import withRouter from "../utils/withRouter"
 import DurationText from "../components/DurationText";
 import Store from "../Store";
@@ -42,19 +41,9 @@ import pjson from '../../package.json';
 import { isBatteryLow } from "../utils/battery";
 import uploadBackgroundImage from "../BackgroundUploader";
 import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
-import { hasAlertBeenHit, isAlerting } from "../utils/alertHelper";
+import { isAlerting } from "../utils/alertHelper";
 import RemoveSensorDialog from "../components/RemoveSensorDialog";
-import { jsPDF } from "jspdf";
 import UniversalMenu from "../components/UniversalMenu";
-import { ruuviTheme } from "../themes";
-import montserratFont from '../utils/fonts/Montserrat';
-import oswaldFont from '../utils/fonts/Oswald';
-import mulishFont from "../utils/fonts/Mulish";
-import ruuviLogo from '../img/pdf/ruuvi-logo.png'
-import checkOK from '../img/pdf/check-02.png'
-import checkNOK from '../img/pdf/check-01.png'
-import { getTimestamp } from "../TimeHelper";
-import { calculateAverage } from "../utils/dataMath";
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "co2", "voc", "nox"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
@@ -425,153 +414,11 @@ class Sensor extends Component {
     export() {
         exportCSV(this.state.data, this.props.sensor.name, this.props.t)
     }
-    exportPDF() {
-        let graphData = this.getGraphData()
-
-        let data = [];
-        for (let i = 0; i < graphData.length; i++) {
-            if (graphData[i].parsed === null) continue
-            data.push({ timestamp: graphData[i].timestamp, value: graphData[i].parsed[this.state.graphKey] })
-        }
-
-        let min = Number.POSITIVE_INFINITY;
-        let max = Number.NEGATIVE_INFINITY;
-
-        for (let i = 0; i < data.length; i++) {
-            const value = data[i].value;
-            if (value < min) min = value;
-            if (value > max) max = value;
-        }
-        let avg = calculateAverage(data)
-
-        let type = this.state.graphKey
-        min = getDisplayValue(type, getUnitHelper(type).value(min))
-        max = getDisplayValue(type, getUnitHelper(type).value(max))
-        avg = getDisplayValue(type, getUnitHelper(type).value(avg))
-
-
-        const padding = 10
-        const width = 210
-        const height = 297
-
-        montserratFont()
-        oswaldFont()
-        mulishFont()
-
+    export_PDF() {
         this.setState({ ...this.state, graphPDFMode: true });
-        setTimeout(() => generatePDF(), 500);
-        const generatePDF = () => {
-            const doc = new jsPDF();
-
-            const logodownsize = 70
-            doc.addImage(ruuviLogo, "png", padding, padding - 3, 1500 / logodownsize, 399 / logodownsize)
-            doc.setTextColor("#1b4847")
-            doc.setFontSize(8)
-            doc.setFont("mulish", "regular")
-            let text_ruuvi_measurments_report = this.props.t("ruuvi_measurements_report")
-            doc.text(text_ruuvi_measurments_report, width - padding - doc.getTextWidth(text_ruuvi_measurments_report), padding)
-
-            //let text_page_number = "Page 1/1"
-            //doc.text(text_page_number, width - padding - doc.getTextWidth(text_page_number), padding + 5)
-
-            doc.setDrawColor("#cdcdcd")
-            let linePos = 18
-            let lineBottomPadding = 3
-            doc.line(padding, linePos, width - padding, linePos)
-
-            doc.setFontSize(24)
-            doc.setFont('montserrat', "extrabold");
-            doc.text(this.props.sensor.name, padding, linePos + lineBottomPadding + doc.getTextDimensions(this.props.sensor.name).h);
-
-            doc.setFontSize(8)
-            doc.setFont("mulish", "bold")
-
-            const dateToit = (ts) => {
-                var d = new Date(ts);
-                return d.getDate() + "." + (d.getMonth() + 1) + "." + (d.getFullYear())
-            }
-            let text_date = this.props.t("dates") + `: ${dateToit(new Date().getTime() - this.state.from * 60 * 60 * 1000)} - ${dateToit(new Date())}`
-            doc.text(text_date, width - doc.getTextWidth(text_date) - padding, linePos + lineBottomPadding + doc.getTextDimensions(text_date).h + 1.2)
-
-            //doc.text("Note:", padding, linePos + 20)
-
-            doc.setFontSize(10)
-            let text_graph_top_info = this.props.t(getUnitHelper(this.state.graphKey).label) + ` (${getUnitHelper(this.state.graphKey).unit})`
-            doc.text(text_graph_top_info, padding, linePos + 31)
-
-            let bottom_info_value_y_pos = linePos + 35 + 75 + 15
-            let bottom_info_y_label_pos = bottom_info_value_y_pos + 5
-            let box_corner_radius = 2
-
-            let boxes = 5
-            let divs = (width - padding * 2) / boxes
-            let boxPos = []
-            for (let i = 0; i < boxes; i++) {
-                boxPos.push(padding + divs * i+1 - divs / 2 + (boxes % 2 ? divs / 2 : 0))
-            }
-
-            doc.setDrawColor("#9cbfb8")
-
-            const drawInfoBox = (value, label, pos, bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius, limitHit) => {
-                doc.setFontSize(20);
-                doc.setFont('oswald', "bold");
-
-                if (value) {
-                    var valueDim = doc.getTextDimensions(value.toString())
-                    doc.text(value.toString(), pos - valueDim.w / 2, bottom_info_value_y_pos);
-                }
-
-                doc.setFontSize(9);
-                doc.setFont("mulish", "regular")
-                doc.text(label, pos - doc.getTextWidth(label) / 2, bottom_info_y_label_pos);
-
-                if (valueDim && valueDim.w !== 0) {
-                    doc.setFont('oswald', "regular");
-                    doc.text(getUnitHelper(this.state.graphKey).unit, pos + valueDim.w/2 + 0.2 ,  bottom_info_value_y_pos - valueDim.h/2 + 0.60)
-                }
-
-                if (limitHit !== undefined) {
-                    // alert box
-                    let checkmarkSize = 8;
-                    let alertImage = limitHit ? checkNOK : checkOK
-                    doc.addImage(alertImage, "png", pos - checkmarkSize / 2, bottom_info_value_y_pos - checkmarkSize + 1, checkmarkSize, checkmarkSize) 
-                }
-
-                let boxWidth = 18;
-
-                doc.setLineWidth(0.4);
-                doc.roundedRect(pos - boxWidth, bottom_info_value_y_pos - 10, boxWidth * 2, 19, box_corner_radius, box_corner_radius);
-            }
-
-            let boxidx = 1;
-            drawInfoBox(min, this.props.t("graph_stat_min"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius);
-            drawInfoBox(max, this.props.t("graph_stat_max"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius);
-            drawInfoBox(avg, this.props.t("graph_stat_avg"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius);
-            let alertsHit = hasAlertBeenHit(this.props.sensor.alerts, this.state.data.measurements, this.state.graphKey)
-            drawInfoBox("", this.props.t(alertsHit ? "limits_hit" : "no_limits_hit"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius, alertsHit);
-
-            let text_timestamp = getTimestamp(new Date())
-            let ts_size = doc.getTextDimensions(text_timestamp)
-
-            let text_ruuvicom = this.props.t('ruuvi.com')
-            doc.text(text_ruuvicom, width / 2 - doc.getTextWidth(text_ruuvicom) / 2, height - padding - ts_size.h)
-
-            doc.setTextColor("#bbbbbb")
-            doc.setFontSize(6)
-            doc.text(text_timestamp, width / 2 - doc.getTextWidth(text_timestamp) / 2, height - padding)
-
-            const canvas = this.chartRef.current.querySelector('canvas');
-            const pngDataUrl = canvas.toDataURL('image/png');
-            const img = new Image();
-
-            img.onload = () => {
-                doc.addImage(img, 'PNG', padding - 1, linePos + 35, width - padding * 2, 75);
-                doc.save(this.props.sensor.name + ".pdf");
-                this.setState({ ...this.state, graphPDFMode: false })
-            };
-
-            img.src = pngDataUrl;
-        }
+        exportPDF(this.props.sensor, this.state.data, this.getGraphData(), this.state.graphKey, this.state.from, this.chartRef, this.props.t, () => {
+            this.setState({ ...this.state, graphPDFMode: false })
+        })
     }
     export_XLSX() {
         exportXLSX(this.state.data, this.props.sensor.name, this.props.t)
@@ -621,7 +468,7 @@ class Sensor extends Component {
                             this.export_XLSX()
                             break
                         case "PDF":
-                            this.exportPDF()
+                            this.export_PDF()
                             break
                         default:
                             this.export()
