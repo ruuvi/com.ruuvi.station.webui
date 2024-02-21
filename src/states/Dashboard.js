@@ -126,7 +126,7 @@ class Dashboard extends Component {
             }, 2000)
         })
     }
-    async componentDidMount() {
+    componentDidMount() {
       this.loadSensors()
     }
     nextIndex(direction) {
