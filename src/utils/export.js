@@ -104,6 +104,8 @@ export function exportCSV(dataIn, sensorName, t) {
 export function exportXLSX(dataIn, sensorName, t) {
     let { csvHeader, data } = processData(dataIn, t)
 
+    data.reverse()
+
     data = [csvHeader].concat(data)
 
     let exportedFilename = getFilename(sensorName, "xlsx")
