@@ -221,7 +221,7 @@ export default function App() {
   }
   return (
     <ChakraProvider theme={ruuviTheme}>
-      <BrowserRouter basename={new NetworkApi().isStaging() ? "/staging/" : "/"}>
+      <BrowserRouter basename={"/"}>
         <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
           <Logo subscription={subscription} />
           <Text>

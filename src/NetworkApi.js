@@ -55,7 +55,10 @@ class NetworkApi {
         document.cookie = `station_status=signedIn;domain=${domain};Max-Age=-99999999`
     }
     isStaging() {
-        return window.location.href.indexOf("/staging") !== -1
+         return localStorage.getItem("env") === "staging"
+    }
+    setEnv(env) {
+        localStorage.setItem("env", env)
     }
     register(email, success, fail) {
         fetch(this.url + "/register", {

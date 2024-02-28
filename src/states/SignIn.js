@@ -102,6 +102,7 @@ class SignIn extends Component {
     }
     render() {
         const { t } = this.props;
+        let isStaging = new NetworkApi().isStaging()
         return (
             <Center style={{ width: "100%" }}>
                 <Stack spacing="24px">
@@ -114,8 +115,15 @@ class SignIn extends Component {
                                 <LanguageMenu loginPage={true} />
                             </center>
                             <Heading style={loginText}>
-                                {t("login_to_ruuvi_station")} {new NetworkApi().isStaging() ? "(staging)" : ""}
+                                {t("login_to_ruuvi_station")} {isStaging ? "(staging)" : ""}
                             </Heading>
+                            {isStaging &&
+                                <Button mb={4} onClick={() => {
+                                    new NetworkApi().setEnv("production")
+                                    window.location.reload()
+                                }
+                                } style={buttonText}>For development purposes, click here for production.</Button>
+                            }
                             {this.state.loading ? (
                                 <SlideFade initialScale={1} in={this.state.loading} unmountOnExit style={{ textAlign: "center" }}>
                                     <CircularProgress isIndeterminate color="teal" />

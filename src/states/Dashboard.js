@@ -260,7 +260,21 @@ class Dashboard extends Component {
                     className="searchInput"
                     borderRadius={5}
                     value={this.state.search}
-                    onChange={e => this.setState({ ...this.state, search: e.target.value })}
+                    onChange={e => {
+                        this.setState({ ...this.state, search: e.target.value })
+                        if (e.target.value === "set_staging") {
+                            let staging = new NetworkApi().isStaging()
+                            if (staging) {
+                                if (window.confirm("Switch back to production environment?") === false) return
+                                new NetworkApi().setEnv("production")
+                                window.location.reload()
+                              } else {
+                                if (window.confirm("Are you sure you want to switch to staging environment?") === false) return
+                                new NetworkApi().setEnv("staging")
+                                window.location.reload()
+                              }
+                        }
+                    }}
                 />
             </InputGroup>
         }

@@ -18,7 +18,4 @@ clean_build:
 	rm -rf build
 
 build:
-	PUBLIC_URL="./" CI=false npm run build
-	mv build staging
 	CI=false npm run build
-	mv staging build/
