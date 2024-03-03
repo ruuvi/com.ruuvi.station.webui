@@ -243,6 +243,11 @@ class SensorCard extends Component {
         if (this.props.sensor?.subscription.maxHistoryDays === 0) noHistoryStrKey = "no_data_free_mode"
         let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
 
+        const noData = (str) =>
+            <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", height: graphHeight, marginLeft: simpleView ? 0 : 24, marginRight: 30, paddingTop: simpleView ? 0 : 10 }} className="nodatatext">
+                <div style={{ position: "relative", top: simpleView ? undefined : this.props.size === "medium" ? "44%" : "50%", transform: simpleView ? undefined : "translateY(-50%)" }}>{str}</div>
+            </div>
+
         if (simpleView) {
             let stats = [mainStat]
             if (mainStat !== "humidity") stats.push("humidity")
@@ -277,10 +282,10 @@ class SensorCard extends Component {
                                     </GridItem>
                                 })}
                             </SimpleGrid>
+                            {infoRow}
                         </> : <>
-                            <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold" }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
+                            {noData(t("no_data").split("\n").map(x => <div key={x}>{x}</div>))}
                         </>}
-                        {infoRow}
                     </Box>
                 </div >
             )
@@ -373,9 +378,9 @@ class SensorCard extends Component {
                                                             {this.state.loadingHistory ? (
                                                                 <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}><Spinner size="xl" /></div></center>
                                                             ) : showGraph && (
-                                                                <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", height: graphHeight, marginLeft: 24, marginRight: 30, paddingTop: 10 }} className="nodatatext">
-                                                                    <div style={{ position: "relative", top: this.props.size === "medium" ? "44%" : "50%", transform: "translateY(-50%)" }}>{noHistoryStr}</div>
-                                                                </div>
+                                                                <>
+                                                                    {noData(noHistoryStr)}
+                                                                </>
                                                             )}
                                                         </>}
                                                     </>
@@ -394,9 +399,12 @@ class SensorCard extends Component {
                                                 </SimpleGrid>
                                             </div>
                                             {infoRow}
-                                        </div> : <div>
-                                            <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", marginTop: height / (isSmallCard ? 6 : 4) }}>{t("no_data").split("\n").map(x => <div key={x}>{x}</div>)}</center>
-                                        </div>}
+                                        </div> : <>
+                                            <div style={{ marginLeft: -24, marginTop: height / 6 }}>
+                                                {noData(t("no_data").split("\n").map(x => <div key={x}>{x}</div>))}
+                                            </div>
+                                        </>
+                                        }
                                     </Link>
                                 </div>
                             )}
