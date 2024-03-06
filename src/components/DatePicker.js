@@ -18,14 +18,6 @@ const css = `
   .rdp-day_range_middle {
     background: #35AD9F33 !important;
   }
-  .rdp-day_range_start {
-    border-top-right-radius: 100% !important;
-    border-bottom-right-radius: 100% !important;
-  }
-  .rdp-day_range_end {
-    border-top-left-radius: 100% !important;
-    border-bottom-left-radius: 100% !important;
-  }
 `;
 
 function ddmm(ts) {
@@ -45,29 +37,6 @@ export default function DatePicker(props) {
     to: null
   };
   const [range, setRange] = useState(defaultSelected);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-
-  const setBgStyle = () => {
-    let cells = window.document.querySelectorAll('.rdp-cell')
-    for (let i = 0; i < cells.length; i++) {
-      cells[i].style.backgroundColor = '';
-    };
-    let startNodes = window.document.querySelectorAll('.rdp-day_range_start');
-    for (let i = 0; i < startNodes.length; i++) {
-      let child = startNodes[i];
-      child.parentNode.style.backgroundColor = '#35AD9F33';
-      child.parentNode.style.borderTopLeftRadius = '50%';
-      child.parentNode.style.borderBottomLeftRadius = '50%';
-    }
-    let endNodes = window.document.querySelectorAll('.rdp-day_range_end');
-    for (let i = 0; i < endNodes.length; i++) {
-      let child = endNodes[i];
-      child.parentNode.style.backgroundColor = '#35AD9F33';
-      child.parentNode.style.borderTopRightRadius = '50%';
-      child.parentNode.style.borderBottomRightRadius = '50%';
-    }
-    setCurrentMonth(currentMonth)
-  }
 
   let footerProps = {
     style: {
@@ -102,7 +71,6 @@ export default function DatePicker(props) {
         onSelect={val => {
           setRange(val)
           props.onChange(val)
-          //setBgStyle()
         }}
         defaultMonth={new Date()}
         disabled={d => d.getTime() > new Date().getTime()}
