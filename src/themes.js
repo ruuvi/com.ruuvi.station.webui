@@ -310,5 +310,12 @@ export const ruuviTheme = extendTheme({
                 },
             }),
         },
+        Popover: {
+            baseStyle: (props) => ({
+                content: {
+                    bg: colors.menuItemBg[props.colorMode],
+                }
+            }),
+        },
     },
 })

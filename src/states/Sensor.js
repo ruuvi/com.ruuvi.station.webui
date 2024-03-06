@@ -203,6 +203,7 @@ class Sensor extends Component {
             loading: true,
             graphKey: "temperature",
             from: new Store().getGraphFrom() || 24,
+            to: null,
             table: "",
             resolvedMode: "",
             editName: false,
@@ -274,7 +275,13 @@ class Sensor extends Component {
             async function load(until, initialLoad) {
                 that.isLoading = true;
                 var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
-                if (!until) until = Math.floor(new Date().getTime() / 1000);
+                if (typeof (that.state.from) === "object") {
+                    since = that.state.from.getTime() / 1000
+                }
+                if (!until) {
+                    if (that.state.to) until = Math.floor(that.state.to.getTime() / 1000)
+                    else until = Math.floor(new Date().getTime() / 1000)
+                }
                 if (!initialLoad && that.state.data.measurements.length) since = that.state.data.measurements[0].timestamp + 1;
                 if (until <= since) {
                     that.isLoading = false;
@@ -380,8 +387,30 @@ class Sensor extends Component {
     }
     updateFrom(v) {
         this.isLoading = false
-        this.setState({ ...this.state, data: null, from: v, loading: false }, () => this.loadData(false))
+        let state = this.state;
+        state.data = null
+        state.loading = false
+        if (typeof (v) === "object") {
+            state = { ...state, ...v }
+        } else {
+            state.from = v
+            state.to = null
+        }
+        this.setState(state, () => this.loadData(false))
         new Store().setGraphFrom(v)
+    }
+    getFrom() {
+        var since = new Date().getTime() - this.state.from * 60 * 60 * 1000;
+        if (typeof (this.state.from) === "object") {
+            since = this.state.from.getTime()
+        }
+        return since
+    }
+    getTo() {
+        if (this.state.to !== null) {
+            return this.state.to.getTime()
+        }
+        return new Date().getTime()
     }
     share(state) {
         this.setState({ ...this.state, showShare: state })
@@ -564,7 +593,7 @@ class Sensor extends Component {
                                         }
                                         <div style={graph}>
                                             {this.state.data?.measurements?.length &&
-                                                <Graph overrideColorMode={this.state.graphPDFMode ? "light" : null} width={this.state.graphPDFMode ? 1017 : null} key={"sensor_graph" + this.state.updateGraphKey} setRef={(ref) => (this.chartRef = ref)} alert={tnpGetAlert(this.state.graphKey)} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={new Date().getTime() - this.state.from * 60 * 60 * 1000} />
+                                                <Graph overrideColorMode={this.state.graphPDFMode ? "light" : null} width={this.state.graphPDFMode ? 1017 : null} key={"sensor_graph" + this.state.updateGraphKey} setRef={(ref) => (this.chartRef = ref)} alert={tnpGetAlert(this.state.graphKey)} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={this.getFrom()} to={this.getTo()} />
                                             }
                                         </div>
                                     </Box>

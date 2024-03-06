@@ -173,7 +173,7 @@ class Graph extends Component {
         return dataKeyChanged || this.props.data.length !== nextProps.data.length || dataUpdated
     }
     getXRange() {
-        return [this.props.from / 1000, new Date().getTime() / 1000]
+        return [this.props.from / 1000, this.props.to ? this.props.to / 1000 : new Date().getTime() / 1000]
     }
     resize = (e) => {
         if (window.innerWidth === screenW) return;
