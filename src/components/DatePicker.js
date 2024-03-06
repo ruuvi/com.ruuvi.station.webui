@@ -77,7 +77,7 @@ export default function DatePicker(props) {
   let footer = <p {...footerProps}>{t("pick_first_day")}</p>;
   if (range?.from) {
     if (!range.to) {
-      footer = <p {...footerProps}>{ddmm(range.from)}</p>;
+      footer = <p {...footerProps}>{t("pick_second_day")}</p>;
     } else if (range.to) {
       footer = (
         <p {...footerProps}>
