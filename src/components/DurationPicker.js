@@ -91,7 +91,7 @@ export default function DurationPicker(props) {
                 <Popover isOpen={showPicker} placement="bottom-end" onClose={() => setShowPicker(false)}>
                     <PopoverAnchor>
                         <MenuButton as={Button}
-                            rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" onClick={e => setShowPicker(false) || setShowDropdown(!showPicker)} style={{ marginRight: -8, marginLeft: 4 }} />}
+                            rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" onClick={e => setShowPicker(false) || setShowDropdown(!showDropdown)} style={{ marginRight: -8, marginLeft: 4 }} />}
                             leftIcon={!props.dashboard && <AiOutlineCalendar size={26} className="buttonSideIcon" onClick={e => setShowDropdown(false) || setShowPicker(!showPicker)} style={{ marginRight: 6, marginLeft: -8 }} />}
                             variant="ddl"
                             className="durationPicker"
