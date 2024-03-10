@@ -445,7 +445,9 @@ class Sensor extends Component {
     }
     export_PDF() {
         this.setState({ ...this.state, graphPDFMode: true });
-        exportPDF(this.props.sensor, this.state.data, this.getGraphData(), this.state.graphKey, this.state.from, this.chartRef, this.props.t, () => {
+        let from = this.getFrom()
+        let to = this.state.to || new Date().getTime()
+        exportPDF(this.props.sensor, this.state.data, this.getGraphData(), this.state.graphKey, from, to, this.chartRef, this.props.t, () => {
             this.setState({ ...this.state, graphPDFMode: false })
         })
     }

@@ -120,7 +120,7 @@ export function exportXLSX(dataIn, sensorName, t) {
     XLSX.writeFile(wb, exportedFilename);
 }
 
-export function exportPDF(sensor, data, graphData, type, from, chartRef, t, done) {
+export function exportPDF(sensor, data, graphData, type, from, to, chartRef, t, done) {
     let ezdata = [];
     for (let i = 0; i < graphData.length; i++) {
         if (graphData[i].parsed === null) continue
@@ -181,7 +181,7 @@ export function exportPDF(sensor, data, graphData, type, from, chartRef, t, done
             var d = new Date(ts);
             return d.getDate() + "." + (d.getMonth() + 1) + "." + (d.getFullYear())
         }
-        let text_date = t("dates") + `: ${dateToit(new Date().getTime() - from * 60 * 60 * 1000)} - ${dateToit(new Date())}`
+        let text_date = t("dates") + `: ${dateToit(from)} - ${dateToit(to)}`
         doc.text(text_date, width - doc.getTextWidth(text_date) - padding, linePos + lineBottomPadding + doc.getTextDimensions(text_date).h + 1.2)
 
         //doc.text("Note:", padding, linePos + 20)
