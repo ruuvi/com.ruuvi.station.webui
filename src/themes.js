@@ -48,6 +48,9 @@ export const ruuviTheme = extendTheme({
                 bg: colors.bodyBg[props.colorMode],
                 color: props.colorMode === "light" ? "#1b4847 !important" : "white !important",
             },
+            '.bodybg': {
+                bg: colors.topbar[props.colorMode],
+            },
             '.subtitle': {
                 color: colors.subtitle[props.colorMode]
             },

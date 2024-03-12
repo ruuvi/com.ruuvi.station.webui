@@ -15,6 +15,7 @@ import {
     useMediaQuery,
     CircularProgress,
     Spinner,
+    Flex,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
@@ -489,10 +490,13 @@ class Sensor extends Component {
         }
 
         let graphCtrl = () => {
-            return <><span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
-                <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
-                    <MdInfo size="16" className="buttonSideIcon" />
-                </IconButton>
+            return <>
+                <span>
+                    <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
+                    <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
+                        <MdInfo size="16" className="buttonSideIcon" />
+                    </IconButton>
+                </span>
                 <ExportMenu buttonText={uppercaseFirst(t("export"))} enablePDF={sensorSubscription === "Business Starter"} onClick={val => {
                     switch (val) {
                         case "XLSX":
@@ -560,8 +564,10 @@ class Sensor extends Component {
                                                         <td>
                                                             {graphTitle()}
                                                         </td>
-                                                        <td style={{ textAlign: "right" }}>
-                                                            {graphCtrl()}
+                                                        <td>
+                                                            <Flex justify="end">
+                                                                {graphCtrl()}
+                                                            </Flex>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -573,8 +579,10 @@ class Sensor extends Component {
                                             <table width="100%">
                                                 <tbody>
                                                     <tr>
-                                                        <td style={{ textAlign: "center" }}>
-                                                            {graphCtrl()}
+                                                        <td>
+                                                            <Flex justify="center" flexWrap="wrap" gap={1}>
+                                                                {graphCtrl(true)}
+                                                            </Flex>
                                                         </td>
                                                     </tr>
                                                 </tbody>

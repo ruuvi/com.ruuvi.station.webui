@@ -10,6 +10,8 @@ import {
     PopoverAnchor,
     PopoverBody,
     Box,
+    Divider,
+    Flex,
 } from "@chakra-ui/react"
 import { MdArrowDropDown } from "react-icons/md"
 import { AiOutlineCalendar } from "react-icons/ai"
@@ -51,6 +53,11 @@ const detailedSubText = {
     fontSize: "14px",
 }
 
+const iconProps = {
+    size: 26,
+    style: { margin: -9 }
+}
+
 export default function DurationPicker(props) {
     const { t } = useTranslation();
     const [lastCustom, setLastCustom] = useState(null)
@@ -87,28 +94,69 @@ export default function DurationPicker(props) {
             </Modal>
             */}
 
-            <Menu autoSelect={false} strategy="fixed" placement="bottom-end" isOpen={showDropdown} onClose={() => setShowDropdown(false)}>
+            <span>
                 <Popover isOpen={showPicker} placement="bottom-end" onClose={() => setShowPicker(false)}>
-                    <PopoverAnchor>
-                        <MenuButton as={Button}
-                            rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" onClick={e => setShowPicker(false) || setShowDropdown(!showDropdown)} style={{ marginRight: -8, marginLeft: 4 }} />}
-                            leftIcon={!props.dashboard && <AiOutlineCalendar size={26} className="buttonSideIcon" onClick={e => setShowDropdown(false) || setShowPicker(!showPicker)} style={{ marginRight: 6, marginLeft: -8 }} />}
-                            variant="ddl"
-                            className="durationPicker"
-                            style={{ ...detailedSubText }}
-                            disabled={props.disabled}
-                            borderRadius='4px'>
-                            {custom ? (
-                                <>
-                                    {ddmm(custom.from) + " - " + ddmm(custom.to)}
-                                </>
-                            ) : (
-                                <>
-                                    {ts.k} {t(ts.t).toLowerCase()}
-                                </>
-                            )}
-                        </MenuButton>
-                    </PopoverAnchor>
+                    <Menu autoSelect={false} strategy="fixed" placement="bottom-end" isOpen={showDropdown} onClose={() => setShowDropdown(false)}>
+                        <PopoverAnchor>
+
+                            <span className="durationPicker" style={{ height: "40px", display: "inline-block", borderRadius: "4px" }} >
+                                <Flex>
+                                    {!props.dashboard &&
+                                        <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px' }}
+                                            onClick={e => setShowDropdown(false) || setShowPicker(!showPicker)} >
+                                            <AiOutlineCalendar {...iconProps} />
+                                        </Button>
+                                    }
+                                    {!props.dashboard ? (
+                                        <Divider orientation="vertical" height={"38px"} mt={"1px"} className="bodybg" width={"2px"} borderStyle="none" />
+                                    ) : (
+                                        <Box width={"4px"} />
+                                    )
+                                    }
+                                    <span style={{ display: "inline-block", marginLeft: 8, marginRight: 10, marginTop: 10, fontFamily: "mulish", fontSize: 14, fontWeight: 600 }}>
+                                        {custom ? (
+                                            <>
+                                                {ddmm(custom.from) + " - " + ddmm(custom.to)}
+                                            </>
+                                        ) : (
+                                            <>
+                                                {ts.k} {t(ts.t).toLowerCase()}
+                                            </>
+                                        )}
+                                    </span>
+                                    <Divider orientation="vertical" height={"38px"} mt={"1px"} className="bodybg" width={"2px"} borderStyle="none" />
+                                    <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px' }}
+                                        onClick={e => setShowPicker(false) || setShowDropdown(!showDropdown)} >
+                                        <MdArrowDropDown {...iconProps} />
+                                    </Button>
+                                    <MenuButton height={"40px"} >
+                                    </MenuButton>
+                                </Flex>
+                            </span>
+
+                        </PopoverAnchor>
+
+                        <MenuList zIndex={2}>
+                            {renderTimespans.map((x, i) => {
+                                let divider = <></>
+                                let borderStyle = {};
+                                if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
+                                if (i === renderTimespans.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
+                                else divider = <MenuDivider />
+                                return <div key={x.v + "p"}>
+                                    <MenuItem key={x.v} className={!custom && ts.v === x.v ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }}
+                                        onClick={() => {
+                                            setCustom(null)
+                                            props.onChange(x.v)
+                                        }}>
+                                        {x.k} {t(x.t).toLowerCase()}
+                                    </MenuItem>
+                                    {divider}
+                                </div>
+                            })}
+                        </MenuList>
+                    </Menu>
+
                     <PopoverContent>
                         <PopoverBody>
                             <DatePicker onChange={setLastCustom} />
@@ -127,26 +175,7 @@ export default function DurationPicker(props) {
                         </PopoverBody>
                     </PopoverContent>
                 </Popover>
-                <MenuList zIndex={2}>
-                    {renderTimespans.map((x, i) => {
-                        let divider = <></>
-                        let borderStyle = {};
-                        if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
-                        if (i === renderTimespans.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
-                        else divider = <MenuDivider />
-                        return <div key={x.v + "p"}>
-                            <MenuItem key={x.v} className={!custom && ts.v === x.v ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }}
-                                onClick={() => {
-                                    setCustom(null)
-                                    props.onChange(x.v)
-                                }}>
-                                {x.k} {t(x.t).toLowerCase()}
-                            </MenuItem>
-                            {divider}
-                        </div>
-                    })}
-                </MenuList>
-            </Menu>
+            </span>
         </>
     )
 }
