@@ -58,52 +58,44 @@ const iconProps = {
     style: { margin: -9 }
 }
 
+let wasInClose = false
+
 export default function DurationPicker(props) {
     const { t } = useTranslation();
     const [lastCustom, setLastCustom] = useState(null)
     const [custom, setCustom] = useState(null)
     const [showPicker, setShowPicker] = useState(false)
     const [showDropdown, setShowDropdown] = useState(false)
+
+    const setDropdownFromClick = (state) => {
+        wasInClose = false
+        setShowDropdown(state)
+    }
+
     var ts = getTimespan(props.value)
     var renderTimespans = timespans;
 
     if (props.dashboard) renderTimespans = renderTimespans.filter(x => x.v <= 24 * 7)
     if (props.showMaxHours !== undefined) renderTimespans = renderTimespans.filter(x => x.v <= props.showMaxHours)
+
     return (
         <>
-            {/* 
-            <Modal isOpen={showPicker} onClose={() => setShowPicker(false)}>
-                <ModalOverlay />
-                <ModalContent maxWidth={"360px"}>
-                    <ModalBody>
-                        <DatePicker onChange={setLastCustom} />
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button variant='ghost' mr={3} onClick={() => setShowPicker(false)}>
-                            Close
-                        </Button>
-                        <Button onClick={() => {
-                            setCustom(lastCustom)
-                            setShowPicker(false)
-                            lastCustom.from.setHours(0, 0, 0, 0)
-                            lastCustom.to.setHours(23, 59, 59, 999)
-                            props.onChange(lastCustom)
-                        }}>Set</Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-            */}
-
             <span>
-                <Popover isOpen={showPicker} placement="bottom-end" onClose={() => setShowPicker(false)}>
-                    <Menu autoSelect={false} strategy="fixed" placement="bottom-end" isOpen={showDropdown} onClose={() => setShowDropdown(false)}>
+                <Popover isOpen={showPicker} placement="bottom-end">
+                    <Menu autoSelect={false} strategy="fixed" placement="bottom-end" isOpen={showDropdown} onClose={() => {
+                        wasInClose = true
+                        setTimeout(() => {
+                            wasInClose = false
+                        }, 100)
+                        setShowDropdown(false)
+                    }}>
                         <PopoverAnchor>
 
                             <span className="durationPicker" style={{ height: "40px", display: "inline-block", borderRadius: "4px" }} >
                                 <Flex>
                                     {!props.dashboard &&
                                         <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px' }}
-                                            onClick={e => setShowDropdown(false) || setShowPicker(!showPicker)} >
+                                            onClick={e => setDropdownFromClick(false) || setShowPicker(!showPicker)} >
                                             <AiOutlineCalendar {...iconProps} />
                                         </Button>
                                     }
@@ -126,7 +118,14 @@ export default function DurationPicker(props) {
                                     </span>
                                     <Divider orientation="vertical" height={"38px"} mt={"1px"} className="bodybg" width={"2px"} borderStyle="none" />
                                     <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px' }}
-                                        onClick={e => setShowPicker(false) || setShowDropdown(!showDropdown)} >
+                                        onClick={e => {
+                                            if (wasInClose) {
+                                                wasInClose = false
+                                                return
+                                            }
+                                            setShowPicker(false)
+                                            setDropdownFromClick(!showDropdown)
+                                        }}>
                                         <MdArrowDropDown {...iconProps} />
                                     </Button>
                                     <MenuButton height={"40px"} >
@@ -158,19 +157,19 @@ export default function DurationPicker(props) {
                     </Menu>
 
                     <PopoverContent>
-                            <DatePicker onChange={setLastCustom} />
-                            <Box textAlign="right" pr={"20px"} pb={"20px"}>
-                                <Button variant='ghost' mr={3} onClick={() => setShowPicker(false)}>
-                                    {t("close")}
-                                </Button>
-                                <Button isDisabled={!lastCustom || !lastCustom.from || !lastCustom.to} onClick={() => {
-                                    setCustom(lastCustom)
-                                    setShowPicker(false)
-                                    lastCustom.from.setHours(0, 0, 0, 0)
-                                    lastCustom.to.setHours(23, 59, 59, 999)
-                                    props.onChange(lastCustom)
-                                }}>{t("set")}</Button>
-                            </Box>
+                        <DatePicker onChange={setLastCustom} />
+                        <Box textAlign="right" pr={"20px"} pb={"20px"}>
+                            <Button variant='ghost' mr={3} onClick={() => setShowPicker(false)}>
+                                {t("close")}
+                            </Button>
+                            <Button isDisabled={!lastCustom || !lastCustom.from || !lastCustom.to} onClick={() => {
+                                setCustom(lastCustom)
+                                setShowPicker(false)
+                                lastCustom.from.setHours(0, 0, 0, 0)
+                                lastCustom.to.setHours(23, 59, 59, 999)
+                                props.onChange(lastCustom)
+                            }}>{t("set")}</Button>
+                        </Box>
                     </PopoverContent>
                 </Popover>
             </span>
