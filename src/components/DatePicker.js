@@ -41,6 +41,7 @@ export default function DatePicker(props) {
   let footerProps = {
     style: {
       textAlign: "left",
+      paddingLeft: 8,
     }
   }
   let footer = <p {...footerProps}>{t("pick_first_day")}</p>;
@@ -60,6 +61,7 @@ export default function DatePicker(props) {
     <>
       <style>{css}</style>
       <DayPicker
+      style={{paddingLeft: "3px"}}
         mode="range"
         locale={local}
         selected={range}

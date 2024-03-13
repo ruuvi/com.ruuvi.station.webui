@@ -158,9 +158,8 @@ export default function DurationPicker(props) {
                     </Menu>
 
                     <PopoverContent>
-                        <PopoverBody>
                             <DatePicker onChange={setLastCustom} />
-                            <Box textAlign="right">
+                            <Box textAlign="right" pr={"20px"} pb={"20px"}>
                                 <Button variant='ghost' mr={3} onClick={() => setShowPicker(false)}>
                                     {t("close")}
                                 </Button>
@@ -172,7 +171,6 @@ export default function DurationPicker(props) {
                                     props.onChange(lastCustom)
                                 }}>{t("set")}</Button>
                             </Box>
-                        </PopoverBody>
                     </PopoverContent>
                 </Popover>
             </span>
