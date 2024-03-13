@@ -105,7 +105,7 @@ export default function DurationPicker(props) {
                                         <Box width={"4px"} />
                                     )
                                     }
-                                    <span style={{ display: "inline-block", marginLeft: 8, marginRight: 10, marginTop: 10, fontFamily: "mulish", fontSize: 14, fontWeight: 600 }}>
+                                    <span style={{ display: "inline-block", marginLeft: props.dashboard ? 10 : 14, marginRight: 14, marginTop: 10, fontFamily: "mulish", fontSize: 14, fontWeight: 600 }}>
                                         {custom ? (
                                             <>
                                                 {ddmm(custom.from) + " - " + ddmm(custom.to)}

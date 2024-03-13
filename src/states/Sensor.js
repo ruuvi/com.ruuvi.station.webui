@@ -509,7 +509,6 @@ class Sensor extends Component {
                             this.export()
                     }
                 }} />
-                <Box display="inline-block" width="12px" />
                 <DurationPicker value={this.state.from} showMaxHours={this.props.sensor.subscription.maxHistoryDays * 24} onChange={v => this.updateFrom(v)} />
             </>
         }
@@ -565,7 +564,7 @@ class Sensor extends Component {
                                                             {graphTitle()}
                                                         </td>
                                                         <td>
-                                                            <Flex justify="end">
+                                                            <Flex justify="end" gap={"6px"}>
                                                                 {graphCtrl()}
                                                             </Flex>
                                                         </td>
@@ -576,18 +575,18 @@ class Sensor extends Component {
                                     </ScreenSizeWrapper>
                                     <ScreenSizeWrapper isMobile>
                                         <div style={{ marginTop: 30, marginBottom: -10 }} id="history">
+                                            {graphTitle(true)}
                                             <table width="100%">
                                                 <tbody>
                                                     <tr>
                                                         <td>
-                                                            <Flex justify="center" flexWrap="wrap" gap={1}>
+                                                            <Flex justify="end" flexWrap="wrap" gap={"6px"}>
                                                                 {graphCtrl(true)}
                                                             </Flex>
                                                         </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
-                                            {graphTitle(true)}
                                         </div>
                                     </ScreenSizeWrapper>
                                 </>}
