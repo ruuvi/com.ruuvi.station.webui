@@ -576,7 +576,7 @@ class Sensor extends Component {
                                     <ScreenSizeWrapper isMobile>
                                         <div style={{ marginTop: 30, marginBottom: -10 }} id="history">
                                             {graphTitle(true)}
-                                            <table width="100%">
+                                            <table width="100%" style={{marginTop: "10px"}}>
                                                 <tbody>
                                                     <tr>
                                                         <td>
