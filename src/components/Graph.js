@@ -1,7 +1,7 @@
 import React, { Component, Suspense, useEffect, useState } from "react";
 import 'uplot/dist/uPlot.min.css';
 import { withTranslation } from 'react-i18next';
-import { getUnitHelper, localeNumber, round } from "../UnitHelper";
+import { getDisplayValue, getUnitHelper, localeNumber, round } from "../UnitHelper";
 import UplotTouchZoomPlugin from "./UplotTouchZoomPlugin";
 import { ruuviTheme } from "../themes";
 import { withColorMode } from "../utils/withColorMode";
@@ -52,7 +52,7 @@ let zoomData = {
 }
 
 function DataInfo(props) {
-    const { graphData, t } = props
+    const { graphData, t, type } = props
     const [currZoom, setCurrZoom] = useState(null);
     useEffect(() => {
         zoomData.registerListener(v => {
@@ -86,9 +86,9 @@ function DataInfo(props) {
     }
     let avg = calculateAverage(data)
     return <>
-        <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_min")}</b>: {localeNumber(min)}</span>
-        <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_max")}</b>: {localeNumber(max)}</span>
-        <span className="graphLabel"><b>{t("graph_stat_avg")}</b>: {localeNumber(avg)}</span>
+        <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_min")}</b>: {getDisplayValue(type, min)}</span>
+        <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_max")}</b>: {getDisplayValue(type, max)}</span>
+        <span className="graphLabel"><b>{t("graph_stat_avg")}</b>: {getDisplayValue(type, avg)}</span>
         <IconButton mt={"-3px"} variant="ghost" onClick={() => notify.info(t("graph_stats_info"))}>
             <MdInfo size="16" className="buttonSideIcon" />
         </IconButton>
@@ -366,7 +366,7 @@ class Graph extends Component {
                                             points: { show: this.props.points, size: 4, fill: ruuviTheme.graph.fill[colorMode] },
                                             width: 1,
                                             ...alertColor(),
-                                            value: (self, rawValue) => localeNumber(rawValue)
+                                            value: (self, rawValue) => getDisplayValue(this.props.dataKey, rawValue)
                                         }],
                                         hooks: {
                                             drawSeries: [
@@ -505,7 +505,7 @@ class Graph extends Component {
                             </div>
                             {!this.props.cardView && <>
                                 <center style={{ fontFamily: "Arial", fontSize: "14px", marginTop: 35 }}>
-                                    <DataInfo graphData={graphData} t={this.props.t} zoom={this.state.zoom} />
+                                    <DataInfo graphData={graphData} t={this.props.t} zoom={this.state.zoom} type={this.props.dataKey} />
                                 </center>
                             </>}
                         </>
