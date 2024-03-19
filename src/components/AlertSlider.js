@@ -4,8 +4,10 @@ import { getAlertRange, getUnitHelper, pressureFromUserFormat, temperatureFromUs
 import InputDialog from "./InputDialog";
 import { withTranslation } from "react-i18next";
 import { uppercaseFirst } from "../TextHelper";
+import { ruuviTheme } from "../themes";
 
-function getColor(gray) {
+function getColor(gray, alert) {
+    if (alert) return ruuviTheme.colors.sensorCardValueAlertState
     return `rgba(67,199,186,${gray ? 0.2 : 1})`
 }
 class AlertSlider extends React.Component {
@@ -62,7 +64,7 @@ class AlertSlider extends React.Component {
                             height: '2px',
                             width: '100%',
                             background: getTrackBackground({
-                                colors: [getColor(true), getColor(this.props.disabled), getColor(true)],
+                                colors: [getColor(true, true), getColor(this.props.disabled), getColor(true, true)],
                                 ...this.state,
                                 values: sliderValues
                             }),
