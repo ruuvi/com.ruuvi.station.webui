@@ -115,10 +115,10 @@ class Graph extends Component {
     }
     getGraphData() {
         if (!this.props.data) return [[], []];
-    
+
         const dataKey = this.props.dataKey;
         const unitHelper = getUnitHelper(dataKey);
-    
+
         // Filter and sort the data
         const filteredData = [];
         for (let i = 0; i < this.props.data.length; i++) {
@@ -127,9 +127,9 @@ class Graph extends Component {
                 filteredData.push(x);
             }
         }
-    
+
         filteredData.sort((a, b) => a.timestamp - b.timestamp);
-    
+
         // Process the sorted data
         const timestamps = [];
         const values = [];
@@ -138,7 +138,7 @@ class Graph extends Component {
             timestamps.push(x.timestamp);
             values.push(unitHelper.value(x.parsed[dataKey], x.parsed.temperature));
         }
-    
+
         // Insert null values for time gaps
         for (let i = 1; i < timestamps.length; i++) {
             const timeDifference = timestamps[i] - timestamps[i - 1];
@@ -148,7 +148,7 @@ class Graph extends Component {
                 values.splice(i, 0, null);
             }
         }
-    
+
         return [timestamps, values];
     }
     setStateVar(k, v) {
@@ -371,46 +371,94 @@ class Graph extends Component {
                                         hooks: {
                                             drawSeries: [
                                                 (u, si) => {
-                                                    if (!alert || !alert.enabled) return
                                                     let ctx = u.ctx;
                                                     ctx.save();
                                                     let s = u.series[si];
-                                                    let xd = u.data[0];
-                                                    let [i0, i1] = s.idxs;
-                                                    const lineAt = (val) => {
-                                                        let x0 = u.valToPos(xd[i0], 'x', true);
-                                                        let y0 = u.valToPos(val, 'y', true);
-                                                        let x1 = u.valToPos(xd[i1], 'x', true);
-                                                        let y1 = u.valToPos(val, 'y', true);
-                                                        ctx.moveTo(x0, y0);
-                                                        ctx.lineTo(x1, y1);
-                                                    }
-
                                                     const offset = (s.width % 2) / 2;
 
-                                                    ctx.translate(offset, offset);
+                                                    if (!this.props.points) {
+                                                        // manually draw points for datapoints that are not connected
 
-                                                    ctx.beginPath();
-                                                    ctx.strokeStyle = ruuviTheme.graph.alert.stroke[colorMode];
-                                                    let yAxisVals = u.data[1]
-                                                    let graphYMin = Number.POSITIVE_INFINITY;
-                                                    let graphYMax = Number.NEGATIVE_INFINITY;
+                                                        ctx.translate(offset, offset);
+                                                        ctx.beginPath();
 
-                                                    for (let i = 0; i < yAxisVals.length; i++) {
-                                                        const value = yAxisVals[i];
-                                                        if (value < graphYMin) graphYMin = value;
-                                                        if (value > graphYMax) graphYMax = value;
+                                                        let xd = u.data[0];
+                                                        let yd = u.data[1]
+
+                                                        const timeToClosestDatapoint = (idx) => {
+                                                            let closestToLeft = Number.POSITIVE_INFINITY
+                                                            let closestToRight = Number.POSITIVE_INFINITY
+                                                            if (idx !== 0) {
+                                                                for (let i = idx - 1; i >= 0; i--) {
+                                                                    if (yd[i] !== null) {
+                                                                        closestToLeft = Math.abs(xd[i] - xd[idx])
+                                                                        break
+                                                                    }
+                                                                }
+                                                            }
+                                                            if (idx !== yd.length - 1) {
+                                                                for (let i = idx + 1; i < yd.length; i++) {
+                                                                    if (yd[i] !== null) {
+                                                                        closestToRight = Math.abs(xd[i] - xd[idx])
+                                                                        break
+                                                                    }
+                                                                }
+                                                            }
+                                                            if (closestToLeft < closestToRight) return closestToLeft
+                                                            return closestToRight
+                                                        }
+
+                                                        for (let i = 0; i < xd.length; i++) {
+                                                            if (yd[i] === null) continue;
+                                                            if (timeToClosestDatapoint(i) < 3600) continue;
+                                                            let x = u.valToPos(xd[i], 'x', true);
+                                                            let y = u.valToPos(yd[i], 'y', true);
+                                                            ctx.beginPath();
+                                                            console.log(x, y)
+                                                            ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
+                                                            ctx.stroke();
+                                                        }
+
+                                                        ctx.stroke();
+                                                        ctx.translate(-offset, -offset);
+
+                                                        ctx.restore();
                                                     }
-                                                    graphYMax = graphYMax + 0.5
-                                                    graphYMin = graphYMin - 0.5
-                                                    if (alertMax < graphYMax && alertMax > graphYMin) lineAt(alertMax)
-                                                    if (alertMin > graphYMin && alertMin < graphYMax) lineAt(alertMin)
-                                                    ctx.stroke();
-                                                    ctx.translate(-offset, -offset);
+                                                    if (alert && alert.enabled) {
+                                                        ctx.translate(offset, offset);
+                                                        ctx.beginPath();
+                                                        let xd = u.data[0];
+                                                        let [i0, i1] = s.idxs;
+                                                        const lineAt = (val) => {
+                                                            let x0 = u.valToPos(xd[i0], 'x', true);
+                                                            let y0 = u.valToPos(val, 'y', true);
+                                                            let x1 = u.valToPos(xd[i1], 'x', true);
+                                                            let y1 = u.valToPos(val, 'y', true);
+                                                            ctx.moveTo(x0, y0);
+                                                            ctx.lineTo(x1, y1);
+                                                        }
 
-                                                    ctx.restore();
-                                                }
-                                            ],
+                                                        ctx.strokeStyle = ruuviTheme.graph.alert.stroke[colorMode];
+                                                        let yAxisVals = u.data[1]
+                                                        let graphYMin = Number.POSITIVE_INFINITY;
+                                                        let graphYMax = Number.NEGATIVE_INFINITY;
+
+                                                        for (let i = 0; i < yAxisVals.length; i++) {
+                                                            const value = yAxisVals[i];
+                                                            if (value < graphYMin) graphYMin = value;
+                                                            if (value > graphYMax) graphYMax = value;
+                                                        }
+                                                        graphYMax = graphYMax + 0.5
+                                                        graphYMin = graphYMin - 0.5
+                                                        if (alertMax < graphYMax && alertMax > graphYMin) lineAt(alertMax)
+                                                        if (alertMin > graphYMin && alertMin < graphYMax) lineAt(alertMin)
+
+                                                        ctx.stroke();
+                                                        ctx.translate(-offset, -offset);
+
+                                                        ctx.restore();
+                                                    }
+                                                }]
                                         },
                                         cursor: {
                                             show: this.props.cursor || false,
