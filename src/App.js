@@ -70,7 +70,7 @@ function ColorModeSwitch() {
   if (currColorMode !== colorMode) {
     currColorMode = colorMode;
     try {
-      document.querySelector('meta[name="theme-color"]').setAttribute("content", ruuviTheme.newColors.bodyBg[currColorMode]);
+      document.querySelector('meta[name="theme-color"]').setAttribute("content", ruuviTheme.newColors.bodyBg[currColorMode].replace(" !important", ""));
     } catch (error) {
     }
   }

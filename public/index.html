@@ -65,7 +65,9 @@
     -->
   <script>
     let bgMode = localStorage.getItem("chakra-ui-color-mode") || "dark"
-    document.body.style.background = bgMode === "dark" ? "#001b1a" : "#edf2f2"
+    let bgColor = bgMode === "dark" ? "#001b1a" : "#edf2f2"
+    document.body.style.background = bgColor
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', bgColor);
 
     try {
       let cookie = document.cookie;
@@ -112,7 +114,7 @@
       return window.location.href.indexOf("/staging") !== -1
     }
     function getUserKey() {
-        return isStaging() ? "staging_user" : "user"
+      return isStaging() ? "staging_user" : "user"
     }
     if (!isStaging() && !getUser()) {
       localStorage.removeItem(getUserKey())
