@@ -708,11 +708,13 @@ class Sensor extends Component {
                                         </Box>}
                                         {["temperature", "humidity", "pressure", "signal", "movement", ...[["Free", "Basic"].includes(sensorSubscription) ? null : "offline"]].map(x => {
                                             if (!x) return null
-                                            let dataKey = x === "movement" ? "movementCounter" : "signal" ? "rssi" : x;
-                                            if (this.getLatestReading()[dataKey] === undefined) return null;
+                                            let dataKey = x === "movement" ? "movementCounter" :  x === "signal" ? "rssi" : x;
+                                            let latestValue = this.getLatestReading()[dataKey]
+                                            if (latestValue === undefined) return null;
                                             var alert = this.getAlert(x)
                                             let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description : x
                                             return <AlertItem key={key} alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
+                                                latestValue={latestValue}
                                                 showDelay={sensorSubscription === "Business Starter"}
                                                 detailedTitle={detailedTitle}
                                                 detailedText={detailedText} detailedSubText={detailedSubText}

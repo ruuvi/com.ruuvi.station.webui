@@ -2,7 +2,7 @@ import { Box, ListItem } from "@chakra-ui/layout";
 import { Switch } from "@chakra-ui/switch";
 import React, { Component, Suspense } from "react";
 import { withTranslation } from 'react-i18next';
-import { getAlertRange, getUnitHelper, localeNumber, round } from "../UnitHelper";
+import { getAlertRange, getDisplayValue, getUnitHelper, localeNumber, round } from "../UnitHelper";
 import EditableText from "./EditableText";
 import InputDialog from "./InputDialog";
 import RangeInputDialog from "./RangeInputDialog";
@@ -148,6 +148,9 @@ class AlertItem extends Component {
                 </span>
             </div>
         </>
+        const getUnit = () => {
+            return type !== "movement" && type !== "signal" && type !== "offline" ? ` ${type === "humidity" ? "%" : uh.unit}` : ""
+        }
 
         return (
             <ListItem key={type}>
@@ -176,9 +179,16 @@ class AlertItem extends Component {
                             }>
                                 <AlertSlider type={type} value={alert || { ...getAlertRange(this.props.type) }} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, type, alert ? alert.enabled : false, !final)} />
                             </Suspense>
+                            {this.props.latestValue !== undefined &&
+                                <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
+                                    <span style={{ ...this.props.detailedSubText, opacity: 0.5 }}>
+                                        {t("latest_measured_value").replace(/{(.*?)}/, getDisplayValue(this.props.type.toLowerCase(), this.props.latestValue))} {getUnit()}
+                                    </span>
+                                </div>
+                            }
                         </Box>
                     }
-                    {this.props.showDelay &&  type !== "offline" &&
+                    {this.props.showDelay && type !== "offline" &&
                         <Box mt={5}>
                             <ScreenSizeWrapper>
                                 {delaySetting()}
