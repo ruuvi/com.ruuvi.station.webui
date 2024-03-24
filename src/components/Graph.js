@@ -366,7 +366,7 @@ class Graph extends Component {
                                             points: { show: this.props.points, size: 3, fill: ruuviTheme.graph.stroke[colorMode] },
                                             width: 1,
                                             ...alertColor(),
-                                            value: (self, rawValue) => getDisplayValue(this.props.dataKey, rawValue)
+                                            value: (self, rawValue) => localeNumber(rawValue)
                                         }],
                                         hooks: {
                                             drawSeries: [
