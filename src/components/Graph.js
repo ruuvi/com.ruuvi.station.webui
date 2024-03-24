@@ -363,7 +363,7 @@ class Graph extends Component {
                                             label: this.props.dataName || this.props.t(this.props.dataKey),
                                             class: "graphLabel",
                                             spanGaps: false,
-                                            points: { show: this.props.points, size: 4, fill: ruuviTheme.graph.fill[colorMode] },
+                                            points: { show: this.props.points, size: 3, fill: ruuviTheme.graph.stroke[colorMode] },
                                             width: 1,
                                             ...alertColor(),
                                             value: (self, rawValue) => getDisplayValue(this.props.dataKey, rawValue)
