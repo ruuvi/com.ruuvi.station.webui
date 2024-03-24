@@ -29,6 +29,7 @@
       "calibrate": "Calibrate",
       "cancel": "Cancel",
       "clear": "Clear",
+      "close": "Close",
       "export": "EXPORT",
       "h": "h",
       "hours": "Hours",
@@ -136,7 +137,7 @@
       "hour": "Hour",
       "year": "Year",
       "years": "Years",
-      "no_data": "No data.\nThe sensor needs to be in range of a Ruuvi Gateway.",
+      "no_data": "No data. The sensor needs to be in range of a Ruuvi Gateway.",
       "no_data_in_range": "No data.",
       "rename_sensor_message": "Your sensors are displayed in alphabetical order.",
       "on": "On",
@@ -243,7 +244,11 @@
       "ruuvi_measurements_report": "Ruuvi Measurements Report",
       "dates": "Dates",
       "limits_hit": "Limits hit",
-      "no_limits_hit": "No limits hit"
+      "no_limits_hit": "No limits hit",
+      "latest_measured_value": "Latest measured value: {%@^%1$s}",
+      "pick_first_day": "Please pick the start date.",
+      "pick_second_day": "Please pick the end date.",
+      "set": "Set"
     }
   },
   "fi": {
@@ -276,6 +281,7 @@
       "calibrate": "Kalibroi",
       "cancel": "Peruuta",
       "clear": "Pyyhi",
+      "close": "Sulje",
       "export": "LATAA",
       "h": "t",
       "hours": "tuntia",
@@ -383,7 +389,7 @@
       "hour": "tunti",
       "year": "vuosi",
       "years": "vuotta",
-      "no_data": "Ei tallennettuja mittauksia.\nAnturin tulee olla reitittimen kuuluvuusalueella.",
+      "no_data": "Ei tallennettuja mittauksia. Anturin tulee olla reitittimen kuuluvuusalueella.",
       "no_data_in_range": "Ei historiatietoja.",
       "rename_sensor_message": "Anturisi asettuvat automaattisesti aakkosjärjestykseen.",
       "on": "Päällä",
@@ -489,8 +495,12 @@
       "account_delete_description": "Kaikki tähän tiliin liittyvät asetukset, antureihin liittyvät tiedot, anturien jaot ja anturin omistajuudet poistetaan pysyvästi. Vahvistusviesti lähetetään sähköpostitse.",
       "ruuvi_measurements_report": "Ruuvi Mittausraportti",
       "dates": "Päivämäärät",
-      "limits_hit": "Rajat saavutettu",
-      "no_limits_hit": "Ei rajoja saavutettu"
+      "limits_hit": "Rajat ylitetty",
+      "no_limits_hit": "Ei ylitettyjä rajoja",
+      "latest_measured_value": "Viimeisin mitattu arvo: {%@^%1$s}",
+      "pick_first_day": "Valitse aloituspäivä.",
+      "pick_second_day": "Valitse päättymispäivä.",
+      "set": "Aseta"
     }
   },
   "sv": {
@@ -523,6 +533,7 @@
       "calibrate": "Kalibrera",
       "cancel": "Avbryt",
       "clear": "Rensa",
+      "close": "Stäng",
       "export": "EXPORTERA",
       "h": "h",
       "hours": "Timmar",
@@ -630,7 +641,7 @@
       "hour": "Timme",
       "year": "år",
       "years": "år",
-      "no_data": "Ingen data.\nSensors måste vara inom räckhåll av en gateway.",
+      "no_data": "Ingen data. Sensors måste vara inom räckhåll av en gateway.",
       "no_data_in_range": "Inga historikdata.",
       "rename_sensor_message": "Dina sensorer kommer att vara i alfabetisk ordning.",
       "on": "På",
@@ -737,7 +748,11 @@
       "ruuvi_measurements_report": "Ruuvi Mätning Rapport",
       "dates": "Datum",
       "limits_hit": "Gränser nådda",
-      "no_limits_hit": "Inga gränser nådda"
+      "no_limits_hit": "Inga gränser nådda",
+      "latest_measured_value": "Senaste uppmätta värde: {%@^%1$s}",
+      "pick_first_day": "Välj ett startdatum.",
+      "pick_second_day": "Välj ett slutdatum.",
+      "set": "Ange"
     }
   },
   "fr": {
@@ -770,6 +785,7 @@
       "calibrate": "Calibrer",
       "cancel": "Annuler",
       "clear": "Effacer",
+      "close": "Fermer",
       "export": "EXPORTER",
       "h": "h",
       "hours": "Heures",
@@ -877,7 +893,7 @@
       "hour": "Heure",
       "year": "Année",
       "years": "Années",
-      "no_data": "Pas de données de mesure.\nLe capteur doit être à la portée du routeur.",
+      "no_data": "Pas de données de mesure. Le capteur doit être à la portée du routeur.",
       "no_data_in_range": "Aucune donnée d'historique.",
       "rename_sensor_message": "Les capteurs sont dans l'ordre alphabétique.",
       "on": "Activé",
@@ -984,7 +1000,11 @@
       "ruuvi_measurements_report": "Rapport de mesures Ruuvi",
       "dates": "Dates",
       "limits_hit": "Limites atteintes",
-      "no_limits_hit": "Aucune limite atteinte"
+      "no_limits_hit": "Aucune limite atteinte",
+      "latest_measured_value": "Dernière valeur mesurée : {%@^%1$s}",
+      "pick_first_day": "Sélectionnez une date de début.",
+      "pick_second_day": "Sélectionnez une date de fin.",
+      "set": "Définir"
     }
   },
   "de": {
@@ -1017,6 +1037,7 @@
       "calibrate": "Kalibrieren",
       "cancel": "Abbrechen",
       "clear": "Löschen",
+      "close": "Schließen",
       "export": "EXPORT",
       "h": "h",
       "hours": "Stunden",
@@ -1231,7 +1252,11 @@
       "ruuvi_measurements_report": "Ruuvi Messbericht",
       "dates": "Termine",
       "limits_hit": "Grenzen erreicht",
-      "no_limits_hit": "Keine Grenzen erreicht"
+      "no_limits_hit": "Keine Grenzen erreicht",
+      "latest_measured_value": "Letzter Messwert: {%@^%1$s}",
+      "pick_first_day": "Wählen Sie ein Startdatum.",
+      "pick_second_day": "Wählen Sie ein Enddatum aus.",
+      "set": "Setzen"
     }
   }
 }
