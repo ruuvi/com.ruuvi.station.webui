@@ -710,7 +710,7 @@ class Sensor extends Component {
                                             if (!x) return null
                                             let dataKey = x === "movement" ? "movementCounter" :  x === "signal" ? "rssi" : x;
                                             let latestValue = this.getLatestReading()[dataKey]
-                                            if (latestValue === undefined) return null;
+                                            if (latestValue === undefined && x !== "offline") return null;
                                             var alert = this.getAlert(x)
                                             let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description : x
                                             return <AlertItem key={key} alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
