@@ -45,6 +45,7 @@ import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
 import { isAlerting } from "../utils/alertHelper";
 import RemoveSensorDialog from "../components/RemoveSensorDialog";
 import ExportMenu from "../components/ExportMenu";
+import UpgradePlanButton from "../components/UpgradePlanButton";
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "co2", "voc", "nox"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
@@ -576,7 +577,7 @@ class Sensor extends Component {
                                     <ScreenSizeWrapper isMobile>
                                         <div style={{ marginTop: 30, marginBottom: -10 }} id="history">
                                             {graphTitle(true)}
-                                            <table width="100%" style={{marginTop: "10px"}}>
+                                            <table width="100%" style={{ marginTop: "10px" }}>
                                                 <tbody>
                                                     <tr>
                                                         <td>
@@ -592,7 +593,14 @@ class Sensor extends Component {
                                 </>}
                             <Box height={520}>
                                 <> {!this.isLoading && (!this.state.data || !this.state.data?.measurements?.length) ? (
-                                    <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", paddingTop: 240, height: 450 }}>{noHistoryStr}</center>
+                                    <>
+                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", paddingTop: 240, height: 450 }}>{noHistoryStr}
+                                            {!this.isSharedSensor() && <>
+                                                <Box mt={2} />
+                                                <UpgradePlanButton />
+                                            </>}
+                                        </center>
+                                    </>
                                 ) : (
                                     <Box ml={-5} mr={-5}>
                                         {this.isLoading &&
@@ -706,15 +714,17 @@ class Sensor extends Component {
                                                 return <div>{parts[0]}<a style={{ color: "teal" }} target="blank" href={t("cloud_ruuvi_link_url")}>{t("cloud_ruuvi_link")}</a>{parts[1]}</div>
                                             })()}
                                         </Box>}
-                                        {["temperature", "humidity", "pressure", "signal", "movement", ...[["Free", "Basic"].includes(sensorSubscription) ? null : "offline"]].map(x => {
+                                        {["temperature", "humidity", "pressure", "signal", "movement", "offline"].map(x => {
                                             if (!x) return null
-                                            let dataKey = x === "movement" ? "movementCounter" :  x === "signal" ? "rssi" : x;
+                                            let dataKey = x === "movement" ? "movementCounter" : x === "signal" ? "rssi" : x;
                                             let latestValue = this.getLatestReading()[dataKey]
                                             if (latestValue === undefined && x !== "offline") return null;
                                             var alert = this.getAlert(x)
                                             let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description : x
                                             return <AlertItem key={key} alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
                                                 latestValue={latestValue}
+                                                noUpgradeButton={this.isSharedSensor()}
+                                                showOffline={!["Free", "Basic"].includes(sensorSubscription)}
                                                 showDelay={sensorSubscription === "Business Starter"}
                                                 detailedTitle={detailedTitle}
                                                 detailedText={detailedText} detailedSubText={detailedSubText}

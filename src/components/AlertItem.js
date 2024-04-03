@@ -10,6 +10,7 @@ import pjson from '../../package.json';
 import ScreenSizeWrapper from "./ScreenSizeWrapper";
 import { getAlertIcon } from "../utils/alertHelper";
 import { addVariablesInString } from "../TextHelper";
+import UpgradePlanButton from "./UpgradePlanButton";
 const AlertSlider = React.lazy(() => import("./AlertSlider"));
 
 class AlertItem extends Component {
@@ -144,12 +145,22 @@ class AlertItem extends Component {
         const delaySetting = (mobile) => <>
             <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
                 <span style={{ ...this.props.detailedSubText, width: mobile ? "100%" : undefined }}>
-                    <EditableText spread={mobile} text={this.getDelayText(alert)} onClick={() => this.setState({ ...this.state, delayInputDialog: true })} />
+                    {!this.props.showDelay && !this.props.noUpgradeButton && <span style={{ marginRight: 8 }}><UpgradePlanButton /></span>}
+                    <span style={!this.props.showDelay ? {opacity: 0.5, pointerEvents: "none"} : {}}>
+                        <EditableText spread={mobile} text={this.getDelayText(alert)} onClick={() => this.setState({ ...this.state, delayInputDialog: true })} />
+                    </span>
                 </span>
             </div>
         </>
         const getUnit = () => {
             return type !== "movement" && type !== "signal" && type !== "offline" ? ` ${type === "humidity" ? "%" : uh.unit}` : ""
+        }
+
+        const gayedOutOffline = () => {
+            if (type === "offline" && !this.props.showDelay) {
+                return { opacity: 0.5, pointerEvents: "none" }
+            }
+            return {}
         }
 
         return (
@@ -158,12 +169,14 @@ class AlertItem extends Component {
                     <div style={{ ...this.props.detailedTitle, width: undefined, display: "flex", justifyContent: "space-between" }}>
                         <span>
                             {t(label) + (type !== "movement" && type !== "signal" && type !== "offline" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}
+                            {type === "offline" && !this.props.showDelay && !this.props.noUpgradeButton && <><Box ml={2} display="inline" /><UpgradePlanButton /></>}
                         </span>
-                        <span>
+                        <span style={gayedOutOffline()}>
                             <span style={{ display: "inline-block", marginRight: 24, marginBottom: -4 }}>{getAlertIcon(this.props.sensor, type)}</span>
                             <span style={{ ...this.props.detailedSubText, fontWeight: 400, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="buttonIconScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
                         </span>
                     </div>
+                    <span style={gayedOutOffline()}>
                     <ScreenSizeWrapper>
                         {asText()}
                     </ScreenSizeWrapper>
@@ -188,7 +201,8 @@ class AlertItem extends Component {
                             }
                         </Box>
                     }
-                    {this.props.showDelay && type !== "offline" &&
+                    </span>
+                    {type !== "offline" &&
                         <Box mt={5}>
                             <ScreenSizeWrapper>
                                 {delaySetting()}

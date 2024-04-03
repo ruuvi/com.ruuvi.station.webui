@@ -32,6 +32,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getAlertIcon, isAlerting } from "../utils/alertHelper";
 import { ruuviTheme } from "../themes";
 import { ArrowDownIcon, ArrowUpIcon } from "@chakra-ui/icons";
+import UpgradePlanButton from './UpgradePlanButton';
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -205,6 +206,12 @@ class SensorCard extends Component {
         let latestReading = this.getLatestReading();
         let alertIcon = getAlertIcon(this.props.sensor)
 
+        const isSharedSensor = () => {
+            var user = new NetworkApi().getUser().email
+            var owner = this.props.sensor.owner
+            return user !== owner;
+        }
+
 
         let tnpGetAlert = (x) => {
             let dataKey = x === "movement" ? "movementCounter" : "signal" ? "rssi" : x;
@@ -240,12 +247,16 @@ class SensorCard extends Component {
         </label>
 
         let noHistoryStrKey = "no_data_in_range"
-        if (this.props.sensor?.subscription.maxHistoryDays === 0) noHistoryStrKey = "no_data_free_mode"
+        let freeMode = this.props.sensor?.subscription.maxHistoryDays === 0
+        if (freeMode) noHistoryStrKey = "no_data_free_mode"
         let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
 
         const noData = (str) =>
             <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", height: graphHeight, marginLeft: simpleView ? 0 : 24, marginRight: 30, paddingTop: simpleView ? 0 : 10 }} className="nodatatext">
-                <div style={{ position: "relative", top: simpleView ? undefined : this.props.size === "medium" ? "44%" : "50%", transform: simpleView ? undefined : "translateY(-50%)" }}>{str}</div>
+                <div style={{ position: "relative", top: simpleView ? undefined : this.props.size === "medium" ? "44%" : "50%", transform: simpleView ? undefined : "translateY(-50%)" }}>
+                    {str}
+                    {freeMode && !isSharedSensor() && <><Box mt={2} /><UpgradePlanButton /></>}
+                </div>
             </div>
 
         if (simpleView) {
