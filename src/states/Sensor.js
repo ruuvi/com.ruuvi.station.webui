@@ -480,6 +480,7 @@ class Sensor extends Component {
         var { t } = this.props
         let lastReading = this.getLatestReading()
         let sensorSubscription = this.props.sensor?.subscription.subscriptionName
+        let freeMode = this.props.sensor?.subscription.maxHistoryDays === 0
         let noHistoryStrKey = "no_data_in_range"
         if (this.props.sensor?.subscription.maxHistoryDays === 0) noHistoryStrKey = "no_data_free_mode"
         let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
@@ -594,8 +595,8 @@ class Sensor extends Component {
                             <Box height={520}>
                                 <> {!this.isLoading && (!this.state.data || !this.state.data?.measurements?.length) ? (
                                     <>
-                                        <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", paddingTop: 240, height: 450 }}>{noHistoryStr}
-                                            {!this.isSharedSensor() && <>
+                                        <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">{noHistoryStr}
+                                            {freeMode && !this.isSharedSensor() && <>
                                                 <Box mt={2} />
                                                 <UpgradePlanButton />
                                             </>}

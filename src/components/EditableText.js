@@ -1,6 +1,4 @@
-import { useColorMode } from "@chakra-ui/react";
 import pen from "../img/pen.svg";
-import penDark from "../img/pen-dark.svg";
 
 function getStyledText(text) {
     var startB = text.split("<b>")
@@ -14,17 +12,20 @@ function getStyledText(text) {
     return output;
 }
 export default function EditableText(props) {
-    let colorMode = useColorMode().colorMode;
+    let disabledStyle = props.disabled ? { opacity: 0.5, pointerEvents: "none" } : {};
     var extraStyle = {};
     if (props.spread) {
         extraStyle.display = "flex"
         extraStyle.justifyContent = "space-between"
         extraStyle.width = "100%"
     }
-    return <span style={{ ...props.style, cursor: "pointer", ...extraStyle }} onClick={props.onClick}>
+    return <span style={{ ...props.style, cursor: !props.disabled ? "pointer" : undefined, ...extraStyle }} onClick={props.disabled ? () => { } : props.onClick}>
         <span style={{ opacity: props.opacity }}>
-            {getStyledText(props.text)}
+            <span style={disabledStyle}>
+                {getStyledText(props.text)}
+            </span>
+            {props.children}
         </span>
-        <img src={pen} style={{ paddingLeft: "10px", display: "inline-block", marginBottom: 2 }} width="23px" height="13px" alt="Pen" />
+        <img src={pen} style={{ paddingLeft: "10px", display: "inline-block", marginBottom: 2, ...disabledStyle }} width="23px" height="13px" alt="Pen" />
     </span>
 }

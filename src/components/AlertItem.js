@@ -145,9 +145,11 @@ class AlertItem extends Component {
         const delaySetting = (mobile) => <>
             <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
                 <span style={{ ...this.props.detailedSubText, width: mobile ? "100%" : undefined }}>
-                    {!this.props.showDelay && !this.props.noUpgradeButton && <span style={{ marginRight: 8 }}><UpgradePlanButton /></span>}
-                    <span style={!this.props.showDelay ? {opacity: 0.5, pointerEvents: "none"} : {}}>
-                        <EditableText spread={mobile} text={this.getDelayText(alert)} onClick={() => this.setState({ ...this.state, delayInputDialog: true })} />
+                    {!mobile && !this.props.showDelay && !this.props.noUpgradeButton && <span style={{ marginRight: 8 }}><UpgradePlanButton /></span>}
+                    <span>
+                        <EditableText spread={mobile} text={this.getDelayText(alert)} onClick={() => this.setState({ ...this.state, delayInputDialog: true })} disabled={!this.props.showDelay } >
+                            {mobile && !this.props.showDelay && !this.props.noUpgradeButton && <span style={{marginLeft: 6, opacity: 1, pointerEvents: undefined, zIndex:99 }}><UpgradePlanButton /></span>}
+                        </EditableText>
                     </span>
                 </span>
             </div>

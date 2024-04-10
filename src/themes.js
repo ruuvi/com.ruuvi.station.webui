@@ -145,7 +145,9 @@ export const ruuviTheme = extendTheme({
                 marginTop: "2px",
             },
             ".nodatatext": {
-                color: props.colorMode === "light" ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)"
+                color: props.colorMode === "light" ? "#1b484780" : "rgba(255,255,255,0.5)",
+                fontFamily: "mulish", 
+                fontSize: 15, 
             },
             ".ddlItem": {
                 fontFamily: "mulish",

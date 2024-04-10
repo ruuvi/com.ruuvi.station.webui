@@ -252,7 +252,7 @@ class SensorCard extends Component {
         let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
 
         const noData = (str) =>
-            <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: "bold", height: graphHeight, marginLeft: simpleView ? 0 : 24, marginRight: 30, paddingTop: simpleView ? 0 : 10 }} className="nodatatext">
+            <div style={{ height: graphHeight, marginLeft: simpleView ? 0 : 24, marginRight: 30, paddingTop: simpleView ? 0 : 10 }} className="nodatatext">
                 <div style={{ position: "relative", top: simpleView ? undefined : this.props.size === "medium" ? "44%" : "50%", transform: simpleView ? undefined : "translateY(-50%)" }}>
                     {str}
                     {freeMode && !isSharedSensor() && <><Box mt={2} /><UpgradePlanButton /></>}
