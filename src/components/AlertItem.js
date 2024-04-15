@@ -197,7 +197,7 @@ class AlertItem extends Component {
                             {this.props.latestValue !== undefined &&
                                 <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
                                     <span style={{ ...this.props.detailedSubText, opacity: 0.5 }}>
-                                        {t("latest_measured_value").replace(/{(.*?)}/, getDisplayValue(this.props.type.toLowerCase(), uh.value(this.props.latestValue)))} {getUnit()}
+                                        {t("latest_measured_value").replace(/{(.*?)}/, type === "humidity" ? this.props.latestValue : getDisplayValue(this.props.type.toLowerCase(), uh.value(this.props.latestValue)))} {getUnit()}
                                     </span>
                                 </div>
                             }
