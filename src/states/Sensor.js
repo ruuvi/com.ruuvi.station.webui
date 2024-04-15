@@ -476,6 +476,9 @@ class Sensor extends Component {
         if (this.state.graphKey === "movementCounter") return `(${this.props.t(unit)})`;
         return <>({unit})</>
     }
+    sensorHasData() {
+        return this.getLatestReadingFromProps() !== null
+    }
     render() {
         var { t } = this.props
         let lastReading = this.getLatestReading()
@@ -596,7 +599,7 @@ class Sensor extends Component {
                                 <> {!this.isLoading && (!this.state.data || !this.state.data?.measurements?.length) ? (
                                     <>
                                         <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">{noHistoryStr}
-                                            {freeMode && !this.isSharedSensor() && <>
+                                            {freeMode && !this.isSharedSensor() && this.sensorHasData() && <>
                                                 <Box mt={2} />
                                                 <UpgradePlanButton />
                                             </>}
@@ -724,7 +727,7 @@ class Sensor extends Component {
                                             let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description : x
                                             return <AlertItem key={key} alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
                                                 latestValue={latestValue}
-                                                noUpgradeButton={this.isSharedSensor()}
+                                                noUpgradeButton={this.isSharedSensor() || !this.sensorHasData()}
                                                 showOffline={!["Free", "Basic"].includes(sensorSubscription)}
                                                 showDelay={sensorSubscription === "Business Starter"}
                                                 detailedTitle={detailedTitle}

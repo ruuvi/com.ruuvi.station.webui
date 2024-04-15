@@ -206,6 +206,10 @@ class SensorCard extends Component {
         let latestReading = this.getLatestReading();
         let alertIcon = getAlertIcon(this.props.sensor)
 
+        const sensorHasData = () => {
+            return this.state.data && this.state.data.measurements.length > 0
+        }
+
         const isSharedSensor = () => {
             var user = new NetworkApi().getUser().email
             var owner = this.props.sensor.owner
@@ -255,7 +259,7 @@ class SensorCard extends Component {
             <div style={{ height: graphHeight, marginLeft: simpleView ? 0 : 24, marginRight: 30, paddingTop: simpleView ? 0 : 10 }} className="nodatatext">
                 <div style={{ position: "relative", top: simpleView ? undefined : this.props.size === "medium" ? "44%" : "50%", transform: simpleView ? undefined : "translateY(-50%)" }}>
                     {str}
-                    {freeMode && !isSharedSensor() && <><Box mt={2} /><UpgradePlanButton /></>}
+                    {freeMode && !isSharedSensor() && sensorHasData() && <><Box mt={2} /><UpgradePlanButton /></>}
                 </div>
             </div>
 
