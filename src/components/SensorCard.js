@@ -207,7 +207,8 @@ class SensorCard extends Component {
         let alertIcon = getAlertIcon(this.props.sensor)
 
         const sensorHasData = () => {
-            return this.state.data && this.state.data.measurements.length > 0
+            var lastParsedReading = this.props.sensor.measurements.length === 1 ? this.props.sensor.measurements[0] : null
+            return lastParsedReading !== null
         }
 
         const isSharedSensor = () => {
@@ -255,6 +256,10 @@ class SensorCard extends Component {
         if (freeMode) noHistoryStrKey = "no_data_free_mode"
         let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
 
+        if (this.props.sensor.sensor === "D4:24:13:2F:D8:E3") {
+        console.log(freeMode && !isSharedSensor() && sensorHasData())
+        console.log(freeMode, !isSharedSensor(), sensorHasData())
+        }
         const noData = (str) =>
             <div style={{ height: graphHeight, marginLeft: simpleView ? 0 : 24, marginRight: 30, paddingTop: simpleView ? 0 : 10 }} className="nodatatext">
                 <div style={{ position: "relative", top: simpleView ? undefined : this.props.size === "medium" ? "44%" : "50%", transform: simpleView ? undefined : "translateY(-50%)" }}>
