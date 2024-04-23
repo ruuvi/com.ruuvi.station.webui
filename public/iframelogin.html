@@ -230,8 +230,9 @@
             let cookie = document.cookie;
             return (cookie && cookie.indexOf("station_status=signedIn") !== -1)
         }
+        let email = ""
         function login() {
-            let email = document.getElementById("emailInput").value
+            email = document.getElementById("emailInput").value
             if (!email) return
             setView("view_loading")
             fetch(apiUrl + "/register", {
@@ -286,7 +287,7 @@
                         for (let i = 0; i < 4; i++) {
                             document.getElementById(`pin_${i + 1}`).value = ""
                         }
-                        setView("view_code")
+                        setView("view_code", email)
                     }
                 })
                 .catch(error => {
