@@ -11,7 +11,8 @@ import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton, Tooltip,
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
-import { CloseIcon, SunIcon } from "@chakra-ui/icons";
+import { SunIcon } from "@chakra-ui/icons";
+import { IoClose } from "react-icons/io5";
 import { MdOutlineNightlight } from "react-icons/md";
 import cache from "./DataCache";
 import { useTranslation } from "react-i18next";
@@ -250,7 +251,7 @@ export default function App() {
                 let rest = banners.filter(y => y.key !== x.key)
                 setBanners(rest);
               }}>
-                <CloseIcon />
+                <IoClose size={24} color="#0aa08a" />
               </div>
             </Box>
           </HStack>

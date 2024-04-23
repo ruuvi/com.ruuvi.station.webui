@@ -58,14 +58,18 @@ export const ruuviTheme = extendTheme({
                 bg: "#ffffff00"//colors.topbar[props.colorMode],
             },
             '.banner': {
-                backgroundColor: "#4bc9ba",
-                color: "#ffffff",
+                backgroundColor: "rgba(195, 237, 230, 0.9)",
+                color: "#000000",
                 minHeight: "20px",
                 paddingTop: "10px",
                 paddingBottom: "10px",
                 fontFamily: "Mulish",
-                fontWeight: 800,
+                fontWeight: 600,
                 fontStyle: "italic",
+            },
+            '.banner a': {
+                fontWeight: 800,
+                color: "#0aa08a"
             },
             '.content': {
                 bg: colors.contentBg[props.colorMode]
