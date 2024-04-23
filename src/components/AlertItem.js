@@ -147,8 +147,8 @@ class AlertItem extends Component {
                 <span style={{ ...this.props.detailedSubText, width: mobile ? "100%" : undefined }}>
                     {!mobile && !this.props.showDelay && !this.props.noUpgradeButton && <span style={{ marginRight: 8 }}><UpgradePlanButton /></span>}
                     <span>
-                        <EditableText spread={mobile} text={this.getDelayText(alert)} onClick={() => this.setState({ ...this.state, delayInputDialog: true })} disabled={!this.props.showDelay } >
-                            {mobile && !this.props.showDelay && !this.props.noUpgradeButton && <span style={{marginLeft: 6, opacity: 1, pointerEvents: undefined, zIndex:99 }}><UpgradePlanButton /></span>}
+                        <EditableText spread={mobile} text={this.getDelayText(alert)} onClick={() => this.setState({ ...this.state, delayInputDialog: true })} disabled={!this.props.showDelay} >
+                            {mobile && !this.props.showDelay && !this.props.noUpgradeButton && <span style={{ marginLeft: 6, opacity: 1, pointerEvents: undefined, zIndex: 99 }}><UpgradePlanButton /></span>}
                         </EditableText>
                     </span>
                 </span>
@@ -174,35 +174,40 @@ class AlertItem extends Component {
                             {type === "offline" && !this.props.showDelay && !this.props.noUpgradeButton && <><Box ml={2} display="inline" /><UpgradePlanButton /></>}
                         </span>
                         <span style={gayedOutOffline()}>
-                            <span style={{ display: "inline-block", marginRight: 24, marginBottom: -4 }}>{getAlertIcon(this.props.sensor, type)}</span>
-                            <span style={{ ...this.props.detailedSubText, fontWeight: 400, marginRight: 4 }}>{enabled ? t("on") : t("off")}</span> <Switch isChecked={alert && alert.enabled} colorScheme="buttonIconScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
+                            <span style={{ display: "inline-block", marginRight: 24, marginBottom: -4 }}>
+                                {getAlertIcon(this.props.sensor, type)}
+                            </span>
+                            <span style={{ ...this.props.detailedSubText, fontWeight: 400, marginRight: 4 }}>
+                                {enabled ? t("on") : t("off")}
+                            </span>
+                            <Switch isChecked={alert && alert.enabled && !(type === "offline" && !this.props.showDelay)} colorScheme="buttonIconScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
                         </span>
                     </div>
                     <span style={gayedOutOffline()}>
-                    <ScreenSizeWrapper>
-                        {asText()}
-                    </ScreenSizeWrapper>
-                    <ScreenSizeWrapper isMobile>
-                        {asText(true)}
-                    </ScreenSizeWrapper>
-                    {type !== "movement" && type !== "offline" &&
-                        <Box mt="4">
-                            <Suspense fallback={
-                                <center style={{ width: "100%", marginTop: 100 }}>
-                                    <span className='spinner'></span>
-                                </center>
-                            }>
-                                <AlertSlider type={type} value={alert || { ...getAlertRange(this.props.type) }} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, type, alert ? alert.enabled : false, !final)} />
-                            </Suspense>
-                            {this.props.latestValue !== undefined &&
-                                <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
-                                    <span style={{ ...this.props.detailedSubText, opacity: 0.5 }}>
-                                        {t("latest_measured_value").replace(/{(.*?)}/, type === "humidity" ? this.props.latestValue : getDisplayValue(this.props.type.toLowerCase(), uh.value(this.props.latestValue)))} {getUnit()}
-                                    </span>
-                                </div>
-                            }
-                        </Box>
-                    }
+                        <ScreenSizeWrapper>
+                            {asText()}
+                        </ScreenSizeWrapper>
+                        <ScreenSizeWrapper isMobile>
+                            {asText(true)}
+                        </ScreenSizeWrapper>
+                        {type !== "movement" && type !== "offline" &&
+                            <Box mt="4">
+                                <Suspense fallback={
+                                    <center style={{ width: "100%", marginTop: 100 }}>
+                                        <span className='spinner'></span>
+                                    </center>
+                                }>
+                                    <AlertSlider type={type} value={alert || { ...getAlertRange(this.props.type) }} onChange={(v, final) => this.setAlert({ ...alert, min: v[0], max: v[1] }, type, alert ? alert.enabled : false, !final)} />
+                                </Suspense>
+                                {this.props.latestValue !== undefined &&
+                                    <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
+                                        <span style={{ ...this.props.detailedSubText, opacity: 0.5 }}>
+                                            {t("latest_measured_value").replace(/{(.*?)}/, type === "humidity" ? this.props.latestValue : getDisplayValue(this.props.type.toLowerCase(), uh.value(this.props.latestValue)))} {getUnit()}
+                                        </span>
+                                    </div>
+                                }
+                            </Box>
+                        }
                     </span>
                     {type !== "offline" &&
                         <Box mt={5}>
