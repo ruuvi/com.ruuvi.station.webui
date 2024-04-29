@@ -6,6 +6,7 @@ import {
     ListItem,
     ListIcon,
     Progress,
+    Box,
 } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import { MdClear } from "react-icons/md";
@@ -88,7 +89,7 @@ class ShareDialog extends Component {
             <>
                 <RDialog title={t("share_sensor_title")} isOpen={this.props.open} onClose={this.props.onClose}>
                     {addNewlines(t("share_sensor_description"), "\\n")}
-                    <br />
+                    <Box h="15px" />
                     <div style={{ fontFamily: "Montserrat", fontWeight: 800 }}>{t("share_sensor_add_friend")}</div>
                     <Input autoFocus placeholder={t("email")} type="email" value={this.state.email} onChange={this.emailHandler.bind(this)} mt="10px" onKeyDown={this.keyDown.bind(this)} />
                     <div style={{ textAlign: "right" }}>
