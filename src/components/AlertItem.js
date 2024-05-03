@@ -159,7 +159,7 @@ class AlertItem extends Component {
         }
 
         const gayedOutOffline = () => {
-            if (type === "offline" && !this.props.showDelay) {
+            if (type === "offline" && !this.props.showOffline) {
                 return { opacity: 0.5, pointerEvents: "none" }
             }
             return {}
@@ -171,7 +171,7 @@ class AlertItem extends Component {
                     <div style={{ ...this.props.detailedTitle, width: undefined, display: "flex", justifyContent: "space-between" }}>
                         <span>
                             {t(label) + (type !== "movement" && type !== "signal" && type !== "offline" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}
-                            {type === "offline" && !this.props.showDelay && !this.props.noUpgradeButton && <><Box ml={2} display="inline" /><UpgradePlanButton /></>}
+                            {type === "offline" && !this.props.showOffline && !this.props.noUpgradeButton && <><Box ml={2} display="inline" /><UpgradePlanButton /></>}
                         </span>
                         <span style={gayedOutOffline()}>
                             <span style={{ display: "inline-block", marginRight: 24, marginBottom: -4 }}>
@@ -180,7 +180,7 @@ class AlertItem extends Component {
                             <span style={{ ...this.props.detailedSubText, fontWeight: 400, marginRight: 4 }}>
                                 {enabled ? t("on") : t("off")}
                             </span>
-                            <Switch isChecked={alert && alert.enabled && !(type === "offline" && !this.props.showDelay)} colorScheme="buttonIconScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
+                            <Switch isChecked={alert && alert.enabled && !(type === "offline" && !this.props.showOffline)} colorScheme="buttonIconScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
                         </span>
                     </div>
                     <span style={gayedOutOffline()}>
