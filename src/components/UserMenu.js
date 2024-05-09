@@ -10,6 +10,8 @@ import {
 import { FaUserAlt } from "react-icons/fa"
 import { MdArrowDropDown } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
+import { withColorMode } from "../utils/withColorMode";
+import { useNavigate } from "react-router-dom";
 
 class UserMenu extends Component {
     settings() {
@@ -26,9 +28,11 @@ class UserMenu extends Component {
                     <MenuItem isDisabled={true} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, cursor: "unset", borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>{this.props.email}</MenuItem>
                     <MenuDivider />
                     {/**
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
-                    */}
+                <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
+                <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
+                */}
+                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.props.navigate('/shares')}>{t("shares")}</MenuItem>
+                    <MenuDivider />
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.settings()}>{t("settings")}</MenuItem>
                     <MenuDivider />
                     <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.props.myAccount()}>{t("my_ruuvi_account")}</MenuItem>
@@ -38,4 +42,8 @@ class UserMenu extends Component {
     }
 }
 
-export default withTranslation()(UserMenu);
+export default withTranslation()(withColorMode((props) => (
+    <UserMenu {...props}
+    navigate={useNavigate()}
+    />
+)));

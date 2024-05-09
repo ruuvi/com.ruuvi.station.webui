@@ -18,6 +18,7 @@ import cache from "./DataCache";
 import { useTranslation } from "react-i18next";
 import Store from "./Store";
 import { logout } from "./utils/loginUtils";
+import ShareCenter from "./states/ShareCenter";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -258,6 +259,7 @@ export default function App() {
         })}
         <div>
           <Routes>
+            <Route path="/shares" element={<ShareCenter />} />
             <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
             <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
           </Routes>

@@ -8,6 +8,7 @@ const config = {
 let colors = {
     bodyBg: { light: "#edf2f2 !important", dark: "#001b1a !important" },
     contentBg: { light: "white", dark: "#111111" },
+    contentImportantBg: { light: "white", dark: "rgba(0,0,0,0)" },
     text: { light: "#1b4847", dark: "#ffffff" },
     textInactive: { light: "#1b484780", dark: "#ffffff80" },
     topbar: { light: "white", dark: "#001b1a" },
@@ -38,6 +39,7 @@ let colors = {
     buttonBackground: { light: "#35AD9F", dark: "#35AD9F" },
     buttonFocus: { light: "#1f9385", dark: "#1f9385" },
     imageBackgroundColor: { light: "#d8edea", dark: "#2d605c" },
+    boxBg: { dark: "rgba(68, 201, 185, 0.3)", light: "rgba(68, 201, 185, 0.3)" },
 }
 
 export const ruuviTheme = extendTheme({
@@ -73,6 +75,9 @@ export const ruuviTheme = extendTheme({
             },
             '.content': {
                 bg: colors.contentBg[props.colorMode]
+            },
+            '.contentImportant': {
+                bg: colors.contentImportantBg[props.colorMode]
             },
             '.durationPicker': {
                 bg: colors.menuButtonBg[props.colorMode],
@@ -156,7 +161,12 @@ export const ruuviTheme = extendTheme({
             ".ddlItem": {
                 fontFamily: "mulish",
                 fontSize: "14px",
-            }
+            },
+            ".box": {
+                backgroundColor: colors.boxBg[props.colorMode],
+                padding: "10px",
+                borderRadius: "5px",
+            },
         })
     },
     graph: {
