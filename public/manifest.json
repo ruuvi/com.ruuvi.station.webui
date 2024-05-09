@@ -1,6 +1,6 @@
 {
-  "short_name": "Ruuvi WebUI",
-  "name": "Ruuvi Network Web Interface",
+  "short_name": "Ruuvi Station Web",
+  "name": "Ruuvi Station Web Interface",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
