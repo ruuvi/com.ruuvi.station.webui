@@ -221,42 +221,48 @@ export default function App() {
     let lang = i18n.language || "en"
     return notification[lang] || notification.en
   }
+
+  // get hideTopBar from query params
+  let hideTopBar = window.location.search.includes("minimalMode=true")
+
   return (
     <ChakraProvider theme={ruuviTheme}>
       <BrowserRouter basename={"/"}>
-        <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
-          <Logo subscription={subscription} />
-          <Text>
-            {new NetworkApi().isStaging() ? "(staging) " : ""}
-          </Text>
-          <span style={{ width: "100%", textAlign: "right", marginLeft: "-25px", marginRight: "-4px" }}>
-            <ColorModeSwitch />
-            <SensorMenu sensors={sensors} key={reloadSub}
-              addSensor={() => {
-                setShowDialog("addsensor")
-              }}
-            />
-            <UserMenu settings={() => {
-              setShowDialog("settings")
-            }} myAccount={() => {
-              setShowDialog("myaccount")
-            }} email={user.email} />
-          </span>
-        </HStack>
-        {banners && banners.map(x => {
-          return <HStack className="banner" style={{ paddingLeft: "18px", paddingRight: "18px" }}>
-            <Box flex style={{ textAlign: "center", width: "100%" }} dangerouslySetInnerHTML={{ __html: getBannerContent(x) }}></Box>
-            <Box flex style={{ width: "16px" }}>
-              <div style={{ cursor: "pointer" }} onClick={() => {
-                store.setHasSeenBanner(x.key, true)
-                let rest = banners.filter(y => y.key !== x.key)
-                setBanners(rest);
-              }}>
-                <IoClose size={24} color="#0aa08a" />
-              </div>
-            </Box>
+        {hideTopBar ? null : <>
+          <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
+            <Logo subscription={subscription} />
+            <Text>
+              {new NetworkApi().isStaging() ? "(staging) " : ""}
+            </Text>
+            <span style={{ width: "100%", textAlign: "right", marginLeft: "-25px", marginRight: "-4px" }}>
+              <ColorModeSwitch />
+              <SensorMenu sensors={sensors} key={reloadSub}
+                addSensor={() => {
+                  setShowDialog("addsensor")
+                }}
+              />
+              <UserMenu settings={() => {
+                setShowDialog("settings")
+              }} myAccount={() => {
+                setShowDialog("myaccount")
+              }} email={user.email} />
+            </span>
           </HStack>
-        })}
+          {banners && banners.map(x => {
+            return <HStack className="banner" style={{ paddingLeft: "18px", paddingRight: "18px" }}>
+              <Box flex style={{ textAlign: "center", width: "100%" }} dangerouslySetInnerHTML={{ __html: getBannerContent(x) }}></Box>
+              <Box flex style={{ width: "16px" }}>
+                <div style={{ cursor: "pointer" }} onClick={() => {
+                  store.setHasSeenBanner(x.key, true)
+                  let rest = banners.filter(y => y.key !== x.key)
+                  setBanners(rest);
+                }}>
+                  <IoClose size={24} color="#0aa08a" />
+                </div>
+              </Box>
+            </HStack>
+          })}
+        </>}
         <div>
           <Routes>
             <Route path="/shares" element={<ShareCenter />} />
