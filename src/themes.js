@@ -155,8 +155,8 @@ export const ruuviTheme = extendTheme({
             },
             ".nodatatext": {
                 color: props.colorMode === "light" ? "#1b484780" : "rgba(255,255,255,0.5)",
-                fontFamily: "mulish", 
-                fontSize: 15, 
+                fontFamily: "mulish",
+                fontSize: 15,
             },
             ".ddlItem": {
                 fontFamily: "mulish",
@@ -334,6 +334,13 @@ export const ruuviTheme = extendTheme({
                 content: {
                     bg: colors.menuItemBg[props.colorMode],
                 }
+            }),
+        },
+        Progress: {
+            baseStyle: (props) => ({
+                filledTrack: {
+                    bg: colors.buttonBackground[props.colorMode]
+                },
             }),
         },
     },

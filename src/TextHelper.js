@@ -12,7 +12,7 @@ export function addNewlines(str, newlineChar) {
 
 export function addVariablesInString(str, variables) {
     for (let i = 0; i < variables.length; i++) {
-        str = str.replace(/{(.*?)}/, variables[i])
+        str = str.replace(/{.*?\}/, variables[i])
     }
     return str
 }

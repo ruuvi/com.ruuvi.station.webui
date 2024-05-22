@@ -19,6 +19,9 @@ import { useTranslation } from "react-i18next";
 import Store from "./Store";
 import { logout } from "./utils/loginUtils";
 import ShareCenter from "./states/ShareCenter";
+import AddSensorModal from "./components/AddSensorModal";
+import SettingsModal from "./components/SettingsModal";
+import MyAccountModal from "./components/MyAccountModal";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -265,7 +268,7 @@ export default function App() {
         </>}
         <div>
           <Routes>
-            <Route path="/shares" element={<ShareCenter />} />
+            <Route path="/shares" element={<ShareCenter showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
             <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
             <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
           </Routes>
@@ -274,6 +277,11 @@ export default function App() {
           <div style={versionText}>v{pjson.version} <a href="https://f.ruuvi.com/t/5039/9999" target="_blank" rel="noreferrer">{t("changelog")}</a></div>
         </div>
       </BrowserRouter>
+      <AddSensorModal open={showDialog === "addsensor"} onClose={() => setShowDialog("")} updateApp={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />
+      <SettingsModal open={showDialog === "settings"} onClose={() => setShowDialog("")} updateUI={() => this.forceUpdate()} />
+      {showDialog === "myaccount" &&
+        <MyAccountModal open={true} onClose={() => setShowDialog("")} updateApp={() => this.props.reloadTags()} />
+      }
     </ChakraProvider>
   );
 }

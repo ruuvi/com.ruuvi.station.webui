@@ -48,7 +48,7 @@ class ShareDialog extends Component {
     }
     unshare(email) {
         if (this.state.loading) return;
-        var confirmMessage = this.props.t("share_sensor_unshare_confirm").replace("{%@^%1$s}", email)
+        var confirmMessage = addVariablesInString(this.props.t("share_sensor_unshare_confirm"), [email])
         if (window.confirm(confirmMessage)) {
             this.setState({ ...this.state, loading: true })
             new NetworkApi().unshare(this.props.sensor.sensor, email, resp => {

@@ -55,7 +55,7 @@ class NetworkApi {
         document.cookie = `station_status=signedIn;domain=${domain};Max-Age=-99999999`
     }
     isStaging() {
-         return localStorage.getItem("env") === "staging"
+        return localStorage.getItem("env") === "staging"
     }
     setEnv(env) {
         localStorage.setItem("env", env)
@@ -223,6 +223,16 @@ class NetworkApi {
         }).then(response => {
             success(response);
         })
+    }
+    async shareAsync(mac, email) {
+        const response = await fetch(this.url + "/share", {
+            ...this.options,
+            method: 'POST',
+            body: JSON.stringify({ sensor: mac, user: email }),
+        });
+        checkStatusCode(response);
+        const data = await response.json();
+        return data
     }
     unshare(mac, email, success) {
         fetch(this.url + "/unshare", {
