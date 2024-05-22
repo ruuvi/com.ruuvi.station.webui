@@ -158,7 +158,7 @@ const ShareCenter = () => {
     sensorsThatCanBeShared = sensorsThatCanBeShared.filter(sensor => !selectedSensors.includes(sensor.sensor));
 
     return (
-        <Box margin={8} marginLeft={16} marginRight={16}>
+        <Box margin={8} marginLeft={{ base: 2, md: 16 }} marginRight={{ base: 2, md: 16 }}>
             <Heading>
                 {i18next.t("share_center")}
             </Heading>
