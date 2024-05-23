@@ -33,6 +33,8 @@ import { getAlertIcon, isAlerting } from "../utils/alertHelper";
 import { ruuviTheme } from "../themes";
 import { ArrowDownIcon, ArrowUpIcon } from "@chakra-ui/icons";
 import UpgradePlanButton from './UpgradePlanButton';
+import RemoveSensorDialog from "./RemoveSensorDialog";
+import notify from "../utils/notify";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -71,6 +73,10 @@ function MoreMenu(props) {
         e.preventDefault()
         props.move(dir)
     }
+    const removeSensor = (e) => {
+        e.preventDefault()
+        props.remove()
+    }
     return <Menu autoSelect={false} isOpen={isOpen} onOpen={handleButtonClick} onClose={handleButtonClick} >
         <MenuButton as={IconButton} onClick={(e) => e.preventDefault() || handleButtonClick()} icon={<MdMoreVert size={23} />} variant="topbar" style={{ backgroundColor: "transparent" }} top={-4} right={props.simpleView ? 0 : -4} height={55} mt={props.mt}>
         </MenuButton>
@@ -86,6 +92,8 @@ function MoreMenu(props) {
                 <MenuDivider />
                 <MenuItem className="ddlItem" onClick={e => doAction(e, "share")}>{t("share")}</MenuItem>
             </>}
+            <MenuDivider />
+            <MenuItem className="ddlItem" onClick={(e) => removeSensor(e, 1)}>{t("remove")}</MenuItem>
             <MenuDivider />
             <MenuItem className="ddlItem" onClick={(e) => moveCard(e, 1)}><ArrowUpIcon mr={2} /> {t("move_up")}</MenuItem>
             <MenuDivider />
@@ -104,6 +112,7 @@ class SensorCard extends Component {
             loadingHistory: true,
             imageHover: false,
             loadingImage: false,
+            showRemoveDialog: false,
         }
     }
     componentDidMount() {
@@ -240,7 +249,7 @@ class SensorCard extends Component {
 
         const moreDropdonw = <MoreMenu move={this.props.move} simpleView sensor={this.props.sensor} share={() => this.props.share()} uploadBg={() => {
             document.getElementById("fileinputlabel" + this.props.sensor.sensor).click()
-        }} rename={this.props.rename} />
+        }} rename={this.props.rename} remove={() => this.setState({ ...this.state, showRemoveDialog: true })} />
 
         const altFileUplaod = <label htmlFor={"altup" + this.props.sensor.sensor} id={"fileinputlabel" + this.props.sensor.sensor}>
             <input type="file" accept="image/*" style={{ display: "none" }} id={"altup" + this.props.sensor.sensor} onChange={f => {
@@ -256,10 +265,13 @@ class SensorCard extends Component {
         if (freeMode) noHistoryStrKey = "no_data_free_mode"
         let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
 
-        if (this.props.sensor.sensor === "D4:24:13:2F:D8:E3") {
-        console.log(freeMode && !isSharedSensor() && sensorHasData())
-        console.log(freeMode, !isSharedSensor(), sensorHasData())
-        }
+        const removeSensorDialog =
+            <RemoveSensorDialog open={this.state.showRemoveDialog} sensor={this.props.sensor} t={t} onClose={() => this.setState({ ...this.state, showRemoveDialog: false })} remove={() => {
+                this.setState({ ...this.state, showRemoveDialog: false })
+                notify.success(t(`sensor_removed`))
+                this.props.remove()
+            }} />
+
         const noData = (str) =>
             <div style={{ height: graphHeight, marginLeft: simpleView ? 0 : 24, marginRight: 30, paddingTop: simpleView ? 0 : 10 }} className="nodatatext">
                 <div style={{ position: "relative", top: simpleView ? undefined : this.props.size === "medium" ? "44%" : "50%", transform: simpleView ? undefined : "translateY(-50%)" }}>
@@ -307,6 +319,7 @@ class SensorCard extends Component {
                             {noData(t("no_data").split("\n").map(x => <div key={x}>{x}</div>))}
                         </>}
                     </Box>
+                    {removeSensorDialog}
                 </div >
             )
         }
@@ -431,6 +444,7 @@ class SensorCard extends Component {
                         </Box>
                     </Box>
                 </Box>
+                {removeSensorDialog}
             </div >
         )
     }

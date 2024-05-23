@@ -241,6 +241,9 @@ class Dashboard extends Component {
             if (yes) this.updateOrder([])
         })
     }
+    removeSensorFromState(mac) {
+        this.setState({ ...this.state, sensors: this.state.sensors.filter(x => x.sensor !== mac) })
+    }
     render() {
         var { t } = this.props;
         let order = this.getOrder()
@@ -290,6 +293,7 @@ class Dashboard extends Component {
                         graphType={this.state.graphType}
                         share={() => this.setState({ ...this.state, showShareFor: x })}
                         rename={() => this.setState({ ...this.state, rename: x })}
+                        remove={() => this.removeSensorFromState(x.sensor)}
                         move={dir => {
                             if (!order) {
                                 order = this.state.sensors.map(y => y.sensor);

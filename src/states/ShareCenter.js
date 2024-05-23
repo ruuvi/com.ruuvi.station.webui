@@ -41,7 +41,7 @@ const SensorSharedWithMeBox = ({ email, sensor, onRemove }) => {
             <RemoveSensorDialog open={remove} sensor={sensor} t={i18next.t} onClose={() => setRemove(false)} remove={() => {
                 setRemove(false)
                 onRemove()
-                notify.success(i18next.t(`successfully_removed`))
+                notify.success(i18next.t(`sensor_removed`))
             }} />
         </Box>
     )
