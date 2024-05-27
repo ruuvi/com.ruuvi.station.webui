@@ -4,6 +4,7 @@ import {
     Box,
     Flex,
     Switch,
+    Spinner,
 } from "@chakra-ui/react"
 import RDialog from "./RDialog";
 import NetworkApi from "../NetworkApi";
@@ -12,12 +13,14 @@ import { addNewlines } from "../TextHelper";
 
 function RemoveSensorDialog(props) {
     const [deleteData, setdeleteData] = useState(false)
+    const [loading, setLoading] = useState(false)
     let user = new NetworkApi().getUser().email
     let owner = props.sensor.owner
     const isSharedSensor = user !== owner;
     const remove = () => {
         var mac = props.sensor.sensor
         if (window.confirm(props.t("remove_sensor_confirmation_dialog"))) {
+            setLoading(true)
             new NetworkApi().unclaim(mac, deleteData, resp => {
                 if (resp.result === "success") {
                     props.remove()
@@ -25,9 +28,11 @@ function RemoveSensorDialog(props) {
                 } else {
                     notify.error(`UserApiError.${this.props.t(resp.code)}`)
                 }
+                setLoading(false)
             }, fail => {
                 notify.error(this.props.t("something_went_wrong"))
                 console.log(fail)
+                setLoading(false)
             })
         }
     }
@@ -48,7 +53,11 @@ function RemoveSensorDialog(props) {
             }
             {deleteData && <Box mt="3">{props.t("remove_cloud_history_description")}</Box>}
             <div style={{ textAlign: "center" }}>
-                <Button onClick={remove} mt={100}>{props.t("remove")}</Button>
+                <Box mt={100} height={"40px"}>
+                    {loading ? <Spinner size="xl" /> :
+                        <Button onClick={remove}>{props.t("remove")}</Button>
+                    }
+                </Box>
             </div>
         </RDialog>
     )
