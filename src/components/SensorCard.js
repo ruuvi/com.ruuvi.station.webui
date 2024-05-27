@@ -93,11 +93,11 @@ function MoreMenu(props) {
                 <MenuItem className="ddlItem" onClick={e => doAction(e, "share")}>{t("share")}</MenuItem>
             </>}
             <MenuDivider />
-            <MenuItem className="ddlItem" onClick={(e) => removeSensor(e, 1)}>{t("remove")}</MenuItem>
-            <MenuDivider />
             <MenuItem className="ddlItem" onClick={(e) => moveCard(e, 1)}><ArrowUpIcon mr={2} /> {t("move_up")}</MenuItem>
             <MenuDivider />
             <MenuItem className="ddlItem" onClick={(e) => moveCard(e, -1)}><ArrowDownIcon mr={2} /> {t("move_down")}</MenuItem>
+            <MenuDivider />
+            <MenuItem className="ddlItem" onClick={(e) => removeSensor(e, 1)}>{t("remove")}</MenuItem>
         </MenuList>
     </Menu>
 }
