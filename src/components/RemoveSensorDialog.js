@@ -32,7 +32,7 @@ function RemoveSensorDialog(props) {
         }
     }
     return (
-        <RDialog title={props.t("remove_sensor")} isOpen={props.open} onClose={() => props.onClose()}>
+        <RDialog title={`${props.t("remove_sensor")} (${props.sensor.name})`} isOpen={props.open} onClose={() => props.onClose()}>
             {isSharedSensor ? (
                 <Box mb="4">{addNewlines(props.t("remove_shared_sensor_description"), '\\n')}</Box>
             ) : (
