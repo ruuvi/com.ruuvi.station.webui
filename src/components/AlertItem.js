@@ -70,6 +70,8 @@ class AlertItem extends Component {
     checkAlertLimits(alert) {
         try {
             let type = this.props.type.toLowerCase();
+            if (type === "temperature") return // no need to check
+            
             var { min, max } = getAlertRange(type)
             if (type === "offline") {
                 if (alert.max < min) alert.max = min
