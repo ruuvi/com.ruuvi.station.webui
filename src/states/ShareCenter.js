@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, Button, Flex, Grid, GridItem, Heading, IconButton, Input, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Progress, Spinner, Tooltip } from '@chakra-ui/react';
+import { useBreakpointValue, Box, Button, Flex, Grid, GridItem, Heading, IconButton, Input, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Progress, Spinner, Tooltip } from '@chakra-ui/react';
 import NetworkApi from '../NetworkApi';
 import pjson from '../../package.json';
 import { MdArrowDropDown, MdClear } from 'react-icons/md';
@@ -10,13 +10,13 @@ import RemoveSensorDialog from '../components/RemoveSensorDialog';
 
 const EmailBox = (props) => {
     return (
-        <Box className='box' width="250px" height="40px" display="flex" alignItems="center" justifyContent="space-between">
+        <Box className='box' height="40px" display="flex" alignItems="center" justifyContent="space-between">
             <Tooltip label={props.email} placement="top" >
-                <Box as="span" alignItems="center" display="inline-block" maxWidth="100%" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+                <Box as="span" fontSize={14} mt={-0.6} alignItems="center" display="inline-block" maxWidth="100%" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
                     {props.email}
                 </Box>
             </Tooltip>
-            <IconButton variant="ghost" icon={<MdClear />} onClick={props.onRemove} />
+            <IconButton variant="ghost" color={"primary"} mr={-3} icon={<MdClear size="13" />} onClick={props.onRemove} />
         </Box>
     )
 }
@@ -30,7 +30,7 @@ const SensorSharedWithMeBox = ({ email, sensor, onRemove }) => {
                 <div style={{ fontWeight: 800, fontFamily: "mulish" }}>
                     {sensor.name || sensor.sensor}
                 </div>
-                <IconButton variant="ghost" margin={-2} icon={<MdClear />} onClick={e => {
+                <IconButton variant="ghost" color={"primary"} margin={-2} icon={<MdClear size="13"/>} onClick={e => {
                     e.preventDefault()
                     setRemove(true)
                 }} />
@@ -55,7 +55,7 @@ const SensorsSharedByMeBox = (props) => {
             <div style={{ fontWeight: 800, fontFamily: "mulish" }}>
                 {props.sensor.name || props.sensor.sensor}
             </div>
-            <div>
+            <div style={{ fontFamily: "mulish", paddingBottom: 4, fontSize: 14 }}>
                 {i18next.t("active_shares")} ({props.sensor.sharedTo.length}/{pjson.settings.maxSharesPerSensor})
             </div>
             <Flex gap='2' wrap="wrap" >
@@ -100,7 +100,13 @@ const SensorPicker = ({ sensors, canBeShared, onSensorChange }) => {
 
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
-            <MenuButton as={Button} variant="topbar" rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 15, fontWeight: 800, paddingRight: 0, paddingLeft: 4 }}>
+            <MenuButton as={Button}
+                variant="ddl"
+                className="durationPicker"
+                borderRadius="4px"
+                rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />}
+                style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, paddingRight: 0, paddingLeft: 4 }}
+            >
                 {i18next.t("sensors")}
             </MenuButton>
             <MenuList mt="2" zIndex={10}>
@@ -120,6 +126,12 @@ const SensorPicker = ({ sensors, canBeShared, onSensorChange }) => {
     )
 };
 
+const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400 }
+const titleStyle = { fontFamily: "montserrat", fontSize: "54px", fontWeight: 800 }
+const titleDescriptionStyle = { fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }
+const subTitleStyle = { fontFamily: "montserrat", fontSize: "24px", fontWeight: 800 }
+const subTitleDescriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, paddingBottom: 15, paddingTop: 5 }
+
 const ShareCenter = () => {
     const [sensors, setSensors] = React.useState([]);
     const [selectedSensors, setSelectedSensors] = React.useState([]);
@@ -130,6 +142,8 @@ const ShareCenter = () => {
     const [shareLoading, setShareLoading] = React.useState(false);
     const [showShareResult, setShowShareResult] = React.useState(false);
     const [shareProgress, setShareProgress] = React.useState([0, 0])
+
+    const isWideVersion = useBreakpointValue({ base: false, md: true })
 
     useEffect(() => {
         (async () => {
@@ -157,12 +171,89 @@ const ShareCenter = () => {
     let sensorsThatCanBeShared = mySensors.filter(x => x.sharedTo.length < pjson.settings.maxSharesPerSensor)
     sensorsThatCanBeShared = sensorsThatCanBeShared.filter(sensor => !selectedSensors.includes(sensor.sensor));
 
+    const selectSensorTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("select_sensor")}</div>
+    const selectSensor = <>
+        <SensorPicker sensors={mySensors} canBeShared={sensorsThatCanBeShared} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} />
+        <Flex gap='2' wrap="wrap" mt={1} mb={3} >
+            {selectedSensors.map((sensor, index) => (
+                <Box key={index}>
+                    <EmailBox email={sensors.find(x => x.sensor === sensor).name || sensor} onRemove={s => {
+                        setSelectedSensors(selectedSensors.filter(x => x !== sensor))
+                    }} />
+                </Box>
+            ))}
+        </Flex>
+    </>
+
+    const selectEmailTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("email")}</div>
+    const selectEmail = <>
+        <Input placeholder={i18next.t("email")} w={"250px"} mr={2} mb={2} value={email} onChange={e =>
+            setEmail(e.target.value)
+        } />
+        <Box display={"inline-block"}>
+            <Button onClick={() => {
+                if (!shareToEmails.includes(email)) {
+                    setShareToEmails([...shareToEmails, email])
+                }
+                setEmail("");
+            }} isDisabled={email.length === 0 || !isEmail(email)}>
+                {i18next.t("add")}
+            </Button>
+        </Box>
+        <Flex gap='2' wrap="wrap" mt={3} >
+            {shareToEmails.map((email, index) => (
+                <EmailBox email={email} onRemove={() => {
+                    let newEmails = [...shareToEmails]
+                    newEmails.splice(index, 1)
+                    setShareToEmails(newEmails)
+                }} />
+            ))}
+        </Flex>
+    </>
+
+    const shareButton = <Button isDisabled={selectedSensors.length === 0 || shareToEmails.length === 0 || shareLoading}
+        onClick={async () => {
+            setShareProgress([0, selectedSensors.length * shareToEmails.length])
+            setShareResult([])
+            setShowShareResult(true)
+            setShareLoading(true)
+            let result = []
+            let progress = 0
+            for (let sensor of selectedSensors) {
+                for (let email of shareToEmails) {
+                    try {
+                        let res = await new NetworkApi().shareAsync(sensor, email)
+                        if (res.result === "error") {
+                            //notify.error(i18next.t("UserApiError." + res.code))
+                            progress++
+                            setShareProgress([progress, selectedSensors.length * shareToEmails.length])
+                            result.push({ sensor, name: getSensorName(sensor), email, result: "error", code: res.code })
+                            continue
+                        }
+                        let thisSensor = sensors.find(x => x.sensor === sensor)
+                        thisSensor.sharedTo.push(email)
+                        setSensors([...sensors])
+                        result.push({ sensor, name: getSensorName(sensor), email, result: "success" })
+                    } catch (e) {
+                        notify.error(e.message)
+                        result.push({ sensor, name: getSensorName(sensor), email, result: "error", code: e.code })
+                    }
+                    progress++
+                    setShareProgress([progress, selectedSensors.length * shareToEmails.length])
+                }
+            }
+            setShareLoading(false)
+            setShareResult(result)
+        }} >
+        {i18next.t("share")}
+    </Button>
+
     return (
         <Box margin={8} marginLeft={{ base: 2, md: 16 }} marginRight={{ base: 2, md: 16 }}>
-            <Heading>
+            <Heading style={titleStyle}>
                 {i18next.t("share_center")}
             </Heading>
-            <p>
+            <p style={titleDescriptionStyle}>
                 {i18next.t("share_center_subtitle")}
             </p>
             <br />
@@ -173,106 +264,65 @@ const ShareCenter = () => {
                 :
                 <>
                     <Box className='contentImportant' width="100%" padding={{ base: "5px", md: "30px" }}>
-                        <Box mb={8}>
+                        <Box mb={8} style={descriptionStyle}>
                             {i18next.t("share_center_description")}
                         </Box>
 
-                        <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(5, 1fr)" }} gap={2}>
-                            <GridItem colSpan={{ base: 1, md: 1 }}>
-                                <span valign="top" style={{ paddingTop: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("select_sensor")}</span>
-                            </GridItem>
-                            <GridItem colSpan={{ base: 1, md: 4 }}>
-                                <SensorPicker sensors={mySensors} canBeShared={sensorsThatCanBeShared} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} />
-                                <Flex gap='2' wrap="wrap" mt={1} mb={3} >
-                                    {selectedSensors.map((sensor, index) => (
-                                        <Box key={index}>
-                                            <EmailBox email={sensors.find(x => x.sensor === sensor).name || sensor} onRemove={s => {
-                                                setSelectedSensors(selectedSensors.filter(x => x !== sensor))
-                                            }} />
-                                        </Box>
-                                    ))}
-                                </Flex>
-                            </GridItem>
-                        </Grid>
-
-                        <br />
-
-                        <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(5, 1fr)" }} gap={2}>
-                            <GridItem colSpan={{ base: 1, md: 1 }}>
-                                <span valign="top" style={{ paddingTop: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("email")}</span>
-                            </GridItem>
-                            <GridItem colSpan={{ base: 1, md: 4 }}>
-                                <Input placeholder={i18next.t("email")} w={"250px"} mr={2} mb={2} value={email} onChange={e =>
-                                    setEmail(e.target.value)
-                                } />
-                                <Box display={"inline-block"}>
-                                    <Button onClick={() => {
-                                        if (!shareToEmails.includes(email)) {
-                                            setShareToEmails([...shareToEmails, email])
-                                        }
-                                        setEmail("");
-                                    }} isDisabled={email.length === 0 || !isEmail(email)}>
-                                        {i18next.t("add")}
-                                    </Button>
+                        {isWideVersion ? <>
+                            <table>
+                                <tr>
+                                    <td valign='top' style={{ minWidth: "150px" }}>
+                                        {selectSensorTitle}
+                                    </td>
+                                    <td>
+                                        {selectSensor}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td valign="top">
+                                        {selectEmailTitle}
+                                    </td>
+                                    <td>
+                                        {selectEmail}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td valign="top">
+                                    </td>
+                                    <td>
+                                        <div style={{ marginTop: 20 }}>
+                                            {shareButton}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </> : <>
+                            <Box display="block" mb={2}>
+                                <Box p={2}>
+                                    {selectSensorTitle}
                                 </Box>
-                                <Flex gap='2' wrap="wrap" mt={3} >
-                                    {shareToEmails.map((email, index) => (
-                                        <EmailBox email={email} onRemove={() => {
-                                            let newEmails = [...shareToEmails]
-                                            newEmails.splice(index, 1)
-                                            setShareToEmails(newEmails)
-                                        }} />
-                                    ))}
-                                </Flex>
-                            </GridItem>
-                        </Grid>
+                                <Box flex={1} ml={{ md: 2, base: 1 }}>
+                                    {selectSensor}
+                                </Box>
+                            </Box>
 
-                        <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(5, 1fr)" }} gap={2} mt={4}>
-                            <GridItem colSpan={{ base: 1, md: 1 }}>
-                            </GridItem>
-                            <GridItem colSpan={{ base: 1, md: 4 }}>
-                                <Button isDisabled={selectedSensors.length === 0 || shareToEmails.length === 0 || shareLoading}
-                                    onClick={async () => {
-                                        setShareProgress([0, selectedSensors.length * shareToEmails.length])
-                                        setShareResult([])
-                                        setShowShareResult(true)
-                                        setShareLoading(true)
-                                        let result = []
-                                        let progress = 0
-                                        for (let sensor of selectedSensors) {
-                                            for (let email of shareToEmails) {
-                                                try {
-                                                    let res = await new NetworkApi().shareAsync(sensor, email)
-                                                    if (res.result === "error") {
-                                                        //notify.error(i18next.t("UserApiError." + res.code))
-                                                        progress++
-                                                        setShareProgress([progress, selectedSensors.length * shareToEmails.length])
-                                                        result.push({ sensor, name: getSensorName(sensor), email, result: "error", code: res.code })
-                                                        continue
-                                                    }
-                                                    let thisSensor = sensors.find(x => x.sensor === sensor)
-                                                    thisSensor.sharedTo.push(email)
-                                                    setSensors([...sensors])
-                                                    result.push({ sensor, name: getSensorName(sensor), email, result: "success" })
-                                                } catch (e) {
-                                                    notify.error(e.message)
-                                                    result.push({ sensor, name: getSensorName(sensor), email, result: "error", code: e.code })
-                                                }
-                                                progress++
-                                                setShareProgress([progress, selectedSensors.length * shareToEmails.length])
-                                            }
-                                        }
-                                        setShareLoading(false)
-                                        setShareResult(result)
-                                    }} >
-                                    {i18next.t("share")}
-                                </Button>
-                            </GridItem>
-                        </Grid>
+                            <Box display="block" mb={2}>
+                                <Box p={2}>
+                                    {selectEmailTitle}
+                                </Box>
+                                <Box flex={1} ml={{ md: 2, base: 1 }}>
+                                    {selectEmail}
+                                </Box>
+                            </Box>
+                            {shareButton}
+                        </>}
 
                     </Box>
                     <br />
-                    <Heading size="lg">{i18next.t("shared_by_me")}</Heading>
+                    <Heading size="lg" style={subTitleStyle}>{i18next.t("shared_by_me")}</Heading>
+                    <Box style={subTitleDescriptionStyle}>
+                        {i18next.t("sensor_shared_by_me_description")}
+                    </Box>
                     <hr />
                     <br />
                     {sensors.filter(x => x.userIsOwner && x.sharedTo.length).map((sensor, index) => (
@@ -284,7 +334,10 @@ const ShareCenter = () => {
                     ))}
                     <br />
                     <br />
-                    <Heading size="lg">{i18next.t("shared_to_me")}</Heading>
+                    <Heading size="lg" style={subTitleStyle}>{i18next.t("shared_to_me")}</Heading>
+                    <Box style={subTitleDescriptionStyle}>
+                        {i18next.t("sensor_shared_with_me_description")}
+                    </Box>
                     <hr />
                     <br />
                     <Flex gap='2' wrap="wrap">

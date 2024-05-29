@@ -39,7 +39,7 @@ let colors = {
     buttonBackground: { light: "#35AD9F", dark: "#35AD9F" },
     buttonFocus: { light: "#1f9385", dark: "#1f9385" },
     imageBackgroundColor: { light: "#d8edea", dark: "#2d605c" },
-    boxBg: { dark: "rgba(68, 201, 185, 0.3)", light: "rgba(68, 201, 185, 0.3)" },
+    boxBg: { dark: "rgba(198, 227, 224, 0.5)", light: "rgba(198, 227, 224, 0.5)" },
 }
 
 export const ruuviTheme = extendTheme({
