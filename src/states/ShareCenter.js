@@ -246,6 +246,8 @@ const ShareCenter = () => {
                     setShareProgress([progress, selectedSensors.length * shareToEmails.length])
                 }
             }
+            setSelectedSensors([])
+            setShareToEmails([])
             setShareLoading(false)
             setShareResult(result)
         }} >
