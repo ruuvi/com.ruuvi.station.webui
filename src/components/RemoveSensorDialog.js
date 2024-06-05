@@ -10,31 +10,32 @@ import RDialog from "./RDialog";
 import NetworkApi from "../NetworkApi";
 import notify from "../utils/notify";
 import { addNewlines } from "../TextHelper";
+import ConfirmModal from "./ConfirmModal";
 
 function RemoveSensorDialog(props) {
     const [deleteData, setdeleteData] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [confirmOpen, setConfirmOpen] = useState(false)
     let user = new NetworkApi().getUser().email
     let owner = props.sensor.owner
     const isSharedSensor = user !== owner;
     const remove = () => {
+        setConfirmOpen(false)
         var mac = props.sensor.sensor
-        if (window.confirm(props.t("remove_sensor_confirmation_dialog"))) {
-            setLoading(true)
-            new NetworkApi().unclaim(mac, deleteData, resp => {
-                if (resp.result === "success") {
-                    props.remove()
-                    props.onClose()
-                } else {
-                    notify.error(`UserApiError.${this.props.t(resp.code)}`)
-                }
-                setLoading(false)
-            }, fail => {
-                notify.error(this.props.t("something_went_wrong"))
-                console.log(fail)
-                setLoading(false)
-            })
-        }
+        setLoading(true)
+        new NetworkApi().unclaim(mac, deleteData, resp => {
+            if (resp.result === "success") {
+                props.remove()
+                props.onClose()
+            } else {
+                notify.error(`UserApiError.${this.props.t(resp.code)}`)
+            }
+            setLoading(false)
+        }, fail => {
+            notify.error(this.props.t("something_went_wrong"))
+            console.log(fail)
+            setLoading(false)
+        })
     }
     return (
         <RDialog title={`${props.t("remove_sensor")} (${props.sensor.name})`} isOpen={props.open} onClose={() => props.onClose()}>
@@ -55,10 +56,17 @@ function RemoveSensorDialog(props) {
             <div style={{ textAlign: "center" }}>
                 <Box mt={100} height={"40px"}>
                     {loading ? <Spinner size="xl" /> :
-                        <Button onClick={remove}>{props.t("remove")}</Button>
+                        <Button onClick={() => setConfirmOpen(true)}>{props.t("remove")}</Button>
                     }
                 </Box>
             </div>
+            <ConfirmModal isOpen={confirmOpen}
+                title={props.t("remove_sensor_confirmation_title")}
+                message={props.t("remove_sensor_confirmation_dialog")}
+                onClose={() => setConfirmOpen(false)}
+                onConfirm={remove}
+                loading={loading} />
+
         </RDialog>
     )
 }

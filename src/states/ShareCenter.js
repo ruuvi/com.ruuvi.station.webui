@@ -7,6 +7,7 @@ import notify from '../utils/notify';
 import i18next from 'i18next';
 import { addVariablesInString } from "../TextHelper";
 import RemoveSensorDialog from '../components/RemoveSensorDialog';
+import ConfirmModal from '../components/ConfirmModal';
 
 const EmailBox = (props) => {
     return (
@@ -363,34 +364,6 @@ const ShareCenter = () => {
         </Box>
     );
 };
-
-const ConfirmModal = ({ isOpen, title, message, onClose, onConfirm, loading }) => {
-    const handleKeyDown = (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            onConfirm();
-        }
-    }
-    return (
-        <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent onKeyDown={handleKeyDown}>
-                <ModalHeader>{title}</ModalHeader>
-                <ModalBody>
-                    {message}
-                </ModalBody>
-                <ModalFooter>
-                    {loading ? <Spinner size="xl" /> : <>
-                        <Button onClick={onClose}>{i18next.t("cancel")}</Button>
-                        <Button onClick={onConfirm} ml={3}>
-                            {i18next.t("ok")}
-                        </Button>
-                    </>}
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
-    )
-}
 
 const ShareResultDialog = ({ isOpen, onClose, result, progress }) => {
     let isSharing = progress[0] !== progress[1]
