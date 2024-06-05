@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useBreakpointValue, Box, Button, Flex, Grid, GridItem, Heading, IconButton, Input, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Progress, Spinner, Tooltip } from '@chakra-ui/react';
+import { useBreakpointValue, Box, Button, Flex, Grid, Heading, IconButton, Input, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Progress, Spinner, Tooltip } from '@chakra-ui/react';
 import NetworkApi from '../NetworkApi';
 import pjson from '../../package.json';
 import { MdArrowDropDown, MdClear } from 'react-icons/md';
@@ -30,7 +30,7 @@ const SensorSharedWithMeBox = ({ email, sensor, onRemove }) => {
                 <div style={{ fontWeight: 800, fontFamily: "mulish" }}>
                     {sensor.name || sensor.sensor}
                 </div>
-                <IconButton variant="ghost" color={"primary"} margin={-2} icon={<MdClear size="13"/>} onClick={e => {
+                <IconButton variant="ghost" color={"primary"} margin={-2} icon={<MdClear size="13" />} onClick={e => {
                     e.preventDefault()
                     setRemove(true)
                 }} />
@@ -107,7 +107,9 @@ const SensorPicker = ({ sensors, canBeShared, onSensorChange }) => {
                 rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />}
                 style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, paddingRight: 0, paddingLeft: 4 }}
             >
-                {i18next.t("sensors")}
+                <Box pl={1}>
+                    {i18next.t("sensors")}
+                </Box>
             </MenuButton>
             <MenuList mt="2" zIndex={10}>
                 {sensors.map((x, i) => {
@@ -230,9 +232,11 @@ const ShareCenter = () => {
                             result.push({ sensor, name: getSensorName(sensor), email, result: "error", code: res.code })
                             continue
                         }
-                        let thisSensor = sensors.find(x => x.sensor === sensor)
-                        thisSensor.sharedTo.push(email)
-                        setSensors([...sensors])
+                        else if (!res.data.invited) {
+                            let thisSensor = sensors.find(x => x.sensor === sensor)
+                            thisSensor.sharedTo.push(email)
+                            setSensors([...sensors])
+                        }
                         result.push({ sensor, name: getSensorName(sensor), email, result: "success" })
                     } catch (e) {
                         notify.error(e.message)
