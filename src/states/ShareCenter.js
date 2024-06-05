@@ -364,10 +364,16 @@ const ShareCenter = () => {
 };
 
 const ConfirmModal = ({ isOpen, title, message, onClose, onConfirm, loading }) => {
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            onConfirm();
+        }
+    }
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
-            <ModalContent>
+            <ModalContent onKeyDown={handleKeyDown}>
                 <ModalHeader>{title}</ModalHeader>
                 <ModalBody>
                     {message}
