@@ -27,7 +27,7 @@ const SensorSharedWithMeBox = ({ email, sensor, onRemove }) => {
     return (
         <Box className='box'>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontWeight: 800, fontFamily: "mulish" }}>
+                <div style={{ fontWeight: 800, fontFamily: "mulish", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {sensor.name || sensor.sensor}
                 </div>
                 <IconButton variant="ghost" color={"primary"} margin={-2} icon={<MdClear size="13" />} onClick={e => {
@@ -35,7 +35,7 @@ const SensorSharedWithMeBox = ({ email, sensor, onRemove }) => {
                     setRemove(true)
                 }} />
             </div>
-            <div style={{ fontSize: 14 }}>
+            <div style={{ fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {sensor.owner} | {sensor.subscription.subscriptionName}
             </div>
             <RemoveSensorDialog open={remove} sensor={sensor} t={i18next.t} onClose={() => setRemove(false)} remove={() => {
