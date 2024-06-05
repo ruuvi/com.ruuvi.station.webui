@@ -1,4 +1,4 @@
-import { extendTheme } from "@chakra-ui/react";
+import { background, extendTheme } from "@chakra-ui/react";
 
 const config = {
     initialColorMode: localStorage.getItem("chakra-ui-color-mode") || "system",
@@ -8,7 +8,7 @@ const config = {
 let colors = {
     bodyBg: { light: "#edf2f2 !important", dark: "#001b1a !important" },
     contentBg: { light: "white", dark: "#111111" },
-    contentImportantBg: { light: "white", dark: "rgba(0,0,0,0)" },
+    contentImportantBg: { light: "white", dark: "#00343480" },
     text: { light: "#1b4847", dark: "#ffffff" },
     textInactive: { light: "#1b484780", dark: "#ffffff80" },
     topbar: { light: "white", dark: "#001b1a" },
@@ -39,7 +39,7 @@ let colors = {
     buttonBackground: { light: "#35AD9F", dark: "#35AD9F" },
     buttonFocus: { light: "#1f9385", dark: "#1f9385" },
     imageBackgroundColor: { light: "#d8edea", dark: "#2d605c" },
-    boxBg: { dark: "rgba(198, 227, 224, 0.5)", light: "rgba(198, 227, 224, 0.5)" },
+    boxBg: { dark: "rgba(53, 173, 159, 0.2)", light: "rgba(198, 227, 224, 0.5)" },
 }
 
 export const ruuviTheme = extendTheme({
@@ -167,6 +167,10 @@ export const ruuviTheme = extendTheme({
                 padding: "10px",
                 borderRadius: "5px",
             },
+            ".shareEmail": {
+                border: "1px solid !important",
+                borderColor: colors.buttonBackground[props.colorMode] + " !important",
+            },
         })
     },
     graph: {
@@ -260,6 +264,11 @@ export const ruuviTheme = extendTheme({
                 ddl: (props) => ({
                     bg: props.colorMode === "light" ? "white" : undefined,
                 }),
+                shareSensorSelect: (props) => ({
+                    bg: "transparent",
+                    border: "1px solid",
+                    borderColor: colors.buttonBackground[props.colorMode],
+                }),
                 imageToggle: (props) => ({
                     borderRadius: 3,
                     bg: colors.menuButtonBg[props.colorMode],
@@ -277,7 +286,7 @@ export const ruuviTheme = extendTheme({
         Input: {
             defaultProps: {
                 focusBorderColor: colors.buttonFocus.dark,
-            }
+            },
         },
         Modal: {
             parts: ['header'],

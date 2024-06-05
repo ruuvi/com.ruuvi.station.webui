@@ -102,11 +102,10 @@ const SensorPicker = ({ sensors, canBeShared, onSensorChange }) => {
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
             <MenuButton as={Button}
-                variant="ddl"
-                className="durationPicker"
+                variant={"shareSensorSelect"}
                 borderRadius="4px"
-                rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />}
-                style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, paddingRight: 0, paddingLeft: 4 }}
+                rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{}} />}
+                style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, width: "250px", textAlign: "left" }}
             >
                 <Box pl={1}>
                     {i18next.t("sensors")}
@@ -132,7 +131,9 @@ const SensorPicker = ({ sensors, canBeShared, onSensorChange }) => {
 
 const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400 }
 const titleStyle = { fontFamily: "montserrat", fontSize: "54px", fontWeight: 800 }
+const mobileTitleStyle = { fontFamily: "montserrat", fontSize: "32px", fontWeight: 800 }
 const titleDescriptionStyle = { fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }
+const mobileTitleDescriptionStyle = { fontFamily: "mulish", fontSize: 14 }
 const subTitleStyle = { fontFamily: "montserrat", fontSize: "24px", fontWeight: 800 }
 const subTitleDescriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, paddingBottom: 15, paddingTop: 5 }
 
@@ -191,7 +192,7 @@ const ShareCenter = () => {
 
     const selectEmailTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("email")}</div>
     const selectEmail = <>
-        <Input placeholder={i18next.t("email")} w={"250px"} mr={2} value={email} onChange={e =>
+        <Input className='shareEmail' placeholder={i18next.t("email")} w={"250px"} mr={2} value={email} onChange={e =>
             setEmail(e.target.value)
         } />
         <Box display={"inline-block"}>
@@ -258,10 +259,10 @@ const ShareCenter = () => {
 
     return (
         <Box margin={8} marginLeft={{ base: 2, md: 16 }} marginRight={{ base: 2, md: 16 }}>
-            <Heading style={titleStyle}>
+            <Heading style={isWideVersion ? titleStyle : mobileTitleStyle}>
                 {i18next.t("share_center")}
             </Heading>
-            <p style={titleDescriptionStyle}>
+            <p style={isWideVersion ? titleDescriptionStyle : mobileTitleDescriptionStyle}>
                 {i18next.t("share_center_subtitle")}
             </p>
             <br />
@@ -326,6 +327,7 @@ const ShareCenter = () => {
                         </>}
 
                     </Box>
+                    <br />
                     <br />
                     <Heading size="lg" style={subTitleStyle}>{i18next.t("shared_by_me")}</Heading>
                     <Box style={subTitleDescriptionStyle}>
