@@ -111,11 +111,12 @@ const SensorPicker = ({ sensors, canBeShared, onSensorChange }) => {
                     {i18next.t("sensors")}
                 </Box>
             </MenuButton>
-            <MenuList mt="2" zIndex={10}>
+            <MenuList mt="2" zIndex={10} ml={2}>
                 {sensors.map((x, i) => {
                     if (!x) return null
                     let divider = <></>
                     let borderStyle = {};
+                    if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
                     if (i === sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                     else divider = <MenuDivider />
                     return <div key={x.sensor + "div"}>
@@ -176,7 +177,7 @@ const ShareCenter = () => {
     const selectSensorTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("select_sensor")}</div>
     const selectSensor = <>
         <SensorPicker sensors={mySensors} canBeShared={sensorsThatCanBeShared} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} />
-        <Flex gap='2' wrap="wrap" mt={1} mb={3} >
+        <Flex gap='2' wrap="wrap" mt={3} mb={3}>
             {selectedSensors.map((sensor, index) => (
                 <Box key={index}>
                     <EmailBox email={sensors.find(x => x.sensor === sensor).name || sensor} onRemove={s => {
@@ -189,7 +190,7 @@ const ShareCenter = () => {
 
     const selectEmailTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("email")}</div>
     const selectEmail = <>
-        <Input placeholder={i18next.t("email")} w={"250px"} mr={2} mb={2} value={email} onChange={e =>
+        <Input placeholder={i18next.t("email")} w={"250px"} mr={2} value={email} onChange={e =>
             setEmail(e.target.value)
         } />
         <Box display={"inline-block"}>
@@ -202,7 +203,7 @@ const ShareCenter = () => {
                 {i18next.t("add")}
             </Button>
         </Box>
-        <Flex gap='2' wrap="wrap" mt={3} >
+        <Flex gap='2' wrap="wrap" mt={2.5} >
             {shareToEmails.map((email, index) => (
                 <EmailBox email={email} onRemove={() => {
                     let newEmails = [...shareToEmails]
@@ -312,7 +313,7 @@ const ShareCenter = () => {
                                 </Box>
                             </Box>
 
-                            <Box display="block" mb={2}>
+                            <Box display="block" mb={4}>
                                 <Box p={2}>
                                     {selectEmailTitle}
                                 </Box>
