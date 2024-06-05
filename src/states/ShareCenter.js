@@ -272,7 +272,7 @@ const ShareCenter = () => {
                 </center>
                 :
                 <>
-                    <Box className='contentImportant' width="100%" padding={{ base: "5px", md: "30px" }}>
+                    <Box className='contentImportant' borderRadius={8} width="100%" padding={{ base: "5px", md: "30px" }}>
                         <Box mb={8} style={descriptionStyle}>
                             {i18next.t("share_center_description")}
                         </Box>
