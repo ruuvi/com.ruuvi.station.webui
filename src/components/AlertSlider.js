@@ -13,17 +13,22 @@ function getColor(gray, alert) {
 class AlertSlider extends React.Component {
     constructor(props) {
         super(props)
-        var range = getAlertRange(props.type)
+        this.state = {
+            editMinValue: false,
+            editMaxValue: false,
+            range: this.getRange(),
+        }
+    }
+    getRange() {
+        var range = getAlertRange(this.props.type)
         if (this.props.type === "temperature" || this.props.type === "pressure") {
             var uh = getUnitHelper(this.props.type)
             range.max = uh.value(range.max)
             range.min = uh.value(range.min)
         }
-        this.state = {
-            ...range,
-            editMinValue: false,
-            editMaxValue: false,
-        }
+        if (this.props.value.max > range.max) range.max = this.props.value.max
+        if (this.props.value.min < range.min) range.min = this.props.value.min
+        return range
     }
     onChange(values, final) {
         if (this.props.type === "temperature") {
@@ -39,11 +44,6 @@ class AlertSlider extends React.Component {
         if (max == null) max = range.max;
         var min = this.props.value.min
         if (min == null) min = range.min;
-        if (max > range.max || min < range.min || min > max) {
-            // revert to default if values are fishy
-            max = range.max;
-            min = range.min;
-        }
         var uh = getUnitHelper(this.props.type)
         if (this.props.type === "temperature" || this.props.type === "pressure") {
             max = uh.value(max)
@@ -51,7 +51,7 @@ class AlertSlider extends React.Component {
         }
         var sliderValues = [min, max]
         return <div style={{ display: 'flex', alignItems: 'center', marginLeft: 4, marginRight: 4 }}>
-            <Range {...this.state} values={sliderValues}
+            <Range {...this.state.range} values={sliderValues}
                 step={this.props.type === "pressure" && uh.unit === "Pa" ? 100 : 1}
                 disabled={this.props.disabled}
                 onChange={values => this.onChange(values, false)}
@@ -65,7 +65,7 @@ class AlertSlider extends React.Component {
                             width: '100%',
                             background: getTrackBackground({
                                 colors: [getColor(true, true), getColor(this.props.disabled), getColor(true, true)],
-                                ...this.state,
+                                ...this.state.range,
                                 values: sliderValues
                             }),
                         }}
