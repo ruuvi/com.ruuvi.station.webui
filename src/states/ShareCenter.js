@@ -13,7 +13,7 @@ const EmailBox = (props) => {
     return (
         <Box className='box' height="40px" display="flex" alignItems="center" justifyContent="space-between">
             <Tooltip label={props.email} placement="top" >
-                <Box as="span" fontSize={14} mt={-0.6} alignItems="center" display="inline-block" maxWidth="100%" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+                <Box as="span" fontSize={14} mt={-0.6} alignItems="center" display="inline-block" maxWidth="100%" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap" fontFamily="mulish">
                     {props.email}
                 </Box>
             </Tooltip>
@@ -135,7 +135,7 @@ const mobileTitleStyle = { fontFamily: "montserrat", fontSize: "32px", fontWeigh
 const titleDescriptionStyle = { fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }
 const mobileTitleDescriptionStyle = { fontFamily: "mulish", fontSize: 14 }
 const subTitleStyle = { fontFamily: "montserrat", fontSize: "24px", fontWeight: 800 }
-const subTitleDescriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, paddingBottom: 15, paddingTop: 5, maxWidth: "800px" }
+const subTitleDescriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, paddingBottom: 25, paddingTop: 5, maxWidth: "800px" }
 
 const ShareCenter = () => {
     const [sensors, setSensors] = React.useState([]);
@@ -272,7 +272,7 @@ const ShareCenter = () => {
                 </center>
                 :
                 <>
-                    <Box className='contentImportant' borderRadius={8} width="100%" padding={{ base: "5px", md: "30px" }}>
+                    <Box className='contentImportant' borderRadius={8} width="100%" padding={{ base: "5px", md: "40px" }}>
                         <Box mb={8} style={descriptionStyle}>
                             {i18next.t("share_center_description")}
                         </Box>
@@ -323,7 +323,9 @@ const ShareCenter = () => {
                                     {selectEmail}
                                 </Box>
                             </Box>
-                            {shareButton}
+                            <Box ml={{ md: 2, base: 1 }}>
+                                {shareButton}
+                            </Box>
                         </>}
 
                     </Box>
