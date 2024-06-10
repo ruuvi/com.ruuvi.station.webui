@@ -129,13 +129,13 @@ const SensorPicker = ({ sensors, canBeShared, onSensorChange }) => {
     )
 };
 
-const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400 }
+const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, maxWidth: "800px" }
 const titleStyle = { fontFamily: "montserrat", fontSize: "54px", fontWeight: 800 }
 const mobileTitleStyle = { fontFamily: "montserrat", fontSize: "32px", fontWeight: 800 }
 const titleDescriptionStyle = { fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }
 const mobileTitleDescriptionStyle = { fontFamily: "mulish", fontSize: 14 }
 const subTitleStyle = { fontFamily: "montserrat", fontSize: "24px", fontWeight: 800 }
-const subTitleDescriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, paddingBottom: 15, paddingTop: 5 }
+const subTitleDescriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, paddingBottom: 15, paddingTop: 5, maxWidth: "800px" }
 
 const ShareCenter = () => {
     const [sensors, setSensors] = React.useState([]);
