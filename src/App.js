@@ -3,11 +3,13 @@ import {
   Routes,
   Route,
   BrowserRouter,
+  Navigate,
+  useNavigate,
 } from "react-router-dom";
 import NetworkApi from "./NetworkApi";
 import logo from './img/ruuvi-vector-logo.svg'
 import logoDark from './img/ruuvi-vector-logo-dark.svg'
-import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton, Tooltip, useMediaQuery, Box } from "@chakra-ui/react"
+import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton, Tooltip, useMediaQuery, Box, useBreakpointValue, Button } from "@chakra-ui/react"
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
@@ -22,6 +24,8 @@ import ShareCenter from "./states/ShareCenter";
 import AddSensorModal from "./components/AddSensorModal";
 import SettingsModal from "./components/SettingsModal";
 import MyAccountModal from "./components/MyAccountModal";
+import SettingsMenu from "./components/SettingsMenu";
+import MobileMenu from "./components/MobileMenu";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -207,7 +211,6 @@ export default function App() {
 
   let store = new Store();
   const [, updateState] = React.useState();
-  var sensors = [];
   if (!user) {
     //goToLoginPage()
     return <ChakraProvider theme={ruuviTheme} style={{ minHeight: "100%" }}>
@@ -238,17 +241,7 @@ export default function App() {
               {new NetworkApi().isStaging() ? "(staging) " : ""}
             </Text>
             <span style={{ width: "100%", textAlign: "right", marginLeft: "-25px", marginRight: "-4px" }}>
-              <ColorModeSwitch />
-              <SensorMenu sensors={sensors} key={reloadSub}
-                addSensor={() => {
-                  setShowDialog("addsensor")
-                }}
-              />
-              <UserMenu settings={() => {
-                setShowDialog("settings")
-              }} myAccount={() => {
-                setShowDialog("myaccount")
-              }} email={user.email} />
+              <TopBar user={user} reloadSub={reloadSub} setShowDialog={setShowDialog} />
             </span>
           </HStack>
           {banners && banners.map(x => {
@@ -284,4 +277,39 @@ export default function App() {
       }
     </ChakraProvider>
   );
+}
+
+function TopBar({ reloadSub, setShowDialog, user }) {
+  const isWideVersion = useBreakpointValue({ base: false, md: true })
+  let sensorMenu = <SensorMenu key={reloadSub} small={!isWideVersion}
+    addSensor={() => {
+      setShowDialog("addsensor")
+    }}
+  />
+  const nav = useNavigate()
+  return <>
+    {isWideVersion ?
+      <>
+        <Button variant="topbar" onClick={() => nav("/")} style={{color: window.location.href.endsWith("/") ? "pink" : undefined}}>
+          {i18next.t("Home")}
+        </Button>
+        <Button variant="topbar" onClick={() => nav("/shares")} style={{color: window.location.href.indexOf("/shares") !== -1 ? "pink" : undefined}}>
+          {i18next.t("share_center")}
+        </Button>
+        {sensorMenu}
+        <SettingsMenu openSettings={() => setShowDialog("settings")} />
+        <UserMenu settings={() => {
+          setShowDialog("settings")
+        }} myAccount={() => {
+          setShowDialog("myaccount")
+        }} email={user.email} />
+      </>
+      :
+      <>
+        {sensorMenu}
+        <MobileMenu openSettings={() => setShowDialog("settings")} />
+      </>
+    }
+
+  </>
 }

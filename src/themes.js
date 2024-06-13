@@ -255,6 +255,12 @@ export const ruuviTheme = extendTheme({
                     bg: props.colorMode === "light" ? "white" : undefined,
                     border: "0px",
                     _hover: {},
+                    backgroundColor: "transparent", 
+                    fontFamily: "mulish", 
+                    fontSize: 15, 
+                    fontWeight: 800,
+                    paddingLeft: 5,
+                    paddingRight: 5,
                 }),
                 ghost: (props) => ({
                     bg: "transparent",

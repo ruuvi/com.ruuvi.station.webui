@@ -46,10 +46,15 @@ class SensorMenu extends Component {
     }
     render() {
         const { t } = this.props;
+        const extraStyle = {}
+        if (this.props.small) {
+            extraStyle.paddingLeft = 4
+            extraStyle.paddingRight = 0
+        }
         return (
             <>
                 <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
-                    <MenuButton as={Button} variant="topbar" rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", fontFamily: "mulish", fontSize: 15, fontWeight: 800, paddingRight: 0, paddingLeft: 4 }}>
+                    <MenuButton as={Button} variant="topbar" rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />} style={extraStyle}>
                         {t("sensors")}
                     </MenuButton>
                     <MenuList mt="2" zIndex={10}>
