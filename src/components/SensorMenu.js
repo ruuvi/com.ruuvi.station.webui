@@ -38,7 +38,7 @@ class SensorMenu extends Component {
         let order = getSetting("SENSOR_ORDER", null)
         if (order) {
             order = JSON.parse(order)
-            if (order) {
+            if (order && order.length > 0) {
                 return order.map(x => this.state.sensors.find(y => y.sensor === x))
             }
         }
