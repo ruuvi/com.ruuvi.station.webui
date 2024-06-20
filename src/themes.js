@@ -6,7 +6,7 @@ const config = {
 }
 
 let colors = {
-    bodyBg: { light: "#edf2f2 !important", dark: "#001b1a !important" },
+    bodyBg: { light: "#edf2f2", dark: "#001b1a" },
     contentBg: { light: "white", dark: "#111111" },
     contentImportantBg: { light: "white", dark: "#00343480" },
     text: { light: "#1b4847", dark: "#ffffff" },
@@ -21,6 +21,7 @@ let colors = {
     sensorValueBoxActiveBorder: { light: "#1f9385", dark: "#1f9385" },
     menuButtonBg: { light: "white", dark: "#003434 !important" },
     menuItemBg: { light: "white", dark: "#003434" },
+    menuSubItemBg: { light: "#f6faf9", dark: "#002727" },
     searchBg: { light: "#ffffff7F !important", dark: "#0034347F !important" },
     navButtonBg: { light: "#ffffff", dark: "#083c3d" },
     navButtonColor: { light: "#1f9385 !important", dark: "white !important" },
@@ -40,6 +41,7 @@ let colors = {
     buttonFocus: { light: "#1f9385", dark: "#1f9385" },
     imageBackgroundColor: { light: "#d8edea", dark: "#2d605c" },
     boxBg: { dark: "rgba(53, 173, 159, 0.2)", light: "rgba(198, 227, 224, 0.5)" },
+    gray: { dark: "#d4ede8", light: "#d4ede8" },
 }
 
 export const ruuviTheme = extendTheme({
@@ -47,11 +49,11 @@ export const ruuviTheme = extendTheme({
     styles: {
         global: (props) => ({
             body: {
-                bg: colors.bodyBg[props.colorMode],
+                bg: colors.bodyBg[props.colorMode] + " !important",
                 color: props.colorMode === "light" ? "#1b4847 !important" : "white !important",
             },
             '.bodybg': {
-                bg: colors.bodyBg[props.colorMode],
+                bg: colors.bodyBg[props.colorMode] + " !important",
             },
             '.subtitle': {
                 color: colors.subtitle[props.colorMode]
@@ -161,6 +163,12 @@ export const ruuviTheme = extendTheme({
             ".ddlItem": {
                 fontFamily: "mulish",
                 fontSize: "14px",
+                fontWeight: 800,
+            },
+            ".ddlSubItem": {
+                fontFamily: "mulish",
+                fontSize: "14px",
+                bg: colors.menuSubItemBg[props.colorMode] + " !important",
             },
             ".box": {
                 backgroundColor: colors.boxBg[props.colorMode],
@@ -170,6 +178,9 @@ export const ruuviTheme = extendTheme({
             ".shareEmail": {
                 border: "1px solid !important",
                 borderColor: colors.buttonBackground[props.colorMode] + " !important",
+            },
+            ".activeNav": {
+                color: "#44c9b9",
             },
         })
     },
@@ -321,7 +332,7 @@ export const ruuviTheme = extendTheme({
                 item: {
                     overflow: "none",
                     bg: colors.menuItemBg[props.colorMode],
-                    _hover: { bg: colors.colorMenuActive[props.colorMode] },
+                    _hover: { bg: colors.colorMenuActive[props.colorMode] + " !important" },
                     padding: 3
                 },
                 divider: {

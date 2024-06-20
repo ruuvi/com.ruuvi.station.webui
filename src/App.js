@@ -290,24 +290,20 @@ function TopBar({ reloadSub, setShowDialog, user }) {
   return <>
     {isWideVersion ?
       <>
-        <Button variant="topbar" onClick={() => nav("/")} style={{color: window.location.href.endsWith("/") ? "pink" : undefined}}>
-          {i18next.t("Home")}
+        <Button variant="topbar" onClick={() => nav("/")} className={window.location.href.endsWith("/") ? "activeNav" : ""}>
+          {i18next.t("home")}
         </Button>
-        <Button variant="topbar" onClick={() => nav("/shares")} style={{color: window.location.href.indexOf("/shares") !== -1 ? "pink" : undefined}}>
+        <Button variant="topbar" onClick={() => nav("/shares")} className={window.location.href.indexOf("/shares") !== -1 ? "activeNav" : ""}>
           {i18next.t("share_center")}
         </Button>
         {sensorMenu}
         <SettingsMenu openSettings={() => setShowDialog("settings")} />
-        <UserMenu settings={() => {
-          setShowDialog("settings")
-        }} myAccount={() => {
-          setShowDialog("myaccount")
-        }} email={user.email} />
+        <UserMenu settings={() => setShowDialog("settings")} myAccount={() => setShowDialog("myaccount")} email={user.email} />
       </>
       :
       <>
         {sensorMenu}
-        <MobileMenu openSettings={() => setShowDialog("settings")} />
+        <MobileMenu openSettings={() => setShowDialog("settings")} myAccount={() => setShowDialog("myaccount")} />
       </>
     }
 

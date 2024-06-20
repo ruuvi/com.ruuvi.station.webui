@@ -265,7 +265,19 @@
       "sensor_removed": "Sensor removed",
       "sensor_shared_by_me_description": "Below is a list of sensors you have shared with others. To remove a share, choose X. After removing the share, the respective sensor will be removed from the recipient's app and it will become instantly unaccessible for the user.",
       "sensor_shared_with_me_description": "Below is a list of sensors shared with you, along with the owner's email addresses and subscription levels. To remove a share, choose X. The respective sensor will be removed from the app.",
-      "remove_sensor_confirmation_title": "Remove sensor"
+      "remove_sensor_confirmation_title": "Remove sensor",
+      "my_sensors": "My Sensors",
+      "home": "Home",
+      "help": "Help",
+      "contact_support": "Contact Support",
+      "what_to_measure": "What to measure",
+      "switch_to_dark_mode": "Switch to dark mode",
+      "switch_to_light_mode": "Switch to light mode",
+      "all_my_sensors": "All my sensors",
+      "buy_sensors": "Buy sensors",
+      "share_sensors": "Share Sensors",
+      "app_settings": "App Settings",
+      "my_profile": "My Profile"
     }
   },
   "fi": {
@@ -534,7 +546,19 @@
       "sensor_removed": "Anturi poistettu",
       "sensor_shared_by_me_description": "Alla on luettelo antureista, jotka olet jakanut muiden kanssa. Poistaaksesi jaon, valitse X. Jaon poistamisen jälkeen kyseinen anturi poistetaan vastaanottajan sovelluksesta eikä käyttäjä pääse enää lukemaan sen tietoja.",
       "sensor_shared_with_me_description": "Alla on luettelo antureista, jotka on jaettu sinulle, sekä omistajien sähköpostiosoitteet ja tilausasetukset. Poistaaksesi jaon, valitse X. Kyseinen anturi poistetaan sovelluksesta.",
-      "remove_sensor_confirmation_title": "Poista anturi"
+      "remove_sensor_confirmation_title": "Poista anturi",
+      "my_sensors": "Omat anturit",
+      "home": "Koti",
+      "help": "Ohje",
+      "contact_support": "Ota yhteyttä tukeen",
+      "what_to_measure": "Mitä mitata",
+      "switch_to_dark_mode": "Vaihda pimeään tilaan",
+      "switch_to_light_mode": "Vaihda vaaleaan tilaan",
+      "all_my_sensors": "Kaikki anturit",
+      "buy_sensors": "Osta antureita",
+      "share_sensors": "Jaa anturit",
+      "app_settings": "Sovelluksen asetukset",
+      "my_profile": "Profiilini"
     }
   },
   "sv": {
@@ -803,7 +827,19 @@
       "sensor_removed": "Sensor borttagen",
       "sensor_shared_by_me_description": "Nedan finns en lista över sensorer du har delat med andra. För att ta bort en delning, välj X. Efter att delningen har tagits bort kommer den respektive sensorn att tas bort från mottagarens app och bli omedelbart otillgänglig för användaren.",
       "sensor_shared_with_me_description": "Nedan finns en lista över sensorer som har delats med dig, tillsammans med ägarens e-postadresser och prenumerationsnivåer. För att ta bort en delning, välj X. Den respektive sensorn kommer att tas bort från appen.",
-      "remove_sensor_confirmation_title": "Ta bort sensor"
+      "remove_sensor_confirmation_title": "Ta bort sensor",
+      "my_sensors": "Mina sensorer",
+      "home": "Hem",
+      "help": "Hjälp",
+      "contact_support": "Kontakta support",
+      "what_to_measure": "Vad att mäta",
+      "switch_to_dark_mode": "Byt till mörkt läge",
+      "switch_to_light_mode": "Byt till ljust läge",
+      "all_my_sensors": "Alla mina sensorer",
+      "buy_sensors": "Köp sensorer",
+      "share_sensors": "Dela sensorer",
+      "app_settings": "Appinställningar",
+      "my_profile": "Min profil"
     }
   },
   "fr": {
@@ -1072,7 +1108,19 @@
       "sensor_removed": "Capteur supprimé",
       "sensor_shared_by_me_description": "Ci-dessous se trouve une liste des capteurs que vous avez partagés avec d'autres. Pour supprimer un partage, choisissez X. Après la suppression du partage, le capteur concerné sera retiré de l'application du destinataire et deviendra immédiatement inaccessible pour l'utilisateur.",
       "sensor_shared_with_me_description": "Ci-dessous se trouve une liste des capteurs partagés avec vous, ainsi que les adresses e-mail des propriétaires et les niveaux d'abonnement. Pour supprimer un partage, choisissez X. Le capteur concerné sera supprimé de l'application.",
-      "remove_sensor_confirmation_title": "Supprimer le capteur"
+      "remove_sensor_confirmation_title": "Supprimer le capteur",
+      "my_sensors": "Mes capteurs",
+      "home": "Accueil",
+      "help": "Aide",
+      "contact_support": "Contacter le support",
+      "what_to_measure": "Quoi mesurer",
+      "switch_to_dark_mode": "Passer en mode sombre",
+      "switch_to_light_mode": "Passer en mode clair",
+      "all_my_sensors": "Tous mes capteurs",
+      "buy_sensors": "Acheter des capteurs",
+      "share_sensors": "Partager les capteurs",
+      "app_settings": "Paramètres de l'application",
+      "my_profile": "Mon profil"
     }
   },
   "de": {
@@ -1341,7 +1389,19 @@
       "sensor_removed": "Sensor entfernt",
       "sensor_shared_by_me_description": "Unten finden Sie eine Liste der Sensoren, die Sie mit anderen geteilt haben. Um eine Freigabe zu entfernen, wählen Sie X. Nach dem Entfernen der Freigabe wird der jeweilige Sensor aus der App des Empfängers entfernt und ist für den Benutzer sofort unzugänglich.",
       "sensor_shared_with_me_description": "Unten finden Sie eine Liste der Sensoren, die mit Ihnen geteilt wurden, zusammen mit den E-Mail-Adressen der Eigentümer und den Abonnementstufen. Um eine Freigabe zu entfernen, wählen Sie X. Der entsprechende Sensor wird aus der App entfernt.",
-      "remove_sensor_confirmation_title": "Sensor entfernen"
+      "remove_sensor_confirmation_title": "Sensor entfernen",
+      "my_sensors": "Meine Sensoren",
+      "home": "Startseite",
+      "help": "Hilfe",
+      "contact_support": "Support kontaktieren",
+      "what_to_measure": "Was messen",
+      "switch_to_dark_mode": "Zum Dunkelmodus wechseln",
+      "switch_to_light_mode": "Zum Lichtmodus wechseln",
+      "all_my_sensors": "Alle meine Sensoren",
+      "buy_sensors": "Sensoren kaufen",
+      "share_sensors": "Sensoren teilen",
+      "app_settings": "App-Einstellungen",
+      "my_profile": "Mein Profil"
     }
   }
 }

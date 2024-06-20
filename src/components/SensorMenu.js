@@ -7,18 +7,19 @@ import {
     Button,
     MenuDivider,
 } from "@chakra-ui/react"
-import { MdArrowDropDown } from "react-icons/md"
+import { MdArrowDropDown, MdArrowRightAlt } from "react-icons/md"
 import NetworkApi from "../NetworkApi";
 import withRouter from "../utils/withRouter"
 import { withTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import { getSetting } from "../UnitHelper";
+import i18next from "i18next";
 
 
 class SensorMenu extends Component {
     constructor(props) {
         super(props)
-        this.state = { sensors: [] }
+        this.state = { sensors: [], sensorsOpen: true}
     }
     componentDidMount() {
         new NetworkApi().user(resp => {
@@ -44,6 +45,11 @@ class SensorMenu extends Component {
         }
         return this.state.sensors
     }
+    toggleSensorList = e => {
+        e.stopPropagation();
+        e.nativeEvent.stopImmediatePropagation();
+        this.setState({...this.state, sensorsOpen: !this.state.sensorsOpen})
+    }
     render() {
         const { t } = this.props;
         const extraStyle = {}
@@ -53,21 +59,31 @@ class SensorMenu extends Component {
         }
         return (
             <>
-                <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
+                <Menu autoSelect={false} closeOnSelect={false} strategy="fixed" placement="bottom-end">
                     <MenuButton as={Button} variant="topbar" rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />} style={extraStyle}>
-                        {t("sensors")}
+                        {t("my_sensors")}
                     </MenuButton>
                     <MenuList mt="2" zIndex={10}>
-                        <MenuItem className="ddlItem" style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6, fontWeight: 800 }} onClick={() => this.props.addSensor()}>{t('add_new_sensor')}</MenuItem>
+                        <MenuItem className="ddlItem" style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6}} onClick={() => window.open(`https://${i18next.language === "fi" ? "ruuvi.com/fi/tuotteet" : "ruuvi.com/products"}`, "_blank")}>{t('buy_sensors')}  <MdArrowRightAlt style={{ marginLeft: 8 }} /></MenuItem>
+                        <MenuDivider />
+                        <MenuItem className="ddlItem" onClick={() => this.props.addSensor()}>{t('add_new_sensor')}</MenuItem>
+                        <MenuDivider />
+                        <MenuItem className="ddlItem"  onClick={this.toggleSensorList} display={"flex"} justifyContent={"space-between"} style={this.state.sensorsOpen ? undefined : { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }}>
+                            <span>
+                                {t('all_my_sensors')}
+                            </span>
+                            <MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />
+                        </MenuItem>
                         <MenuDivider />
                         {this.getSensors().map((x, i) => {
+                            if (!this.state.sensorsOpen) return null
                             if (!x) return null
                             let divider = <></>
                             let borderStyle = {};
                             if (i === this.state.sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                             else divider = <MenuDivider />
                             return <div key={x.sensor + "div"}>
-                                <MenuItem key={x.sensor} className={(this.getCurrentSensor() === x.sensor ? "menuActive" : undefined) + " ddlItem"} style={{ ...borderStyle }} onClick={() => this.props.navigate('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
+                                <MenuItem key={x.sensor} className={(this.getCurrentSensor() === x.sensor ? "menuActive" : "") + " ddlSubItem"} style={{ ...borderStyle }} onClick={() => this.props.navigate('/' + x.sensor)}>{x.name || x.sensor}</MenuItem>
                                 {divider}
                             </div>
                         })}

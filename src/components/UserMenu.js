@@ -12,6 +12,7 @@ import { MdArrowDropDown } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
 import { withColorMode } from "../utils/withColorMode";
 import { useNavigate } from "react-router-dom";
+import { logout } from "../utils/loginUtils";
 
 class UserMenu extends Component {
     settings() {
@@ -25,19 +26,9 @@ class UserMenu extends Component {
                     <FaUserAlt />
                 </MenuButton>
                 <MenuList mt="2" zIndex={10}>
-                    <MenuItem isDisabled={true} style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, cursor: "unset", borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>{this.props.email}</MenuItem>
+                    <MenuItem className="ddlItem" style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => this.props.myAccount()}>{t("my_ruuvi_account")}</MenuItem>
                     <MenuDivider />
-                    {/**
-                <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.seeSettings()}>Show settings</MenuItem>
-                <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.seeAlerts()}>Show alerts</MenuItem>
-                */}
-                    {/* 
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.props.navigate('/shares')}>{t("share_center")}</MenuItem>
-                    <MenuDivider />
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800 }} onClick={() => this.settings()}>{t("settings")}</MenuItem>
-                    <MenuDivider />
-                    */}
-                    <MenuItem style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => this.props.myAccount()}>{t("my_ruuvi_account")}</MenuItem>
+                    <MenuItem className="ddlItem" style={{ borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => logout()}>{t("sign_out")}</MenuItem>
                 </MenuList>
             </Menu>
         )
@@ -46,6 +37,6 @@ class UserMenu extends Component {
 
 export default withTranslation()(withColorMode((props) => (
     <UserMenu {...props}
-    navigate={useNavigate()}
+        navigate={useNavigate()}
     />
 )));

@@ -178,10 +178,6 @@ function MyAccountModal(props) {
                 )}
             </Box>
             <Box mt={16}></Box>
-            <Button variant='link' onClick={() => {
-                logout(props.updateApp)
-            }}>{t("sign_out")}</Button>
-            <Box mt={1}></Box>
             <Button variant='link' onClick={async () => {
                 setShowDeleteAccount(true)
             }}>{t("delete_account")}</Button>
