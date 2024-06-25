@@ -70,9 +70,11 @@ class AlertItem extends Component {
     checkAlertLimits(alert) {
         try {
             let type = this.props.type.toLowerCase();
-            if (type === "temperature") return // no need to check
-            
-            var { min, max } = getAlertRange(type)
+            var { min, max, extended } = getAlertRange(type)
+            if (extended) {
+                min = extended.min
+                max = extended.max
+            }
             if (type === "offline") {
                 if (alert.max < min) alert.max = min
                 if (alert.max > max) alert.max = max
@@ -128,8 +130,14 @@ class AlertItem extends Component {
         var enabled = alert && alert.enabled;
         var validRange = getAlertRange(type)
         if (type === "temperature" || type === "pressure") {
-            validRange.min = uh.value(validRange.min)
-            validRange.max = uh.value(validRange.max)
+            let min = validRange.min
+            let max = validRange.max
+            if (validRange.extended) {
+                min = validRange.extended.min
+                max = validRange.extended.max
+            }
+            validRange.min = uh.value(min)
+            validRange.max = uh.value(max)
         }
         let label = type === "signal" ? "signal_strength" : type
         if (type === "offline") label = "alert_offline_title"

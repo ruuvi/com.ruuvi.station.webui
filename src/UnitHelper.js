@@ -213,7 +213,7 @@ export function round(number, deciamals) {
 export function getAlertRange(type) {
     switch (type) {
         case "temperature":
-            return { max: 85, min: -40 }
+            return { max: 85, min: -40, extended: { max: 150, min: -55 } }
         case "humidity":
             return { max: 100, min: 0 }
         case "pressure":
