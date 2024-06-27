@@ -266,9 +266,9 @@ export const ruuviTheme = extendTheme({
                     bg: props.colorMode === "light" ? "white" : undefined,
                     border: "0px",
                     _hover: {},
-                    backgroundColor: "transparent", 
-                    fontFamily: "mulish", 
-                    fontSize: 15, 
+                    backgroundColor: "transparent",
+                    fontFamily: "mulish",
+                    fontSize: 15,
                     fontWeight: 800,
                     paddingLeft: 5,
                     paddingRight: 5,
@@ -332,7 +332,9 @@ export const ruuviTheme = extendTheme({
                 item: {
                     overflow: "none",
                     bg: colors.menuItemBg[props.colorMode],
-                    _hover: { bg: colors.colorMenuActive[props.colorMode] + " !important" },
+                    '@media (hover: hover)': {
+                        _hover: { bg: colors.colorMenuActive[props.colorMode] + " !important" },
+                    },
                     padding: 3
                 },
                 divider: {
