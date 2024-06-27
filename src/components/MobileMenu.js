@@ -1,8 +1,7 @@
 import React from 'react';
-import { Button, Menu, MenuButton, MenuList, MenuItem, MenuDivider, useColorMode, Collapse, Divider } from '@chakra-ui/react';
-import { MdArrowDropDown, MdArrowRightAlt } from "react-icons/md"
+import { Button, Menu, MenuButton, MenuList, MenuItem, MenuDivider, useColorMode } from '@chakra-ui/react';
+import { MdArrowDropDown, MdMenu, MdOpenInNew } from "react-icons/md"
 import i18next from 'i18next';
-import { FaBars } from 'react-icons/fa';
 import { logout } from '../utils/loginUtils';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,7 +24,7 @@ const MobileMenu = ({ openSettings, myAccount }) => {
     return (
         <Menu autoSelect={false} closeOnSelect={false}>
             <MenuButton as={Button} variant="topbar" style={{ backgroundColor: "transparent", paddingRight: 0, paddingLeft: 10 }}>
-                <FaBars />
+                <MdMenu size={28} />
             </MenuButton>
             <MenuList mt="2" zIndex={10}>
                 <MenuItem className={(window.location.href.endsWith("/") ? "menuActive" : "") + " ddlItem"} style={{ borderTopRightRadius: 8, borderTopLeftRadius: 8 }} onClick={() => nav("/")}>{t("home")}</MenuItem>
@@ -44,11 +43,11 @@ const MobileMenu = ({ openSettings, myAccount }) => {
                     <MenuDivider />
                     <MenuItem className="ddlSubItem" onClick={() => openSettings()}>{t("settings")}</MenuItem>
                     <MenuDivider />
-                    <MenuItem className="ddlSubItem" onClick={() => window.open(`https://${i18next.language === "fi" ? "ruuvi.com/fi/tuki" : "ruuvi.com/support"}`, "_blank")}>{t("help")} <MdArrowRightAlt style={{ marginLeft: 8 }} /></MenuItem>
+                    <MenuItem className="ddlSubItem" onClick={() => window.open(`https://${i18next.language === "fi" ? "ruuvi.com/fi/tuki" : "ruuvi.com/support"}`, "_blank")}>{t("help")} <MdOpenInNew style={{ marginLeft: 8 }} /></MenuItem>
                     <MenuDivider />
-                    <MenuItem className="ddlSubItem" onClick={() => window.open(`mailto:support@ruuvi.com?subject=Ruuvi Station Web Feedback`)}>{t("contact_support")} <MdArrowRightAlt style={{ marginLeft: 8 }} /></MenuItem>
+                    <MenuItem className="ddlSubItem" onClick={() => window.open(`mailto:support@ruuvi.com?subject=Ruuvi Station Web Feedback`)}>{t("contact_support")} <MdOpenInNew style={{ marginLeft: 8 }} /></MenuItem>
                     <MenuDivider />
-                    <MenuItem className="ddlSubItem" style={{ borderBottomRightRadius: 8, borderBottomLeftRadius: 8 }} onClick={() => window.open(`https://${i18next.language === "fi" ? "ruuvi.com/fi/ideat" : "ruuvi.com/ideas"}`, "_blank")}>{t("what_to_measure")} <MdArrowRightAlt style={{ marginLeft: 8 }} /></MenuItem>
+                    <MenuItem className="ddlSubItem" style={{ borderBottomRightRadius: 8, borderBottomLeftRadius: 8 }} onClick={() => window.open(`https://${i18next.language === "fi" ? "ruuvi.com/fi/ideat" : "ruuvi.com/ideas"}`, "_blank")}>{t("what_to_measure")} <MdOpenInNew style={{ marginLeft: 8 }} /></MenuItem>
                 </>}
                 <MenuDivider />
                 <MenuItem className="ddlItem" onClick={handleToggleProfile} display={"flex"} justifyContent={"space-between"} style={showMyProfile ? undefined : { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }}>

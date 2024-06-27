@@ -7,7 +7,7 @@ import {
     Button,
     MenuDivider,
 } from "@chakra-ui/react"
-import { MdArrowDropDown, MdArrowRightAlt } from "react-icons/md"
+import { MdArrowDropDown, MdOpenInNew } from "react-icons/md"
 import NetworkApi from "../NetworkApi";
 import withRouter from "../utils/withRouter"
 import { withTranslation } from 'react-i18next';
@@ -77,7 +77,9 @@ class SensorMenu extends Component {
                         {t("my_sensors")}
                     </MenuButton>
                     <MenuList mt="2" zIndex={10}>
-                        <MenuItem className="ddlItem" style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6}} onClick={() => window.open(`https://${i18next.language === "fi" ? "ruuvi.com/fi/tuotteet" : "ruuvi.com/products"}`, "_blank")}>{t('buy_sensors')}  <MdArrowRightAlt style={{ marginLeft: 8 }} /></MenuItem>
+                        <MenuItem className="ddlItem" style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6}} onClick={() => window.open(`https://${i18next.language === "fi" ? "ruuvi.com/fi/tuotteet" : "ruuvi.com/products"}`, "_blank")}>
+                        {t('buy_sensors')}  <MdOpenInNew style={{ marginLeft: 8 }} />
+                        </MenuItem>
                         <MenuDivider />
                         <MenuItem className="ddlItem" onClick={() => this.props.addSensor()}>{t('add_new_sensor')}</MenuItem>
                         <MenuDivider />
@@ -96,7 +98,7 @@ class SensorMenu extends Component {
                             if (i === this.state.sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                             else divider = <MenuDivider />
                             return <div key={x.sensor + "div"}>
-                                <MenuItem key={x.sensor} className={(this.getCurrentSensor() === x.sensor ? "menuActive" : "") + " ddlSubItem"} style={{ ...borderStyle }} onClick={() => this.sensorClicked(x.sensor)}>{x.name || x.sensor}</MenuItem>
+                                <MenuItem key={x.sensor} className={`ddlSubItem ${this.getCurrentSensor() === x.sensor ? "selectedSensorInMenu" : ""}`} style={{ ...borderStyle }} onClick={() => this.sensorClicked(x.sensor)}>{x.name || x.sensor}</MenuItem>
                                 {divider}
                             </div>
                         })}

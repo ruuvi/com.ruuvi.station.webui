@@ -36,7 +36,8 @@ let colors = {
     toastErrorBackground: { light: "#f15a24", dark: "#f15a24" },
     toastInfoBackground: { light: "#e6f6f2", dark: "#003434" },
     toastSuccessBackground: { light: "#44c9b9", dark: "#44c9b9" },
-    colorMenuActive: { light: "rgba(68, 201, 185, 0.3)", dark: "#0B2626" },
+    colorMenuActive: { light: "rgba(68, 201, 185, 0.6)", dark: "#0B2626" },
+    colorMenuHover: { light: "rgba(68, 201, 185, 0.3)", dark: "#0B2626" },
     buttonBackground: { light: "#35AD9F", dark: "#35AD9F" },
     buttonFocus: { light: "#1f9385", dark: "#1f9385" },
     imageBackgroundColor: { light: "#d8edea", dark: "#2d605c" },
@@ -130,6 +131,7 @@ export const ruuviTheme = extendTheme({
                 bg: colors.colorMenuActive[props.colorMode] + " !important",
                 color: colors.textInactive[props.colorMode] + " !important",
             },
+           
             '.buttonSideIcon': {
                 color: colors.buttonBackground[props.colorMode]
             },
@@ -178,6 +180,10 @@ export const ruuviTheme = extendTheme({
             ".shareEmail": {
                 border: "1px solid !important",
                 borderColor: colors.buttonBackground[props.colorMode] + " !important",
+            },
+            '.selectedSensorInMenu': {
+                bg: colors.colorMenuHover[props.colorMode] + " !important",
+                color: colors.textInactive[props.colorMode] + " !important",
             },
             ".activeNav": {
                 color: "#44c9b9",
@@ -333,7 +339,7 @@ export const ruuviTheme = extendTheme({
                     overflow: "none",
                     bg: colors.menuItemBg[props.colorMode],
                     '@media (hover: hover)': {
-                        _hover: { bg: colors.colorMenuActive[props.colorMode] + " !important" },
+                        _hover: { bg: colors.colorMenuHover[props.colorMode] + " !important" },
                     },
                     padding: 3
                 },
