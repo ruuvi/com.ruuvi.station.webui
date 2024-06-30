@@ -338,7 +338,7 @@ export const ruuviTheme = extendTheme({
                 item: {
                     overflow: "none",
                     bg: colors.menuItemBg[props.colorMode],
-                    '@media (hover: hover)': {
+                    '@media (hover: hover) and (pointer: fine)': {
                         _hover: { bg: colors.colorMenuHover[props.colorMode] + " !important" },
                     },
                     padding: 3
