@@ -69,7 +69,7 @@ class SensorMenu extends Component {
         }
         return (
             <>
-                <Menu autoSelect={false} closeOnSelect={false} strategy="fixed" placement="bottom-end" isOpen={this.state.isMenuOpen} onClose={this.closeMenu}>
+                <Menu autoSelect={false} closeOnSelect={false} placement="bottom-end" isOpen={this.state.isMenuOpen} onClose={this.closeMenu}>
                     <MenuButton as={Button} variant="topbar" 
                     rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />} 
                     onClick={this.toggleMenu}
