@@ -47,7 +47,7 @@ const MobileMenu = ({ openSettings, myAccount }) => {
                     <MenuDivider />
                     <MenuItem className="ddlSubItem" onClick={() => window.open(`mailto:support@ruuvi.com?subject=Ruuvi Station Web Feedback`)}>{t("contact_support")} <MdOpenInNew style={{ marginLeft: 8 }} /></MenuItem>
                     <MenuDivider />
-                    <MenuItem className="ddlSubItem" style={{ borderBottomRightRadius: 8, borderBottomLeftRadius: 8 }} onClick={() => window.open(`https://${i18next.language === "fi" ? "ruuvi.com/fi/ideat" : "ruuvi.com/ideas"}`, "_blank")}>{t("what_to_measure")} <MdOpenInNew style={{ marginLeft: 8 }} /></MenuItem>
+                    <MenuItem className="ddlSubItem" onClick={() => window.open(`https://${i18next.language === "fi" ? "ruuvi.com/fi/ideat" : "ruuvi.com/ideas"}`, "_blank")}>{t("what_to_measure")} <MdOpenInNew style={{ marginLeft: 8 }} /></MenuItem>
                 </>}
                 <MenuDivider />
                 <MenuItem className="ddlItem" onClick={handleToggleProfile} display={"flex"} justifyContent={"space-between"} style={showMyProfile ? undefined : { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }}>
@@ -58,7 +58,7 @@ const MobileMenu = ({ openSettings, myAccount }) => {
                 </MenuItem>
                 {showMyProfile && <>
                     <MenuDivider />
-                    <MenuItem className="ddlSubItem" style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => myAccount()}>{t("my_ruuvi_account")}</MenuItem>
+                    <MenuItem className="ddlSubItem" onClick={() => myAccount()}>{t("my_ruuvi_account")}</MenuItem>
                     <MenuDivider />
                     <MenuItem className="ddlSubItem" style={{ borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => logout()}>{t("sign_out")}</MenuItem>
                 </>}
