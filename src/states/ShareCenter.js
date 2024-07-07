@@ -100,7 +100,7 @@ const SensorPicker = ({ sensors, canBeShared, onSensorChange }) => {
     };
 
     return (
-        <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
+        <Menu autoSelect={false} placement="bottom-end">
             <MenuButton as={Button}
                 variant={"shareSensorSelect"}
                 borderRadius="4px"
