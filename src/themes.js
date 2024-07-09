@@ -172,6 +172,10 @@ export const ruuviTheme = extendTheme({
                 fontSize: "14px",
                 bg: colors.menuSubItemBg[props.colorMode] + " !important",
             },
+            ".ddlItemAlt": {
+                fontFamily: "mulish",
+                fontSize: "14px",
+            },
             ".box": {
                 backgroundColor: colors.boxBg[props.colorMode],
                 padding: "10px",
@@ -188,6 +192,28 @@ export const ruuviTheme = extendTheme({
             ".activeNav": {
                 color: "#44c9b9",
             },
+            ".pageTitle": {
+                fontFamily: "montserrat",
+                fontSize: "54px",
+                fontWeight: 800,
+                lineHeight: "1.2"
+            },
+            ".mobilePageTitle": {
+                fontFamily: "montserrat",
+                fontSize: "32px",
+                fontWeight: 800,
+                lineHeight: "1.33"
+            },
+            ".pageTitleDescription": {
+                fontFamily: "mulish",
+                fontSize: 18,
+                fontWeight: 600,
+                ontStyle: "italic",
+            },
+            ".mobilePageTitleDescription": {
+                fontFamily: "mulish",
+                fontSize: 14
+            }
         })
     },
     graph: {

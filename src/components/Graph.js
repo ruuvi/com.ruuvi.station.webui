@@ -546,7 +546,7 @@ class Graph extends Component {
                                                 font: "12px Arial",
                                                 values: (_, ticks) => ticks.map(rawValue => localeNumber(rawValue)),
                                             }
-                                        ],
+                                        ]
                                     }}
                                     data={graphData}
                                 />

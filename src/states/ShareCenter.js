@@ -1,30 +1,18 @@
 import React, { useEffect } from 'react';
-import { useBreakpointValue, Box, Button, Flex, Grid, Heading, IconButton, Input, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Progress, Spinner, Tooltip } from '@chakra-ui/react';
+import { useBreakpointValue, Box, Button, Flex, Grid, Heading, IconButton, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Progress, Spinner } from '@chakra-ui/react';
 import NetworkApi from '../NetworkApi';
 import pjson from '../../package.json';
-import { MdArrowDropDown, MdClear } from 'react-icons/md';
+import { MdClear } from 'react-icons/md';
 import notify from '../utils/notify';
 import i18next from 'i18next';
 import { addVariablesInString } from "../TextHelper";
 import RemoveSensorDialog from '../components/RemoveSensorDialog';
 import ConfirmModal from '../components/ConfirmModal';
-
-const EmailBox = (props) => {
-    return (
-        <Box className='box' height="40px" display="flex" alignItems="center" justifyContent="space-between">
-            <Tooltip label={props.email} placement="top" >
-                <Box as="span" fontSize={14} mt={-0.6} alignItems="center" display="inline-block" maxWidth="100%" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap" fontFamily="mulish">
-                    {props.email}
-                </Box>
-            </Tooltip>
-            <IconButton variant="ghost" color={"primary"} mr={-3} icon={<MdClear size="13" />} onClick={props.onRemove} />
-        </Box>
-    )
-}
+import { SensorPicker } from '../components/SensorPicker';
+import { EmailBox } from '../components/EmailBox';
 
 const SensorSharedWithMeBox = ({ email, sensor, onRemove }) => {
     const [remove, setRemove] = React.useState(false);
-
     return (
         <Box className='box'>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -93,47 +81,8 @@ const SensorsSharedByMeBox = (props) => {
 const isEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
-const SensorPicker = ({ sensors, canBeShared, onSensorChange }) => {
-
-    const handleSensorChange = (selectedSensor) => {
-        onSensorChange(selectedSensor);
-    };
-
-    return (
-        <Menu autoSelect={false} placement="bottom-end">
-            <MenuButton as={Button}
-                variant={"shareSensorSelect"}
-                borderRadius="4px"
-                rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{}} />}
-                style={{ fontFamily: "mulish", fontSize: 15, fontWeight: 800, width: "250px", textAlign: "left" }}
-            >
-                <Box pl={1}>
-                    {i18next.t("sensors")}
-                </Box>
-            </MenuButton>
-            <MenuList mt="2" zIndex={10} ml={2}>
-                {sensors.map((x, i) => {
-                    if (!x) return null
-                    let divider = <></>
-                    let borderStyle = {};
-                    if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
-                    if (i === sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
-                    else divider = <MenuDivider />
-                    return <div key={x.sensor + "div"}>
-                        <MenuItem key={x.sensor} isDisabled={!canBeShared.map(y => y.sensor).includes(x.sensor)} className={"ddlItem"} style={{ ...borderStyle }} onClick={() => handleSensorChange(x.sensor)}>{x.name || x.sensor}</MenuItem>
-                        {divider}
-                    </div>
-                })}
-            </MenuList>
-        </Menu>
-    )
-};
 
 const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, maxWidth: "800px" }
-const titleStyle = { fontFamily: "montserrat", fontSize: "54px", fontWeight: 800 }
-const mobileTitleStyle = { fontFamily: "montserrat", fontSize: "32px", fontWeight: 800 }
-const titleDescriptionStyle = { fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }
-const mobileTitleDescriptionStyle = { fontFamily: "mulish", fontSize: 14 }
 const subTitleStyle = { fontFamily: "montserrat", fontSize: "24px", fontWeight: 800 }
 const subTitleDescriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, paddingBottom: 25, paddingTop: 5, maxWidth: "800px" }
 
@@ -178,7 +127,7 @@ const ShareCenter = () => {
 
     const selectSensorTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("select_sensor")}</div>
     const selectSensor = <>
-        <SensorPicker sensors={mySensors} canBeShared={sensorsThatCanBeShared} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} />
+        <SensorPicker sensors={mySensors} canBeSelected={sensorsThatCanBeShared} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} />
         <Flex gap='2' wrap="wrap" mt={3} mb={3}>
             {selectedSensors.map((sensor, index) => (
                 <Box key={index}>
@@ -259,10 +208,10 @@ const ShareCenter = () => {
 
     return (
         <Box margin={8} marginLeft={{ base: 2, md: 16 }} marginRight={{ base: 2, md: 16 }}>
-            <Heading style={isWideVersion ? titleStyle : mobileTitleStyle}>
+            <div className={isWideVersion ? "pageTitle" : "mobilePageTitle"}>
                 {i18next.t("share_center")}
-            </Heading>
-            <p style={isWideVersion ? titleDescriptionStyle : mobileTitleDescriptionStyle}>
+            </div>
+            <p className={isWideVersion ? "pageTitleDescription" : "mobilePageTitleDescription"}>
                 {i18next.t("share_center_subtitle")}
             </p>
             <br />

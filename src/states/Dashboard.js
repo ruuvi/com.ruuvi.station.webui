@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box, Link, useMediaQuery, Flex, Input, InputGroup, InputRightElement, Show } from "@chakra-ui/react"
+import { Spinner, Box, Link, useMediaQuery, Flex, Input, InputGroup, InputRightElement, Show, Button } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
@@ -41,13 +41,19 @@ function DashboardGrid(props) {
     </Box>
 }
 
+const getSensorCache = () => {
+    let sensors = localStorage.getItem("sensors")
+    if (!sensors) return []
+    return JSON.parse(sensors)
+}
+
 class Dashboard extends Component {
     constructor(props) {
         super(props)
         let store = new Store();
         this.state = {
             loading: true,
-            sensors: [],
+            sensors: getSensorCache(),
             from: 24 * 3,
             cardType: store.getDashboardCardType(),
             showBig: true,
@@ -101,6 +107,7 @@ class Dashboard extends Component {
                 }
             })
             this.setState({ ...this.state, sensors: sensors, loading: false }, () => {
+                localStorage.setItem("sensors", JSON.stringify(sensors))
                 this.checkSensorOrder()
             })
         }
@@ -253,6 +260,7 @@ class Dashboard extends Component {
             <DashboardViewType value={this.state.cardType} onChange={this.setDashboardViewType.bind(this)} showResetOrder={this.getOrder() !== null} resetOrder={() => this.setState({ ...this.state, showResetOrderConfirmation: true })} />
             <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard disabled={this.shouldDurationBeDisabled()} />
+            <Button onClick={() => this.props.navigate('/compare')}>Compare</Button>
         </>
         const search = width => {
             return <InputGroup width={width}>

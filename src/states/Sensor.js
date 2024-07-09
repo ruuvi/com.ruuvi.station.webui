@@ -54,16 +54,6 @@ const graphInfo = {
     fontFamily: "mulish",
     fontSize: 14,
 }
-const sensorName = {
-    fontFamily: "montserrat",
-    fontSize: "54px",
-    fontWeight: 800,
-}
-const sensorNameMobile = {
-    fontFamily: "montserrat",
-    fontSize: "32px",
-    fontWeight: 800,
-}
 const graphLengthText = {
     fontFamily: "montserrat",
     fontWeight: 800,
@@ -140,9 +130,9 @@ function SensorHeader(props) {
                 }
             </label>
             <span style={{ width: "calc(100% - 250px - 18px)", marginLeft: 18 }}>
-                <Heading style={{ ...sensorName, textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden", }}>
+                <div className="pageTitle" style={{ textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden", }}>
                     {props.sensor.name}
-                </Heading>
+                </div>
                 <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }} className="subtitle">
                     <DurationText from={props.lastUpdateTime} t={props.t} isAlerting={props.isAlertTriggerd("offline")} />
                 </div>
@@ -178,9 +168,9 @@ function SensorHeader(props) {
                     </tbody>
                 </table>
                 <div style={{ width: "65%", marginTop: "5px" }}>
-                    <Heading style={sensorNameMobile}>
+                    <div className="mobilePageTitle">
                         {props.sensor.name}
-                    </Heading>
+                    </div>
                     <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic" }} className="subtitle">
                         <DurationText from={props.lastUpdateTime} t={props.t} isAlerting={props.isAlertTriggerd("offline")} />
                     </div>

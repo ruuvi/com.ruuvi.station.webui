@@ -26,6 +26,7 @@ import SettingsModal from "./components/SettingsModal";
 import MyAccountModal from "./components/MyAccountModal";
 import SettingsMenu from "./components/SettingsMenu";
 import MobileMenu from "./components/MobileMenu";
+import SensorComapare from "./states/SensorComapare";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -264,6 +265,7 @@ export default function App() {
             <Route path="/shares" element={<ShareCenter showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
             <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
             <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
+            <Route path="/compare" element={<SensorComapare />} />
           </Routes>
           <div style={bottomText}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi" : "https://ruuvi.com/"} target="_blank" rel="noreferrer">ruuvi.com</a></div>
           <div style={supportLink}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi/tuki" : "https://ruuvi.com/support"}>{t("support")}</a></div>
@@ -292,6 +294,9 @@ function TopBar({ reloadSub, setShowDialog, user }) {
       <>
         <Button variant="topbar" onClick={() => nav("/")} className={window.location.href.endsWith("/") ? "activeNav" : ""}>
           {i18next.t("home")}
+        </Button>
+        <Button variant="topbar" onClick={() => nav("/compare")} className={window.location.href.indexOf("/compare") !== -1 ? "activeNav" : ""}>
+          {i18next.t("compare")}
         </Button>
         <Button variant="topbar" onClick={() => nav("/shares")} className={window.location.href.indexOf("/shares") !== -1 ? "activeNav" : ""}>
           {i18next.t("share_center")}
