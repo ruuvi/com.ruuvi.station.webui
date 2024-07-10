@@ -3,7 +3,6 @@ import {
   Routes,
   Route,
   BrowserRouter,
-  Navigate,
   useNavigate,
 } from "react-router-dom";
 import NetworkApi from "./NetworkApi";
@@ -26,7 +25,7 @@ import SettingsModal from "./components/SettingsModal";
 import MyAccountModal from "./components/MyAccountModal";
 import SettingsMenu from "./components/SettingsMenu";
 import MobileMenu from "./components/MobileMenu";
-import SensorComapare from "./states/SensorComapare";
+import SensorCompare from "./states/SensorCompare";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -265,7 +264,7 @@ export default function App() {
             <Route path="/shares" element={<ShareCenter showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
             <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
             <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
-            <Route path="/compare" element={<SensorComapare />} />
+            <Route path="/compare" element={<SensorCompare />} />
           </Routes>
           <div style={bottomText}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi" : "https://ruuvi.com/"} target="_blank" rel="noreferrer">ruuvi.com</a></div>
           <div style={supportLink}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi/tuki" : "https://ruuvi.com/support"}>{t("support")}</a></div>

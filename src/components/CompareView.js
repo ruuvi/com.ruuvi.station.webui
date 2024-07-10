@@ -160,10 +160,10 @@ function CompareView(props) {
     if (loading) return <Box height={450}><Progress isIndeterminate /></Box>
     if (!gdata) return <Box height={450}>{t("no_data")}</Box>
     return (
-
         <div ref={ref}>
             <UplotReact
                 options={{
+                    padding: [0,10,0,-10],
                     width: width,
                     height: 450,
                     series: [
