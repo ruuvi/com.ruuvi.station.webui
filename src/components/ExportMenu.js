@@ -15,6 +15,7 @@ const detailedSubText = {
 }
 
 export default function ExportMenu(props) {
+    let bottomStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
     return (
         <Menu autoSelect={false}>
             <MenuButton as={Button}
@@ -28,9 +29,11 @@ export default function ExportMenu(props) {
             <MenuList>
                 <MenuItem style={{ ...detailedSubText, borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => props.onClick("CSV")}>CSV</MenuItem>
                 <MenuDivider />
-                <MenuItem style={{ ...detailedSubText }} onClick={() => props.onClick("XLSX")}>XLSX</MenuItem>
-                <MenuDivider />
-                <MenuItem isDisabled={!props.enablePDF} style={{ ...detailedSubText, borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => props.onClick("PDF")}>PDF {props.enablePDF ? "" : "(Business Starter Plan)"}</MenuItem>
+                <MenuItem style={{ ...detailedSubText, ...(props.noPdf ? bottomStyle : {}) }} onClick={() => props.onClick("XLSX")}>XLSX</MenuItem>
+                {!props.noPdf && <>
+                    <MenuDivider />
+                    <MenuItem isDisabled={!props.enablePDF} style={{ ...detailedSubText, ...bottomStyle }} onClick={() => props.onClick("PDF")}>PDF {props.enablePDF ? "" : "(Business Starter Plan)"}</MenuItem>
+                </>}
             </MenuList>
         </Menu>
     )

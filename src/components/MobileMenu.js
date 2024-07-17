@@ -31,6 +31,8 @@ const MobileMenu = ({ openSettings, myAccount }) => {
                 <MenuDivider />
                 <MenuItem className={(window.location.href.endsWith("/shares") ? "menuActive" : "") + " ddlItem"} onClick={() => nav("/shares")}>{t("share_sensors")}</MenuItem>
                 <MenuDivider />
+                <MenuItem className={(window.location.href.endsWith("/compare") ? "menuActive" : "") + " ddlItem"} onClick={() => nav("/compare")}>{t("compare")}</MenuItem>
+                <MenuDivider />
                 <MenuItem className="ddlItem" onClick={handleToggle} display={"flex"} justifyContent={"space-between"}>
                     <span>
                         {t('app_settings')}

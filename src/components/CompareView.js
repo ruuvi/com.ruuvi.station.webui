@@ -29,13 +29,17 @@ function hashString(inputString) {
     return hash;
 }
 
-function stringToColor(inputString) {
+function stringToColor(inputString, fill = false) {
     const hash = hashString(inputString);
 
     // Use HSL color model for more varied colors
     const hue = (hash % 360 + 360) % 360;
     const saturation = 50; // You can adjust these values
     const lightness = 50; // to control the color appearance
+
+    if (fill) {
+        return `hsla(${hue}, ${saturation}%, ${lightness}%, 0.2)`;
+    }
 
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
@@ -93,6 +97,7 @@ function CompareView(props) {
                 let since = parseInt((new Date().getTime() / 1000) - 60 * 60 * props.from)
                 let allData = null
                 for (; ;) {
+                    if (since >= until) break
                     let data = await new NetworkApi().getAsync(sensor, since, until, { limit: pjson.settings.dataFetchPaginationSize });
                     if (data.result === "success") {
                         if (!allData) allData = data
@@ -150,6 +155,7 @@ function CompareView(props) {
                 }
             });
 
+            props.setData(results)
             setLoading(false);
             props.isLoading(false);
         })();
@@ -163,12 +169,12 @@ function CompareView(props) {
         <div ref={ref}>
             <UplotReact
                 options={{
-                    padding: [0,10,0,-10],
+                    padding: [10, 10, 0, -10],
                     width: width,
                     height: 450,
                     series: [
                         {
-                            label: "ts",
+                            label: t('time'),
                             class: "graphLabel",
                             value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
                         },
@@ -177,13 +183,30 @@ function CompareView(props) {
                                 label: x.name || x.sensor,
                                 points: { show: true, size: 2, fill: stringToColor(x.sensor) },
                                 stroke: stringToColor(x.sensor),
+                                fill: stringToColor(x.sensor, true),
                             }
                         })
                     ],
                     axes: [
                         {
+                            grid: { show: false },
                             font: "12px Arial",
                             stroke: ruuviTheme.graph.axisLabels[colorMode],
+                            values: (_, ticks) => {
+                                var xRange = ticks[ticks.length - 1] - ticks[0]
+                                var xRangeHours = xRange / 60 / 60
+                                var prevRaw = null;
+                                var useDates = xRangeHours >= 72;
+                                return ticks.map(raw => {
+                                    var out = useDates ? ddmm(raw) : hhmm(raw);
+                                    if (prevRaw === out) {
+                                        if (useDates) return hhmm(raw);
+                                        return null;
+                                    }
+                                    prevRaw = out;
+                                    return out;
+                                })
+                            }
                         }, {
                             grid: { stroke: ruuviTheme.graph.grid[colorMode], width: 2 },
                             stroke: ruuviTheme.graph.axisLabels[colorMode],

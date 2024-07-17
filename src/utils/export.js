@@ -74,6 +74,79 @@ function getFilename(sensorName, extension) {
     return `${sensorName}_${now}.${extension}`
 }
 
+function processMultiSensorReportData(data, t, sensorType) {
+    let uHelpV = getUnitHelper(sensorType)
+    let unit = uHelpV.unit
+    var csvHeader = [t('date')];
+    for (let i = 0; i < data.length; i++) {
+        csvHeader.push(data[i].data.data.name + " (" + unit + ")");
+    }
+
+    let timestampsWithData = []
+    for (let i = 0; i < data.length; i++) {
+        let d = data[i].data.data.measurements
+        for (let j = 0; j < d.length; j++) {
+            if (d[j].parsed) {
+                timestampsWithData.push(d[j].timestamp)
+            }
+        }
+    }
+
+    timestampsWithData.sort((a, b) => a - b)
+    timestampsWithData = timestampsWithData.filter(function (item, pos, ary) {
+        return !pos || item !== ary[pos - 1];
+    });
+
+    let rows = []
+    for (let i = 0; i < timestampsWithData.length; i++) {
+        let row = [toISOString(new Date(timestampsWithData[i] * 1000))]
+        for (let j = 0; j < data.length; j++) {
+            let d = data[j].data.data.measurements
+            let val = ""
+            for (let k = 0; k < d.length; k++) {
+                if (d[k].timestamp === timestampsWithData[i]) {
+                    if (sensorType === "humidity") {
+                        val = uHelpV.value(d[k].parsed[sensorType], d[k].parsed.temperature)
+                    } else {
+                        val = uHelpV.value(d[k].parsed[sensorType])
+                    }
+                    break
+                }
+            }
+            row.push(val)
+        }
+        rows.push(row)
+    }
+    return { csvHeader, rows }
+}
+
+export function exportMuliSensorCSV(datain, t, sensorType) {
+    let { csvHeader, rows } = processMultiSensorReportData(datain, t, sensorType)
+    var csv = csvHeader.toString() + "\n"
+    for (var i = rows.length - 1; i >= 0; i--) {
+        csv += rows[i].toString() + "\n"
+    }
+
+    let exportedFilename = getFilename("ruuvi_report", "csv")
+
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    if (navigator.msSaveBlob) { // IE 10+
+        navigator.msSaveBlob(blob, exportedFilename)
+    } else {
+        var link = document.createElement('a')
+        if (link.download !== undefined) { // feature detection
+            // Browsers that support HTML5 download attribute
+            var url = URL.createObjectURL(blob)
+            link.setAttribute('href', url)
+            link.setAttribute('download', exportedFilename)
+            link.style.visibility = 'hidden'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+        }
+    }
+}
+
 export function exportCSV(dataIn, sensorName, t) {
     let { csvHeader, data } = processData(dataIn, t)
     var csv = csvHeader.toString() + "\n"
@@ -99,6 +172,24 @@ export function exportCSV(dataIn, sensorName, t) {
             document.body.removeChild(link)
         }
     }
+}
+
+
+export function exportMuliSensorXLSX(datain, t, sensorType) {
+    let { csvHeader, rows } = processMultiSensorReportData(datain, t, sensorType)
+
+    rows.reverse()
+
+    rows = [csvHeader].concat(rows)
+
+    let exportedFilename = getFilename("ruuvi_report", "xlsx")
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+
+    XLSX.utils.book_append_sheet(wb, ws, "Ruuvi");
+
+    XLSX.writeFile(wb, exportedFilename);
 }
 
 export function exportXLSX(dataIn, sensorName, t) {

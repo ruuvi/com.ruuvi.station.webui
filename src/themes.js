@@ -131,7 +131,6 @@ export const ruuviTheme = extendTheme({
                 bg: colors.colorMenuActive[props.colorMode] + " !important",
                 color: colors.textInactive[props.colorMode] + " !important",
             },
-           
             '.buttonSideIcon': {
                 color: colors.buttonBackground[props.colorMode]
             },
@@ -213,7 +212,15 @@ export const ruuviTheme = extendTheme({
             ".mobilePageTitleDescription": {
                 fontFamily: "mulish",
                 fontSize: 14
-            }
+            },
+            ".graphInfo": {
+                fontFamily: "mulish",
+                fontSize: 14,
+            },
+            ".graphLengthText": {
+                fontFamily: "montserrat",
+                fontWeight: 800,
+            },
         })
     },
     graph: {

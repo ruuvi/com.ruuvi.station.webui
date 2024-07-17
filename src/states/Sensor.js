@@ -46,18 +46,11 @@ import { isAlerting } from "../utils/alertHelper";
 import RemoveSensorDialog from "../components/RemoveSensorDialog";
 import ExportMenu from "../components/ExportMenu";
 import UpgradePlanButton from "../components/UpgradePlanButton";
+import ZoomInfo from "../components/ZoomInfo";
 
 var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "co2", "voc", "nox"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
 
-const graphInfo = {
-    fontFamily: "mulish",
-    fontSize: 14,
-}
-const graphLengthText = {
-    fontFamily: "montserrat",
-    fontWeight: 800,
-}
 const collapseText = {
     fontFamily: "montserrat",
     fontSize: "24px",
@@ -449,9 +442,6 @@ class Sensor extends Component {
     setOpenAccordion(open) {
         new Store().setOpenAccordions(open)
     }
-    zoomInfo() {
-        notify.info(addNewlines(this.props.t("zoom_info")))
-    }
     getGraphData() {
         if (!this.state.data?.measurements?.length) return []
         let data = this.state.data.measurements;
@@ -486,12 +476,7 @@ class Sensor extends Component {
 
         let graphCtrl = () => {
             return <>
-                <span>
-                    <span style={detailedSubText}>{`${uppercaseFirst(t("zoom"))}`}</span>
-                    <IconButton ml="-8px" variant="ghost" onClick={() => this.zoomInfo()}>
-                        <MdInfo size="16" className="buttonSideIcon" />
-                    </IconButton>
-                </span>
+                <ZoomInfo />
                 <ExportMenu buttonText={uppercaseFirst(t("export"))} enablePDF={sensorSubscription === "Business Starter"} onClick={val => {
                     switch (val) {
                         case "XLSX":
@@ -510,11 +495,11 @@ class Sensor extends Component {
 
         let graphTitle = (mobile) => {
             return <div style={{ marginLeft: 30 }}>
-                <span style={{ ...graphLengthText, fontSize: mobile ? "20px" : "24px" }}>
+                <span className="graphLengthText" style={{ fontSize: mobile ? "20px" : "24px" }}>
                     {t(getUnitHelper(this.state.graphKey).label)}
                 </span>
                 {!mobile && <br />}
-                <span style={{ ...graphInfo, marginLeft: mobile ? 6 : undefined }}>
+                <span className="graphInfo" style={{ marginLeft: mobile ? 6 : undefined }}>
                     {this.getSelectedUnit()}
                 </span>
             </div>
