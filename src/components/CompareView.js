@@ -20,29 +20,25 @@ function hhmm(ts) {
     return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2)
 }
 
-function hashString(inputString) {
-    let hash = 0;
-    for (let i = 0; i < inputString.length; i++) {
-        const charCode = inputString.charCodeAt(i);
-        hash = (hash << 5) - hash + charCode;
-    }
-    return hash;
-}
-
-function stringToColor(inputString, fill = false) {
-    const hash = hashString(inputString);
-
-    // Use HSL color model for more varied colors
-    const hue = (hash % 360 + 360) % 360;
-    const saturation = 50; // You can adjust these values
-    const lightness = 50; // to control the color appearance
-
+function getGraphColor(idx, fill) {
+    const colors = [
+        "#01b9a8",
+        "#e5d16e",
+        "#f77a61",
+        "#d62bb6",
+        "#9f2be2",
+        "#5273e8",
+        "#82d182"
+    ]
+    let color = colors[idx % colors.length]
+    
     if (fill) {
-        return `hsla(${hue}, ${saturation}%, ${lightness}%, 0.2)`;
+        return `rgba(${parseInt(color.slice(-6, -4), 16)}, ${parseInt(color.slice(-4, -2), 16)}, ${parseInt(color.slice(-2), 16)}, 0.2)`;
     }
 
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    return color
 }
+
 var gdata = []
 function CompareView(props) {
     let sensors = props.sensors;
@@ -178,12 +174,12 @@ function CompareView(props) {
                             class: "graphLabel",
                             value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
                         },
-                        ...sensorData.map(x => {
+                        ...sensorData.map((x, i) => {
                             return {
                                 label: x.name || x.sensor,
-                                points: { show: true, size: 2, fill: stringToColor(x.sensor) },
-                                stroke: stringToColor(x.sensor),
-                                fill: stringToColor(x.sensor, true),
+                                points: { show: true, size: 2, fill: getGraphColor(i) },
+                                stroke: getGraphColor(i),
+                                fill: getGraphColor(i, true),
                             }
                         })
                     ],
