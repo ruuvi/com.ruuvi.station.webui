@@ -33,7 +33,7 @@ function getGraphColor(idx, fill) {
     let color = colors[idx % colors.length]
     
     if (fill) {
-        return `rgba(${parseInt(color.slice(-6, -4), 16)}, ${parseInt(color.slice(-4, -2), 16)}, ${parseInt(color.slice(-2), 16)}, 0.2)`;
+        return `rgba(${parseInt(color.slice(-6, -4), 16)}, ${parseInt(color.slice(-4, -2), 16)}, ${parseInt(color.slice(-2), 16)}, 0.3)`;
     }
 
     return color
