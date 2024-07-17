@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Mulish:ital,wght@1,800&display=swap"
         rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400&family=Mulish:ital,wght@1,400&display=swap"
+        rel="stylesheet">
     <style>
         * {
             padding: 0;
@@ -35,7 +37,22 @@
             outline: none;
         }
 
-        input {
+        label {
+            font-family: "Montserrat", sans-serif;
+            font-weight: 400;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        input[type=checkbox] {
+            width: 30px;
+            height: 30px;
+            accent-color: #09afa1;
+            margin-right: 15px;
+        }
+
+        input[type=email],
+        input[type=pin] {
             width: 100%;
             height: 40px;
             font-size: 14px;
@@ -80,6 +97,12 @@
             background-color: #77cdc2;
         }
 
+        button:disabled {
+            background-color: #d4ede8;
+            color: #ffffff;
+            cursor: not-allowed;
+        }
+
         #activationCodeLabel {
             color: #1b4847;
             font-size: 18px;
@@ -114,9 +137,18 @@
             <div id="loading"></div>
         </div>
         <div id="view_email">
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <input type="checkbox" id="privacyCheckbox" onchange="handlePrivacyCheckboxChange()" />
+                <label for="privacyCheckbox" id="privacyLabel" style="margin-left: 8px;">
+                    <span id="privacy_part_1">I accept</span>
+                    <a href="https://ruuvi.com/privacy/" target="_blank">
+                        <span id="privacy_part_2">Terms and conditionsand privacy Policy.</span>
+                    </a>
+                </label>
+            </div>
             <input id="emailInput" type="email" placeholder="Email.." onkeyup="emailInput(event)" />
             <br />
-            <button id="loginButton" onClick="login()">Sign in</button>
+            <button id="loginButton" onClick="login()" disabled>Sign in</button>
         </div>
         <div id="view_code" style="text-align: center;">
             <div id="activationCodeLabel">
@@ -162,6 +194,18 @@
                     'fi': 'Avaa Ruuvi Station',
                     'sv': 'Öppna Ruuvi Station',
                 }],
+            'privacy_part_1':
+                ['innerText', {
+                    'en': 'I accept',
+                    'fi': 'Hyväksyn',
+                    'sv': 'Jag accepterar',
+                }],
+            'privacy_part_2':
+                ['innerText', {
+                    'en': 'Terms of Service and Privacy Policy.',
+                    'fi': 'yleiset myynti- ja käyttöehdot sekä yksityisyyskäytännön.',
+                    'sv': 'villkoren och integritetspolicyn.',
+                }],
         }
         const strLocals = {
             'ER_THROTTLED': {
@@ -182,6 +226,12 @@
                 let el = document.getElementById(l)
                 el[locals[l][0]] = locals[l][1][lang] || locals[l][1]["en"]
             })
+        }
+
+        function handlePrivacyCheckboxChange() {
+            let checked = document.getElementById("privacyCheckbox").checked
+            let button = document.getElementById("loginButton")
+            button.disabled = !checked
         }
 
         const target = document.getElementById('pin_1');
@@ -336,6 +386,7 @@
 
         setLanguage()
         sendData({ type: "getLangauge" })
+        handlePrivacyCheckboxChange()
     </script>
 
 </body>
