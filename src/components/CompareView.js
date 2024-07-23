@@ -6,7 +6,7 @@ import pjson from '../../package.json';
 import NetworkApi from "../NetworkApi";
 import parse from "../decoder/parser";
 import { ruuviTheme } from "../themes";
-import { Box } from "@chakra-ui/react";
+import { Box, useColorMode } from "@chakra-ui/react";
 import { t } from "i18next";
 
 function ddmm(ts) {
@@ -31,9 +31,9 @@ function getGraphColor(idx, fill) {
         "#82d182"
     ]
     let color = colors[idx % colors.length]
-    
+
     if (fill) {
-        return `rgba(${parseInt(color.slice(-6, -4), 16)}, ${parseInt(color.slice(-4, -2), 16)}, ${parseInt(color.slice(-2), 16)}, 0.3)`;
+        return `rgba(${parseInt(color.slice(-6, -4), 16)}, ${parseInt(color.slice(-4, -2), 16)}, ${parseInt(color.slice(-2), 16)}, 0.0)`;
     }
 
     return color
@@ -158,7 +158,7 @@ function CompareView(props) {
     }, [sensors, props.from, props.dataKey]);
 
     const { width } = useContainerDimensions(ref)
-    const colorMode = "dark"
+    const colorMode = useColorMode().colorMode;
     if (loading) return <Box height={450}><Progress isIndeterminate /></Box>
     if (!gdata) return <Box height={450}>{t("no_data")}</Box>
     return (
@@ -219,7 +219,6 @@ function CompareView(props) {
     )
 }
 
-
 export const useContainerDimensions = myRef => {
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
 
@@ -247,5 +246,35 @@ export const useContainerDimensions = myRef => {
     return dimensions;
 };
 
+export function EmtpyGraph() {
+    const ref = useRef(null);
+    const { width } = useContainerDimensions(ref)
+    const colorMode = useColorMode().colorMode;
+    return <div ref={ref}>
+        <UplotReact options={{
+            padding: [10, 10, 0, -10],
+            width: width,
+            height: 450,
+            series: [
+                {
+                    class: "hide"
+                },
+            ],
+            axes: [
+                {
+                }, {
+                    grid: { stroke: ruuviTheme.graph.grid[colorMode], width: 2 },
+                    stroke: "rgba(0,0,0,0)",
+                }
+            ],
+            scales: {
+                y: {
+                    range: [0, 100], 
+                    values: () => "", 
+                },
+            },
+        }} />
+    </div>
+}
 
 export default CompareView

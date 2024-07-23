@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import NetworkApi from "../NetworkApi";
-import { Button, Flex, Divider, Box, useBreakpointValue } from "@chakra-ui/react";
-import CompairView from "../components/CompareView";
+import { Button, Flex, Box, useBreakpointValue } from "@chakra-ui/react";
+import CompairView, { EmtpyGraph } from "../components/CompareView";
 import DurationPicker from "../components/DurationPicker";
 import i18next, { t } from "i18next";
 import { SensorPicker } from '../components/SensorPicker';
@@ -15,7 +15,7 @@ import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
 import { getUnitHelper } from "../UnitHelper";
 
 let data = {};
-
+const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, maxWidth: "800px" }
 function SensorCompare(props) {
     const [sensors, setSensors] = useState([])
     const [selectedSensors, setSelectedSensors] = useState([])
@@ -73,6 +73,27 @@ function SensorCompare(props) {
         </>
     }
 
+    const selectSensorTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("select_sensor")}</div>
+    const selectSensor = <>
+        <SensorPicker sensors={sensors} canBeSelected={canBeSelected} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} />
+        <Flex gap='2' wrap="wrap" mt={3} mb={3}>
+            {selectedSensors.map((sensor, index) => (
+                <Box key={index}>
+                    <EmailBox email={sensors.find(x => x.sensor === sensor).name || sensor} onRemove={s => {
+                        setSelectedSensors(selectedSensors.filter(x => x !== sensor))
+                    }} />
+                </Box>
+            ))}
+        </Flex>
+    </>
+
+    const selectEmailTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("email")}</div>
+    const selectEmail = <>
+        <SensorTypePicker value={dataKey} onChange={v => setDataKey(v)} />
+    </>
+
+    const loadButton = <Button isDisabled={!selectedSensors.length || loading} onClick={() => load()}>{i18next.t("load")}</Button>
+
     const load = () => {
         setViewData({ sensors: selectedSensors, from, dataKey })
         setLoadedDataKeys(dataKey)
@@ -86,29 +107,69 @@ function SensorCompare(props) {
             <p className={isWideVersion ? "pageTitleDescription" : "mobilePageTitleDescription"}>
                 {i18next.t("compare_subtitle")}
             </p>
-            <Flex mt={6}>
-                <Flex grow={1}>
-                </Flex>
-                <Flex gap='2' wrap="wrap" justifyContent="end">
-                    <SensorTypePicker value={dataKey} onChange={v => setDataKey(v)} />
-                    <SensorPicker sensors={sensors} canBeSelected={canBeSelected} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} normalStyle />
-                    <DurationPicker value={from} onChange={v => setFrom(v)} />
-                    <Button isDisabled={!selectedSensors.length || loading} onClick={() => load()}>{i18next.t("load")}</Button>
-                </Flex>
-            </Flex>
-            <Flex gap='2' wrap="wrap" mt={3} mb={3}>
-                {selectedSensors.map((sensor, index) => (
-                    <Box key={index}>
-                        <EmailBox email={sensors.find(x => x.sensor === sensor).name || sensor} onRemove={s => {
-                            setSelectedSensors(selectedSensors.filter(x => x !== sensor))
-                        }} />
-                    </Box>
-                ))}
-            </Flex>
             <br />
-            {viewData && !loading && <>
+            <Box className='contentImportant' borderRadius={8} width="100%" padding={{ base: "5px", md: "40px" }}>
+                <Box mb={8} style={descriptionStyle}>
+                    {i18next.t("compare_description")}
+                </Box>
+
+                {isWideVersion ? <>
+                    <table>
+                        <tr>
+                            <td valign='top' style={{ minWidth: "150px" }}>
+                                {selectSensorTitle}
+                            </td>
+                            <td>
+                                {selectSensor}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td valign="top">
+                                {selectEmailTitle}
+                            </td>
+                            <td>
+                                {selectEmail}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td valign="top">
+                            </td>
+                            <td>
+                                <div style={{ marginTop: 20 }}>
+                                    {loadButton}
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </> : <>
+                    <Box display="block" mb={2}>
+                        <Box p={2}>
+                            {selectSensorTitle}
+                        </Box>
+                        <Box flex={1} ml={{ md: 2, base: 1 }}>
+                            {selectSensor}
+                        </Box>
+                    </Box>
+
+                    <Box display="block" mb={4}>
+                        <Box p={2}>
+                            {selectEmailTitle}
+                        </Box>
+                        <Box flex={1} ml={{ md: 2, base: 1 }}>
+                            {selectEmail}
+                        </Box>
+                    </Box>
+                    <Box ml={{ md: 2, base: 1 }}>
+                        {loadButton}
+                    </Box>
+                </>}
+
+            </Box>
+
+            <br />
+            {(viewData && !loading) ? <>
                 <ScreenSizeWrapper>
-                    <div style={{ marginTop: 30 }} id="history">
+                    <div id="history">
                         <table width="100%">
                             <tbody>
                                 <tr>
@@ -118,6 +179,7 @@ function SensorCompare(props) {
                                     <td>
                                         <Flex justify="end" gap={"6px"}>
                                             {graphCtrl()}
+                                            <DurationPicker value={from} onChange={v => setFrom(v)} />
                                         </Flex>
                                     </td>
                                 </tr>
@@ -126,7 +188,7 @@ function SensorCompare(props) {
                     </div>
                 </ScreenSizeWrapper>
                 <ScreenSizeWrapper isMobile>
-                    <div style={{ marginTop: 30, marginBottom: -10 }} id="history">
+                    <div style={{ marginBottom: -10 }} id="history">
                         {graphTitle(true)}
                         <table width="100%" style={{ marginTop: "10px" }}>
                             <tbody>
@@ -134,6 +196,7 @@ function SensorCompare(props) {
                                     <td>
                                         <Flex justify="end" flexWrap="wrap" gap={"6px"}>
                                             {graphCtrl(true)}
+                                            <DurationPicker value={from} onChange={v => setFrom(v)} />
                                         </Flex>
                                     </td>
                                 </tr>
@@ -141,10 +204,15 @@ function SensorCompare(props) {
                         </table>
                     </div>
                 </ScreenSizeWrapper>
+            </> : <>
+                <Flex justify="end" gap={"6px"} pt={"11px"} height={"62px"}>
+                    <DurationPicker value={from} onChange={v => setFrom(v)} />
+                </Flex>
             </>}
             <br />
             {viewData && <CompairView key={123} {...viewData} isLoading={s => setLoading(s)} setData={d => data = d} />}
-            {!viewData && <Box height={450} textAlign={"center"} pt={200}>{t("select_sensor_and_load")}</Box>}
+            {!viewData && <Box height={450}><EmtpyGraph /></Box>}
+            <Box height={50} />
         </Box>
     </>
 }

@@ -18,14 +18,25 @@ export default function SensorTypePicker(props) {
     let v = props.value || "temperature";
     let current = t(getUnitHelper(v).label);
     if (current.length > 15) current = current.substring(0, 15) + "..."
+
+    let style = {
+        variant: "shareSensorSelect",
+        style: { fontFamily: "mulish", fontSize: 15, fontWeight: 800, width: "250px", textAlign: "left" }
+    }
+    if (props.normalStyle) {
+        style = {
+            variant: "ddl",
+            className: "durationPicker",
+        }
+    }
+
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
             <MenuButton as={Button}
                 rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marginRight: -8 }} />}
-                variant="ddl"
-                className="durationPicker"
+                {...style}
                 borderRadius='4px'>
-                <Box pl={1} className={"ddlItemAlt"}>
+                <Box pl={1}  className={props.normalStyle ? "ddlItemAlt" : ""}>
                     {current}
                 </Box>
             </MenuButton>

@@ -156,6 +156,9 @@ export const ruuviTheme = extendTheme({
             '.graphLabel > td': {
                 marginTop: "2px",
             },
+            '.hide': {
+                display: "none",
+            },
             ".nodatatext": {
                 color: props.colorMode === "light" ? "#1b484780" : "rgba(255,255,255,0.5)",
                 fontFamily: "mulish",
