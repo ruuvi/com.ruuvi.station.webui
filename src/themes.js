@@ -143,6 +143,9 @@ export const ruuviTheme = extendTheme({
             '.imageBackgroundOverlay': {
                 opacity: props.colorMode === "dark" ? 0.75 : 0.3,
             },
+            '#singleSerieGraph .u-marker': {
+                display: 'none !important'
+            },
             '.graphLabel': {
                 fontFamily: "Mulish",
                 fontWeight: 600,

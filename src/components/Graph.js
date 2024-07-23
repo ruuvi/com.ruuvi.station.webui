@@ -345,7 +345,7 @@ class Graph extends Component {
                         </center>
                     }>
                         <>
-                            <div style={{ height: height }}>
+                            <div style={{ height: height }} id="singleSerieGraph">
                                 <UplotReact
                                     options={{
                                         title: this.props.title,
