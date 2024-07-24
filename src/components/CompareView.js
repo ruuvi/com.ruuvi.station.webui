@@ -109,6 +109,8 @@ function CompareView(props) {
                         break
                     }
                 }
+                // filter out data that is not in the time range
+                allData.data.measurements = allData.data.measurements.filter(x => x.timestamp >= since && x.timestamp <= until)
                 return { sensor, data: allData };
             });
 
@@ -160,61 +162,68 @@ function CompareView(props) {
     const { width } = useContainerDimensions(ref)
     const colorMode = useColorMode().colorMode;
     if (loading) return <Box height={450}><Progress isIndeterminate /></Box>
-    if (!gdata) return <Box height={450}>{t("no_data")}</Box>
     return (
         <div ref={ref}>
-            <UplotReact
-                options={{
-                    padding: [10, 10, 0, -10],
-                    width: width,
-                    height: 450,
-                    series: [
-                        {
-                            label: t('time'),
-                            class: "graphLabel",
-                            value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
-                        },
-                        ...sensorData.map((x, i) => {
-                            return {
-                                label: x.name || x.sensor,
-                                points: { show: true, size: 2, fill: getGraphColor(i) },
-                                stroke: getGraphColor(i),
-                                fill: getGraphColor(i, true),
-                            }
-                        })
-                    ],
-                    axes: [
-                        {
-                            grid: { show: false },
-                            font: "12px Arial",
-                            stroke: ruuviTheme.graph.axisLabels[colorMode],
-                            values: (_, ticks) => {
-                                var xRange = ticks[ticks.length - 1] - ticks[0]
-                                var xRangeHours = xRange / 60 / 60
-                                var prevRaw = null;
-                                var useDates = xRangeHours >= 72;
-                                return ticks.map(raw => {
-                                    var out = useDates ? ddmm(raw) : hhmm(raw);
-                                    if (prevRaw === out) {
-                                        if (useDates) return hhmm(raw);
-                                        return null;
+            {!gdata.length ?
+                <Box height={450}>
+                    <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">
+                        {t("no_data_in_range")}
+                    </center>
+                </Box>
+                : (
+                    <UplotReact
+                        options={{
+                            padding: [10, 10, 0, -10],
+                            width: width,
+                            height: 450,
+                            series: [
+                                {
+                                    label: t('time'),
+                                    class: "graphLabel",
+                                    value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
+                                },
+                                ...sensorData.map((x, i) => {
+                                    return {
+                                        label: x.name || x.sensor,
+                                        points: { show: true, size: 2, fill: getGraphColor(i) },
+                                        stroke: getGraphColor(i),
+                                        fill: getGraphColor(i, true),
                                     }
-                                    prevRaw = out;
-                                    return out;
                                 })
-                            }
-                        }, {
-                            grid: { stroke: ruuviTheme.graph.grid[colorMode], width: 2 },
-                            stroke: ruuviTheme.graph.axisLabels[colorMode],
-                            size: 55,
-                            font: "12px Arial",
-                        }
-                    ],
-                }}
-                data={getGraphData()}
-                onCreate={(chart) => { }}
-                onDelete={(chart) => { }}
-            />
+                            ],
+                            axes: [
+                                {
+                                    grid: { show: false },
+                                    font: "12px Arial",
+                                    stroke: ruuviTheme.graph.axisLabels[colorMode],
+                                    values: (_, ticks) => {
+                                        var xRange = ticks[ticks.length - 1] - ticks[0]
+                                        var xRangeHours = xRange / 60 / 60
+                                        var prevRaw = null;
+                                        var useDates = xRangeHours >= 72;
+                                        return ticks.map(raw => {
+                                            var out = useDates ? ddmm(raw) : hhmm(raw);
+                                            if (prevRaw === out) {
+                                                if (useDates) return hhmm(raw);
+                                                return null;
+                                            }
+                                            prevRaw = out;
+                                            return out;
+                                        })
+                                    }
+                                }, {
+                                    grid: { stroke: ruuviTheme.graph.grid[colorMode], width: 2 },
+                                    stroke: ruuviTheme.graph.axisLabels[colorMode],
+                                    size: 55,
+                                    font: "12px Arial",
+                                }
+                            ],
+                        }}
+                        data={getGraphData()}
+                        onCreate={(chart) => { }}
+                        onDelete={(chart) => { }}
+                    />
+                )}
         </div>
     )
 }
@@ -269,8 +278,8 @@ export function EmtpyGraph() {
             ],
             scales: {
                 y: {
-                    range: [0, 100], 
-                    values: () => "", 
+                    range: [0, 100],
+                    values: () => "",
                 },
             },
         }} />
