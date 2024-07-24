@@ -110,7 +110,7 @@ function CompareView(props) {
                     }
                 }
                 // filter out data that is not in the time range
-                allData.data.measurements = allData.data.measurements.filter(x => x.timestamp >= since && x.timestamp <= until)
+                allData.data.measurements = allData.data.measurements.filter(x => x.timestamp >= since)
                 return { sensor, data: allData };
             });
 
@@ -162,6 +162,7 @@ function CompareView(props) {
     const { width } = useContainerDimensions(ref)
     const colorMode = useColorMode().colorMode;
     if (loading) return <Box height={450}><Progress isIndeterminate /></Box>
+    console.log("gdata.length", gdata.length)
     return (
         <div ref={ref}>
             {!gdata.length ?
