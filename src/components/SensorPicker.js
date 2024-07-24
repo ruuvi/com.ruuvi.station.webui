@@ -32,7 +32,7 @@ export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalSty
                     {i18next.t("sensors")}
                 </Box>
             </MenuButton>
-            <MenuList mt="2" zIndex={10} ml={2}>
+            <MenuList mt="2" zIndex={10} ml={2} maxH={"800px"} overflowY={"scroll"}>
                 {sensors.map((x, i) => {
                     if (!x) return null;
                     let divider = <></>;
@@ -40,10 +40,17 @@ export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalSty
                     if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 };
                     if (i === sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 };
                     else divider = <MenuDivider />;
-                    return <div key={x.sensor + "div"}>
-                        <MenuItem key={x.sensor} isDisabled={canBeSelected && !canBeSelected.map(y => y.sensor).includes(x.sensor)} className={!normalStyle ? "ddlItem" : "ddlItemAlt"} style={{ ...borderStyle }} onClick={() => handleSensorChange(x.sensor)}>{x.name || x.sensor}</MenuItem>
+                    return <>
+                        <MenuItem key={x.sensor}
+                            isDisabled={canBeSelected && !canBeSelected.map(y => y.sensor).includes(x.sensor)}
+                            className={!normalStyle ? "ddlItem" : "ddlItemAlt"}
+                            style={{ ...borderStyle }}
+                            onClick={() => handleSensorChange(x.sensor)}
+                        >
+                            {x.name || x.sensor}
+                        </MenuItem>
                         {divider}
-                    </div>;
+                    </>;
                 })}
             </MenuList>
         </Menu>
