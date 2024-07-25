@@ -87,8 +87,8 @@ function SensorCompare(props) {
         </Flex>
     </>
 
-    const selectEmailTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("email")}</div>
-    const selectEmail = <>
+    const selectUnitTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("unit")}</div>
+    const selectUnit = <>
         <SensorTypePicker value={dataKey} onChange={v => setDataKey(v)} />
     </>
 
@@ -125,10 +125,10 @@ function SensorCompare(props) {
                         </tr>
                         <tr>
                             <td valign="top">
-                                {selectEmailTitle}
+                                {selectUnitTitle}
                             </td>
                             <td>
-                                {selectEmail}
+                                {selectUnit}
                             </td>
                         </tr>
                         <tr>
@@ -153,10 +153,10 @@ function SensorCompare(props) {
 
                     <Box display="block" mb={4}>
                         <Box p={2}>
-                            {selectEmailTitle}
+                            {selectUnitTitle}
                         </Box>
                         <Box flex={1} ml={{ md: 2, base: 1 }}>
-                            {selectEmail}
+                            {selectUnit}
                         </Box>
                     </Box>
                     <Box ml={{ md: 2, base: 1 }}>
