@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Button, Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react';
 import { MdArrowDropDown } from 'react-icons/md';
 import i18next from 'i18next';
+import { getSetting } from "../UnitHelper";
 
 export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalStyle }) => {
 
@@ -21,6 +22,17 @@ export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalSty
         }
     }
 
+    function getSensors() {
+        let order = getSetting("SENSOR_ORDER", null)
+        if (order) {
+            order = JSON.parse(order)
+            if (order && order.length > 0) {
+                return order.map(x => sensors.find(y => y.sensor === x))
+            }
+        }
+        return sensors
+    }
+
     return (
         <Menu autoSelect={false} placement="bottom-end">
             <MenuButton as={Button}
@@ -33,7 +45,7 @@ export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalSty
                 </Box>
             </MenuButton>
             <MenuList mt="2" zIndex={10} ml={2} maxH={"800px"} overflowY={"scroll"}>
-                {sensors.map((x, i) => {
+                {getSensors().map((x, i) => {
                     if (!x) return null;
                     let divider = <></>;
                     let borderStyle = {};
