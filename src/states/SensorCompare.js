@@ -19,7 +19,9 @@ const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 4
 function SensorCompare(props) {
     const [sensors, setSensors] = useState([])
     const [selectedSensors, setSelectedSensors] = useState([])
-    const [from, setFrom] = useState(24 * 7)
+    const [durationPickerValue, setDurationPickerValue] = useState(24 * 7)
+    const [from, setFrom] = useState((new Date().getTime() / 1000) - 60 * 60 * 24 * 7)
+    const [to, setTo] = useState(new Date().getTime() / 1000)
     const [dataKey, setDataKey] = useState("temperature")
     const [loading, setLoading] = useState(false)
     const [viewData, setViewData] = useState(null)
@@ -95,9 +97,21 @@ function SensorCompare(props) {
     const loadButton = <Button isDisabled={!selectedSensors.length || loading} onClick={() => load()}>{i18next.t("load")}</Button>
 
     const load = () => {
-        setViewData({ sensors: selectedSensors, from, dataKey })
+        setViewData({ sensors: selectedSensors, from, to, dataKey })
         setLoadedDataKeys(dataKey)
     }
+
+    const updateDuration = (v) => {
+        setDurationPickerValue(v)
+        if (typeof v === "object") {
+            setFrom(v.from.getTime() / 1000)
+            setTo(v.to.getTime() / 1000)
+        } else {
+            setFrom((new Date().getTime() / 1000) - 60 * 60 * v)
+            setTo(new Date().getTime() / 1000)
+        }
+    }
+    const durationPicker = <DurationPicker value={durationPickerValue} onChange={v => updateDuration(v)} />
 
     return <>
         <Box margin={8} marginLeft={{ base: 2, md: 16 }} marginRight={{ base: 2, md: 16 }}>
@@ -167,53 +181,56 @@ function SensorCompare(props) {
             </Box>
 
             <br />
-            {(viewData && !loading) ? <>
-                <ScreenSizeWrapper>
-                    <div id="history">
-                        <table width="100%">
-                            <tbody>
-                                <tr>
-                                    <td>
+            <ScreenSizeWrapper>
+                <div id="history">
+                    <table width="100%">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    {(viewData && !loading) && <>
                                         {graphTitle()}
-                                    </td>
-                                    <td>
-                                        <Flex justify="end" gap={"6px"}>
+                                    </>}
+
+                                </td>
+                                <td>
+                                    <Flex justify="end" gap={"6px"}>
+                                        {(viewData && !loading) && <>
                                             {graphCtrl()}
-                                            <DurationPicker value={from} onChange={v => setFrom(v)} />
-                                        </Flex>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </ScreenSizeWrapper>
-                <ScreenSizeWrapper isMobile>
-                    <div style={{ marginBottom: -10 }} id="history">
+                                        </>}
+                                        {durationPicker}
+                                    </Flex>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </ScreenSizeWrapper>
+            <ScreenSizeWrapper isMobile>
+                <div style={{ marginBottom: -10 }} id="history">
+                    {(viewData && !loading) && <>
                         {graphTitle(true)}
-                        <table width="100%" style={{ marginTop: "10px" }}>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <Flex justify="end" flexWrap="wrap" gap={"6px"}>
+                    </>}
+                    <table width="100%" style={{ marginTop: "10px" }}>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <Flex justify="end" flexWrap="wrap" gap={"6px"}>
+                                        {(viewData && !loading) && <>
                                             {graphCtrl(true)}
-                                            <DurationPicker value={from} onChange={v => setFrom(v)} />
-                                        </Flex>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </ScreenSizeWrapper>
-            </> : <>
-                <Flex justify="end" gap={"6px"} pt={"11px"} height={"62px"}>
-                    <DurationPicker value={from} onChange={v => setFrom(v)} />
-                </Flex>
-            </>}
+                                        </>}
+                                        {durationPicker}
+                                    </Flex>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </ScreenSizeWrapper>
             <br />
             {viewData && <CompairView key={123} {...viewData} isLoading={s => setLoading(s)} setData={d => data = d} />}
             {!viewData && <Box height={450}><EmtpyGraph /></Box>}
             <Box height={50} />
-        </Box>
+        </Box >
     </>
 }
 

@@ -87,10 +87,10 @@ function CompareView(props) {
             setSensorData([])
             gdata = []
             let pd = [[], []];
-            let until = parseInt(new Date().getTime() / 1000)
+            let until = props.to
 
             const fetchDataPromises = sensors.map(async (sensor) => {
-                let since = parseInt((new Date().getTime() / 1000) - 60 * 60 * props.from)
+                let since = props.from
                 let allData = null
                 for (; ;) {
                     if (since >= until) break
@@ -110,7 +110,9 @@ function CompareView(props) {
                     }
                 }
                 // filter out data that is not in the time range
-                allData.data.measurements = allData.data.measurements.filter(x => x.timestamp >= since)
+                if (allData) {
+                    allData.data.measurements = allData.data.measurements.filter(x => x.timestamp >= props.from && x.timestamp <= props.to)
+                }
                 return { sensor, data: allData };
             });
 
@@ -162,7 +164,6 @@ function CompareView(props) {
     const { width } = useContainerDimensions(ref)
     const colorMode = useColorMode().colorMode;
     if (loading) return <Box height={450}><Progress isIndeterminate /></Box>
-    console.log("gdata.length", gdata.length)
     return (
         <div ref={ref}>
             {!gdata.length ?

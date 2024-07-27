@@ -62,8 +62,8 @@ let wasInClose = false
 
 export default function DurationPicker(props) {
     const { t } = useTranslation();
-    const [lastCustom, setLastCustom] = useState(null)
-    const [custom, setCustom] = useState(null)
+    const [lastCustom, setLastCustom] = useState(typeof props.value === "object" ? props.value : null)
+    const [custom, setCustom] = useState(typeof props.value === "object" ? props.value : null)
     const [showPicker, setShowPicker] = useState(false)
     const [showDropdown, setShowDropdown] = useState(false)
 
@@ -90,7 +90,6 @@ export default function DurationPicker(props) {
                         setShowDropdown(false)
                     }}>
                         <PopoverAnchor>
-
                             <span className="durationPicker" style={{ height: "40px", display: "inline-block", borderRadius: "4px" }} >
                                 <Flex>
                                     {!props.dashboard &&

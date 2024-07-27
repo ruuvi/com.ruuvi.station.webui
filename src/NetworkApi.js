@@ -144,7 +144,7 @@ class NetworkApi {
             let d = await DataCache.getData(mac, mode) || {};
             let tss = Object.keys(d).map(x => parseInt(x)).filter(x => x <= until && x > since).sort()
             for (let i = tss.length - 1; i >= 0; i--) {
-                if (tss[i] <= until) {
+                if (tss[i] <= until && d[tss[i]]) {
                     d[tss[i]].fromCache = true
                     return { until: tss[i], data: d[tss[i]] }
                 }
