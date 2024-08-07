@@ -96,19 +96,30 @@ function SensorCompare(props) {
 
     const loadButton = <Button isDisabled={!selectedSensors.length || loading} onClick={() => load()}>{i18next.t("load")}</Button>
 
-    const load = () => {
+    const load = (newFrom, newTo) => {
         reloadIndex++
-        setViewData({ sensors: selectedSensors, from, to, dataKey, reloadIndex })
+        setViewData({ sensors: selectedSensors, from: newFrom || from, to: newTo || to, dataKey, reloadIndex })
+        if (newFrom && newTo) {
+            setFrom(newFrom)
+            setTo(newTo)
+        }
     }
 
     const updateDuration = (v) => {
         setDurationPickerValue(v)
+        let setFromTo = null, setToTo = null
         if (typeof v === "object") {
-            setFrom(v.from.getTime() / 1000)
-            setTo(v.to.getTime() / 1000)
+            setFromTo = v.from.getTime() / 1000
+            setToTo = v.to.getTime() / 1000
         } else {
-            setFrom((new Date().getTime() / 1000) - 60 * 60 * v)
-            setTo(new Date().getTime() / 1000)
+            setFromTo = (new Date().getTime() / 1000) - 60 * 60 * v
+            setToTo = new Date().getTime() / 1000
+        }
+        if (viewData) {
+            load(setFromTo, setToTo)
+        } else {
+            setFrom(setFromTo)
+            setTo(setToTo)
         }
     }
     const durationPicker = <DurationPicker value={durationPickerValue} onChange={v => updateDuration(v)} />
