@@ -57,6 +57,34 @@ function CompareView(props) {
     }
 
     const getGraphData = () => {
+        gdata = []
+        let pd = [[], []];
+        const timestampIndexMap = {}
+        sensorData.forEach(data => {
+            if (data.measurements.length) {
+                let d = data
+
+                if (pd.length < sensors.length + 2) pd.push([]);
+
+                for (let j = 0; j < d.measurements.length; j++) {
+                    const timestamp = d.measurements[j].timestamp;
+
+                    if (timestamp in timestampIndexMap) {
+                        // Update existing entry in gdata
+                        gdata[timestampIndexMap[timestamp]][d.name || d.mac] = d.measurements[j].parsed[props.dataKey];
+                    } else {
+                        // Add new entry to gdata
+                        gdata.push({
+                            t: timestamp,
+                            [d.name || d.mac]: d.measurements[j].parsed[props.dataKey],
+                        });
+
+                        // Update timestampIndexMap
+                        timestampIndexMap[timestamp] = gdata.length - 1;
+                    }
+                }
+            }
+        });
         let uniqueKeysArray = getUniqueKeys();
 
         let keyIndexMap = {};
@@ -119,39 +147,10 @@ function CompareView(props) {
             // Use Promise.all to wait for all promises to resolve
             const results = await Promise.all(fetchDataPromises);
 
-            //console.log(results)
-            //
-            const timestampIndexMap = gdata.reduce((acc, entry, index) => {
-                acc[entry.t] = index;
-                return acc;
-            }, {});
-
             results.forEach(({ sensor, data }) => {
                 if (data?.result === "success" && data.data.measurements.length) {
                     let d = parse(data.data);
-
-                    // Update SensorData state
                     setSensorData((s) => [...s, d]);
-
-                    if (pd.length < sensors.length + 2) pd.push([]);
-
-                    for (let j = 0; j < d.measurements.length; j++) {
-                        const timestamp = d.measurements[j].timestamp;
-
-                        if (timestamp in timestampIndexMap) {
-                            // Update existing entry in gdata
-                            gdata[timestampIndexMap[timestamp]][d.name || d.mac] = d.measurements[j].parsed[props.dataKey];
-                        } else {
-                            // Add new entry to gdata
-                            gdata.push({
-                                t: timestamp,
-                                [d.name || d.mac]: d.measurements[j].parsed[props.dataKey],
-                            });
-
-                            // Update timestampIndexMap
-                            timestampIndexMap[timestamp] = gdata.length - 1;
-                        }
-                    }
                 }
             });
 
@@ -159,14 +158,16 @@ function CompareView(props) {
             setLoading(false);
             props.isLoading(false);
         })();
-    }, [sensors, props.from, props.dataKey, props.reloadIndex]);
+    }, [sensors, props.from, props.reloadIndex]);
+
 
     const { width } = useContainerDimensions(ref)
     const colorMode = useColorMode().colorMode;
     if (loading) return <Box height={450}><Progress isIndeterminate /></Box>
+    let graphData = getGraphData();
     return (
         <div ref={ref}>
-            {!gdata.length ?
+            {!graphData.length ?
                 <Box height={450}>
                     <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">
                         {t("no_data_in_range")}
@@ -221,7 +222,7 @@ function CompareView(props) {
                                 }
                             ],
                         }}
-                        data={getGraphData()}
+                        data={graphData}
                         onCreate={(chart) => { }}
                         onDelete={(chart) => { }}
                     />

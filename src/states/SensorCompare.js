@@ -27,7 +27,6 @@ function SensorCompare(props) {
     const [dataKey, setDataKey] = useState("temperature")
     const [loading, setLoading] = useState(false)
     const [viewData, setViewData] = useState(null)
-    const [loadedDataKeys, setLoadedDataKeys] = useState(dataKey)
     const isWideVersion = useBreakpointValue({ base: false, md: true })
 
 
@@ -45,13 +44,12 @@ function SensorCompare(props) {
     let canBeSelected = sensors.filter(sensor => !selectedSensors.includes(sensor.sensor));
 
     const graphTitle = (mobile) => {
-        if (loadedDataKeys === "measurementSequenceNumber") return "";
-        let unit = getUnitHelper(loadedDataKeys).unit
-        if (loadedDataKeys === "movementCounter") return `(${this.props.t(unit)})`;
+        if (dataKey === "measurementSequenceNumber") return "";
+        let unit = getUnitHelper(dataKey).unit
 
         return <div style={{ marginLeft: 30 }}>
             <span className="graphLengthText" style={{ fontSize: mobile ? "20px" : "24px" }}>
-                {t(getUnitHelper(loadedDataKeys).label)}
+                {t(getUnitHelper(dataKey).label)}
             </span>
             {!mobile && <br />}
             <span className="graphInfo" style={{ marginLeft: mobile ? 6 : undefined }}>
@@ -63,7 +61,7 @@ function SensorCompare(props) {
         return <>
             <ZoomInfo />
             <ExportMenu buttonText={uppercaseFirst(t("export"))} noPdf onClick={val => {
-                exportMuliSensorCSV(data, i18next.t, loadedDataKeys)
+                exportMuliSensorCSV(data, i18next.t, dataKey)
                 /*
                 switch (val) {
                     case "XLSX":
@@ -101,7 +99,6 @@ function SensorCompare(props) {
     const load = () => {
         reloadIndex++
         setViewData({ sensors: selectedSensors, from, to, dataKey, reloadIndex })
-        setLoadedDataKeys(dataKey)
     }
 
     const updateDuration = (v) => {
@@ -230,7 +227,7 @@ function SensorCompare(props) {
                 </div>
             </ScreenSizeWrapper>
             <br />
-            {viewData && <CompairView key={123} {...viewData} isLoading={s => setLoading(s)} setData={d => data = d} />}
+            {viewData && <CompairView key={123} {...viewData} dataKey={dataKey} isLoading={s => setLoading(s)} setData={d => data = d} />}
             {!viewData && <Box height={450}><EmtpyGraph /></Box>}
             <Box height={50} />
         </Box >
