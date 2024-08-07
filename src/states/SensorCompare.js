@@ -16,6 +16,8 @@ import { getUnitHelper } from "../UnitHelper";
 
 let data = {};
 const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, maxWidth: "800px" }
+let reloadIndex = 0;
+
 function SensorCompare(props) {
     const [sensors, setSensors] = useState([])
     const [selectedSensors, setSelectedSensors] = useState([])
@@ -97,7 +99,8 @@ function SensorCompare(props) {
     const loadButton = <Button isDisabled={!selectedSensors.length || loading} onClick={() => load()}>{i18next.t("load")}</Button>
 
     const load = () => {
-        setViewData({ sensors: selectedSensors, from, to, dataKey })
+        reloadIndex++
+        setViewData({ sensors: selectedSensors, from, to, dataKey, reloadIndex })
         setLoadedDataKeys(dataKey)
     }
 

@@ -159,7 +159,7 @@ function CompareView(props) {
             setLoading(false);
             props.isLoading(false);
         })();
-    }, [sensors, props.from, props.dataKey]);
+    }, [sensors, props.from, props.dataKey, props.reloadIndex]);
 
     const { width } = useContainerDimensions(ref)
     const colorMode = useColorMode().colorMode;
