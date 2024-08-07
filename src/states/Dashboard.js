@@ -8,14 +8,11 @@ import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
 import SessionStore from "../SessionStore";
 import notify from "../utils/notify";
-import SettingsModal from "../components/SettingsModal";
 import { withColorMode } from "../utils/withColorMode";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import SensorTypePicker from "../components/SensorTypePicker";
-import MyAccountModal from "../components/MyAccountModal";
 import DashboardViewType from "../components/DashboardViewType";
 import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
-import AddSensorModal from "../components/AddSensorModal";
 import ShareDialog from "../components/ShareDialog";
 import { getSetting } from "../UnitHelper";
 import EditNameDialog from "../components/EditNameDialog";
@@ -96,21 +93,31 @@ class Dashboard extends Component {
         this.alertUpdateLoop = setTimeout(() => {
             this.fetchData()
         }, 60 * 1000);
-        let resp = await new NetworkApi().getAllSensorsAsync();
-        if (resp.result === "success") {
-            let sensors = this.state.sensors;
-            if (initialSensors) sensors = initialSensors
-            sensors.forEach((x, i) => {
-                let newSensor = resp.data.sensors.find(y => y.sensor === x.sensor)
-                if (newSensor) {
-                    sensors[i] = { ...x, ...newSensor }
-                }
-            })
-            this.setState({ ...this.state, sensors: sensors, loading: false }, () => {
-                localStorage.setItem("sensors", JSON.stringify(sensors))
-                this.checkSensorOrder()
-            })
+
+        try {
+            let resp = await new NetworkApi().getAllSensorsAsync();
+            if (resp.result === "success") {
+                let sensors = this.state.sensors;
+                if (initialSensors) sensors = initialSensors
+                sensors.forEach((x, i) => {
+                    let newSensor = resp.data.sensors.find(y => y.sensor === x.sensor)
+                    if (newSensor) {
+                        sensors[i] = { ...x, ...newSensor }
+                    }
+                })
+                this.setState({ ...this.state, sensors: sensors, loading: false }, () => {
+                    localStorage.setItem("sensors", JSON.stringify(sensors))
+                    this.checkSensorOrder()
+                })
+                return
+            }
+        } catch (e) {
+            console.log("failed to load sensors", e)
         }
+
+        setTimeout(() => {
+            this.fetchData(initialSensors)
+        }, 2000);
     }
     updateFrom(v) {
         this.setState({ ...this.state, from: v })
@@ -134,7 +141,7 @@ class Dashboard extends Component {
         })
     }
     componentDidMount() {
-      this.loadSensors()
+        this.loadSensors()
     }
     nextIndex(direction) {
         var current = this.getCurrentSensor().sensor;
@@ -278,11 +285,11 @@ class Dashboard extends Component {
                                 if (window.confirm("Switch back to production environment?") === false) return
                                 new NetworkApi().setEnv("production")
                                 window.location.reload()
-                              } else {
+                            } else {
                                 if (window.confirm("Are you sure you want to switch to staging environment?") === false) return
                                 new NetworkApi().setEnv("staging")
                                 window.location.reload()
-                              }
+                            }
                         }
                     }}
                 />
