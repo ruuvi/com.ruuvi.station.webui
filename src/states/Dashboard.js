@@ -260,7 +260,6 @@ class Dashboard extends Component {
             <DashboardViewType value={this.state.cardType} onChange={this.setDashboardViewType.bind(this)} showResetOrder={this.getOrder() !== null} resetOrder={() => this.setState({ ...this.state, showResetOrderConfirmation: true })} />
             <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} normalStyle />
             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard disabled={this.shouldDurationBeDisabled()} />
-            <Button onClick={() => this.props.navigate('/compare')}>Compare</Button>
         </>
         const search = width => {
             return <InputGroup width={width}>
