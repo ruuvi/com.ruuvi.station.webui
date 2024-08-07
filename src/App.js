@@ -274,7 +274,7 @@ export default function App() {
       <AddSensorModal open={showDialog === "addsensor"} onClose={() => setShowDialog("")} updateApp={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />
       <SettingsModal open={showDialog === "settings"} onClose={() => setShowDialog("")} updateUI={() => this.forceUpdate()} />
       {showDialog === "myaccount" &&
-        <MyAccountModal open={true} onClose={() => setShowDialog("")} updateApp={() => this.props.reloadTags()} />
+        <MyAccountModal open={true} onClose={() => setShowDialog("")} updateApp={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />
       }
     </ChakraProvider>
   );
