@@ -240,7 +240,7 @@ function SensorCompare(props) {
             <br />
             {viewData && <CompairView key={123} {...viewData} dataKey={dataKey} isLoading={s => setLoading(s)} setData={d => data = d} />}
             {!viewData && <Box height={450}><EmtpyGraph /></Box>}
-            <Box height={50} />
+            <Box height={90} />
         </Box >
     </>
 }
