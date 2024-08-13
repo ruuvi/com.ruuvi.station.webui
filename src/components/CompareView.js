@@ -8,6 +8,7 @@ import parse from "../decoder/parser";
 import { ruuviTheme } from "../themes";
 import { Box, useColorMode } from "@chakra-ui/react";
 import { t } from "i18next";
+import { getUnitHelper } from "../UnitHelper";
 
 function ddmm(ts) {
     var d = new Date(ts * 1000);
@@ -60,6 +61,7 @@ function CompareView(props) {
         gdata = []
         let pd = [[], []];
         const timestampIndexMap = {}
+        const unitHelper = getUnitHelper(props.dataKey);
         sensorData.forEach(data => {
             if (data.measurements.length) {
                 let d = data
@@ -71,12 +73,12 @@ function CompareView(props) {
 
                     if (timestamp in timestampIndexMap) {
                         // Update existing entry in gdata
-                        gdata[timestampIndexMap[timestamp]][d.name || d.mac] = d.measurements[j].parsed[props.dataKey];
+                        gdata[timestampIndexMap[timestamp]][d.name || d.mac] = unitHelper.value(d.measurements[j].parsed[props.dataKey], d.measurements[j].parsed.temperature);
                     } else {
                         // Add new entry to gdata
                         gdata.push({
                             t: timestamp,
-                            [d.name || d.mac]: d.measurements[j].parsed[props.dataKey],
+                            [d.name || d.mac]: unitHelper.value(d.measurements[j].parsed[props.dataKey], d.measurements[j].parsed.temperature),
                         });
 
                         // Update timestampIndexMap
@@ -194,6 +196,15 @@ function CompareView(props) {
                                     }
                                 })
                             ],
+                            scales: {
+                                y: {
+                                    range: (_, fromY, toY) => {
+                                        fromY -= 0.5
+                                        toY += 0.5
+                                        return [fromY, toY]
+                                    }
+                                }
+                            },
                             axes: [
                                 {
                                     grid: { show: false },
