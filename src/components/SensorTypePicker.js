@@ -23,7 +23,7 @@ export default function SensorTypePicker(props) {
         variant: "shareSensorSelect",
         style: { fontFamily: "mulish", fontSize: 15, fontWeight: 800, width: "250px", textAlign: "left" }
     }
-    if (props.normalStyle) {
+    if (!props.altStyle) {
         style = {
             variant: "ddl",
             className: "durationPicker",
@@ -36,7 +36,7 @@ export default function SensorTypePicker(props) {
                 rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marginRight: -8 }} />}
                 {...style}
                 borderRadius='4px'>
-                <Box pl={1}  className={props.normalStyle ? "ddlItemAlt" : ""}>
+                <Box pl={1}  className={props.altStyle ? "" : "ddlItemAlt"}>
                     {current}
                 </Box>
             </MenuButton>

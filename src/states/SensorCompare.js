@@ -89,7 +89,6 @@ function SensorCompare(props) {
         </Flex>
     </>
 
-    const selectUnitTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("unit")}</div>
     const selectUnit = <>
         <SensorTypePicker value={dataKey} onChange={v => setDataKey(v)} />
     </>
@@ -151,14 +150,6 @@ function SensorCompare(props) {
                         </tr>
                         <tr>
                             <td valign="top">
-                                {selectUnitTitle}
-                            </td>
-                            <td>
-                                {selectUnit}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td valign="top">
                             </td>
                             <td>
                                 <div style={{ marginTop: 20 }}>
@@ -174,15 +165,6 @@ function SensorCompare(props) {
                         </Box>
                         <Box flex={1} ml={{ md: 2, base: 1 }}>
                             {selectSensor}
-                        </Box>
-                    </Box>
-
-                    <Box display="block" mb={4}>
-                        <Box p={2}>
-                            {selectUnitTitle}
-                        </Box>
-                        <Box flex={1} ml={{ md: 2, base: 1 }}>
-                            {selectUnit}
                         </Box>
                     </Box>
                     <Box ml={{ md: 2, base: 1 }}>
@@ -205,10 +187,11 @@ function SensorCompare(props) {
 
                                 </td>
                                 <td>
-                                    <Flex justify="end" gap={"6px"}>
+                                    <Flex justify="end" flexWrap="wrap" gap={"6px"}>
                                         {(viewData && !loading) && <>
                                             {graphCtrl()}
                                         </>}
+                                        {selectUnit}
                                         {durationPicker}
                                     </Flex>
                                 </td>
@@ -230,6 +213,7 @@ function SensorCompare(props) {
                                         {(viewData && !loading) && <>
                                             {graphCtrl(true)}
                                         </>}
+                                        {selectUnit}
                                         {durationPicker}
                                     </Flex>
                                 </td>
