@@ -201,7 +201,8 @@ export const ruuviTheme = extendTheme({
                 fontFamily: "montserrat",
                 fontSize: "54px",
                 fontWeight: 800,
-                lineHeight: "1.2"
+                lineHeight: "1.2",
+                paddingBottom: "10px",
             },
             ".mobilePageTitle": {
                 fontFamily: "montserrat",
