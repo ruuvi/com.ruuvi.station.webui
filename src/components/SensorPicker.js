@@ -4,7 +4,7 @@ import { MdArrowDropDown } from 'react-icons/md';
 import i18next from 'i18next';
 import { getSetting } from "../UnitHelper";
 
-export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalStyle }) => {
+export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalStyle, buttonText }) => {
 
     const handleSensorChange = (selectedSensor) => {
         onSensorChange(selectedSensor);
@@ -41,7 +41,7 @@ export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalSty
                 rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{}} />}
             >
                 <Box pl={1} className={normalStyle ? "ddlItemAlt" : ""}>
-                    {i18next.t("sensors")}
+                    {buttonText || i18next.t("sensors")}
                 </Box>
             </MenuButton>
             <MenuList mt="2" zIndex={10} ml={2} maxH={"800px"} overflowY={"scroll"}>

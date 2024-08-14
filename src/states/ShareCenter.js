@@ -125,9 +125,9 @@ const ShareCenter = () => {
     let sensorsThatCanBeShared = mySensors.filter(x => x.sharedTo.length < pjson.settings.maxSharesPerSensor)
     sensorsThatCanBeShared = sensorsThatCanBeShared.filter(sensor => !selectedSensors.includes(sensor.sensor));
 
-    const selectSensorTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("select_sensor")}</div>
+    const selectSensorTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("sensors_select_label")}</div>
     const selectSensor = <>
-        <SensorPicker sensors={mySensors} canBeSelected={sensorsThatCanBeShared} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} />
+        <SensorPicker sensors={mySensors} canBeSelected={sensorsThatCanBeShared} buttonText={i18next.t("sensors_select_button")} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} />
         <Flex gap='2' wrap="wrap" mt={3} mb={3}>
             {selectedSensors.map((sensor, index) => (
                 <Box key={index}>

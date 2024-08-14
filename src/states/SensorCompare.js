@@ -75,9 +75,9 @@ function SensorCompare(props) {
         </>
     }
 
-    const selectSensorTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("select_sensor")}</div>
+    const selectSensorTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("sensors_select_label")}</div>
     const selectSensor = <>
-        <SensorPicker sensors={sensors} canBeSelected={canBeSelected} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} />
+        <SensorPicker sensors={sensors} canBeSelected={canBeSelected} buttonText={i18next.t("sensors_select_button")} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} />
         <Flex gap='2' wrap="wrap" mt={3} mb={3}>
             {selectedSensors.map((sensor, index) => (
                 <Box key={index}>
