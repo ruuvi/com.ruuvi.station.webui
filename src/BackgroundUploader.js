@@ -8,6 +8,10 @@ let uploadBackgroundImage = (sensor, f, t, doneCB) => {
         let reader = new FileReader();
         reader.onload = readerEvent => {
             let image = new Image();
+            image.onerror = () => {
+                notify.error(t("image_format_not_supported"));
+                doneCB(null);
+            };
             image.onload = () => {
                 let canvas = document.createElement('canvas'),
                     max_size = pjson.settings.uploadImageMaxSize,
