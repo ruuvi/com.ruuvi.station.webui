@@ -9,6 +9,7 @@ import { ruuviTheme } from "../themes";
 import { Box, useColorMode } from "@chakra-ui/react";
 import { t } from "i18next";
 import { getUnitHelper } from "../UnitHelper";
+import UplotTouchZoomPlugin from "./UplotTouchZoomPlugin";
 
 function ddmm(ts) {
     var d = new Date(ts * 1000);
@@ -162,6 +163,9 @@ function CompareView(props) {
         })();
     }, [sensors, props.from, props.reloadIndex]);
 
+    function getXRange() {
+        return [props.from, new Date().getTime() / 1000]
+    }
 
     const { width } = useContainerDimensions(ref)
     const colorMode = useColorMode().colorMode;
@@ -178,6 +182,7 @@ function CompareView(props) {
                 : (
                     <UplotReact
                         options={{
+                            plugins: [UplotTouchZoomPlugin(getXRange())],
                             padding: [10, 10, 0, -10],
                             width: width,
                             height: 450,
