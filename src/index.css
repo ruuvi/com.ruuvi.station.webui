@@ -91,6 +91,10 @@ code {
   background: rgba(0, 0, 0, 0.2) !important;
 }
 
+.u-marker {
+  border-radius: 8px !important;
+}
+
 .rdp {
   --rdp-background-color: #5e8d88a0 !important;
 }
