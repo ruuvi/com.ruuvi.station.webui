@@ -25,7 +25,6 @@ function hhmm(ts) {
 function getGraphColor(idx, fill) {
     const colors = [
         "#01b9a8",
-        "#e5d16e",
         "#f77a61",
         "#d62bb6",
         "#9f2be2",
@@ -34,10 +33,9 @@ function getGraphColor(idx, fill) {
     ]
     let color = colors[idx % colors.length]
 
-    if (fill) {
-        return `rgba(${parseInt(color.slice(-6, -4), 16)}, ${parseInt(color.slice(-4, -2), 16)}, ${parseInt(color.slice(-2), 16)}, 0.0)`;
+    if (idx >= colors.length) {
+        return `rgba(${parseInt(color.slice(-6, -4), 16)}, ${parseInt(color.slice(-4, -2), 16)}, ${parseInt(color.slice(-2), 16)}, 0.5)`;
     }
-
     return color
 }
 
@@ -197,7 +195,6 @@ function CompareView(props) {
                                         label: x.name || x.sensor,
                                         points: { show: true, size: 2, fill: getGraphColor(i) },
                                         stroke: getGraphColor(i),
-                                        fill: getGraphColor(i, true),
                                     }
                                 })
                             ],
