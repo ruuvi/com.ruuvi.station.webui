@@ -133,7 +133,7 @@ function SensorCompare(props) {
                 {i18next.t("compare_subtitle")}
             </p>
             <br />
-            <Box className='contentImportant' borderRadius={8} width="100%" padding={{ base: "5px", md: "40px" }}>
+            <Box className='contentImportant' borderRadius={8} width="100%" padding={{ base: "24px", md: "40px" }}>
                 <Box mb={8} style={descriptionStyle}>
                     {i18next.t("compare_description")}
                 </Box>

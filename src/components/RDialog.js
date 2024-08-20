@@ -15,7 +15,7 @@ export default function RDialog(props) {
         <>
             <Modal isOpen={props.isOpen} onClose={props.onClose} size={props.size || "xl"} >
                 <ModalOverlay />
-                <ModalContent>
+                <ModalContent marginRight={4} marginLeft={4}>
                     <ModalHeader style={{ marginTop: 15, marginRight: 40 }}>{props.title}</ModalHeader>
                     <ModalCloseButton style={{ margin: 15 }}>
                         <IconButton isRound={true} className="navButton" variant="nav"><MdClose /></IconButton>
