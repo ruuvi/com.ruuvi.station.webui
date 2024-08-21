@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import NetworkApi from '../NetworkApi'
 import {
-    Heading,
     IconButton,
     Box,
     Avatar,
@@ -21,16 +20,15 @@ import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
 import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
-import { MdChevronRight, MdInfo } from "react-icons/md"
+import { MdChevronRight } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 import { exportCSV, exportPDF, exportXLSX } from "../utils/export";
 import withRouter from "../utils/withRouter"
 import DurationText from "../components/DurationText";
 import Store from "../Store";
-import ShareDialog from "../components/ShareDialog";
 import EditNameDialog from "../components/EditNameDialog";
-import { addNewlines, addVariablesInString, uppercaseFirst } from "../TextHelper";
+import { addVariablesInString, uppercaseFirst } from "../TextHelper";
 import AlertItem from "../components/AlertItem";
 import EditableText from "../components/EditableText";
 import OffsetDialog from "../components/OffsetDialog";
@@ -192,7 +190,6 @@ class Sensor extends Component {
             table: "",
             resolvedMode: "",
             editName: false,
-            showShare: false,
             offsetDialog: null,
             loadingImage: false,
             updateGraphKey: 0,
@@ -397,8 +394,8 @@ class Sensor extends Component {
         }
         return new Date().getTime()
     }
-    share(state) {
-        this.setState({ ...this.state, showShare: state })
+    share() {
+        this.props.router.navigate(`/shares?sensor=${this.props.sensor.sensor}`)
     }
     editName(state) {
         this.setState({ ...this.state, editName: state })
@@ -816,7 +813,6 @@ class Sensor extends Component {
                         </Accordion>
                     </Box>
                     <EditNameDialog open={this.state.editName} onClose={() => this.editName(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
-                    <ShareDialog open={this.state.showShare} onClose={() => this.share(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
                     <OffsetDialog open={this.state.offsetDialog} onClose={() => this.setState({ ...this.state, offsetDialog: null })} sensor={this.props.sensor} offsets={{ "Humidity": this.props.sensor.offsetHumidity, "Pressure": this.props.sensor.offsetPressure, "Temperature": this.props.sensor.offsetTemperature }} lastReading={this.getLatestReading()} updateSensor={this.props.updateSensor} />
                     <RemoveSensorDialog open={this.state.removeSensor} onClose={() => this.setState({ ...this.state, removeSensor: null })} sensor={this.props.sensor} updateSensor={this.props.updateSensor} t={t} remove={() => this.props.remove()} />
                 </Box>

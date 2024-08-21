@@ -13,7 +13,6 @@ import { useLocation, useNavigate, useParams, useSearchParams } from "react-rout
 import SensorTypePicker from "../components/SensorTypePicker";
 import DashboardViewType from "../components/DashboardViewType";
 import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
-import ShareDialog from "../components/ShareDialog";
 import { getSetting } from "../UnitHelper";
 import EditNameDialog from "../components/EditNameDialog";
 import ConfirmationDialog from "../components/ConfirmationDialog";
@@ -57,7 +56,6 @@ class Dashboard extends Component {
             graphType: store.getDashboardGraphType(),
             search: "",
             currSize: '',
-            showShare: null,
             rename: null,
             showResetOrderConfirmation: false
         }
@@ -305,7 +303,7 @@ class Dashboard extends Component {
                         dataFrom={this.state.from}
                         cardType={this.state.cardType}
                         graphType={this.state.graphType}
-                        share={() => this.setState({ ...this.state, showShareFor: x })}
+                        share={() => this.props.navigate('/shares?sensor=' + x.sensor)}
                         rename={() => this.setState({ ...this.state, rename: x })}
                         remove={() => this.removeSensorFromState(x.sensor)}
                         move={dir => {
@@ -399,7 +397,6 @@ class Dashboard extends Component {
                         </Box>
                     </Box>
                 </Box>
-                <ShareDialog open={this.state.showShareFor} onClose={() => this.setState({ ...this.state, showShareFor: null })} sensor={this.state.showShareFor} updateSensor={(s) => this.updateSensor(s)} />
                 <EditNameDialog open={this.state.rename} onClose={() => this.setState({ ...this.state, rename: null })} sensor={this.state.rename} updateSensor={(s) => this.updateSensor(s)} />
                 <ConfirmationDialog open={this.state.showResetOrderConfirmation} title="dialog_are_you_sure" description='reset_order_confirmation' onClose={(yes) => this.resetOrder(yes)} />
             </>

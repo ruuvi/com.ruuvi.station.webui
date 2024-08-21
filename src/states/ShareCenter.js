@@ -101,6 +101,7 @@ const ShareCenter = () => {
 
     useEffect(() => {
         (async () => {
+            window.scrollTo(0, 0)
             let user = new NetworkApi().getUser();
             let resp = await new NetworkApi().getAllSensorsAsync();
             if (resp.result === "success") {
@@ -111,6 +112,11 @@ const ShareCenter = () => {
                     }
                 }
                 setSensors(sensors)
+                const urlParams = new URLSearchParams(window.location.search);
+                const sensorParam = urlParams.get('sensor');
+                if (sensorParam) {
+                    setSelectedSensors([sensorParam])
+                }
                 setLoading(false)
             }
         })();
