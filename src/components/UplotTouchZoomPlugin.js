@@ -1,12 +1,16 @@
 
 export default function UplotTouchZoomPlugin(xRange) {
-    function init(u, opts, data) {
+    function ready(u) {
         let min = Number.POSITIVE_INFINITY;
         let max = Number.NEGATIVE_INFINITY;
+        let data = []
+        for (let i = 1; i < u.data.length; i++) {
+            data = data.concat(u.data[i])
+        }
 
-        if (Array.isArray(data[1])) {
-            for (let i = 0; i < data[1].length; i++) {
-                const value = data[1][i];
+        if (Array.isArray(data)) {
+            for (let i = 0; i < data.length; i++) {
+                const value = data[i];
                 if (value < min) min = value;
                 if (value > max) max = value;
             }
@@ -155,7 +159,7 @@ export default function UplotTouchZoomPlugin(xRange) {
 
     return {
         hooks: {
-            init
+            ready
         }
     };
 }
