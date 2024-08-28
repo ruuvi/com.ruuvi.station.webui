@@ -17,3 +17,7 @@ export function getTimestamp(date) {
     let part_time = `${("0" + date.getHours()).slice(-2)}:${("0" + date.getMinutes()).slice(-2)}`
     return part_date + " " + part_time
 }
+
+export function secondsToUserDateString(seconds) {
+    return new Date(seconds * 1000).toLocaleString(navigator.language || "fi-FI")
+}

@@ -169,8 +169,10 @@ export function getUnitHelper(key, plaintext) {
 export function localeNumber(value, decimals) {
     if (typeof (value) !== "number") return value
     if (isNaN(value)) return "-"
-    if (decimals === undefined) return value.toLocaleString("fi-FI")
-    return value.toLocaleString("fi-FI", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+    let lng = navigator.language;
+    if (!lng) lng = "fi-FI"
+    if (decimals === undefined) return value.toLocaleString(lng)
+    return value.toLocaleString(lng, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 }
 
 export function temperatureToUserFormat(temperature, offset) {

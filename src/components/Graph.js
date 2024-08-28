@@ -9,6 +9,7 @@ import { IconButton } from "@chakra-ui/react";
 import { MdInfo } from "react-icons/md";
 import notify from "../utils/notify";
 import { calculateAverage } from "../utils/dataMath";
+import { secondsToUserDateString } from "../TimeHelper";
 const UplotReact = React.lazy(() => import('uplot-react'));
 
 function ddmm(ts) {
@@ -358,7 +359,7 @@ class Graph extends Component {
                                         series: [{
                                             label: this.props.t('time'),
                                             class: "graphLabel",
-                                            value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
+                                            value: (_, ts) => secondsToUserDateString(ts),
                                         }, {
                                             label: this.props.dataName || this.props.t(this.props.dataKey),
                                             class: "graphLabel",

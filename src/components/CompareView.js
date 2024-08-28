@@ -10,6 +10,7 @@ import { Box, useColorMode } from "@chakra-ui/react";
 import { t } from "i18next";
 import { getUnitHelper } from "../UnitHelper";
 import UplotTouchZoomPlugin from "./UplotTouchZoomPlugin";
+import { secondsToUserDateString } from "../TimeHelper";
 
 function ddmm(ts) {
     var d = new Date(ts * 1000);
@@ -188,7 +189,7 @@ function CompareView(props) {
                                 {
                                     label: t('time'),
                                     class: "graphLabel",
-                                    value: "{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}",
+                                    value: (_, ts) => secondsToUserDateString(ts),
                                 },
                                 ...sensorData.map((x, i) => {
                                     return {
