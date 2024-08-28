@@ -138,6 +138,10 @@ class Settings extends Component {
                     </>
                     }
                     <RadioInput label={"settings_chart_draw_dots"} value={this.state.CHART_DRAW_DOTS} options={boolOpt} onChange={v => this.updateLocalSetting("CHART_DRAW_DOTS", JSON.parse(v))} />
+                    <br />
+                    <RadioInput label={"settings_email_alerts"} value={this.state.settings.DISABLE_EMAIL_NOTIFICATIONS !== "1"} options={boolOpt} onChange={v => this.updateSetting("DISABLE_EMAIL_NOTIFICATIONS", v ? "0" : "1")} />
+                    <br />
+                    <RadioInput label={"settings_mobile_push_alerts"} reverseBool value={this.state.settings.DISABLE_PUSH_NOTIFICATIONS !== "1"} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", v ? "0" : "1")} />
                 </>
             )}
         </>
