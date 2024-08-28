@@ -211,6 +211,8 @@
       "graph_stats_info": "A minimum, maximum and average values in the visible timeframe are shown. You can change the visible timeframe from the dropdown menu or by using the zoom tool.",
       "no_expiry_date": "No expiry date",
       "shared_to_x": "Shared to {%d^%1$,d}/{%d^%2$,d}",
+      "settings_email_alerts": "Email Alerts",
+      "settings_mobile_push_alerts": "Mobile Push Alerts",
       "sensor_alert_free_info": "This sensor is in Free mode. You will be able to receive local alerts via Bluetooth when using Ruuvi Station mobile and your sensor is within Bluetooth signal range. Email and push notifications are available in paid subscriptions. View subscription packages at cloud.ruuvi.com.",
       "cloud_ruuvi_link": "cloud.ruuvi.com",
       "cloud_ruuvi_link_url": "https://cloud.ruuvi.com",
@@ -286,8 +288,11 @@
       "sensors_select_label": "Sensors",
       "sensors_select_button": "Select",
       "image_format_not_supported": "Image format not supported",
-      "load": "Load",
-      "try_refreshing_page": "Try refreshing the page"
+      "load": "Compare",
+      "try_refreshing_page": "Try refreshing the page",
+      "my_account_change_email": "Contact support@ruuvi.com if you wish to change the email address associated with this user account.",
+      "my_account_change_email_link_markup": "support@ruuvi.com",
+      "my_account_change_email_link": "mailto:support@ruuvi.com"
     }
   },
   "fi": {
@@ -502,6 +507,8 @@
       "graph_stats_info": "Minimi-, maksimi- ja keskiarvot näytettävälle aikajaksolle. Voit vaihtaa näytettävän aikajakson pudotusvalikosta tai zoom-työkalua käyttämällä.",
       "no_expiry_date": "Ei päättymispäivää",
       "shared_to_x": "Jaettu {%d^%1$,d}/{%d^%2$,d}",
+      "settings_email_alerts": "Sähköpostihälytykset",
+      "settings_mobile_push_alerts": "Mobiilipush-hälytykset",
       "sensor_alert_free_info": "Tämä anturi on Free-tilassa. Voit vastaanottaa paikallisia hälytyksiä Bluetoothin kautta käyttäessäsi Ruuvi Station -mobiilisovellusta ja anturi on Bluetooth-signaalin kantaman sisällä. Sähköposti- ja push-ilmoitukset ovat saatavilla maksullisissa tilauksissa. Katso tilauspaketteja osoitteessa cloud.ruuvi.com/fi.",
       "cloud_ruuvi_link": "cloud.ruuvi.com/fi",
       "cloud_ruuvi_link_url": "https://cloud.ruuvi.com/fi",
@@ -577,8 +584,11 @@
       "sensors_select_label": "Anturit",
       "sensors_select_button": "Valitse",
       "image_format_not_supported": "Kuvamuotoa ei tueta",
-      "load": "Lataa",
-      "try_refreshing_page": "Kokeile päivittää sivu uudelleen."
+      "load": "Vertaa",
+      "try_refreshing_page": "Kokeile päivittää sivu uudelleen",
+      "my_account_change_email": "Ota yhteyttä support@ruuvi.com, jos haluat vaihtaa tämän käyttäjätilin sähköpostiosoitteen.",
+      "my_account_change_email_link_markup": "support@ruuvi.com",
+      "my_account_change_email_link": "mailto:support@ruuvi.com"
     }
   },
   "sv": {
@@ -793,6 +803,8 @@
       "graph_stats_info": "Ett minimi-, maximi- och medelvärde i den synliga tidsramen visas. Du kan ändra den synliga tidsramen från rullgardinsmenyn eller genom att använda zoomverktyget.",
       "no_expiry_date": "Ingen utgångsdatum",
       "shared_to_x": "Delad {%d^%1$,d}/{%d^%2$,d}",
+      "settings_email_alerts": "E-postvarningar",
+      "settings_mobile_push_alerts": "Mobil push-varningar",
       "sensor_alert_free_info": "Den här sensorn är i Free läge. Du kommer kunna ta emot lokala varningar via Bluetooth när du använder Ruuvi Station appen och din sensor är inom Bluetooth signalräckvidd. E-post och push-meddelanden är tillgängliga i betalda prenumerationer. Visa prenumerationspaket på cloud.ruuvi.com.",
       "cloud_ruuvi_link": "cloud.ruuvi.com",
       "cloud_ruuvi_link_url": "https://cloud.ruuvi.com",
@@ -868,8 +880,11 @@
       "sensors_select_label": "Sensorer",
       "sensors_select_button": "Välj",
       "image_format_not_supported": "Bildformat stöds inte",
-      "load": "Ladda",
-      "try_refreshing_page": "Försök att ladda om sidan"
+      "load": "Jämför",
+      "try_refreshing_page": "Försök att ladda om sidan",
+      "my_account_change_email": "Kontakta support@ruuvi.com om du vill ändra e-postadressen som är kopplad till detta användarkonto.",
+      "my_account_change_email_link_markup": "support@ruuvi.com",
+      "my_account_change_email_link": "mailto:support@ruuvi.com"
     }
   },
   "fr": {
@@ -1084,6 +1099,8 @@
       "graph_stats_info": "Des valeurs minimale, maximale et moyenne dans la période visible sont affichées. Vous pouvez modifier la période visible à partir du menu déroulant ou en utilisant l'outil de zoom.",
       "no_expiry_date": "Pas de date d'expiration",
       "shared_to_x": "Partagé {%d^%1$,d}/{%d^%2$,d}",
+      "settings_email_alerts": "Alertes courrier électronique",
+      "settings_mobile_push_alerts": "Alertes push mobiles",
       "sensor_alert_free_info": "Ce capteur est en mode gratuit. Vous pourrez recevoir des alertes locales via Bluetooth lorsque vous utilisez Ruuvi Station mobile et que votre capteur se trouve à portée du signal Bluetooth. Les notifications par e-mail et push sont disponibles dans les abonnements payants. Consultez les forfaits d'abonnement sur cloud.ruuvi.com.",
       "cloud_ruuvi_link": "cloud.ruuvi.com",
       "cloud_ruuvi_link_url": "https://cloud.ruuvi.com",
@@ -1159,8 +1176,11 @@
       "sensors_select_label": "Capteurs",
       "sensors_select_button": "Sélectionner",
       "image_format_not_supported": "Format d'image non pris en charge",
-      "load": "Charger",
-      "try_refreshing_page": "Essayez de rafraîchir la page"
+      "load": "Comparer",
+      "try_refreshing_page": "Essayez de rafraîchir la page",
+      "my_account_change_email": "Contactez support@ruuvi.com si vous souhaitez modifier l'adresse e-mail associée à ce compte utilisateur.",
+      "my_account_change_email_link_markup": "support@ruuvi.com",
+      "my_account_change_email_link": "mailto:support@ruuvi.com"
     }
   },
   "de": {
@@ -1375,6 +1395,8 @@
       "graph_stats_info": "Es werden ein Minimum, ein Maximum und ein Durchschnittswert im sichtbaren Zeitrahmen angezeigt. Sie können den sichtbaren Zeitrahmen über das Dropdown-Menü oder mit dem Zoom-Tool ändern.",
       "no_expiry_date": "Kein Ablaufdatum",
       "shared_to_x": "Freigegebene {%d^%1$,d}/{%d^%2$,d}",
+      "settings_email_alerts": "E-Mail-Benachrichtigungen",
+      "settings_mobile_push_alerts": "Mobile Push-Benachrichtigungen",
       "sensor_alert_free_info": "Dieser Sensor befindet sich im Free-Modus. Sie können lokale Benachrichtigungen über Bluetooth erhalten, wenn Sie Ruuvi Station Mobile verwenden und sich Ihr Sensor in Bluetooth-Signalreichweite befindet. E-Mail- und Push-Benachrichtigungen sind in kostenpflichtigen Abonnements verfügbar. Sehen Sie sich Abonnementpakete unter cloud.ruuvi.com an.",
       "cloud_ruuvi_link": "cloud.ruuvi.com",
       "cloud_ruuvi_link_url": "https://cloud.ruuvi.com",
@@ -1450,8 +1472,11 @@
       "sensors_select_label": "Sensoren",
       "sensors_select_button": "Auswählen",
       "image_format_not_supported": "Bildformat wird nicht unterstützt",
-      "load": "Laden",
-      "try_refreshing_page": "Versuchen Sie, die Seite neu zu laden"
+      "load": "Vergleichen",
+      "try_refreshing_page": "Versuchen Sie, die Seite neu zu laden",
+      "my_account_change_email": "Kontaktieren Sie support@ruuvi.com, wenn Sie die mit diesem Benutzerkonto verknüpfte E-Mail-Adresse ändern möchten.",
+      "my_account_change_email_link_markup": "support@ruuvi.com",
+      "my_account_change_email_link": "mailto:support@ruuvi.com"
     }
   }
 }

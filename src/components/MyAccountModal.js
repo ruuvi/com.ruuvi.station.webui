@@ -2,11 +2,11 @@ import { Box, Button, PinInput, PinInputField, Progress } from "@chakra-ui/react
 import React, { useEffect, useState } from "react";
 import { withTranslation } from 'react-i18next';
 import NetworkApi from "../NetworkApi";
-import { logout } from "../utils/loginUtils";
 import notify from "../utils/notify";
 import RDialog from "./RDialog";
 import { ruuviTheme } from "../themes";
 import ConfirmationDialog from "./ConfirmationDialog";
+import { addLink } from "../TextHelper";
 
 function MyAccountModal(props) {
     var { t, i18n } = props;
@@ -15,7 +15,6 @@ function MyAccountModal(props) {
     const [activationCode, setActivationCode] = useState("")
     const [isProcessingCode, setIsProcessingCode] = useState(false)
     const [showDeleteAccount, setShowDeleteAccount] = useState(false)
-    const [loadingDelete, setLoadingDelete] = useState(false)
     useEffect(() => {
         async function getSubs() {
             let resp = await new NetworkApi().getSubscription()
@@ -181,9 +180,14 @@ function MyAccountModal(props) {
                 )}
             </Box>
             <Box mt={16}></Box>
+            <Content>
+                {addLink(t("my_account_change_email"), t("my_account_change_email_link_markup"), t("my_account_change_email_link"))}
+            </Content>
+            <Box mt={4}></Box>
             <Button variant='link' onClick={async () => {
                 setShowDeleteAccount(true)
             }}>{t("delete_account")}</Button>
+
             <ConfirmationDialog open={showDeleteAccount} title="delete_account" loading={true} description='account_delete_description' onClose={(yes) => yes ? deleteAccount() : setShowDeleteAccount(false)} />
         </RDialog>
     )
