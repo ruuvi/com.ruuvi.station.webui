@@ -93,7 +93,6 @@ class Settings extends Component {
                 new NetworkApi().getSettings(settings => {
                     if (settings.result === "success") {
                         localStorage.setItem("settings", JSON.stringify(settings.data.settings))
-                        if (this.props.updateUI) this.props.updateUI()
                     }
 
                 })
@@ -139,9 +138,9 @@ class Settings extends Component {
                     }
                     <RadioInput label={"settings_chart_draw_dots"} value={this.state.CHART_DRAW_DOTS} options={boolOpt} onChange={v => this.updateLocalSetting("CHART_DRAW_DOTS", JSON.parse(v))} />
                     <br />
-                    <RadioInput label={"settings_email_alerts"} value={this.state.settings.DISABLE_EMAIL_NOTIFICATIONS !== "1"} options={boolOpt} onChange={v => this.updateSetting("DISABLE_EMAIL_NOTIFICATIONS", v ? "0" : "1")} />
+                    <RadioInput label={"settings_email_alerts"} value={this.state.settings.DISABLE_EMAIL_NOTIFICATIONS !== "1"} options={boolOpt} onChange={v => this.updateSetting("DISABLE_EMAIL_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} />
                     <br />
-                    <RadioInput label={"settings_mobile_push_alerts"} reverseBool value={this.state.settings.DISABLE_PUSH_NOTIFICATIONS !== "1"} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", v ? "0" : "1")} />
+                    <RadioInput label={"settings_mobile_push_alerts"} value={this.state.settings.DISABLE_PUSH_NOTIFICATIONS !== "1"} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} />
                 </>
             )}
         </>
