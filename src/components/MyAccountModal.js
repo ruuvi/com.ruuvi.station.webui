@@ -93,6 +93,9 @@ function MyAccountModal(props) {
         <RDialog title={t("my_ruuvi_account")} isOpen={props.open} onClose={props.onClose}>
             <Title>{t("signed_in_user")}</Title>
             <Content>{userEmail}</Content>
+            <Content>
+                {addLink(t("my_account_change_email"), t("my_account_change_email_link_markup"), t("my_account_change_email_link"))}
+            </Content>
             <Box minHeight="250px">
                 {subscriptions.length < 1 ? (
                     <Progress isIndeterminate />
@@ -159,6 +162,7 @@ function MyAccountModal(props) {
                             </Content>
                         }
                         <Title>{t("enter_activation_code")}</Title>
+                        <Box mt={1} />
                         <PinInput variant="filled" type="alphanumeric" value={activationCode} autoFocus={false} focusBorderColor="#1f938500" onChange={code => updateValidationCode(code)}>
                             {Array(4).fill().map(() => {
                                 return <PinInputField bg={ruuviTheme.colors.pinFieldBgColor} _focus={{ backgroundColor: ruuviTheme.colors.pinFieldBgHoverColor }} _hover={{ backgroundColor: ruuviTheme.colors.pinFieldBgHoverColor }} color={"black"} height={12} style={{ margin: 5, fontWeight: 800, maxWidth: "9%" }} onPaste={handleCodePaste} />
@@ -180,10 +184,6 @@ function MyAccountModal(props) {
                 )}
             </Box>
             <Box mt={16}></Box>
-            <Content>
-                {addLink(t("my_account_change_email"), t("my_account_change_email_link_markup"), t("my_account_change_email_link"))}
-            </Content>
-            <Box mt={4}></Box>
             <Button variant='link' onClick={async () => {
                 setShowDeleteAccount(true)
             }}>{t("delete_account")}</Button>
