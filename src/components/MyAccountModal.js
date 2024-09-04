@@ -110,57 +110,9 @@ function MyAccountModal(props) {
                             <Content>{t("no_expiry_date")}</Content>
                         )}
                         <Title>{t("information")}</Title>
-                        {lng === "en" &&
-                            <Content>
-                                <Content>
-                                    To purchase Ruuvi Cloud package activation codes, please visit {cloudLink()}
-                                </Content>
-                                <Content>
-                                    Once you have received your code(s) by email, enter them below to activate them.
-                                </Content>
-                                <Content>
-                                    <span style={{ color: "#f15a24" }}>Important!</span> Entering a code for a different type of Ruuvi Cloud plan than the one currently active overrides the currently active plan. For example, if you currently have a Ruuvi Cloud Pro plan in your account, entering the Ruuvi Cloud Basic activation code will replace the Pro plan and your new Basic plan will be activated immediately, losing the remaining part of the old Pro plan. But if you enter the same type of activation code (in this case Pro), the current Pro plan's expiration date will be automatically extended.
-                                </Content>
-                                <Content>
-                                    Most frequently asked questions and more information about available packages and their features can be found at {cloudLink()}
-                                </Content>
-                            </Content>
-                        }
-                        {lng === "fi" &&
-                            <Content>
-                                <Content>
-                                    Osta Ruuvi Cloud -paketin aktivointikoodi kotisivuiltamme osoitteesta {cloudLink()}
-                                </Content>
-                                <Content>
-                                    Tarkasta aktivointikoodi(t) saamastasi sähköpostista ja syötä tiedot alla olevaan kenttään.
-                                </Content>
-                                <Content>
-                                    <span style={{ color: "#f15a24" }}>Tärkeää!</span> Eri tyyppisen Ruuvi Cloud -tilauskoodin syöttäminen korvaa ja päättää nykyisen tyyppisen aktiivisen tilauksen. Esimerkiksi Ruuvi Cloud Basic -tilauskoodin syöttäminen tilille jolla on jo aktiivinen Ruuvi Cloud Pro -tilaus päättää  Pro-tilauksen välittömästi ja se korvataan Ruuvi Cloud Basic tilauksella, jolloin Pro-tilauksessa jäljellä oleva käyttöaika päättyy heti.
-                                </Content>
-                                <Content>
-                                    Nykyisen Pro-tilauksen päättymispäivää siirretään aktivointikoodin mukaisesti eteenpäin, mikäli syötät kenttään saman tyyppisen tilauksen aktivointikoodin (tässä tapauksessa Pro).
-                                </Content>
-                                <Content>
-                                    Lisätietoja saatavilla olevista tilauspaketeista ja vastauksia usein kysyttyihin kysymyksiin löydät osoitteesta {cloudLink()}
-                                </Content>
-                            </Content>
-                        }
-                        {lng === "sv" &&
-                            <Content>
-                                <Content>
-                                    För att köpa aktiveringskoder för Ruuvi Cloud-paket, besök {cloudLink()}
-                                </Content>
-                                <Content>
-                                    När du har fått din/dina kod(er) via e-post, ange dem nedan för att aktivera dem.
-                                </Content>
-                                <Content>
-                                    <span style={{ color: "#f15a24" }}>Viktigt!</span> Genom att ange en kod för en annan typ av Ruuvi Cloud-plan än den som är aktiv just nu ersätts den aktuella planen. Till exempel, om du just nu har en Ruuvi Cloud Pro-plan i ditt konto, genom att ange en Ruuvi Cloud Basic-aktiveringskod, kommer Pro-planen att ersättas och din nya Basic-plan kommer att aktiveras omedelbart, vilket leder till förlusten av resten av den gamla Pro-planen. Men om du anger samma typ av aktiveringskod (i det här fallet Pro), kommer den aktuella Pro-planens utgångsdatum att automatiskt förlängas.
-                                </Content>
-                                <Content>
-                                    De flesta vanligt förekommande frågorna och mer information om tillgängliga paket och deras funktioner finns på {cloudLink()}
-                                </Content>
-                            </Content>
-                        }
+                        <Content>
+                            {addLink(t('my_account_information'), t("cloud_ruuvi_link"), t("cloud_ruuvi_link_url"), true, t('my_account_information_hightlighted_text'))}
+                        </Content>
                         <Title>{t("enter_activation_code")}</Title>
                         <Box mt={1} />
                         <PinInput variant="filled" type="alphanumeric" value={activationCode} autoFocus={false} focusBorderColor="#1f938500" onChange={code => updateValidationCode(code)}>

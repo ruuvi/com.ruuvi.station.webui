@@ -3,16 +3,23 @@ export function uppercaseFirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-export function addNewlines(str, newlineChar) {
+function addHighlight(str, highlightedText) {
+    return str.split(highlightedText).map((x, i, all) => {
+        return <>{x}{i === all.length - 1 ? null : <span style={{ color: "#f15a24" }}>{highlightedText}</span>}</>
+    })
+}
+
+export function addNewlines(str, newlineChar, highlightedText) {
     return str.split(newlineChar || "\n").map((x, i, all) => {
-        if (i === all.length-1) return <>{x}</>
+        x = addHighlight(x, highlightedText)
         return <p style={{ marginTop: i > 0 ? 10 : undefined }} key={Math.random()}>{x}</p>
     })
 }
 
-export function addLink(str, key, link) {
+export function addLink(str, key, link, andNewLines, highlightedText) {
     return str.split(key).map((x, i, all) => {
-        return <>{x}{i === all.length-1 ? null : <a href={link} style={{ textDecoration: "underline" }} target="_blank" rel="noreferrer">{key}</a>}</>
+        if (andNewLines) x = addNewlines(x, undefined, highlightedText)
+        return <>{x}{i === all.length - 1 ? null : <a href={link} style={{ textDecoration: "underline" }} target="_blank" rel="noreferrer">{key} ⇗</a>}</>
     })
 }
 
