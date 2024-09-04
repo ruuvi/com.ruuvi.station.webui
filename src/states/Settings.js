@@ -111,6 +111,10 @@ class Settings extends Component {
         }
         if (this.props.updateUI) this.props.updateUI()
     }
+    cloudBoolValue(value) {
+        if (value === undefined) return false
+        return JSON.parse(value) ? true : false
+    }
     render() {
         var content = <>
             {this.state.loading ? (
@@ -138,9 +142,9 @@ class Settings extends Component {
                     }
                     <RadioInput label={"settings_chart_draw_dots"} value={this.state.CHART_DRAW_DOTS} options={boolOpt} onChange={v => this.updateLocalSetting("CHART_DRAW_DOTS", JSON.parse(v))} />
                     <br />
-                    <RadioInput label={"settings_email_alerts"} value={this.state.settings.DISABLE_EMAIL_NOTIFICATIONS !== "1"} options={boolOpt} onChange={v => this.updateSetting("DISABLE_EMAIL_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} />
+                    <RadioInput label={"settings_email_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_EMAIL_NOTIFICATIONS)} options={boolOpt} onChange={v => console.log(v) || this.updateSetting("DISABLE_EMAIL_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} />
                     <br />
-                    <RadioInput label={"settings_mobile_push_alerts"} value={this.state.settings.DISABLE_PUSH_NOTIFICATIONS !== "1"} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} />
+                    <RadioInput label={"settings_mobile_push_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_PUSH_NOTIFICATIONS)} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} />
                 </>
             )}
         </>
