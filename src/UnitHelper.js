@@ -87,7 +87,6 @@ export function getDisplayValue(key, value) {
                     // don't show decimals for Pa
                     if (settings.UNIT_PRESSURE === "0") resolution = 0
                 }
-                console.log(typeof (value), value)
                 if (typeof value === "string") {
                     // Remove non-breaking spaces and replace minus sign
                     value = value.replace(" ", "").replace("−", "-");
