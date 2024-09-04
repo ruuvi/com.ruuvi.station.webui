@@ -9,19 +9,8 @@ import { IconButton } from "@chakra-ui/react";
 import { MdInfo } from "react-icons/md";
 import notify from "../utils/notify";
 import { calculateAverage } from "../utils/dataMath";
-import { secondsToUserDateString } from "../TimeHelper";
+import { date2digits, secondsToUserDateString, time2digits } from "../TimeHelper";
 const UplotReact = React.lazy(() => import('uplot-react'));
-
-function ddmm(ts) {
-    var d = new Date(ts * 1000);
-    return d.getDate() + "." + (d.getMonth() + 1) + "."
-}
-
-function hhmm(ts) {
-    var d = new Date(ts * 1000);
-    if (d.getHours() === 0 && d.getMinutes() === 0) return ddmm(ts)
-    return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2)
-}
 
 const legendHider = ({
     hooks: {
@@ -528,9 +517,9 @@ class Graph extends Component {
                                                     var prevRaw = null;
                                                     var useDates = xRangeHours >= 72;
                                                     return ticks.map(raw => {
-                                                        var out = useDates ? ddmm(raw) : hhmm(raw);
+                                                        var out = useDates ? date2digits(raw) : time2digits(raw);
                                                         if (prevRaw === out) {
-                                                            if (useDates) return hhmm(raw);
+                                                            if (useDates) return time2digits(raw);
                                                             return null;
                                                         }
                                                         prevRaw = out;

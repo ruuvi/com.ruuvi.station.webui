@@ -21,3 +21,14 @@ export function getTimestamp(date) {
 export function secondsToUserDateString(seconds) {
     return new Date(seconds * 1000).toLocaleString(navigator.language || "fi-FI")
 }
+
+export function date2digits(ts) {
+    var d = new Date(ts * 1000);
+    return d.toLocaleDateString(navigator.language || "fi-FI", { day: '2-digit', month: '2-digit' });
+}
+
+export function time2digits(ts) {
+    var d = new Date(ts * 1000);
+    if (d.getHours() === 0 && d.getMinutes() === 0) return date2digits(ts);
+    return d.toLocaleTimeString(navigator.language || "fi-FI", { hour: '2-digit', minute: '2-digit' }).replace(" ", "").toLocaleLowerCase();
+}

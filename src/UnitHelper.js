@@ -87,7 +87,20 @@ export function getDisplayValue(key, value) {
                     // don't show decimals for Pa
                     if (settings.UNIT_PRESSURE === "0") resolution = 0
                 }
-                if (typeof (value) === "string") value = value.replace(" ", "").replace(",", ".").replace("−", "-")
+                console.log(typeof (value), value)
+                if (typeof value === "string") {
+                    // Remove non-breaking spaces and replace minus sign
+                    value = value.replace(" ", "").replace("−", "-");
+                    const locale = navigator.language;
+                    // Create a NumberFormat object for the user's locale
+                    const numberFormat = new Intl.NumberFormat(locale);
+                    // Use the NumberFormat object to parse the number
+                    const parts = numberFormat.formatToParts(12345.6);
+                    const groupSeparator = parts.find(part => part.type === 'group').value;
+                    const decimalSeparator = parts.find(part => part.type === 'decimal').value;
+                    // Replace group separators with empty string and decimal separators with dot
+                    value = value.replace(new RegExp(`\\${groupSeparator}`, 'g'), '').replace(decimalSeparator, '.');
+                }
                 value = parseFloat(value).toFixed(resolution)
                 value = localeNumber(+value, resolution)
             }
