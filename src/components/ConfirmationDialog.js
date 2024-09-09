@@ -1,6 +1,7 @@
 import React from "react";
 import { AlertDialog, AlertDialogBody, AlertDialogCloseButton, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
+import { addNewlines } from "../TextHelper";
 
 export default function ConfirmationDialog(props) {
     const { t } = useTranslation();
@@ -15,7 +16,7 @@ export default function ConfirmationDialog(props) {
             </AlertDialogHeader>
             <AlertDialogCloseButton />
             <AlertDialogBody>
-                {t(props.description)}
+                {addNewlines(t(props.description))}
             </AlertDialogBody>
             <AlertDialogFooter>
                 <Button onClick={() => close()}>{t('cancel')}</Button>

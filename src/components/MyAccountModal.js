@@ -15,6 +15,8 @@ function MyAccountModal(props) {
     const [activationCode, setActivationCode] = useState("")
     const [isProcessingCode, setIsProcessingCode] = useState(false)
     const [showDeleteAccount, setShowDeleteAccount] = useState(false)
+    const [showActivationConfirmation, setShowActivationConfirmation] = useState(false)
+
     useEffect(() => {
         async function getSubs() {
             let resp = await new NetworkApi().getSubscription()
@@ -29,7 +31,8 @@ function MyAccountModal(props) {
         getSubs()
     }, [t])
     const activate = async () => {
-        if (!window.confirm(t("plan_activation_confirmation"))) return
+        setShowActivationConfirmation(false)
+        //if (!window.confirm(t("plan_activation_confirmation"))) return
         setIsProcessingCode(true)
         let code = activationCode.length === 8 ? activationCode.slice(0, 4) + "-" + activationCode.slice(4) : activationCode;
         let resp = await new NetworkApi().claimSubscription(code)
@@ -129,7 +132,7 @@ function MyAccountModal(props) {
                             {isProcessingCode ? (
                                 <Progress isIndeterminate />
                             ) : (
-                                <Button disabled={activationCode.length !== 8} onClick={activate}>{t("activate")}</Button>
+                                <Button disabled={activationCode.length !== 8} onClick={() => setShowActivationConfirmation(true)}>{t("activate")}</Button>
                             )}
                         </Box>
                     </>
@@ -141,6 +144,7 @@ function MyAccountModal(props) {
             }}>{t("delete_account")}</Button>
 
             <ConfirmationDialog open={showDeleteAccount} title="delete_account" loading={true} description='account_delete_description' onClose={(yes) => yes ? deleteAccount() : setShowDeleteAccount(false)} />
+            <ConfirmationDialog open={showActivationConfirmation} description="plan_activation_confirmation" onClose={(yes) => yes ? activate() : setShowActivationConfirmation(false)} />
         </RDialog>
     )
 }
