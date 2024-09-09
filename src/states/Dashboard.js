@@ -399,9 +399,27 @@ class Dashboard extends Component {
                 </Box>
                 <EditNameDialog open={this.state.rename} onClose={() => this.setState({ ...this.state, rename: null })} sensor={this.state.rename} updateSensor={(s) => this.updateSensor(s)} />
                 <ConfirmationDialog open={this.state.showResetOrderConfirmation} title="dialog_are_you_sure" description='reset_order_confirmation' onClose={(yes) => this.resetOrder(yes)} />
+                {!this.getCurrentSensor() && <ExtraPadding />}
             </>
         )
     }
+}
+
+function ExtraPadding() {
+    const [extraBottomPadding, setExtraBottomPadding] = React.useState(window.innerHeight < 800 ? 20 : 0);
+
+    React.useEffect(() => {
+        const handleResize = () => {
+            setExtraBottomPadding(window.innerHeight < 800 ? 20 : 0);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
+    return <Box height={`${extraBottomPadding}px`} />;
 }
 
 export default withTranslation()(withColorMode((props) => (
