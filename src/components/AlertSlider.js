@@ -1,9 +1,7 @@
 import React from "react";
 import { Range, getTrackBackground } from 'react-range';
 import { getAlertRange, getUnitHelper, pressureFromUserFormat, temperatureFromUserFormat } from '../UnitHelper';
-import InputDialog from "./InputDialog";
 import { withTranslation } from "react-i18next";
-import { uppercaseFirst } from "../TextHelper";
 import { ruuviTheme } from "../themes";
 
 function getColor(gray, alert) {
@@ -14,8 +12,6 @@ class AlertSlider extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            editMinValue: false,
-            editMaxValue: false,
             range: this.getRange(),
         }
     }
@@ -96,18 +92,6 @@ class AlertSlider extends React.Component {
                         }}
                     />
                 )}
-            />
-            <InputDialog open={this.state.editMinValue} value={min}
-                onClose={(save, value) => (save && value <= max && this.props.onChange([value, max], true)) || this.setState({ ...this.state, editMinValue: false })}
-                title={uppercaseFirst(this.props.t("min"))}
-                number={true}
-                buttonText={this.props.t("update")}
-            />
-            <InputDialog open={this.state.editMaxValue} value={max}
-                onClose={(save, value) => (save && value >= min && this.props.onChange([min, value], true)) || this.setState({ ...this.state, editMaxValue: false })}
-                title={uppercaseFirst(this.props.t("max"))}
-                number={true}
-                buttonText={this.props.t("update")}
             />
         </div>
     }

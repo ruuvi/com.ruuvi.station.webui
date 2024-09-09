@@ -64,7 +64,7 @@ class RangeInputDialog extends Component {
                     </SimpleGrid>
                 </FormControl>
                 <div style={{ textAlign: "right" }}>
-                    <Button onClick={this.update.bind(this)} mt="17px" disabled={!this.isValid()}>{this.props.buttonText}</Button>
+                    <Button onClick={this.update.bind(this)} mt="17px" isDisabled={!this.isValid()}>{this.props.buttonText}</Button>
                 </div>
             </RDialog>
         )
