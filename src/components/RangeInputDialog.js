@@ -28,18 +28,29 @@ class RangeInputDialog extends Component {
         }
         this.props.onClose(true, value)
     }
-    isValid() {
+    isValid(index) {
         var value = JSON.parse(JSON.stringify(this.state.value));
-        for (var i = 0; i < value.length; i++) {
-            value[i] = parseFloat(value[i]);
-            if (isNaN(value[i])) {
+        if (index === undefined) {
+            for (var i = 0; i < value.length; i++) {
+                value[i] = parseFloat(value[i]);
+                if (isNaN(value[i])) {
+                    return false
+                }
+            }
+            if (parseFloat(value[0]) < this.props.range.min) return false
+            if (parseFloat(value[1]) > this.props.range.max) return false
+            if (value[0] > value[1]) return false
+            return true;
+        } else {
+            value[index] = parseFloat(value[index]);
+            if (isNaN(value[index])) {
                 return false
             }
+            if (index === 0 && value[index] < this.props.range.min) return false
+            if (index === 1 && value[index] > this.props.range.max) return false
+            if (value[0] > value[1]) return false
+            return true;
         }
-        if (parseFloat(value[0]) < this.props.range.min) return false
-        if (parseFloat(value[1]) > this.props.range.max) return false
-        if (value[0] > value[1]) return false
-        return true;
     }
     keyDown = (e) => {
         if (e.key === 'Enter') {
@@ -51,15 +62,15 @@ class RangeInputDialog extends Component {
         var unit = this.props.unit();
         return (
             <RDialog title={this.props.title} isOpen={this.props.open} onClose={() => this.props.onClose(false)}>
-                <FormControl isInvalid={!this.isValid()}>
+                <FormControl>
                     <SimpleGrid columns={2} spacing={4}>
                         <span>
                             <FormLabel>{this.props.t("min") + (unit ? ` (${this.props.range.min} ${unit})` : "")}</FormLabel>
-                            <Input autoFocus value={this.state.value[0]} type={"number"} onChange={e => this.setState({ ...this.state, value: [e.target.value, this.state.value[1]] })} onKeyDown={this.keyDown.bind(this)} />
+                            <Input autoFocus value={this.state.value[0]} type={"number"} onChange={e => this.setState({ ...this.state, value: [e.target.value, this.state.value[1]] })} onKeyDown={this.keyDown.bind(this)} isInvalid={!this.isValid(0)} />
                         </span>
                         <span>
                             <FormLabel>{this.props.t("max") + (unit ? ` (${this.props.range.max} ${unit})` : "")}</FormLabel>
-                            <Input value={this.state.value[1]} type={"number"} onChange={e => this.setState({ ...this.state, value: [this.state.value[0], e.target.value] })} onKeyDown={this.keyDown.bind(this)} />
+                            <Input value={this.state.value[1]} type={"number"} onChange={e => this.setState({ ...this.state, value: [this.state.value[0], e.target.value] })} onKeyDown={this.keyDown.bind(this)} isInvalid={!this.isValid(1)} />
                         </span>
                     </SimpleGrid>
                 </FormControl>
