@@ -1,4 +1,4 @@
-const { round } = require("../UnitHelper");
+import { round } from "../UnitHelper";
 
 // cid  df  pm2 pm2.  pm4 pm10  c02     packed msqn          mac
 // 9904 06 0027 0028 0028 0028 03AB 4CCC4010F0 00BE C803C7B14436
@@ -48,7 +48,7 @@ const parseRawRuuvi = function (data) {
   return robject;
 };
 
-module.exports = {
+export default {
   parse: buffer => parseRawRuuvi(buffer)
 };
 

@@ -1,4 +1,4 @@
-const { round } = require("../UnitHelper");
+import { round } from "../UnitHelper";
 
 const parseRawRuuvi = function (data) {
   const robject = {};
@@ -36,7 +36,7 @@ const parseRawRuuvi = function (data) {
   return robject;
 };
 
-module.exports = {
+export default {
   parse: buffer => parseRawRuuvi(buffer)
 };
 

@@ -2,7 +2,7 @@ function unSign(signed) {
   return signed & 0x80 ? -1 * (signed & 0x7f) : signed;
 }
 
-module.exports = {
+export default {
   parse: buffer => {
     return {
       dataFormat: buffer[0],

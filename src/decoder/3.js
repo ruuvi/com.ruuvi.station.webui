@@ -2,7 +2,7 @@
 // which is licenced under BSD-3
 // Credits to GitHub user ojousima
 
-const { round } = require("../UnitHelper");
+import { round } from "../UnitHelper";
 
 const parseRawRuuvi = function (manufacturerDataString) {
   let humidityStart = 6;
@@ -69,6 +69,6 @@ const parseRawRuuvi = function (manufacturerDataString) {
   return robject;
 };
 
-module.exports = {
+export default {
   parse: buffer => parseRawRuuvi(buffer.toString("hex")),
 };
