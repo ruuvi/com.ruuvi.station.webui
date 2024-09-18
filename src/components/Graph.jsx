@@ -19,7 +19,7 @@ const legendHider = ({
             u.over.addEventListener("mouseleave", () => {
                 document.getElementsByClassName("u-legend")[0].style.visibility = 'hidden';
             });
-            u.over.addEventListener("mouseenter", () => {
+            u.over.addEventListener("mousemove", () => {
                 document.getElementsByClassName("u-legend")[0].style.visibility = '';
             });
         }
