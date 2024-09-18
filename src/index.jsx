@@ -28,8 +28,12 @@ class ErrorView extends React.Component {
 
   render() {
     if (this.state.hasError) {
+      let isDarkMode = true
+      if (localStorage.getItem("chakra-ui-color-mode") === "light") {
+        isDarkMode = false
+      }
       return (
-        <center style={{ color: "white" }}>
+        <center style={{color: isDarkMode ? "white" : "black"}}>
           <br />
           <img src={logo} alt='logo' width={"100px"} />
           <br />
