@@ -128,7 +128,6 @@ class NetworkApi {
         return data;
     }
     async getAsync(mac, since, until, settings) {
-        if (!this.options) return null;
         const mode = settings?.mode || "mixed";
 
         const saveCacheD = async (data) => {
