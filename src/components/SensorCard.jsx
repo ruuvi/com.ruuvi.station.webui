@@ -113,6 +113,7 @@ class SensorCard extends Component {
             imageHover: false,
             loadingImage: false,
             showRemoveDialog: false,
+            errorFetchingData: false,
         }
     }
     componentDidMount() {
@@ -132,10 +133,10 @@ class SensorCard extends Component {
                 graphData.data[x] = this.props.sensor[x]
             })
             let d = parse(graphData.data);
-            this.setState({ data: d, loading: false, loadingHistory: false, table: d.table, resolvedMode: d.resolvedMode })
+            this.setState({ data: d, loading: false, loadingHistory: false, table: d.table, resolvedMode: d.resolvedMode, errorFetchingData: false })
         } else if (graphData.result === "error") {
-            console.error(graphData.error)
-            this.setState({ ...this.state, loading: false, loadingHistory: false })
+            console.log(graphData.error)
+            this.setState({ ...this.state, loading: false, loadingHistory: false, errorFetchingData: true })
         }
     }
     async loadData() {
@@ -412,7 +413,7 @@ class SensorCard extends Component {
                                                                 <center style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: graphHeight }}><div style={{ position: "relative", top: "50%", transform: "translateY(-50%)" }}><Spinner size="xl" /></div></center>
                                                             ) : showGraph && (
                                                                 <>
-                                                                    {noData(noHistoryStr)}
+                                                                    {noData(this.state.errorFetchingData ? "error" : noHistoryStr)}
                                                                 </>
                                                             )}
                                                         </>}

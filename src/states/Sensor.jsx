@@ -272,9 +272,9 @@ class Sensor extends Component {
                 var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
                 that.isLoading = false;
                 // stop fetching data if sensor page has changed
-                if (that.props.sensor.sensor !== resp.data.sensor) return;
                 if (that.state.from !== thisFrom) return;
                 if (resp.result === "success") {
+                    if (that.props.sensor.sensor !== resp.data.sensor) return;
                     let returndDataLength = resp.data.measurements.length
                     Object.keys(that.props.sensor).filter(x => x.startsWith("offset")).forEach(x => {
                         resp.data[x] = that.props.sensor[x]

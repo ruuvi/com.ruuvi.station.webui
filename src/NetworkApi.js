@@ -129,70 +129,99 @@ class NetworkApi {
     }
     async getAsync(mac, since, until, settings) {
         const mode = settings?.mode || "mixed";
-
-        const saveCacheD = async (data) => {
-            if (data.measurements.length < 100) {
-                //console.log("not saving tiny cache")
-                return
+        const limit = settings?.limit || 100000;
+        const paginationSize = pjson.settings.dataFetchPaginationSize;
+    
+        // Helper function to save cache data if the measurements array is large enough
+        const saveCacheData = async (data) => {
+            if (data.measurements.length < 100) return;
+    
+            try {
+                const cacheData = await DataCache.getData(mac, mode) || {};
+                cacheData[until] = data;
+                await DataCache.setData(mac, mode, cacheData);
+            } catch (error) {
+                console.error("Error saving data to cache", error);
             }
-            let d = await DataCache.getData(mac, mode) || {};
-            d[until] = data
-            DataCache.setData(mac, mode, d);
-        }
-        const getClosestCacheD = async () => {
-            let d = await DataCache.getData(mac, mode) || {};
-            let tss = Object.keys(d).map(x => parseInt(x)).filter(x => x <= until && x > since).sort()
-            for (let i = tss.length - 1; i >= 0; i--) {
-                if (tss[i] <= until && d[tss[i]]) {
-                    d[tss[i]].fromCache = true
-                    return { until: tss[i], data: d[tss[i]] }
+        };
+    
+        // Helper function to get the closest cached data within the time range
+        const getClosestCacheData = async () => {
+            try {
+                const cacheData = await DataCache.getData(mac, mode) || {};
+                const timestamps = Object.keys(cacheData)
+                    .map(Number)
+                    .filter(ts => !isNaN(ts) && ts <= until && ts > since)  // Ensure valid timestamps
+                    .sort((a, b) => b - a);  // Sort timestamps in descending order
+    
+                // Loop through the timestamps in reverse to get the closest valid cache
+                for (let ts of timestamps) {
+                    if (cacheData[ts]) {
+                        cacheData[ts].fromCache = true;
+                        return { until: ts, data: cacheData[ts] };
+                    }
                 }
+            } catch (error) {
+                console.error("Error getting cache data", error);
             }
-            return null
-        }
-
-        let closestCache = await getClosestCacheD()
+            return null;
+        };
+    
+        // Attempt to retrieve the closest cached data
+        let closestCache = await getClosestCacheData();
+    
+        // If cache is found and fully covers the request, return it
         if (closestCache && closestCache.until === until) {
-            let fromCacheLength = closestCache.data.measurements.length
-            closestCache.data.measurements = closestCache.data.measurements.filter(x => x.timestamp >= since)
-            if (fromCacheLength > closestCache.data.measurements.length) {
-                // pretend this is not from cache to stop fetching data as we have reached the end
-                closestCache.data.fromCache = false
+            const { data } = closestCache;
+            const originalLength = data.measurements.length;
+    
+            // Filter measurements to include only those after `since`
+            data.measurements = data.measurements.filter(x => x.timestamp >= since);
+    
+            // If some measurements were filtered out, mark cache as incomplete
+            if (originalLength > data.measurements.length) {
+                data.fromCache = false;
             }
-            return { result: "success", data: closestCache.data }
+    
+            return { result: "success", data };
         }
-        else if (closestCache) {
-            since = closestCache.until
+    
+        // If cache is found but not complete, update `since` to continue fetching from API
+        if (closestCache) {
+            since = closestCache.until;
         }
-
-        let q = "?sensor=" + encodeURIComponent(mac);
-        q += "&mode=" + encodeURIComponent(mode);
-
-        if (since) {
-            q += "&since=" + since;
-        }
-
-        if (until) {
-            q += "&until=" + until;
-        } else {
-            q += "&until=" + parseInt(Date.now() / 1000);
-        }
-
-        q += "&limit=" + (settings?.limit || 100000);
-
+    
+        // Build query string for API call
+        let query = `?sensor=${encodeURIComponent(mac)}&mode=${encodeURIComponent(mode)}`;
+        query += `&since=${since || 0}`;  // Ensure default value if `since` is undefined
+        query += `&until=${until || Math.floor(Date.now() / 1000)}`;  // Use current timestamp if `until` is undefined
+        query += `&limit=${limit}`;
+        
         if (settings?.sort) {
-            q += "&sort=" + settings.sort;
+            query += `&sort=${settings.sort}`;
         }
-
-        const resp = await fetch(this.url + "/get" + q, this.options);
-        checkStatusCode(resp)
-        const respData = await resp.json();
-
+    
+        // Make API call and handle potential errors
+        let respData;
+        try {
+            const response = await fetch(`${this.url}/get${query}`, this.options);
+            checkStatusCode(response);  // Assuming this is a custom function to check status code
+            respData = await response.json();
+        } catch (error) {
+            console.error("Error fetching data from API", error);
+            return { result: "error", message: "Failed to fetch data", error };
+        }
+    
+        // Cache data if the response is successful
         if (respData.result === "success") {
-            await saveCacheD(respData.data)
+            await saveCacheData(respData.data);
         }
-
-        if (closestCache && respData.data.measurements.length < pjson.settings.dataFetchPaginationSize) respData.data.nextUp = since
+    
+        // If fetched data is smaller than the pagination size, indicate that fetching should stop
+        if (closestCache && respData.data.measurements.length < paginationSize) {
+            respData.data.nextUp = since;
+        }
+    
         return respData;
     }
     async getAllSensorsAsync() {
