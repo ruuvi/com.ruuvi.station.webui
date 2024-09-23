@@ -9,7 +9,8 @@ import { ruuviTheme } from "../themes";
 import { Box, useColorMode } from "@chakra-ui/react";
 import { t } from "i18next";
 import { getUnitHelper } from "../UnitHelper";
-import UplotTouchZoomPlugin from "./UplotTouchZoomPlugin";
+import UplotTouchZoomPlugin from "./uplotPlugins/UplotTouchZoomPlugin";
+import UplotLegendHider from "./uplotPlugins/UplotLegendHider";
 import { date2digits, secondsToUserDateString, time2digits } from "../TimeHelper";
 
 function getGraphColor(idx, fill) {
@@ -170,7 +171,7 @@ function CompareView(props) {
                 : (
                     <UplotReact
                         options={{
-                            plugins: [UplotTouchZoomPlugin(getXRange())],
+                            plugins: [UplotTouchZoomPlugin(getXRange()), UplotLegendHider],
                             padding: [10, 10, 0, -10],
                             width: width,
                             height: 450,

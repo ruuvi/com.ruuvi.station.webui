@@ -2,7 +2,8 @@ import React, { Component, Suspense, useEffect, useState } from "react";
 import 'uplot/dist/uPlot.min.css';
 import { withTranslation } from 'react-i18next';
 import { getDisplayValue, getUnitHelper, localeNumber, round } from "../UnitHelper";
-import UplotTouchZoomPlugin from "./UplotTouchZoomPlugin";
+import UplotTouchZoomPlugin from "./uplotPlugins/UplotTouchZoomPlugin";
+import UplotLegendHider from "./uplotPlugins/UplotLegendHider";
 import { ruuviTheme } from "../themes";
 import { withColorMode } from "../utils/withColorMode";
 import { IconButton } from "@chakra-ui/react";
@@ -11,20 +12,6 @@ import notify from "../utils/notify";
 import { calculateAverage } from "../utils/dataMath";
 import { date2digits, secondsToUserDateString, time2digits } from "../TimeHelper";
 const UplotReact = React.lazy(() => import('uplot-react'));
-
-const legendHider = ({
-    hooks: {
-        init(u, opts) {
-            document.getElementsByClassName("u-legend")[0].style.visibility = 'hidden';
-            u.over.addEventListener("mouseleave", () => {
-                document.getElementsByClassName("u-legend")[0].style.visibility = 'hidden';
-            });
-            u.over.addEventListener("mousemove", () => {
-                document.getElementsByClassName("u-legend")[0].style.visibility = '';
-            });
-        }
-    }
-});
 
 let zoomData = {
     value: undefined,
@@ -198,7 +185,7 @@ class Graph extends Component {
         var plugins = [];
         if (!this.props.cardView) {
             plugins.push(UplotTouchZoomPlugin(this.getXRange()))
-            plugins.push(legendHider)
+            plugins.push(UplotLegendHider)
         }
         let colorMode = this.props.overrideColorMode ? this.props.overrideColorMode : this.props.colorMode.colorMode;
         let height = this.props.height || 300;
