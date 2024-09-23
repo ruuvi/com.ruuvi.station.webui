@@ -25,7 +25,7 @@ const SensorSharedWithMeBox = ({ email, sensor, onRemove }) => {
                 }} />
             </div>
             <div style={{ fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {sensor.owner} | {sensor.subscription.subscriptionName}
+                {sensor.owner.toLowerCase()} | {sensor.subscription.subscriptionName}
             </div>
             <RemoveSensorDialog open={remove} sensor={sensor} t={i18next.t} onClose={() => setRemove(false)} remove={() => {
                 setRemove(false)
@@ -49,7 +49,7 @@ const SensorsSharedByMeBox = (props) => {
             </div>
             <Flex gap='2' wrap="wrap" >
                 {props.sensor.sharedTo.map((sharedWith, index) => (
-                    <EmailBox email={sharedWith} onRemove={() => {
+                    <EmailBox email={sharedWith.toLowerCase()} onRemove={() => {
                         setRemoveShare(sharedWith)
                     }} />
                 ))}
@@ -148,7 +148,7 @@ const ShareCenter = () => {
     const selectEmailTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("email")}</div>
     const selectEmail = <>
         <Input className='shareEmail' placeholder={i18next.t("email")} w={"250px"} mr={2} value={email} onChange={e =>
-            setEmail(e.target.value)
+            setEmail(e.target.value.toLowerCase())
         } />
         <Box display={"inline-block"}>
             <Button onClick={() => {
@@ -162,7 +162,7 @@ const ShareCenter = () => {
         </Box>
         <Flex gap='2' wrap="wrap" mt={2.5} >
             {shareToEmails.map((email, index) => (
-                <EmailBox email={email} onRemove={() => {
+                <EmailBox email={email.toLowerCase()} onRemove={() => {
                     let newEmails = [...shareToEmails]
                     newEmails.splice(index, 1)
                     setShareToEmails(newEmails)

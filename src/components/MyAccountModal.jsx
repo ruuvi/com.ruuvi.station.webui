@@ -95,7 +95,7 @@ function MyAccountModal(props) {
     return (
         <RDialog title={t("my_ruuvi_account")} isOpen={props.open} onClose={props.onClose}>
             <Title>{t("signed_in_user")}</Title>
-            <Content>{userEmail}</Content>
+            <Content>{userEmail.toLowerCase()}</Content>
             <Content>
                 {addLink(t("my_account_change_email"), t("my_account_change_email_link_markup"), t("my_account_change_email_link"))}
             </Content>

@@ -631,7 +631,7 @@ class Sensor extends Component {
                                                             {t("owner")}
                                                         </td>
                                                         <td style={detailedText}>
-                                                            {this.props.sensor.owner}
+                                                            {this.props.sensor.owner.toLowerCase()}
                                                         </td>
                                                     </tr>
                                                 </tbody>

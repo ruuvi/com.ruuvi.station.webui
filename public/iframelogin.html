@@ -276,6 +276,8 @@
         function emailInput(event) {
             if (event.keyCode === 13) {
                 login();
+            } else {
+                document.getElementById("emailInput").value = document.getElementById("emailInput").value.toLowerCase()
             }
         }
         function isStaging() {

@@ -302,7 +302,7 @@ function TopBar({ reloadSub, setShowDialog, user }) {
         </Button>
         {sensorMenu}
         <SettingsMenu openSettings={() => setShowDialog("settings")} />
-        <UserMenu settings={() => setShowDialog("settings")} myAccount={() => setShowDialog("myaccount")} email={user.email} />
+        <UserMenu settings={() => setShowDialog("settings")} myAccount={() => setShowDialog("myaccount")} />
       </>
       :
       <>
