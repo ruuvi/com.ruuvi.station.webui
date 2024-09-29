@@ -1,4 +1,4 @@
-import React, { Component, Suspense, useEffect, useState } from "react";
+import React, { Component, Suspense, useEffect, useState, useMemo } from "react";
 import 'uplot/dist/uPlot.min.css';
 import { withTranslation } from 'react-i18next';
 import { getDisplayValue, getUnitHelper, localeNumber, round } from "../UnitHelper";
@@ -25,51 +25,66 @@ let zoomData = {
     },
     registerListener: function (listener) {
         this.aListener = listener;
+    },
+    unregisterListener: function (listener) {
+        this.aListener = function (val) { };
     }
 }
 
 function DataInfo(props) {
-    const { graphData, t, type } = props
+    const { graphData, t, type } = props;
     const [currZoom, setCurrZoom] = useState(null);
+
     useEffect(() => {
-        zoomData.registerListener(v => {
-            setCurrZoom(v)
-        })
-    }, [])
+        const listener = zoomData.registerListener(v => {
+            setCurrZoom(v);
+        });
+        return () => {
+            zoomData.unregisterListener(listener);
+        };
+    }, []);
 
-    // convert to an easier to work with format
-    let data = [];
-    for (let i = 0; i < graphData[1].length; i++) {
-        if (graphData[1][i] === null) continue
-        data.push({ timestamp: graphData[0][i], value: graphData[1][i] })
-    }
-
-    // remove data outside zoom range
-    if (currZoom) {
-        for (let i = 0; i < data.length; i++) {
-            if (data[i].timestamp < currZoom[0] || data[i].timestamp > currZoom[1]) {
-                data.splice(i, 1)
-                i--
+    const filteredData = useMemo(() => {
+        return graphData[0].reduce((acc, timestamp, i) => {
+            const value = graphData[1][i];
+            if (value !== null && (!currZoom || (timestamp >= currZoom[0] && timestamp <= currZoom[1]))) {
+                acc.push({ timestamp, value });
             }
-        }
-    }
-    let min = Number.POSITIVE_INFINITY;
-    let max = Number.NEGATIVE_INFINITY;
+            return acc;
+        }, []);
+    }, [graphData, currZoom]);
 
-    for (let i = 0; i < data.length; i++) {
-        const value = data[i].value;
-        if (value < min) min = value;
-        if (value > max) max = value;
-    }
-    let avg = calculateAverage(data)
-    return <>
-        <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_min")}</b>: {getDisplayValue(type, min)}</span>
-        <span className="graphLabel" style={{ marginRight: 18 }}><b>{t("graph_stat_max")}</b>: {getDisplayValue(type, max)}</span>
-        <span className="graphLabel"><b>{t("graph_stat_avg")}</b>: {getDisplayValue(type, avg)}</span>
-        <IconButton mt={"-3px"} variant="ghost" onClick={() => notify.info(t("graph_stats_info"))}>
-            <MdInfo size="16" className="buttonSideIcon" />
-        </IconButton>
-    </>
+    const { min, max, avg } = useMemo(() => {
+        if (filteredData.length === 0) {
+            return { min: null, max: null, avg: null };
+        }
+        const { min, max, sum } = filteredData.reduce((acc, { value }) => {
+            acc.min = Math.min(acc.min, value);
+            acc.max = Math.max(acc.max, value);
+            acc.sum += value;
+            return acc;
+        }, { min: Number.POSITIVE_INFINITY, max: Number.NEGATIVE_INFINITY, sum: 0 });
+
+        const avg = sum / filteredData.length;
+        return { min, max, avg };
+    }, [filteredData]);
+
+    return (
+        <>
+            <span className="graphLabel" style={{ marginRight: 18 }}>
+                <b>{t("graph_stat_min")}</b>: {getDisplayValue(type, min)}
+            </span>
+            <span className="graphLabel" style={{ marginRight: 18 }}>
+                <b>{t("graph_stat_max")}</b>: {getDisplayValue(type, max)}
+            </span>
+            <span className="graphLabel">
+                <b>{t("graph_stat_avg")}</b>: {getDisplayValue(type, avg)}
+            </span>
+            <IconButton mt={"-3px"} variant="ghost" onClick={() => notify.info(t("graph_stats_info"))}>
+                <MdInfo size="16" className="buttonSideIcon" />
+            </IconButton>
+        </>
+    );
 }
 
 
@@ -451,7 +466,7 @@ class Graph extends Component {
                                                     // redo this at some point, this will do as a workaround for now.
                                                     let allowZoom = true;
                                                     if (xRangeUpdateThottle + 20 > new Date().getTime()) {
-                                                        //console.log("throttle x-range updates")
+                                                        console.log("throttle x-range updates")
                                                         allowZoom = false;
                                                     }
                                                     xRangeUpdateThottle = new Date().getTime();
