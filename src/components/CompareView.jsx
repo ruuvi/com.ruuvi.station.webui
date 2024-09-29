@@ -171,7 +171,7 @@ function CompareView(props) {
                 : (
                     <UplotReact
                         options={{
-                            plugins: [UplotTouchZoomPlugin(getXRange()), UplotLegendHider],
+                            plugins: [UplotTouchZoomPlugin(getXRange())],
                             padding: [10, 10, 0, -10],
                             width: width,
                             height: 450,
@@ -185,6 +185,7 @@ function CompareView(props) {
                                     return {
                                         label: x.name || x.sensor,
                                         points: { show: true, size: 2, fill: getGraphColor(i) },
+                                        class: "graphLabel",
                                         stroke: getGraphColor(i),
                                     }
                                 })

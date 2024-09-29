@@ -200,7 +200,7 @@ class Graph extends Component {
         var plugins = [];
         if (!this.props.cardView) {
             plugins.push(UplotTouchZoomPlugin(this.getXRange()))
-            plugins.push(UplotLegendHider)
+            plugins.push(UplotLegendHider())
         }
         let colorMode = this.props.overrideColorMode ? this.props.overrideColorMode : this.props.colorMode.colorMode;
         let height = this.props.height || 300;

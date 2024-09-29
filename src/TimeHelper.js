@@ -19,6 +19,7 @@ export function getTimestamp(date) {
 }
 
 export function secondsToUserDateString(seconds) {
+    if (!seconds) return "-"
     return new Date(seconds * 1000).toLocaleString(navigator.language || "fi-FI")
 }
 
