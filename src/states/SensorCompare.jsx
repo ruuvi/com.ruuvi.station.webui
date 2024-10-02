@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import NetworkApi from "../NetworkApi";
 import { Button, Flex, Box, useBreakpointValue } from "@chakra-ui/react";
-import CompairView, { EmtpyGraph } from "../components/CompareView";
+import CompairView, { EmptyGraph } from "../components/CompareView";
 import DurationPicker from "../components/DurationPicker";
 import i18next, { t } from "i18next";
 import { SensorPicker } from '../components/SensorPicker';
@@ -224,7 +224,7 @@ function SensorCompare(props) {
             </ScreenSizeWrapper>
             <br />
             {viewData && <CompairView key={123} {...viewData} dataKey={dataKey} isLoading={s => setLoading(s)} setData={d => data = d} />}
-            {!viewData && <Box height={450}><EmtpyGraph /></Box>}
+            {!viewData && <Box height={450}><EmptyGraph /></Box>}
             <Box height={90} />
         </Box >
     </>

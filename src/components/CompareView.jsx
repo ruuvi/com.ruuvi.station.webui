@@ -39,11 +39,10 @@ function CompareView(props) {
 
     const getUniqueKeys = () => {
         let uniqueKeysSet = new Set();
-        gdata.forEach(obj => {
-            Object.keys(obj).forEach(key => {
-                if (key !== "t") uniqueKeysSet.add(key);
-            });
-        });
+        for (let i = 0; i < sensorData.length; i++) {
+            let key = sensorData[i].name || sensorData[i].mac;
+            uniqueKeysSet.add(key);
+        }
         return Array.from(uniqueKeysSet);
     }
 
@@ -263,7 +262,7 @@ export const useContainerDimensions = myRef => {
     return dimensions;
 };
 
-export function EmtpyGraph() {
+export function EmptyGraph() {
     const ref = useRef(null);
     const { width } = useContainerDimensions(ref)
     const colorMode = useColorMode().colorMode;
