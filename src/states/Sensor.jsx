@@ -586,7 +586,7 @@ class Sensor extends Component {
                                         }
                                         <div style={graph}>
                                             {this.state.data?.measurements?.length &&
-                                                <Graph overrideColorMode={this.state.graphPDFMode ? "light" : null} width={this.state.graphPDFMode ? 1017 : null} key={"sensor_graph" + this.state.updateGraphKey} setRef={(ref) => (this.chartRef = ref)} alert={tnpGetAlert(this.state.graphKey)} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={this.getFrom()} to={this.getTo()} />
+                                                <Graph overrideColorMode={this.state.graphPDFMode ? "light" : null} width={this.state.graphPDFMode ? 1017 : null} key={"sensor_graph" + this.state.updateGraphKey} unit={this.getSelectedUnit()} setRef={(ref) => (this.chartRef = ref)} alert={tnpGetAlert(this.state.graphKey)} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={this.getFrom()} to={this.getTo()} />
                                             }
                                         </div>
                                     </Box>

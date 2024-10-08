@@ -150,6 +150,7 @@ class Graph extends Component {
         this.setState(state);
     }
     shouldComponentUpdate(nextProps) {
+        if (this.props.unit !== nextProps.unit) return true;
         if (this.props.points !== nextProps.points) return true
         if (this.props.height !== nextProps.height) return true;
         if (nextProps.colorMode.colorMode !== this.props.colorMode.colorMode) return true;
