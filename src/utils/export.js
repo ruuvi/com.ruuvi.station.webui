@@ -79,12 +79,12 @@ function processMultiSensorReportData(data, t, sensorType) {
     let unit = uHelpV.unit
     var csvHeader = [t('date')];
     for (let i = 0; i < data.length; i++) {
-        csvHeader.push(data[i].data.data.name + " (" + unit + ")");
+        csvHeader.push(data[i].name + " (" + unit + ")");
     }
 
     let timestampsWithData = []
     for (let i = 0; i < data.length; i++) {
-        let d = data[i].data.data.measurements
+        let d = data[i].measurements
         for (let j = 0; j < d.length; j++) {
             if (d[j].parsed) {
                 timestampsWithData.push(d[j].timestamp)
@@ -101,7 +101,7 @@ function processMultiSensorReportData(data, t, sensorType) {
     for (let i = 0; i < timestampsWithData.length; i++) {
         let row = [toISOString(new Date(timestampsWithData[i] * 1000))]
         for (let j = 0; j < data.length; j++) {
-            let d = data[j].data.data.measurements
+            let d = data[j].measurements
             let val = ""
             for (let k = 0; k < d.length; k++) {
                 if (d[k].timestamp === timestampsWithData[i]) {

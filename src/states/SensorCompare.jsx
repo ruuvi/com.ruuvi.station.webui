@@ -10,7 +10,7 @@ import { EmailBox } from "../components/EmailBox";
 import ZoomInfo from "../components/ZoomInfo";
 import ExportMenu from "../components/ExportMenu";
 import { uppercaseFirst } from "../TextHelper";
-import { exportMuliSensorCSV } from "../utils/export";
+import { exportMuliSensorCSV, exportMuliSensorXLSX } from "../utils/export";
 import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
 import { getUnitHelper } from "../UnitHelper";
 
@@ -61,16 +61,13 @@ function SensorCompare(props) {
         return <>
             <ZoomInfo />
             <ExportMenu buttonText={uppercaseFirst(t("export"))} noPdf onClick={val => {
-                exportMuliSensorCSV(data, i18next.t, dataKey)
-                /*
                 switch (val) {
                     case "XLSX":
-                        this.export_XLSX()
+                        exportMuliSensorXLSX(data, i18next.t, dataKey)
                         break
                     default:
-                        this.export()
+                        exportMuliSensorCSV(data, i18next.t, dataKey)
                 }
-                        */
             }} />
         </>
     }
@@ -93,7 +90,11 @@ function SensorCompare(props) {
         <SensorTypePicker value={dataKey} onChange={v => setDataKey(v)} />
     </>
 
-    const loadButton = <Button isDisabled={!selectedSensors.length || loading} onClick={() => load()}>{i18next.t("load")}</Button>
+    const loadButton = <Button
+        isDisabled={!selectedSensors.length || loading}
+        onClick={() => load()}>
+        {i18next.t("load")}
+    </Button>
 
     const load = (newFrom, newTo) => {
         reloadIndex++

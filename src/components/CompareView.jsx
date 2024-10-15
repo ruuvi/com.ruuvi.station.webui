@@ -6,7 +6,7 @@ import pjson from '../../package.json';
 import NetworkApi from "../NetworkApi";
 import parse from "../decoder/parser";
 import { ruuviTheme } from "../themes";
-import { Box, useColorMode } from "@chakra-ui/react";
+import { Box, Spinner, useColorMode } from "@chakra-ui/react";
 import { t } from "i18next";
 import { getUnitHelper } from "../UnitHelper";
 import UplotTouchZoomPlugin from "./uplotPlugins/UplotTouchZoomPlugin";
@@ -29,6 +29,12 @@ function getGraphColor(idx, fill) {
     }
     return color
 }
+const graphLoadingOverlay = {
+    position: "absolute",
+    width: "100%",
+    height: "450px",
+    zIndex: 1,
+}
 
 var gdata = []
 function CompareView(props) {
@@ -47,6 +53,7 @@ function CompareView(props) {
     }
 
     const getGraphData = () => {
+        if (!sensorData) return [];
         gdata = []
         let pd = [[], []];
         const timestampIndexMap = {}
@@ -58,6 +65,7 @@ function CompareView(props) {
                 if (pd.length < sensors.length + 2) pd.push([]);
 
                 for (let j = 0; j < d.measurements.length; j++) {
+                    if (!d.measurements[j].parsed) continue;
                     const timestamp = d.measurements[j].timestamp;
 
                     if (timestamp in timestampIndexMap) {
@@ -106,61 +114,70 @@ function CompareView(props) {
             setSensorData([])
             gdata = []
             let pd = [[], []];
-            let until = props.to
 
-            const fetchDataPromises = sensors.map(async (sensor) => {
-                let since = props.from
-                let allData = null
+            for (const sensor of sensors) {
+                let until = props.to
+                let since = props.from;
+                let allData = null;
                 for (; ;) {
-                    if (since >= until) break
+                    if (since >= until) break;
                     let data = await new NetworkApi().getAsync(sensor, since, until, { limit: pjson.settings.dataFetchPaginationSize });
                     if (data.result === "success") {
-                        if (!allData) allData = data
-                        else allData.data.measurements = allData.data.measurements.concat(data.data.measurements)
+                        if (!allData) allData = data;
+                        else allData.data.measurements = allData.data.measurements.concat(data.data.measurements);
 
-                        let returndDataLength = data.data.measurements.length
-                        if (data.data.nextUp) until = data.data.nextUp
-                        else if (data.data.fromCache) until = data.data.measurements[data.data.measurements.length - 1].timestamp
-                        else if (returndDataLength >= pjson.settings.dataFetchPaginationSize) until = data.data.measurements[data.data.measurements.length - 1].timestamp
-                        else break
-                    } else {
-                        allData = data
-                        break
+                        let returndDataLength = data.data.measurements.length;
+                        if (data.data.nextUp) until = data.data.nextUp;
+                        else if (data.data.fromCache) until = data.data.measurements[data.data.measurements.length - 1].timestamp;
+                        else if (returndDataLength >= pjson.settings.dataFetchPaginationSize) until = data.data.measurements[data.data.measurements.length - 1].timestamp;
+                        else break;
+
+                        let d = parse(allData.data);
+                        setSensorData((s) => {
+                            if (!s) s = [];
+                            let updated = false;
+                            const newData = s.map(item => {
+                                if (item.sensor === sensor) {
+                                    updated = true;
+                                    return d; // Replace the existing data for the sensor
+                                }
+                                return item;
+                            });
+
+                            if (!updated) {
+                                newData.push(d); // Add new data if the sensor was not found
+                            }
+
+                            return newData;
+                        });
                     }
                 }
-                // filter out data that is not in the time range
-                if (allData) {
-                    allData.data.measurements = allData.data.measurements.filter(x => x.timestamp >= props.from && x.timestamp <= props.to)
-                }
-                return { sensor, data: allData };
-            });
+            }
 
-            // Use Promise.all to wait for all promises to resolve
-            const results = await Promise.all(fetchDataPromises);
-
-            results.forEach(({ sensor, data }) => {
-                if (data?.result === "success" && data.data.measurements.length) {
-                    let d = parse(data.data);
-                    setSensorData((s) => [...s, d]);
-                }
-            });
-
-            props.setData(results)
             setLoading(false);
             props.isLoading(false);
         })();
-    }, [sensors, props.from, props.reloadIndex]);
+    }, [sensors, props.to, props.from, props.reloadIndex]);
+
+    useEffect(() => {
+        props.setData(sensorData);
+    }, [sensorData]);
 
     function getXRange() {
-        return [props.from, new Date().getTime() / 1000]
+        return [props.from, props.to || new Date().getTime() / 1000]
     }
 
     const { width } = useContainerDimensions(ref)
     const colorMode = useColorMode().colorMode;
-    if (loading) return <Box height={450}><Progress isIndeterminate /></Box>
+    //if (loading) return <Box height={450}><Progress isIndeterminate /></Box>
     let graphData = getGraphData();
     return (
         <div ref={ref}>
+            {loading &&
+                <div style={graphLoadingOverlay}>
+                    <div style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: "100%", textAlign: "center" }}><div style={{ position: "relative", top: "45%" }}><Spinner size="xl" /></div></div>
+                </div>
+            }
             {!graphData.length ?
                 <Box height={450}>
                     <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">
@@ -196,6 +213,8 @@ function CompareView(props) {
                                         toY += 0.5
                                         return [fromY, toY]
                                     }
+                                }, x: {
+                                    range: loading ? getXRange() : undefined,
                                 }
                             },
                             axes: [
