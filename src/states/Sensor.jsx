@@ -46,7 +46,10 @@ import ExportMenu from "../components/ExportMenu";
 import UpgradePlanButton from "../components/UpgradePlanButton";
 import ZoomInfo from "../components/ZoomInfo";
 
-var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "co2", "voc", "nox"];
+var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery",
+    "accelerationX", "accelerationY", "accelerationZ", "rssi",
+    "measurementSequenceNumber", "pm1p0", "pm2p5", "pm4p0",
+    "pm10p0", "co2", "voc", "nox", "illuminance", "soundLevelAvg", "soundLevelPeak"];
 var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
 
 const collapseText = {
@@ -779,6 +782,21 @@ class Sensor extends Component {
                                                 </ListItem>
                                             )
                                         })}
+                                        {this.getLatestReading(true).find(x => x.key === "flags") && <ListItem>
+                                            <table style={accordionContent}>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style={detailedTitle}> {t("flags")}</td>
+                                                        <td style={detailedText}>
+                                                            <pre>
+                                                                {JSON.stringify(this.getLatestReading(true).find(x => x.key === "flags").value, null, 2)}
+                                                            </pre>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </ListItem>}
+
                                     </List>
                                 </AccordionPanel>
                             </AccordionItem>

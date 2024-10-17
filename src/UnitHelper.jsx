@@ -21,6 +21,9 @@ const unitHelper = {
     "co2": { label: "co2", unit: "ppm", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: true },
     "voc": { label: "voc", unit: "VOC Index", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: true },
     "nox": { label: "nox", unit: "NNOx Index", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: true },
+    "illuminance": { label: "illuminance", unit: "lx", value: (value) => value, fromUser: (value) => value, decimals: 0, graphable: true },
+    "soundLevelAvg": { label: "soundLevelAvg", unit: "dBA", value: (value) => value, fromUser: (value) => value, decimals: 1, graphable: true },
+    "soundLevelPeak": { label: "soundLevelPeak", unit: "dBA", value: (value) => value, fromUser: (value) => value, decimals: 1, graphable: true },
 }
 
 export function getUnitFor(key, setting) {
