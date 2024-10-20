@@ -193,6 +193,10 @@ export default function App() {
         if (notifications) {
           let notification = notifications.filter(x => x.plan === subscription || x.plan === "")
           notification = notification.filter(x => x.key && !store.getHasSeenBanner(x.key))
+          notification = notification.filter(x => {
+            if (x.version && x.version !== pjson.version) return false
+            return true
+          });
           if (notification && notification.length) setBanners(notification)
           else if (banners !== null) setBanners(null)
         }
