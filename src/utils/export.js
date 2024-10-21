@@ -92,7 +92,7 @@ function processMultiSensorReportData(data, t, sensorType) {
         }
     }
 
-    timestampsWithData.sort((a, b) => a - b)
+    timestampsWithData.sort((a, b) => b - a)
     timestampsWithData = timestampsWithData.filter(function (item, pos, ary) {
         return !pos || item !== ary[pos - 1];
     });
