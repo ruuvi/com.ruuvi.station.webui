@@ -650,7 +650,7 @@ class Sensor extends Component {
                                                                 {t("share")}
                                                             </td>
                                                             <td style={detailedText}>
-                                                                {addVariablesInString(t("shared_to_x"), [this.props.sensor.sharedTo.length, pjson.settings.maxSharesPerSensor])}
+                                                                {addVariablesInString(t("shared_to_x"), [this.props.sensor.sharedTo.length, this.props.sensor.subscription.maxSharesPerSensor])}
                                                                 <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
                                                             </td>
                                                         </tr>

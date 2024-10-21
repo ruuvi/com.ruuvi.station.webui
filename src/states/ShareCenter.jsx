@@ -45,7 +45,7 @@ const SensorsSharedByMeBox = (props) => {
                 {props.sensor.name || props.sensor.sensor}
             </div>
             <div style={{ fontFamily: "mulish", paddingBottom: 4, fontSize: 14 }}>
-                {i18next.t("active_shares")} ({props.sensor.sharedTo.length}/{pjson.settings.maxSharesPerSensor})
+                {i18next.t("active_shares")} ({props.sensor.sharedTo.length}/{props.sensor.subscription.maxSharesPerSensor})
             </div>
             <Flex gap='2' wrap="wrap" >
                 {props.sensor.sharedTo.map((sharedWith, index) => (
@@ -128,7 +128,7 @@ const ShareCenter = () => {
     }
 
     let mySensors = sensors.filter(x => x.userIsOwner)
-    let sensorsThatCanBeShared = mySensors.filter(x => x.sharedTo.length < pjson.settings.maxSharesPerSensor)
+    let sensorsThatCanBeShared = mySensors.filter(x => x.sharedTo.length < x.subscription.maxSharesPerSensor)
     sensorsThatCanBeShared = sensorsThatCanBeShared.filter(sensor => !selectedSensors.includes(sensor.sensor));
 
     const selectSensorTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("sensors_select_label")}</div>
