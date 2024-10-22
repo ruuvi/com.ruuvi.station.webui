@@ -127,6 +127,16 @@ class NetworkApi {
         }
         return data;
     }
+    async fetchWithTimeout(resource, options = {}, timeout = 20000) {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+        const response = await fetch(resource, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+    }
     async getAsync(mac, since, until, settings) {
         const mode = settings?.mode || "mixed";
         const limit = settings?.limit || 100000;

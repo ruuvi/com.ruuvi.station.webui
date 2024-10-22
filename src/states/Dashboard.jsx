@@ -131,11 +131,11 @@ class Dashboard extends Component {
             }
             setTimeout(() => {
                 this.loadSensors()
-            }, 2000)
+            }, 60000)
         }, () => {
             setTimeout(() => {
                 this.loadSensors()
-            }, 2000)
+            }, 60000)
         })
     }
     componentDidMount() {
