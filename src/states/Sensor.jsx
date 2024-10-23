@@ -181,6 +181,8 @@ function SensorValueGrid(props) {
     </Box>
 }
 
+let alertDebouncer = {}
+
 class Sensor extends Component {
     constructor(props) {
         super(props)
@@ -404,26 +406,46 @@ class Sensor extends Component {
         this.setState({ ...this.state, editName: state })
     }
     updateAlert(alert, prevEnabled) {
-        var offToOn = alert.enabled;
-        let sensor = JSON.parse(JSON.stringify(this.props.sensor))
-        var alertIdx = sensor.alerts.findIndex(x => x.sensor === alert.sensor && x.type === alert.type)
-        if (alertIdx !== -1) {
-            offToOn = !prevEnabled && alert.enabled
-            sensor.alerts[alertIdx] = alert
-            this.props.updateSensor(sensor)
+        let prev = null;
+        if (alertDebouncer[alert.sensor + alert.type]) {
+            prev = JSON.parse(JSON.stringify(alertDebouncer[alert.sensor + alert.type]))
         }
-        this.setState({ ...this.state, updateGraphKey: this.state.updateGraphKey + 1 })
-        new NetworkApi().setAlert({ ...alert, sensor: this.props.sensor.sensor }, resp => {
-            switch (resp.result) {
-                case "success":
-                    notify.success(this.props.t(offToOn ? "alert_enabled" : "successfully_saved"))
-                    break
-                case "error":
-                    notify.error(this.props.t(`UserApiError.${resp.code}`))
-                    break;
-                default:
+        let ts = new Date().getTime()
+        alertDebouncer[alert.sensor + alert.type] = {
+            alert: alert,
+            prevEnabled: prevEnabled,
+            timestamp: ts 
+        }
+        let executeAfter = 0
+        if (prev && prev.timestamp + 1000 > new Date().getTime()) {
+            executeAfter = 1000
+        }
+        setTimeout(() => {
+            if (alertDebouncer[alert.sensor + alert.type].timestamp !== ts) {
+                console.log("newer alert debouncer, skipping")
+                return
             }
-        })
+            var offToOn = alert.enabled;
+            let sensor = JSON.parse(JSON.stringify(this.props.sensor))
+            var alertIdx = sensor.alerts.findIndex(x => x.sensor === alert.sensor && x.type === alert.type)
+            if (alertIdx !== -1) {
+                offToOn = !prevEnabled && alert.enabled
+                sensor.alerts[alertIdx] = alert
+                this.props.updateSensor(sensor)
+            }
+            this.setState({ ...this.state, updateGraphKey: this.state.updateGraphKey + 1 })
+            new NetworkApi().setAlert({ ...alert, sensor: this.props.sensor.sensor }, resp => {
+                switch (resp.result) {
+                    case "success":
+                        notify.success(this.props.t(offToOn ? "alert_enabled" : "successfully_saved"))
+                        break
+                    case "error":
+                        notify.error(this.props.t(`UserApiError.${resp.code}`))
+                        break;
+                    default:
+                }
+            })
+        }, executeAfter)
     }
     export() {
         exportCSV(this.state.data, this.props.sensor.name, this.props.t)
