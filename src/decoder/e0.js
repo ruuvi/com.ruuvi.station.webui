@@ -29,10 +29,10 @@ const parseRawRuuvi = function (data) {
   robject.pm4p0 = pmFrom(15)
   robject.pm10p0 = pmFrom(17)
 
-  robject.co2 = ((data[19] & 0b00011111) << 4) | ((data[20] & 0b11110000) >> 4)
-  robject.voc = ((data[21] & 0b11111111) << 1) | ((data[22] & 0b10000000) >> 7)
-  robject.nox = ((data[23] & 0b11111111) << 1) | ((data[24] & 0b10000000) >> 7)
-  robject.illuminance = ((data[25] & 0b00011111) << 4) | ((data[26] & 0b11110000) >> 4)
+  robject.co2 = ((data[19] << 8) | data[20])
+  robject.voc = (((data[21] & 0b00000001) << 8) | data[22])
+  robject.nox = (((data[23] & 0b00000001) << 8) | data[24])
+  robject.illuminance = ((data[25] << 8) | data[26])
 
   robject.soundLevelAvg = data[27] * 0.5
   robject.soundLevelPeak = data[28] * 0.5
