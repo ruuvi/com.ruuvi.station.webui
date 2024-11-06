@@ -24,7 +24,11 @@ function sortSensors(sensors) {
 
 function checkStatusCode(response) {
     let status = response?.status
-    if (status === 401) logout()
+    if (status === 401) {
+        logout()
+        return false
+    }
+    return true
 }
 
 class NetworkApi {
@@ -86,11 +90,18 @@ class NetworkApi {
     user(success, fail) {
         if (!this.options) return fail("Not signed in")
         fetch(this.url + "/user", this.options).then(function (response) {
-            checkStatusCode(response)
+            if (!checkStatusCode(response)) return
             return response.json();
         })
             .then(response => {
                 if (response.data && response.data.sensors.length > 0) {
+                    let email = response.data.email
+                    let userObj = this.getUser()
+                    if (userObj && userObj.email !== email) {
+                        console.log("email changed")
+                        userObj.email = email
+                        this.setUser(userObj)
+                    }
                     response.data.sensors = sortSensors(response.data.sensors)
                 }
                 success(response)
