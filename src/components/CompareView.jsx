@@ -54,10 +54,24 @@ function CompareView(props) {
 
     const getGraphData = () => {
         if (!sensorData) return [];
+        let dataKey = props.dataKey?.sensorType || props.dataKey || "";
+        let unit = props.dataKey?.unit || null;
+        let settings = undefined
+        if (unit) {
+            if (dataKey === "temperature" && unit) {
+                settings = { UNIT_TEMPERATURE: unit.cloudStoreKey }
+            }
+            if (dataKey === "humidity") {
+                settings = { UNIT_HUMIDITY: unit.cloudStoreKey }
+            }
+            if (dataKey === "pressure") {
+                settings = { UNIT_PRESSURE: unit.cloudStoreKey }
+            }
+        }
         gdata = []
         let pd = [[], []];
         const timestampIndexMap = {}
-        const unitHelper = getUnitHelper(props.dataKey);
+        const unitHelper = getUnitHelper(dataKey);
         sensorData.forEach(data => {
             if (data.measurements.length) {
                 let d = data
@@ -68,14 +82,27 @@ function CompareView(props) {
                     if (!d.measurements[j].parsed) continue;
                     const timestamp = d.measurements[j].timestamp;
 
+                    let value;
+                    switch (dataKey) {
+                        case "temperature":
+                            value = unitHelper.value(d.measurements[j].parsed[dataKey], undefined, settings)
+                            break
+                        case "humidity":
+                            value = unitHelper.value(d.measurements[j].parsed[dataKey], d.measurements[j].parsed.temperature, settings)
+                            break
+                        default:
+                            value = unitHelper.value(d.measurements[j].parsed[dataKey], settings)
+                            break
+                    }
+
                     if (timestamp in timestampIndexMap) {
                         // Update existing entry in gdata
-                        gdata[timestampIndexMap[timestamp]][d.name || d.mac] = unitHelper.value(d.measurements[j].parsed[props.dataKey], d.measurements[j].parsed.temperature);
+                        gdata[timestampIndexMap[timestamp]][d.name || d.mac] = value;
                     } else {
                         // Add new entry to gdata
                         gdata.push({
                             t: timestamp,
-                            [d.name || d.mac]: unitHelper.value(d.measurements[j].parsed[props.dataKey], d.measurements[j].parsed.temperature),
+                            [d.name || d.mac]: value,
                         });
 
                         // Update timestampIndexMap

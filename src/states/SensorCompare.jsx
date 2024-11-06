@@ -87,7 +87,7 @@ function SensorCompare(props) {
     </>
 
     const selectUnit = <>
-        <SensorTypePicker value={dataKey} onChange={v => setDataKey(v)} />
+        <SensorTypePicker value={dataKey} onChange={v => setDataKey(v)} allUnits={true} />
     </>
 
     const loadButton = <Button

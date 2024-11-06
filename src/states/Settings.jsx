@@ -35,6 +35,7 @@ const pressureOptions = [
     { value: "2", label: "pressure_mmhg_name" },
     { value: "3", label: "pressure_inhg_name" },
 ]
+
 let resolutionOptions = (type, unitVal) => {
     let unit = getUnitFor(type, unitVal)
     return [

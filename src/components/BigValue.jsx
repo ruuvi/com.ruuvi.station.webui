@@ -19,7 +19,7 @@ export default function BigValue(props) {
         <div>
             <div style={{ position: "relative", color: props.alertActive ? ruuviTheme.colors.sensorCardValueAlertState : undefined }}>
                 <span style={valueStyle}>
-                    {props.value}
+                    {props.value || "-"}
                 </span>
                 <span style={unitStyle}>
                     {props.unit}
