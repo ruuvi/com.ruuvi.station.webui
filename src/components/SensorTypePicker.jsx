@@ -37,6 +37,25 @@ export default function SensorTypePicker(props) {
     }
 
     let opts = Object.keys(allUnits).map(x => allUnits[x].graphable ? { "sensorType": x, unit: null } : null).filter(x => x !== null)
+    if (props.sensors) {
+        let sensorTypes = []
+        for (let i = 0; i < props.sensors.length; i++) {
+            let sensor = props.sensors[i];
+            if (sensor.measurements?.length === 1 && sensor.measurements[0].parsed) {
+                let parsedKeys = Object.keys(sensor.measurements[0].parsed)
+                for (let j = 0; j < parsedKeys.length; j++) {
+                    let key = parsedKeys[j]
+                    if (!sensorTypes.includes(key)) {
+                        sensorTypes.push(key)
+                    }
+                }
+            }
+        }
+        if (!sensorTypes.length) sensorTypes = types
+        opts = opts.filter(x => sensorTypes.includes(x.sensorType))
+    } else {
+        opts = opts.filter(x => types.includes(x.sensorType))
+    }
     if (props.allUnits) {
         for (let i = 0; i < opts.length; i++) {
             let unitOpts = allUnits[opts[i]?.sensorType]?.units

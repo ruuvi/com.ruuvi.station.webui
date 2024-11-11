@@ -31,14 +31,16 @@ function SensorCompare(props) {
 
 
     useEffect(() => {
-        new NetworkApi().user(resp => {
-            if (resp.result === "success") {
-                var d = resp.data.sensors;
-                setSensors(d)
-            } else if (resp.result === "error") {
-                console.log("sensor menu error", resp.error)
+        (async () => {
+            try {
+                let res = await new NetworkApi().getAllSensorsAsync()
+                let sensors = res.data.sensors
+                if (!sensors) throw new Error("No sensors")
+                setSensors(sensors)
+            } catch (e) {
+                console.log("sensor menu error", e)
             }
-        });
+        })()
     }, [])
 
     let canBeSelected = sensors.filter(sensor => !selectedSensors.includes(sensor.sensor));
@@ -87,7 +89,7 @@ function SensorCompare(props) {
     </>
 
     const selectUnit = <>
-        <SensorTypePicker value={dataKey} onChange={v => setDataKey(v)} allUnits={true} />
+        <SensorTypePicker value={dataKey} onChange={v => setDataKey(v)} allUnits={true} sensors={sensors.filter(x => selectedSensors.find(y => y === x.sensor))} />
     </>
 
     const loadButton = <Button

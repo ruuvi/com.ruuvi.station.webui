@@ -263,7 +263,7 @@ class Dashboard extends Component {
         else SessionStore.setBackRoute("/")
         const dropdowns = <>
             <DashboardViewType value={this.state.cardType} onChange={this.setDashboardViewType.bind(this)} showResetOrder={this.getOrder() !== null} resetOrder={() => this.setState({ ...this.state, showResetOrderConfirmation: true })} />
-            <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} />
+            <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} sensors={this.state.sensors} />
             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard disabled={this.shouldDurationBeDisabled()} />
         </>
         const search = width => {

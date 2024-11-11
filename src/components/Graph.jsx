@@ -407,7 +407,6 @@ class Graph extends Component {
                                                             let x = u.valToPos(xd[i], 'x', true);
                                                             let y = u.valToPos(yd[i], 'y', true);
                                                             ctx.beginPath();
-                                                            console.log(x, y)
                                                             ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
                                                             ctx.stroke();
                                                         }
@@ -467,7 +466,7 @@ class Graph extends Component {
                                                     // redo this at some point, this will do as a workaround for now.
                                                     let allowZoom = true;
                                                     if (xRangeUpdateThottle + 20 > new Date().getTime()) {
-                                                        console.log("throttle x-range updates")
+                                                        //console.log("throttle x-range updates")
                                                         allowZoom = false;
                                                     }
                                                     xRangeUpdateThottle = new Date().getTime();
