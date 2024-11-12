@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react"
 import { MdArrowDropDown } from "react-icons/md"
 import { useTranslation } from 'react-i18next';
-import { allUnits, getUnitHelper } from "../UnitHelper";
+import { allUnits, getUnitHelper, getUnitSettingFor } from "../UnitHelper";
 
 const types = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"]
 
@@ -36,6 +36,7 @@ export default function SensorTypePicker(props) {
         }
     }
 
+
     let opts = Object.keys(allUnits).map(x => allUnits[x].graphable ? { "sensorType": x, unit: null } : null).filter(x => x !== null)
     if (props.sensors) {
         let sensorTypes = []
@@ -59,8 +60,10 @@ export default function SensorTypePicker(props) {
     if (props.allUnits) {
         for (let i = 0; i < opts.length; i++) {
             let unitOpts = allUnits[opts[i]?.sensorType]?.units
+            let setting = getUnitSettingFor(opts[i]?.sensorType)
             if (unitOpts) {
                 for (let j = 0; j < unitOpts.length; j++) {
+                    if (setting === unitOpts[j].cloudStoreKey) continue
                     opts.splice(i + 1, 0, { "sensorType": opts[i].sensorType, "unit": unitOpts[j] });
                     i++;
                 }

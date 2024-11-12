@@ -193,6 +193,22 @@ const unitHelper = {
 
 export const allUnits = unitHelper;
 
+export function getUnitSettingFor(key) {
+    let map = { 'temperature': 'UNIT_TEMPERATURE', 'humidity': 'UNIT_HUMIDITY', 'pressure': 'UNIT_PRESSURE' }
+    const defaults = {
+        UNIT_HUMIDITY: "0",
+        UNIT_TEMPERATURE: "C",
+        UNIT_PRESSURE: "1",
+    }
+    let settings = localStorage.getItem("settings");
+    if (settings) {
+        settings = JSON.parse(settings)
+        if (settings[map[key]]) return settings[map[key]]
+    }
+    if (defaults[map[key]]) return defaults[map[key]]
+    return null
+}
+
 export function getUnitFor(key, setting) {
     switch (key) {
         case "temperature":

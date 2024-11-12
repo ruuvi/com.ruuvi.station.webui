@@ -12,7 +12,7 @@ import ExportMenu from "../components/ExportMenu";
 import { uppercaseFirst } from "../TextHelper";
 import { exportMuliSensorCSV, exportMuliSensorXLSX } from "../utils/export";
 import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
-import { getUnitHelper } from "../UnitHelper";
+import { getUnitHelper, getUnitSettingFor } from "../UnitHelper";
 
 let data = {};
 const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, maxWidth: "800px" }
@@ -47,11 +47,23 @@ function SensorCompare(props) {
 
     const graphTitle = (mobile) => {
         if (dataKey === "measurementSequenceNumber") return "";
-        let unit = getUnitHelper(dataKey).unit
+        let unit = ""
+        let label = "";
+        if (typeof(dataKey) === "object") {
+            label = dataKey.sensorType
+            if (dataKey.unit) {
+                unit = t(dataKey.unit.translationKey)
+            } else {
+                unit = getUnitHelper(label).unit 
+            }
+        } else {
+            label = getUnitHelper(dataKey).label
+            unit = getUnitHelper(dataKey).unit
+        }
 
         return <div style={{ marginLeft: 30 }}>
             <span className="graphLengthText" style={{ fontSize: mobile ? "20px" : "24px" }}>
-                {t(getUnitHelper(dataKey).label)}
+                {t(label)}
             </span>
             {!mobile && <br />}
             <span className="graphInfo" style={{ marginLeft: mobile ? 6 : undefined }}>
@@ -60,6 +72,12 @@ function SensorCompare(props) {
         </div>
     }
     const graphCtrl = (isMobile) => {
+        let key = ""
+        if (typeof(dataKey) === "object") {
+            key = dataKey.sensorType
+        } else {
+            key = dataKey
+        }
         return <>
             <ZoomInfo />
             <ExportMenu buttonText={uppercaseFirst(t("export"))} noPdf onClick={val => {
