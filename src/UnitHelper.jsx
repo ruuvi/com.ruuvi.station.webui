@@ -424,6 +424,22 @@ export function getAlertRange(type) {
             return { max: 0, min: -105 }
         case "offline":
             return { max: +Infinity, min: 120 }
+        case "co2":
+            return { max: 2500, min: 350 }
+        case "voc":
+            return { max: 500, min: 0 }
+        case "pm10":
+            return { max: 250, min: 0 }
+        case "pm25":
+            return { max: 250, min: 0 }
+        case "pm40":
+            return { max: 250, min: 0 }
+        case "pm100":
+            return { max: 250, min: 0 }
+        case "luminosity":
+            return { max: 10000, min: 0 }
+        case "sound":
+            return { max: 127, min: 0 }
         default:
             return { max: 100, min: 0 }
     }

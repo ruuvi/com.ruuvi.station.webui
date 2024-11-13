@@ -715,9 +715,20 @@ class Sensor extends Component {
                                                 return <div>{parts[0]}<a style={{ color: "teal" }} target="blank" href={t("cloud_ruuvi_link_url")}>{t("cloud_ruuvi_link")}</a>{parts[1]}</div>
                                             })()}
                                         </Box>}
-                                        {["temperature", "humidity", "pressure", "signal", "movement", "offline"].map(x => {
+                                        {["temperature", "humidity", "pressure", "signal", "movement", "offline", "co2", "voc", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"].map(x => {
                                             if (!x) return null
-                                            let dataKey = x === "movement" ? "movementCounter" : x === "signal" ? "rssi" : x;
+                                            const dataKeyMapping = {
+                                                "movement": "movementCounter",
+                                                "signal": "rssi",
+                                                "pm10": "pm1p0",
+                                                "pm25": "pm2p5",
+                                                "pm40": "pm4p0",
+                                                "pm100": "pm10p0",
+                                                "luminosity": "illuminance",
+                                                "sound": "soundLevelAvg"
+                                            };
+                                            
+                                            const dataKey = dataKeyMapping[x] || x;
                                             let latestValue = this.getLatestReading()[dataKey]
                                             if (latestValue === undefined && x !== "offline") return null;
                                             var alert = this.getAlert(x)
@@ -729,7 +740,7 @@ class Sensor extends Component {
                                                 showDelay={sensorSubscription === "Business Starter"}
                                                 detailedTitle={detailedTitle}
                                                 detailedText={detailedText} detailedSubText={detailedSubText}
-                                                type={x} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />
+                                                type={x} dataKey={dataKey} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />
                                         })}
                                     </List>
                                 </AccordionPanel>
