@@ -15,15 +15,6 @@ const types = ["temperature", "humidity", "pressure", "movementCounter", "batter
 
 export default function SensorTypePicker(props) {
     const { t } = useTranslation();
-    let current = ""
-    if (typeof (props.value) === "object") {
-        current = t(getUnitHelper(props.value.sensorType).label) + (props.value.unit ? ` (${t(props.value.unit.translationKey)})` : "")
-    } else {
-        let v = props.value || "temperature";
-        current = t(getUnitHelper(v).label) || t(v);
-    }
-    let valueTextMaxLength = props.allUnits ? 30 : 15
-    if (current.length > valueTextMaxLength) current = current.substring(0, valueTextMaxLength) + "..."
 
     let style = {
         variant: "shareSensorSelect",
@@ -62,14 +53,31 @@ export default function SensorTypePicker(props) {
             let unitOpts = allUnits[opts[i]?.sensorType]?.units
             let setting = getUnitSettingFor(opts[i]?.sensorType)
             if (unitOpts) {
+                let mainUnit = i
                 for (let j = 0; j < unitOpts.length; j++) {
-                    if (setting === unitOpts[j].cloudStoreKey) continue
+                    if (setting === unitOpts[j].cloudStoreKey) {
+                        opts[mainUnit] = { "sensorType": opts[mainUnit].sensorType, "unit": unitOpts[j] }
+                        continue;
+                    }
                     opts.splice(i + 1, 0, { "sensorType": opts[i].sensorType, "unit": unitOpts[j] });
                     i++;
                 }
             }
         }
     }
+
+
+    let current = ""
+    if (props.value !== null && typeof (props.value) === "object") {
+        current = t(getUnitHelper(props.value.sensorType).label) + (props.value.unit ? ` (${t(props.value.unit.translationKey)})` : "")
+    } else {
+        let v = props.value || opts[0];
+        if (typeof (v) === "object") {
+            current = t(getUnitHelper(v.sensorType).label) + (v.unit ? ` (${t(v.unit.translationKey)})` : "")
+        } else current = t(getUnitHelper(v).label) || t(v);
+    }
+    let valueTextMaxLength = props.allUnits ? 30 : 15
+    if (current.length > valueTextMaxLength) current = current.substring(0, valueTextMaxLength) + "..."
 
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">

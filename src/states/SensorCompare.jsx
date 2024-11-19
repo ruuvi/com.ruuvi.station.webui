@@ -24,7 +24,7 @@ function SensorCompare(props) {
     const [durationPickerValue, setDurationPickerValue] = useState(24 * 7)
     const [from, setFrom] = useState((new Date().getTime() / 1000) - 60 * 60 * 24 * 7)
     const [to, setTo] = useState(new Date().getTime() / 1000)
-    const [dataKey, setDataKey] = useState("temperature")
+    const [dataKey, setDataKey] = useState(null)
     const [loading, setLoading] = useState(false)
     const [viewData, setViewData] = useState(null)
     const isWideVersion = useBreakpointValue({ base: false, md: true })
