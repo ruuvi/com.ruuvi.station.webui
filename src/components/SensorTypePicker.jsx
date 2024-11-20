@@ -66,18 +66,38 @@ export default function SensorTypePicker(props) {
         }
     }
 
-
-    let current = ""
-    if (props.value !== null && typeof (props.value) === "object") {
-        current = t(getUnitHelper(props.value.sensorType).label) + (props.value.unit ? ` (${t(props.value.unit.translationKey)})` : "")
-    } else {
-        let v = props.value || opts[0];
-        if (typeof (v) === "object") {
-            current = t(getUnitHelper(v.sensorType).label) + (v.unit ? ` (${t(v.unit.translationKey)})` : "")
-        } else current = t(getUnitHelper(v).label) || t(v);
+    if (props.value === null) {
+        if (props.allUnits) {
+            props.onChange(opts[0])
+        } else {
+            props.onChange(opts[0].sensorType)
+        }
     }
-    let valueTextMaxLength = props.allUnits ? 30 : 15
-    if (current.length > valueTextMaxLength) current = current.substring(0, valueTextMaxLength) + "..."
+
+    const getLabelForOption = (value) => {
+        let label = ""
+        let sensorType = value?.sensorType || value
+        let unit = value?.unit
+        if (sensorType === null) return ""
+        if (props.allUnits) {
+            if (sensorType === "humidity" && unit?.cloudStoreKey === "0") {
+                label = t(getUnitHelper(sensorType).label) + " (" + t("humidity_relative_name") +")"
+            }
+            else if (sensorType === "humidity" && unit?.cloudStoreKey === "1") {
+                label = t(getUnitHelper(sensorType).label) + " (" + t("humidity_absolute_name") +")"
+            }
+            else if (sensorType === "humidity" && unit?.cloudStoreKey === "2") {
+                label = t(unit.translationKey) + " (" + t(getUnitHelper("temperature").unit) + ")"
+            }
+            else {
+                label = t(getUnitHelper(sensorType).label) + (unit ? ` (${t(unit.translationKey)})` : "")
+            }
+        } else label = t(getUnitHelper(sensorType).label) || t(sensorType);
+
+        let valueTextMaxLength = props.allUnits ? 30 : 15
+        if (label.length > valueTextMaxLength) label = label.substring(0, valueTextMaxLength) + "..."
+        return label
+    }
 
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
@@ -86,7 +106,7 @@ export default function SensorTypePicker(props) {
                 {...style}
                 borderRadius='4px'>
                 <Box pl={1} className={props.altStyle ? "" : "ddlItemAlt"}>
-                    {current}
+                    {getLabelForOption(props.value)}
                 </Box>
             </MenuButton>
             <MenuList maxHeight="600px" overflowY="auto">
@@ -101,7 +121,7 @@ export default function SensorTypePicker(props) {
                     return <div key={x + JSON.stringify(unit) + "s"}>
                         <MenuItem className={props.value === op ? "menuActive ddlItemAlt" : "ddlItemAlt"}
                             style={{ ...borderStyle }} onClick={() => props.onChange(props.allUnits ? op : x)}>
-                            {t(getUnitHelper(x).label || t(x))} {unit ? ` (${t(unit.translationKey)})` : ""}
+                            {getLabelForOption(op)}
                         </MenuItem>
                         {divider}
                     </div>
