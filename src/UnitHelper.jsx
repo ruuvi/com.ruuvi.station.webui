@@ -159,7 +159,7 @@ const unitHelper = {
     },
     "nox": {
         label: "nox",
-        unit: "NNOx Index",
+        unit: "NOx Index",
         value: (value) => value,
         fromUser: (value) => value,
         decimals: 0,
@@ -427,6 +427,8 @@ export function getAlertRange(type) {
         case "co2":
             return { max: 2500, min: 350 }
         case "voc":
+            return { max: 500, min: 0 }
+        case "nox":
             return { max: 500, min: 0 }
         case "pm10":
             return { max: 250, min: 0 }
