@@ -360,6 +360,15 @@ class Sensor extends Component {
     isAlertTriggerd(type) {
         if (type === "movementCounter") type = "movement";
         if (type === "rssi") type = "signal";
+        if (type.indexOf("pm") !== -1) {
+            const pmMapping = {
+                "pm1p0": "pm10",
+                "pm2p5": "pm25",
+                "pm4p0": "pm40",
+                "pm10p0": "pm100"
+            };
+            type = pmMapping[type] || type;
+        }
         var alert = this.getAlert(type.toLocaleLowerCase())
         if (!alert) return false
         return isAlerting(this.props.sensor, type)
