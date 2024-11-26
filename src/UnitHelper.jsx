@@ -110,7 +110,7 @@ const unitHelper = {
         graphable: true
     },
     "pm1p0": {
-        label: "pm1.0",
+        label: "pm10",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
@@ -118,7 +118,7 @@ const unitHelper = {
         graphable: true
     },
     "pm2p5": {
-        label: "pm2.5",
+        label: "pm25",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
@@ -126,7 +126,7 @@ const unitHelper = {
         graphable: true
     },
     "pm4p0": {
-        label: "pm4.0",
+        label: "pm40",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
@@ -134,7 +134,7 @@ const unitHelper = {
         graphable: true
     },
     "pm10p0": {
-        label: "pm10.0",
+        label: "pm100",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
