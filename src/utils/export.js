@@ -75,8 +75,20 @@ function getFilename(sensorName, extension) {
 }
 
 function processMultiSensorReportData(data, t, sensorType) {
+    let unit = undefined
+    let unitObj = undefined
+
+    if (typeof sensorType === "object") {
+        if (sensorType.unit) {
+            unit = sensorType.unit.translationKey
+            unitObj = sensorType.unit
+        }
+        sensorType = sensorType.sensorType
+    }
+    
     let uHelpV = getUnitHelper(sensorType)
-    let unit = uHelpV.unit
+    if (!unit) unit = uHelpV.unit
+
     var csvHeader = [t('date')];
     for (let i = 0; i < data.length; i++) {
         csvHeader.push(data[i].name + " (" + unit + ")");
@@ -97,6 +109,20 @@ function processMultiSensorReportData(data, t, sensorType) {
         return !pos || item !== ary[pos - 1];
     });
 
+    const unitHelper = getUnitHelper(sensorType);
+    let settings = undefined
+    if (unitObj) {
+        if (sensorType === "temperature") {
+            settings = { UNIT_TEMPERATURE: unitObj.cloudStoreKey }
+        }
+        if (sensorType === "humidity") {
+            settings = { UNIT_HUMIDITY: unitObj.cloudStoreKey }
+        }
+        if (sensorType === "pressure") {
+            settings = { UNIT_PRESSURE: unitObj.cloudStoreKey }
+        }
+    }
+
     let rows = []
     for (let i = 0; i < timestampsWithData.length; i++) {
         let row = [toISOString(new Date(timestampsWithData[i] * 1000))]
@@ -105,10 +131,16 @@ function processMultiSensorReportData(data, t, sensorType) {
             let val = ""
             for (let k = 0; k < d.length; k++) {
                 if (d[k].timestamp === timestampsWithData[i]) {
-                    if (sensorType === "humidity") {
-                        val = uHelpV.value(d[k].parsed[sensorType], d[k].parsed.temperature)
-                    } else {
-                        val = uHelpV.value(d[k].parsed[sensorType])
+                    switch (sensorType) {
+                        case "temperature":
+                            val = unitHelper.value(d[k].parsed[sensorType], undefined, settings)
+                            break
+                        case "humidity":
+                            val = unitHelper.value(d[k].parsed[sensorType], d[k].parsed.temperature, settings)
+                            break
+                        default:
+                            val = unitHelper.value(d[k].parsed[sensorType], settings)
+                            break
                     }
                     break
                 }
