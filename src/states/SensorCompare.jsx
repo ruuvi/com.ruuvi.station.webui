@@ -50,7 +50,7 @@ function SensorCompare(props) {
         let unit = ""
         let label = "";
         if (typeof(dataKey) === "object") {
-            label = dataKey.sensorType
+            label = getUnitHelper(dataKey.sensorType)?.label || dataKey.sensorType
             if (dataKey.unit) {
                 unit = t(dataKey.unit.translationKey)
             } else {
