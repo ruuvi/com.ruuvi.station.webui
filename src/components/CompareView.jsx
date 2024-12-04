@@ -140,14 +140,16 @@ function CompareView(props) {
             props.isLoading(true)
             setSensorData([])
             gdata = []
-            let pd = [[], []];
 
             for (const sensor of sensors) {
                 let until = props.to
                 let since = props.from;
                 let allData = null;
+                let stop = false
                 for (; ;) {
-                    if (since >= until) break;
+                    if (since >= until || stop) {
+                        break;
+                    }
                     let data = await new NetworkApi().getAsync(sensor, since, until, { limit: pjson.settings.dataFetchPaginationSize });
                     if (data.result === "success") {
                         if (!allData) allData = data;
@@ -157,7 +159,7 @@ function CompareView(props) {
                         if (data.data.nextUp) until = data.data.nextUp;
                         else if (data.data.fromCache) until = data.data.measurements[data.data.measurements.length - 1].timestamp;
                         else if (returndDataLength >= pjson.settings.dataFetchPaginationSize) until = data.data.measurements[data.data.measurements.length - 1].timestamp;
-                        else break;
+                        else stop = true
 
                         let d = parse(allData.data);
                         setSensorData((s) => {
