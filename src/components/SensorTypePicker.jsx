@@ -87,7 +87,7 @@ export default function SensorTypePicker(props) {
                 label = t(getUnitHelper(sensorType).label) + " (" + t("humidity_absolute_name") +")"
             }
             else if (sensorType === "humidity" && unit?.cloudStoreKey === "2") {
-                label = t(unit.translationKey) + " (" + t(getUnitHelper("temperature").unit) + ")"
+                label = t(getUnitHelper(sensorType).label) + " (" +t(unit.translationKey) + " (" + t(getUnitHelper("temperature").unit) + "))"
             }
             else {
                 label = t(getUnitHelper(sensorType).label) + (unit ? ` (${t(unit.translationKey)})` : "")
