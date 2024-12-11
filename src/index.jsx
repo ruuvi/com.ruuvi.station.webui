@@ -60,6 +60,5 @@ root.render(
       <App />
     </ErrorView>
     <ToastContainer />
-  </Suspense>,
-  document.getElementById('root')
+  </Suspense>
 );

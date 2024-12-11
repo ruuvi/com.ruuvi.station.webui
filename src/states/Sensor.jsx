@@ -741,7 +741,7 @@ class Sensor extends Component {
                                             let latestValue = this.getLatestReading()[dataKey]
                                             if (latestValue === undefined && x !== "offline") return null;
                                             var alert = this.getAlert(x)
-                                            let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description : x
+                                            let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description + x : x
                                             return <AlertItem key={key} alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
                                                 latestValue={latestValue}
                                                 noUpgradeButton={this.isSharedSensor() || !this.sensorHasData()}

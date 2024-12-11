@@ -58,6 +58,7 @@ function AddSensorModal(props) {
     }
     const getPinInput = (i) => {
         return <PinInputField ref={(input) => { pRef[i + ""] = input; }}
+            key={Math.random()}
             onKeyDown={e => {
                 if (e.code === "Backspace") {
                     let idx = e.target.dataset.index
@@ -75,9 +76,9 @@ function AddSensorModal(props) {
         if (text.indexOf("ruuvi.com/fi/tuki") !== -1) link = "ruuvi.com/fi/tuki"
         var splitted = text.split(link)
         if (splitted.length === 1) return text;
-        var out = [<span>{addNewlines(splitted[0])}</span>]
+        var out = [<span key={Math.random()}>{addNewlines(splitted[0])}</span>]
         for (var i = 1; i < splitted.length; i++) {
-            out.push(<Link display="inline-block" href={"https://" + link} isExternal color="primary">{link}</Link>)
+            out.push(<Link key={Math.random()} display="inline-block" href={"https://" + link} isExternal color="primary">{link}</Link>)
         }
         return out;
     }

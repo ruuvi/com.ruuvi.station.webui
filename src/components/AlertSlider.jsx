@@ -56,7 +56,7 @@ class AlertSlider extends React.Component {
         if (this.props.type === "temperature" || this.props.type === "pressure") {
             max = uh.value(max)
             min = uh.value(min)
-            
+
         }
         var sliderValues = [min, max]
         return <div style={{ display: 'flex', alignItems: 'center', marginLeft: 4, marginRight: 4 }}>
@@ -85,6 +85,7 @@ class AlertSlider extends React.Component {
                 renderThumb={({ props }) => (
                     <div
                         {...props}
+                        key={props.key + this.props.type}
                         style={{
                             ...props.style,
                             borderRadius: '6px',

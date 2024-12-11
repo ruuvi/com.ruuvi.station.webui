@@ -5,11 +5,12 @@ export function uppercaseFirst(string) {
 
 function addHighlight(str, highlightedText) {
     return str.split(highlightedText).map((x, i, all) => {
-        return <>{x}{i === all.length - 1 ? null : <span style={{ color: "#f15a24" }}>{highlightedText}</span>}</>
+        return <span key={Math.random()}>{x}{i === all.length - 1 ? null : <span style={{ color: "#f15a24" }}>{highlightedText}</span>}</span>
     })
 }
 
 export function addNewlines(str, newlineChar, highlightedText) {
+    
     return str.split(newlineChar || "\n").map((x, i, all) => {
         x = addHighlight(x, highlightedText)
         return <p style={{ marginTop: i > 0 ? 10 : undefined }} key={Math.random()}>{x}</p>
