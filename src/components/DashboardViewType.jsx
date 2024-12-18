@@ -18,8 +18,12 @@ const detailedSubText = {
 
 export default function DashboardViewType(props) {
     const { t } = useTranslation();
-    let optLabels = ["image_cards", "history_cards", "simple_cards"];
-    let opts = ["image_view", "graph_view", "simple_view"]
+    let opts = [
+        { label: "image_cards", value: "image_view" },
+        { label: "image_history_cards", value: "image_graph_view" },
+        { label: "history_cards", value: "graph_view" },
+        { label: "simple_cards", value: "simple_view" }
+    ]
     let current = props.value || "";
 
     return (
@@ -39,8 +43,8 @@ export default function DashboardViewType(props) {
                         let borderStyle = {};
                         if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
                         if (i === opts.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
-                        return <div key={x + "p"}>
-                            <MenuItem key={x} className={current === x ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => props.onChange(x)}>{t(optLabels[i])}</MenuItem>
+                        return <div key={x.value + "p"}>
+                            <MenuItem key={x.value} className={current === x.value ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => props.onChange(x.value)}>{t(x.label)}</MenuItem>
                             {divider}
                         </div>
                     })}

@@ -200,17 +200,15 @@ class SensorCard extends Component {
     }
     render() {
         var { t } = this.props;
-        let showGraph = this.props.cardType === "graph_view";
-        let showImage = this.props.cardType === "image_view";
+        let showGraph = this.props.cardType === "graph_view" || this.props.cardType === "image_graph_view";
+        let showImage = this.props.cardType === "image_view" || this.props.cardType === "image_graph_view";
         let simpleView = this.props.cardType === "simple_view";
-        if (!showGraph && this.props.size !== "mobile") showGraph = true
         let height = showGraph ? this.props.size === "medium" ? 300 : 360 : 193;
         let graphHeight = height - 170;
         let imageWidth = height / 2;
         let imageButtonSize = 80;
         if (this.props.size === "mobile") imageButtonSize = 60;
         if (this.props.size === "medium") graphHeight = 145;
-        if (this.props.size === "mobile" && showGraph) showImage = false;
         let isSmallCard = this.props.size === "mobile" && !showGraph
         let mainStat = this.props.graphType || "temperature";
         let latestReading = this.getLatestReading();
