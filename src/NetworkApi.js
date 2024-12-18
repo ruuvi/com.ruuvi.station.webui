@@ -138,7 +138,7 @@ class NetworkApi {
         }
         return data;
     }
-    async fetchWithTimeout(resource, options = {}, timeout = 20000) {
+    async fetchWithTimeout(resource, options = {}, timeout = 30000) {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
         const response = await fetch(resource, {
@@ -225,7 +225,7 @@ class NetworkApi {
         // Make API call and handle potential errors
         let respData;
         try {
-            const response = await fetch(`${this.url}/get${query}`, this.options);
+            const response = await this.fetchWithTimeout(`${this.url}/get${query}`, this.options);
             checkStatusCode(response);  // Assuming this is a custom function to check status code
             respData = await response.json();
         } catch (error) {
