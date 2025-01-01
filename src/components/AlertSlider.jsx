@@ -56,7 +56,11 @@ class AlertSlider extends React.Component {
         if (this.props.type === "temperature" || this.props.type === "pressure") {
             max = uh.value(max)
             min = uh.value(min)
-
+        }
+        if (min > max) {
+            var tmp = min
+            min = max
+            max = tmp
         }
         var sliderValues = [min, max]
         return <div style={{ display: 'flex', alignItems: 'center', marginLeft: 4, marginRight: 4 }}>
@@ -79,7 +83,21 @@ class AlertSlider extends React.Component {
                             }),
                         }}
                     >
-                        {children}
+                        {children.map((child, i) => {
+                            if (min === max) {
+                                if (min === range.min) {
+                                    if (i === 0) {
+                                        child.props.style.display = "none"
+                                    }
+                                }
+                                if (min === range.max) {
+                                    if (i === 1) {
+                                        child.props.style.display = "none"
+                                    }
+                                }
+                            }
+                            return child
+                        })}
                     </div>
                 )}
                 renderThumb={({ props }) => (
