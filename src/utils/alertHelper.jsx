@@ -1,6 +1,7 @@
 import bell from '../img/icon-bell.svg'
 import bellAlert from '../img/icon-bell-alert.svg'
 import { Image } from '@chakra-ui/react'
+import { alertTypes } from '../UnitHelper'
 
 export function getAlertIcon(sensor, type) {
     function getSensorAlertState() {
@@ -9,7 +10,6 @@ export function getAlertIcon(sensor, type) {
             alerts = alerts.filter(x => x.type === type)
             if (isAlerting(sensor, type)) return 1
         } else {
-            const alertTypes = ["temperature", "humidity", "pressure", "offline", "signal", "movement"]
             for (let i = 0; i < alertTypes.length; i++) {
                 if (isAlerting(sensor, alertTypes[i])) return 1
             }
@@ -28,13 +28,29 @@ export function getAlertIcon(sensor, type) {
     return alertIcon
 }
 
+export function getMappedAlertDataType(type) {
+    if (!type) return null
+    const dataKeyMapping = {
+        "movement": "movementCounter",
+        "signal": "rssi",
+        "pm10": "pm1p0",
+        "pm25": "pm2p5",
+        "pm40": "pm4p0",
+        "pm100": "pm10p0",
+        "luminosity": "illuminance",
+        "sound": "soundLevelAvg"
+    };
+
+    return dataKeyMapping[type] || type;
+}
+
 export function isAlerting(sensor, type) {
     let alerts = sensor.alerts
     if (type) alerts = alerts.filter(x => x.type === type)
     if (!alerts.find(x => x.enabled)) return false
     let data = sensor.measurements.length === 1 ? sensor.measurements[0] : null
     if (data && data.parsed) {
-        let dp = type === "offline" ? data.timestamp : type === "signal" ? data.rssi : data.parsed[type]
+        let dp = type === "offline" ? data.timestamp : type === "signal" ? data.rssi : data.parsed[getMappedAlertDataType(type)]
         if (alerts.find(x => checkIfShouldBeAlerting(x, dp))) return true
     } else {
         if (alerts.find(x => x.enabled && x.triggered)) return true
@@ -48,7 +64,7 @@ export function hasAlertBeenHit(alerts, measurements, type) {
     for (let i = 0; measurements && i < measurements.length; i++) {
         let data = measurements[i]
         if (data && data.parsed) {
-            let dp = type === "offline" ? data.timestamp : type === "signal" ? data.rssi : data.parsed[type]
+            let dp = type === "offline" ? data.timestamp : type === "signal" ? data.rssi : data.parsed[getMappedAlertDataType(type)]
             if (alerts.find(x => checkIfShouldBeAlerting(x, dp))) return true
         } else {
             if (alerts.find(x => x.enabled && x.triggered)) return true

@@ -40,7 +40,7 @@ import pjson from '../../package.json';
 import { isBatteryLow } from "../utils/battery";
 import uploadBackgroundImage from "../BackgroundUploader";
 import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
-import { isAlerting } from "../utils/alertHelper";
+import { getMappedAlertDataType, isAlerting } from "../utils/alertHelper";
 import RemoveSensorDialog from "../components/RemoveSensorDialog";
 import ExportMenu from "../components/ExportMenu";
 import UpgradePlanButton from "../components/UpgradePlanButton";
@@ -726,18 +726,8 @@ class Sensor extends Component {
                                         </Box>}
                                         {["temperature", "humidity", "pressure", "signal", "movement", "offline", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"].map(x => {
                                             if (!x) return null
-                                            const dataKeyMapping = {
-                                                "movement": "movementCounter",
-                                                "signal": "rssi",
-                                                "pm10": "pm1p0",
-                                                "pm25": "pm2p5",
-                                                "pm40": "pm4p0",
-                                                "pm100": "pm10p0",
-                                                "luminosity": "illuminance",
-                                                "sound": "soundLevelAvg"
-                                            };
                                             
-                                            const dataKey = dataKeyMapping[x] || x;
+                                            const dataKey = getMappedAlertDataType(x);
                                             let latestValue = this.getLatestReading()[dataKey]
                                             if (latestValue === undefined && x !== "offline") return null;
                                             var alert = this.getAlert(x)
