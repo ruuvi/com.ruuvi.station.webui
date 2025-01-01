@@ -205,7 +205,7 @@ class SensorCard extends Component {
         let simpleView = this.props.cardType === "simple_view";
         let height = showGraph ? this.props.size === "medium" ? 300 : 360 : 193;
         let graphHeight = height - 170;
-        let imageWidth = height / 2;
+        let imageWidth = "25%";
         let imageButtonSize = 80;
         if (this.props.size === "mobile") imageButtonSize = 60;
         if (this.props.size === "medium") graphHeight = 145;
@@ -331,7 +331,7 @@ class SensorCard extends Component {
                             <Box float="left" width={imageWidth} className="imageBackgroundColor" position={"relative"} backgroundImage={this.props.sensor.picture} backgroundSize="cover" backgroundPosition="center" height="100%"
                                 onMouseEnter={() => this.setHover(true)}
                                 onMouseLeave={() => this.setHover(false)}>
-                                <Box className="imageBackgroundOverlay" backgroundImage={bglayer} backgroundSize="cover" backgroundPosition="center" width={imageWidth} height={height}>
+                                <Box className="imageBackgroundOverlay" backgroundImage={bglayer} backgroundSize="cover" backgroundPosition="center" width={"100%"} height={height}>
                                     <div style={{ height: "100%" }}>
                                     </div>
                                 </Box>
