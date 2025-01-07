@@ -44,6 +44,16 @@ class AlertSlider extends React.Component {
         } else if (this.props.type === "pressure") {
             values = [pressureFromUserFormat(values[0]), pressureFromUserFormat(values[1])]
         }
+        // always keep min and max different
+        if (values[0] === values[1]) {
+            // figure out which value has changed
+            let oldMin = this.props.value.min
+            if (oldMin === values[0]) {
+                values[1] = values[0] + 1
+            } else {
+                values[0] = values[1] - 1
+            }
+        }
         this.props.onChange(values, final)
     }
     render() {
