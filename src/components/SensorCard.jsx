@@ -195,6 +195,7 @@ class SensorCard extends Component {
     getSmallDataFields() {
         let arr = ["humidity", "pressure", "movementCounter"]
         if (this.getLatestReading().dataFormat === 6) arr = ["pm1p0", "co2", "voc"]
+        if (this.getLatestReading().dataFormat === "e0") arr = ["pm1p0", "co2", "voc", "aqi"]
         if ((this.props.graphType || "temperature") !== "temperature") arr.push("temperature")
         return arr
     }

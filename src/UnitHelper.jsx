@@ -188,7 +188,15 @@ const unitHelper = {
         fromUser: (value) => value,
         decimals: 1,
         graphable: true
-    }
+    },
+    "aqi": {
+        label: "aqi",
+        unit: "AQI",
+        value: (value) => value,
+        fromUser: (value) => value,
+        decimals: 1,
+        graphable: true
+    },
 };
 
 export const allUnits = unitHelper;
