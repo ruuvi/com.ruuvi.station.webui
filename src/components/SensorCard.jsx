@@ -420,7 +420,7 @@ class SensorCard extends Component {
                                                 )}
                                             </div>
                                             <div style={{ maxWidth: this.props.size === "mobile" && !this.props.showGraph ? "300px" : undefined }}>
-                                                <SimpleGrid columns={2} style={{ width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 0 0" }}>
+                                                <SimpleGrid columns={2} style={{ height: "50px", width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 0 0" }}>
                                                     {this.getSmallDataFields().map(x => {
                                                         let value = latestReading[x];
                                                         if (value === undefined) return null;
