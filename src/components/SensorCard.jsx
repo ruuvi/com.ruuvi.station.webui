@@ -420,13 +420,23 @@ class SensorCard extends Component {
                                                 )}
                                             </div>
                                             <div style={{ maxWidth: this.props.size === "mobile" && !this.props.showGraph ? "300px" : undefined }}>
-                                                <SimpleGrid columns={2} style={{ height: "50px", width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 0 0" }}>
+                                                <SimpleGrid columns={2} style={{ height: "49px", width: "100%", overflow: "hidden", whiteSpace: "nowrap", margin: (showGraph ? this.props.size === "medium" ? -10 : 15 : this.props.size === "mobile" ? 8 : 20) + "px 0 1px 0" }}>
                                                     {this.getSmallDataFields().map(x => {
                                                         let value = latestReading[x];
                                                         if (value === undefined) return null;
-                                                        return <GridItem key={x} style={{ color: this.getAlertState(x) > 0 ? ruuviTheme.colors.sensorCardValueAlertState : undefined }}>
-                                                            <span style={smallSensorValue}>{value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}</span>
-                                                            <span style={smallSensorValueUnit}> {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}</span>
+                                                        return <GridItem
+                                                            key={x}
+                                                            alignSelf="flex-end"
+                                                            style={{
+                                                                color: this.getAlertState(x) > 0 ? ruuviTheme.colors.sensorCardValueAlertState : undefined
+                                                            }}
+                                                            >
+                                                            <span style={smallSensorValue}>
+                                                                {value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}
+                                                            </span>
+                                                            <span style={smallSensorValueUnit}>
+                                                                {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}
+                                                            </span>
                                                         </GridItem>
                                                     })}
                                                 </SimpleGrid>
