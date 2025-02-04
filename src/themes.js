@@ -30,7 +30,7 @@ let colors = {
     graphFillAlert: { dark: "#ff954d7f", light: "#ff954d7f" },
     graphStrokeAlert: { dark: "rgba(241, 90, 36, 0.8)", light: "rgba(241, 90, 36, 0.8)" },
     graphGrid: { dark: "rgba(68, 201, 185, 0.1)", light: "#083c3d1a" },
-    sensorCardBackground: { light: undefined, dark: "#003434 !important" },
+    sensorCardBackground: { light: undefined, dark: "#083c3d !important" },
     signinInputBg: { light: "white", dark: undefined },
     dashboardUpdatedAtColor: { light: "#1b484780", dark: "#ffffff80" },
     toastErrorBackground: { light: "#f15a24", dark: "#f15a24" },
