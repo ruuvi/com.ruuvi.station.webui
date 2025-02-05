@@ -147,7 +147,7 @@ const ShareCenter = () => {
 
     const selectEmailTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("email")}</div>
     const selectEmail = <>
-        <Input className='shareEmail' placeholder={i18next.t("email")} w={"250px"} mr={2} value={email} onChange={e =>
+        <Input className='shareEmail' autoCorrect="off" autoCapitalize="none" autoComplete="off" placeholder={i18next.t("email")} w={"250px"} mr={2} value={email} onChange={e =>
             setEmail(e.target.value.toLowerCase())
         } />
         <Box display={"inline-block"}>
