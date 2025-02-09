@@ -276,7 +276,7 @@ export default function App() {
         </div>
       </BrowserRouter>
       <AddSensorModal open={showDialog === "addsensor"} onClose={() => setShowDialog("")} updateApp={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />
-      <SettingsModal open={showDialog === "settings"} onClose={() => setShowDialog("")} />
+      <SettingsModal open={showDialog === "settings"} onClose={() => setShowDialog("")} updateApp={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />
       {showDialog === "myaccount" &&
         <MyAccountModal open={true} onClose={() => setShowDialog("")} updateApp={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />
       }

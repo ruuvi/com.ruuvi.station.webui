@@ -94,6 +94,7 @@ class Settings extends Component {
                 new NetworkApi().getSettings(settings => {
                     if (settings.result === "success") {
                         localStorage.setItem("settings", JSON.stringify(settings.data.settings))
+                        if (this.props.updateApp) this.props.updateApp()
                     }
 
                 })

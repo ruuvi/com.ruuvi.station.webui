@@ -8,7 +8,7 @@ class SettingsModal extends Component {
         var { t } = this.props;
         return (
             <RDialog title={t("settings")} isOpen={this.props.open} onClose={this.props.onClose}>
-                <Settings isModal />
+                <Settings isModal updateApp={this.props.updateApp} />
             </RDialog>
         )
     }

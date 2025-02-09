@@ -432,7 +432,7 @@ class SensorCard extends Component {
                                                             }}
                                                             >
                                                             <span style={smallSensorValue}>
-                                                                {value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(value, latestReading["temperature"]), getUnitHelper(x).decimals))}
+                                                                {value == null ? "-" : getDisplayValue(x, localeNumber(getUnitHelper(x).value(latestReading[x], x === "humidity" ? latestReading.temperature : undefined), getUnitHelper(x).decimals))}
                                                             </span>
                                                             <span style={smallSensorValueUnit}>
                                                                 {x === "movementCounter" ? t(getUnitHelper(x).unit.toLocaleLowerCase()) : getUnitHelper(x).unit}
