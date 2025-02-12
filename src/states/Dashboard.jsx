@@ -32,7 +32,7 @@ function DashboardGrid(props) {
     else size = "mobile"
     if (props.currSize !== size) props.onSizeChange(size)
     //this.state.showBig ? "550px" : "400px"
-    return <Box style={{ marginBottom: 30, marginTop: size === "mobile" ? 10 : 30 }} justifyItems="start" display="grid" gap={size === "mobile" ? "10px" : "20px"} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" : props.showGraph ? "300px" : "360px"}, max-content))`}>
+    return <Box style={{ marginBottom: 30, marginTop: 10 }} justifyItems="start" display="grid" gap={size === "mobile" ? "10px" : "20px"} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" : props.showGraph ? "300px" : "360px"}, max-content))`}>
         {props.children(size)}
     </Box>
 }
