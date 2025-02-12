@@ -22,8 +22,8 @@ export function getAlertIcon(sensor, type) {
     let sensorSubscription = sensor.subscription
     let alertIcon = <></>
     if (sensorSubscription.emailAlertAllowed) {
-        if (sensorAlertState === 0) alertIcon = <Image src={bell} width="15px" />
-        if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} width="15px" className="alarmFadeInOut" />
+        if (sensorAlertState === 0) alertIcon = <Image src={bell} ml={"2px"} height="18px" />
+        if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} height="18px" className="alarmFadeInOut" />
     }
     return alertIcon
 }
