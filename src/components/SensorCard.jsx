@@ -681,8 +681,8 @@ class SensorCard extends Component {
                         )}
 
                         {/* Info & Graph section */}
-                        <Box padding="15px" marginLeft={showImage ? imageWidth : 0}>
-                            <Box height={isSmallCard && latestReading ? "82px" : ""}>
+                        <Box padding="15px" marginLeft={showImage ? imageWidth : 0} height="100%" display="flex" flexDirection="column">
+                            <Box>
                                 <Flex>
                                     {/* Sensor Heading */}
                                     <Flex grow={1} width="calc(100% - 41px)">
@@ -771,153 +771,151 @@ class SensorCard extends Component {
                                     <Spinner size="xl" />
                                 </center>
                             ) : (
-                                <div>
-                                    <Link to={`/${this.props.sensor.sensor}`}>
+                                <Flex direction="column" height="100%" justifyContent="space-between">
+                                    <Link to={`/${this.props.sensor.sensor}`} style={{ height: "100%" }}>
                                         {latestReading ? (
-                                            <div>
-                                                <div
-                                                    style={{
-                                                        marginLeft: -10,
-                                                        marginRight: -20,
-                                                        marginBottom: -10,
-                                                        paddingBottom: -50,
-                                                    }}
-                                                >
-                                                    {this.state.data &&
-                                                        this.state.data.measurements.length ? (
-                                                        <>
-                                                            {showGraph && (
-                                                                <Graph
-                                                                    title=""
-                                                                    key={
-                                                                        this.props.sensor.sensor +
-                                                                        this.props.cardType +
-                                                                        mainStat
-                                                                    }
-                                                                    alert={tnpGetAlert(mainStat)}
-                                                                    unit={getUnitHelper(mainStat).unit}
-                                                                    dataKey={mainStat}
-                                                                    data={this.getMeasurements()}
-                                                                    height={graphHeight}
-                                                                    legend={false}
-                                                                    cardView={true}
-                                                                    from={
-                                                                        new Date().getTime() -
-                                                                        60 * 60 * 1000 * this.props.dataFrom
-                                                                    }
-                                                                />
-                                                            )}
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            {/* No measurements */}
-                                                            {showGraph && (
-                                                                <>
-                                                                    {this.state.loadingHistory ? (
-                                                                        <center
-                                                                            style={{
-                                                                                fontFamily: "montserrat",
-                                                                                fontSize: 16,
-                                                                                fontWeight: "bold",
-                                                                                height: graphHeight,
-                                                                            }}
-                                                                        >
-                                                                            <div
-                                                                                style={{
-                                                                                    position: "relative",
-                                                                                    top: "50%",
-                                                                                    transform: "translateY(-50%)",
-                                                                                }}
-                                                                            >
-                                                                                <Spinner size="xl" />
-                                                                            </div>
-                                                                        </center>
-                                                                    ) : (
-                                                                        showGraph && (
-                                                                            <>
-                                                                                {noData(
-                                                                                    this.state.errorFetchingData
-                                                                                        ? "error"
-                                                                                        : noHistoryStr
-                                                                                )}
-                                                                            </>
-                                                                        )
-                                                                    )}
-                                                                </>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                </div>
-
-                                                {/* Small data fields */}
-                                                <div
-                                                    style={{
-                                                        maxWidth:
-                                                            this.props.size === "mobile" && !this.props.showGraph
-                                                                ? "300px"
-                                                                : undefined,
-                                                    }}
-                                                >
-                                                    <SimpleGrid
-                                                        columns={2}
+                                            <Flex direction="column" height="100%" justifyContent="space-between">
+                                                <Box flexGrow={1} display="flex" flexDir="column" justifyContent="space-between">
+                                                    <div
                                                         style={{
-                                                            width: "100%",
-                                                            verflow: "hidden",
-                                                            whiteSpace: "nowrap",
-                                                            paddingTop: 18,
-                                                            margin:
-                                                                (showGraph
-                                                                    ? -20
-                                                                    : this.props.size === "mobile"
-                                                                        ? 8
-                                                                        : 20) + "px 0 1px 0",
+                                                            marginLeft: -10,
+                                                            marginRight: -20,
+                                                            marginBottom: -10,
+                                                            paddingBottom: -50,
                                                         }}
                                                     >
-                                                        {this.getSmallDataFields().map((x) => {
-                                                            let value = latestReading[x];
-                                                            if (value === undefined) return null;
-                                                            return (
-                                                                <GridItem
-                                                                    key={x}
-                                                                    alignSelf="flex-end"
-                                                                    lineHeight="1.3"
-                                                                    style={{
-                                                                        color:
-                                                                            this.getAlertState(x) > 0
-                                                                                ? ruuviTheme.colors.sensorCardValueAlertState
-                                                                                : undefined,
-                                                                    }}
-                                                                >
-                                                                    <span style={smallSensorValue}>
-                                                                        {value == null
-                                                                            ? "-"
-                                                                            : getDisplayValue(
-                                                                                x,
-                                                                                localeNumber(
-                                                                                    getUnitHelper(x).value(
-                                                                                        latestReading[x],
-                                                                                        x === "humidity"
-                                                                                            ? latestReading.temperature
-                                                                                            : undefined
-                                                                                    ),
-                                                                                    getUnitHelper(x).decimals
-                                                                                )
-                                                                            )}
-                                                                    </span>
-                                                                    <span style={smallSensorValueUnit}>
-                                                                        {x === "movementCounter"
-                                                                            ? t(
-                                                                                getUnitHelper(x).unit.toLocaleLowerCase()
+                                                        {this.state.data &&
+                                                            this.state.data.measurements.length ? (
+                                                            <>
+                                                                {showGraph && (
+                                                                    <Graph
+                                                                        title=""
+                                                                        key={
+                                                                            this.props.sensor.sensor +
+                                                                            this.props.cardType +
+                                                                            mainStat
+                                                                        }
+                                                                        alert={tnpGetAlert(mainStat)}
+                                                                        unit={getUnitHelper(mainStat).unit}
+                                                                        dataKey={mainStat}
+                                                                        data={this.getMeasurements()}
+                                                                        height={graphHeight}
+                                                                        legend={false}
+                                                                        cardView={true}
+                                                                        from={
+                                                                            new Date().getTime() -
+                                                                            60 * 60 * 1000 * this.props.dataFrom
+                                                                        }
+                                                                    />
+                                                                )}
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                {/* No measurements */}
+                                                                {showGraph && (
+                                                                    <>
+                                                                        {this.state.loadingHistory ? (
+                                                                            <center
+                                                                                style={{
+                                                                                    fontFamily: "montserrat",
+                                                                                    fontSize: 16,
+                                                                                    fontWeight: "bold",
+                                                                                    height: graphHeight,
+                                                                                }}
+                                                                            >
+                                                                                <div
+                                                                                    style={{
+                                                                                        position: "relative",
+                                                                                        top: "50%",
+                                                                                        transform: "translateY(-50%)",
+                                                                                    }}
+                                                                                >
+                                                                                    <Spinner size="xl" />
+                                                                                </div>
+                                                                            </center>
+                                                                        ) : (
+                                                                            showGraph && (
+                                                                                <>
+                                                                                    {noData(
+                                                                                        this.state.errorFetchingData
+                                                                                            ? "error"
+                                                                                            : noHistoryStr
+                                                                                    )}
+                                                                                </>
                                                                             )
-                                                                            : getUnitHelper(x).unit}
-                                                                    </span>
-                                                                </GridItem>
-                                                            );
-                                                        })}
-                                                    </SimpleGrid>
-                                                </div>
-                                                {infoRow}
-                                            </div>
+                                                                        )}
+                                                                    </>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Small data fields */}
+                                                    <div
+                                                        style={{
+                                                            minHeight: 42,
+                                                            maxWidth:
+                                                                this.props.size === "mobile" && !this.props.showGraph
+                                                                    ? "300px"
+                                                                    : undefined,
+                                                        }}
+                                                    >
+                                                        <SimpleGrid
+                                                            columns={2}
+                                                            style={{
+                                                                width: "100%",
+                                                                overflow: "hidden",
+                                                                whiteSpace: "nowrap",
+                                                            }}
+                                                        >
+                                                            {this.getSmallDataFields().map((x) => {
+                                                                let value = latestReading[x];
+                                                                if (value === undefined) return null;
+                                                                return (
+                                                                    <GridItem
+                                                                        key={x}
+                                                                        alignSelf="flex-end"
+                                                                        lineHeight="1.3"
+                                                                        style={{
+                                                                            color:
+                                                                                this.getAlertState(x) > 0
+                                                                                    ? ruuviTheme.colors.sensorCardValueAlertState
+                                                                                    : undefined,
+                                                                        }}
+                                                                    >
+                                                                        <span style={smallSensorValue}>
+                                                                            {value == null
+                                                                                ? "-"
+                                                                                : getDisplayValue(
+                                                                                    x,
+                                                                                    localeNumber(
+                                                                                        getUnitHelper(x).value(
+                                                                                            latestReading[x],
+                                                                                            x === "humidity"
+                                                                                                ? latestReading.temperature
+                                                                                                : undefined
+                                                                                        ),
+                                                                                        getUnitHelper(x).decimals
+                                                                                    )
+                                                                                )}
+                                                                        </span>
+                                                                        <span style={smallSensorValueUnit}>
+                                                                            {x === "movementCounter"
+                                                                                ? t(
+                                                                                    getUnitHelper(x).unit.toLocaleLowerCase()
+                                                                                )
+                                                                                : getUnitHelper(x).unit}
+                                                                        </span>
+                                                                    </GridItem>
+                                                                );
+                                                            })}
+                                                        </SimpleGrid>
+                                                    </div>
+                                                </Box>
+                                                <Box h={"10px"}>
+                                                    {infoRow}
+                                                </Box>
+                                            </Flex>
                                         ) : (
                                             <>
                                                 {/* No data available fallback */}
@@ -931,7 +929,7 @@ class SensorCard extends Component {
                                             </>
                                         )}
                                     </Link>
-                                </div>
+                                </Flex>
                             )}
                         </Box>
                     </Box>
