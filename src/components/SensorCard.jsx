@@ -111,7 +111,7 @@ function MoreMenu(props) {
                 icon={<MdMoreVert size={23} />}
                 variant="topbar"
                 style={{ 
-                    zIndex: 10,
+                    zIndex: 2,
                     backgroundColor: "transparent",
                     transition: "color 0.2s ease-in-out"
                 }}
@@ -124,7 +124,7 @@ function MoreMenu(props) {
                 mt={props.mt}
             />
 
-            <MenuList mt="2" zIndex={11}>
+            <MenuList mt="2" zIndex={3}>
                 {menuItems.map((item, index) => (
                     item.condition !== false && (
                         <React.Fragment key={item.key}>
