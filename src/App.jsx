@@ -26,6 +26,7 @@ import MyAccountModal from "./components/MyAccountModal";
 import SettingsMenu from "./components/SettingsMenu";
 import MobileMenu from "./components/MobileMenu";
 import SensorCompare from "./states/SensorCompare";
+import detectForceRefresh from "./utils/detectForceRefresh";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -162,6 +163,11 @@ export default function App() {
   browserLanguage = browserLanguage.substring(0, 2)
 
   let { t, i18n } = useTranslation()
+
+  useEffect(() => {
+    const cleanup = detectForceRefresh();
+    return cleanup
+  }, [])
 
   const [showDialog, setShowDialog] = useState("")
 
