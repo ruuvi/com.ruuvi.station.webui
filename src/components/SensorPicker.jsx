@@ -4,10 +4,20 @@ import { MdArrowDropDown } from 'react-icons/md';
 import i18next from 'i18next';
 import { getSetting } from "../UnitHelper";
 
-export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalStyle, buttonText }) => {
+export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalStyle, buttonText, showSelectAll = false }) => {
 
     const handleSensorChange = (selectedSensor) => {
         onSensorChange(selectedSensor);
+    };
+
+    const handleSelectAll = (e) => {
+        e.preventDefault();
+        const selectableSensors = canBeSelected ? 
+            sensors.filter(x => canBeSelected.map(y => y.sensor).includes(x.sensor)) : 
+            sensors;
+        selectableSensors.forEach(sensor => {
+            handleSensorChange(sensor.sensor);
+        });
     };
 
     let style = {
@@ -45,6 +55,18 @@ export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalSty
                 </Box>
             </MenuButton>
             <MenuList mt="2" zIndex={10} ml={2} maxH={"800px"} overflowY={"scroll"}>
+                {showSelectAll && (
+                    <>
+                        <MenuItem
+                            className={!normalStyle ? "ddlItem" : "ddlItemAlt"}
+                            style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6 }}
+                            onClick={handleSelectAll}
+                        >
+                            {i18next.t("select_all")}
+                        </MenuItem>
+                        <MenuDivider />
+                    </>
+                )}
                 {getSensors().map((x, i) => {
                     if (!x) return null;
                     let divider = <></>;

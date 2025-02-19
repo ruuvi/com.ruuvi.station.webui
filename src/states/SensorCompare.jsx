@@ -49,12 +49,12 @@ function SensorCompare(props) {
         if (dataKey === "measurementSequenceNumber") return "";
         let unit = ""
         let label = "";
-        if (typeof(dataKey) === "object") {
+        if (typeof (dataKey) === "object") {
             label = getUnitHelper(dataKey.sensorType)?.label || dataKey.sensorType
             if (dataKey.unit) {
                 unit = t(dataKey.unit.translationKey)
             } else {
-                unit = getUnitHelper(label).unit 
+                unit = getUnitHelper(label).unit
             }
         } else {
             label = getUnitHelper(dataKey).label
@@ -73,7 +73,7 @@ function SensorCompare(props) {
     }
     const graphCtrl = (isMobile) => {
         let key = ""
-        if (typeof(dataKey) === "object") {
+        if (typeof (dataKey) === "object") {
             key = dataKey.sensorType
         } else {
             key = dataKey
@@ -94,7 +94,13 @@ function SensorCompare(props) {
 
     const selectSensorTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("sensors_select_label")}</div>
     const selectSensor = <>
-        <SensorPicker sensors={sensors} canBeSelected={canBeSelected} buttonText={i18next.t("sensors_select_button")} onSensorChange={s => setSelectedSensors([...selectedSensors, s])} />
+        <SensorPicker
+            sensors={sensors}
+            showSelectAll
+            canBeSelected={canBeSelected}
+            buttonText={i18next.t("sensors_select_button")}
+            onSensorChange={s => setSelectedSensors(prev => [...prev, s])}
+        />
         <Flex gap='2' wrap="wrap" mt={3} mb={3}>
             {selectedSensors.map((sensor, index) => (
                 <Box key={index}>
@@ -103,6 +109,11 @@ function SensorCompare(props) {
                     }} />
                 </Box>
             ))}
+            {selectedSensors.length > 0 &&
+                <Button variant='link' onClick={() => setSelectedSensors([])}>
+                    {i18next.t("clear")}
+                </Button>
+            }
         </Flex>
     </>
 
