@@ -36,7 +36,7 @@ export default function DashboardViewType(props) {
                 borderRadius='4px'>
                 {t('view')}
             </MenuButton>
-            <MenuList>
+            <MenuList zIndex={100}>
                 <MenuGroup title={t('card_type')} style={{ paddingTop: 6 }}>
                     {opts.map((x, i) => {
                         let divider = <></>

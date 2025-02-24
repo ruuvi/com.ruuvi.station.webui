@@ -109,7 +109,7 @@ export default function SensorTypePicker(props) {
                     {getLabelForOption(props.value)}
                 </Box>
             </MenuButton>
-            <MenuList maxHeight="600px" overflowY="auto">
+            <MenuList maxHeight="600px" overflowY="auto" zIndex={100}>
                 {opts.map((op, i) => {
                     let { sensorType, unit } = op;
                     let x = sensorType

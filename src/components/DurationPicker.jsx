@@ -134,7 +134,7 @@ export default function DurationPicker(props) {
 
                         </PopoverAnchor>
 
-                        <MenuList zIndex={2}>
+                        <MenuList zIndex={100}>
                             {renderTimespans.map((x, i) => {
                                 let divider = <></>
                                 let borderStyle = {};
