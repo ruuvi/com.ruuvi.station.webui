@@ -109,9 +109,9 @@ function SensorCompare(props) {
                     }} />
                 </Box>
             ))}
-            {selectedSensors.length > 0 &&
+            {selectedSensors.length > 1 &&
                 <Button variant='link' onClick={() => setSelectedSensors([])}>
-                    {i18next.t("clear")}
+                    {i18next.t("clear_all")}
                 </Button>
             }
         </Flex>
