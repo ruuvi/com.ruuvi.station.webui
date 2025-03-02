@@ -9,7 +9,6 @@ import { withColorMode } from "../utils/withColorMode";
 import { IconButton } from "@chakra-ui/react";
 import { MdInfo } from "react-icons/md";
 import notify from "../utils/notify";
-import { calculateAverage } from "../utils/dataMath";
 import { date2digits, secondsToUserDateString, time2digits } from "../TimeHelper";
 const UplotReact = React.lazy(() => import('uplot-react'));
 
@@ -365,58 +364,72 @@ class Graph extends Component {
                                             drawSeries: [
                                                 (u, si) => {
                                                     let ctx = u.ctx;
-                                                    ctx.save();
                                                     let s = u.series[si];
                                                     const offset = (s.width % 2) / 2;
 
-                                                    if (!this.props.points) {
-                                                        // manually draw points for datapoints that are not connected
+                                                    ctx.save();
+                                                    let xd = u.data[0];
+                                                    let yd = u.data[1]
 
-                                                        ctx.translate(offset, offset);
-                                                        ctx.beginPath();
-
-                                                        let xd = u.data[0];
-                                                        let yd = u.data[1]
-
-                                                        const timeToClosestDatapoint = (idx) => {
-                                                            let closestToLeft = Number.POSITIVE_INFINITY
-                                                            let closestToRight = Number.POSITIVE_INFINITY
-                                                            if (idx !== 0) {
-                                                                for (let i = idx - 1; i >= 0; i--) {
-                                                                    if (yd[i] !== null) {
-                                                                        closestToLeft = Math.abs(xd[i] - xd[idx])
-                                                                        break
-                                                                    }
+                                                    const timeToClosestDatapoint = (idx) => {
+                                                        let closestToLeft = Number.POSITIVE_INFINITY
+                                                        let closestToRight = Number.POSITIVE_INFINITY
+                                                        if (idx !== 0) {
+                                                            for (let i = idx - 1; i >= 0; i--) {
+                                                                if (yd[i] !== null) {
+                                                                    closestToLeft = Math.abs(xd[i] - xd[idx])
+                                                                    break
                                                                 }
                                                             }
-                                                            if (idx !== yd.length - 1) {
-                                                                for (let i = idx + 1; i < yd.length; i++) {
-                                                                    if (yd[i] !== null) {
-                                                                        closestToRight = Math.abs(xd[i] - xd[idx])
-                                                                        break
-                                                                    }
-                                                                }
-                                                            }
-                                                            if (closestToLeft < closestToRight) return closestToLeft
-                                                            return closestToRight
                                                         }
+                                                        if (idx !== yd.length - 1) {
+                                                            for (let i = idx + 1; i < yd.length; i++) {
+                                                                if (yd[i] !== null) {
+                                                                    closestToRight = Math.abs(xd[i] - xd[idx])
+                                                                    break
+                                                                }
+                                                            }
+                                                        }
+                                                        if (closestToLeft < closestToRight) return closestToLeft
+                                                        return closestToRight
+                                                    }
 
-                                                        for (let i = 0; i < xd.length; i++) {
-                                                            if (yd[i] === null) continue;
-                                                            if (timeToClosestDatapoint(i) < 3600) continue;
-                                                            let x = u.valToPos(xd[i], 'x', true);
-                                                            let y = u.valToPos(yd[i], 'y', true);
+                                                    for (let i = 0; i < xd.length; i++) {
+                                                        if (yd[i] === null) continue;
+                                                        if (timeToClosestDatapoint(i) < 3600) continue;
+                                                        let x = u.valToPos(xd[i], 'x', true);
+                                                        let y = u.valToPos(yd[i], 'y', true);
+
+                                                        if (!this.props.points) {
                                                             ctx.beginPath();
                                                             ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
                                                             ctx.stroke();
                                                         }
+                                                        // Draw point
 
-                                                        ctx.stroke();
-                                                        ctx.translate(-offset, -offset);
+                                                        // Draw a small area under the datapoint to make it more visible
+                                                        ctx.beginPath();
+                                                        const areaWidth = 1;
 
-                                                        ctx.restore();
+                                                        let areaToValue = u.valToPos(0, 'y', true);
+                                                        if (u.scales.y.min > 0) areaToValue = u.valToPos(u.scales.y.min, 'y', true);
+                                                        if (u.scales.y.max < 0) areaToValue = u.valToPos(u.scales.y.max, 'y', true);
+
+                                                        // Create a small area that extends from the point to the zero line
+                                                        ctx.moveTo(x - areaWidth, y);
+                                                        ctx.lineTo(x - areaWidth, areaToValue);
+                                                        ctx.lineTo(x + areaWidth, areaToValue);
+                                                        ctx.lineTo(x + areaWidth, y);
+                                                        ctx.closePath();
+
+                                                        // Use the fill color for series
+                                                        ctx.fillStyle = ruuviTheme.graph.fill[colorMode];
+                                                        ctx.fill();
                                                     }
+                                                    ctx.restore();
+                                                    
                                                     if (alert && alert.enabled) {
+                                                        ctx.save();
                                                         ctx.translate(offset, offset);
                                                         ctx.beginPath();
                                                         let xd = u.data[0];
