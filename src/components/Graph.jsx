@@ -409,7 +409,7 @@ class Graph extends Component {
 
                                                         // Draw a small area under the datapoint to make it more visible
                                                         ctx.beginPath();
-                                                        const areaWidth = 1;
+                                                        const areaWidth = 1.5;
 
                                                         let areaToValue = u.valToPos(0, 'y', true);
                                                         if (u.scales.y.min > 0) areaToValue = u.valToPos(u.scales.y.min, 'y', true);
