@@ -407,16 +407,19 @@ class Graph extends Component {
                                                             ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
                                                             ctx.stroke();
                                                         }
-                                                        // Draw point
 
                                                         // Draw a small area under the datapoint to make it more visible
                                                         ctx.beginPath();
-                                                        const areaWidth = 1.5;
+                                                        
+                                                        // Calculate area width based on device pixel ratio for better visibility on high-density screens
+                                                        const devicePixelRatio = window.devicePixelRatio || 1;
+                                                        // Base width scaled by pixel ratio
+                                                        const areaWidth = Math.min(Math.max(1 * devicePixelRatio, 1), 5);
 
                                                         let areaToValue = u.valToPos(0, 'y', true);
                                                         if (u.scales.y.min > 0) areaToValue = u.valToPos(u.scales.y.min, 'y', true);
                                                         if (u.scales.y.max < 0) areaToValue = u.valToPos(u.scales.y.max, 'y', true);
-
+                                                        
                                                         // Create a small area that extends from the point to the zero line
                                                         ctx.moveTo(x - areaWidth, y);
                                                         ctx.lineTo(x - areaWidth, areaToValue);
