@@ -414,7 +414,7 @@ class Graph extends Component {
                                                         // Calculate area width based on device pixel ratio for better visibility on high-density screens
                                                         const devicePixelRatio = window.devicePixelRatio || 1;
                                                         // Base width scaled by pixel ratio
-                                                        const areaWidth = Math.min(Math.max(1 * devicePixelRatio, 1), 5);
+                                                        const areaWidth = Math.min(Math.max(1 * devicePixelRatio, 1), 3);
 
                                                         let areaToValue = u.valToPos(0, 'y', true);
                                                         if (u.scales.y.min > 0) areaToValue = u.valToPos(u.scales.y.min, 'y', true);
