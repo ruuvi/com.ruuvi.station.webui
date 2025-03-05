@@ -127,7 +127,7 @@ class Graph extends Component {
         for (let i = 0; i < filteredData.length; i++) {
             const x = filteredData[i];
             timestamps.push(x.timestamp);
-            values.push(unitHelper.value(x.parsed[dataKey], x.parsed.temperature));
+            values.push(unitHelper.value(x.parsed[dataKey], dataKey === "humidity" ? x.parsed.temperature : undefined));
         }
 
         // Insert null values for time gaps

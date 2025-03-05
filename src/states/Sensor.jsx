@@ -556,13 +556,29 @@ class Sensor extends Component {
                                 {mainSensorFields.map(x => {
                                     let value = this.getLatestReading()[x];
                                     if (value === undefined) return null;
-                                    return <SensorReading key={x} value={this.getLatestReading()[x] == null ? "-" : localeNumber(getUnitHelper(x).value(this.getLatestReading()[x], this.getLatestReading()["temperature"]), getUnitHelper(x).decimals)}
-                                        info={x !== "battery" ? undefined : isBatteryLow(this.getLatestReading()[x], this.getLatestReading().temperature) ? "replace_battery" : "battery_ok"}
-                                        alertTriggered={this.isAlertTriggerd(x)}
-                                        label={getUnitHelper(x).label}
-                                        unit={getUnitHelper(x).unit}
-                                        selected={this.state.graphKey === x}
-                                        onClick={() => this.setGraphKey(x)} />
+                                    return (
+                                        <SensorReading 
+                                            key={x} 
+                                            value={this.getLatestReading()[x] == null ? "-" : 
+                                                localeNumber(
+                                                    getUnitHelper(x).value(
+                                                        this.getLatestReading()[x], 
+                                                        x === "humidity" ? this.getLatestReading()["temperature"] : undefined
+                                                    ), 
+                                                    getUnitHelper(x).decimals
+                                                )
+                                            }
+                                            info={x !== "battery" ? undefined : 
+                                                isBatteryLow(this.getLatestReading()[x], this.getLatestReading().temperature) ? 
+                                                "replace_battery" : "battery_ok"
+                                            }
+                                            alertTriggered={this.isAlertTriggerd(x)}
+                                            label={getUnitHelper(x).label}
+                                            unit={getUnitHelper(x).unit}
+                                            selected={this.state.graphKey === x}
+                                            onClick={() => this.setGraphKey(x)} 
+                                        />
+                                    )
                                 })}
                             </SensorValueGrid>
 
@@ -788,7 +804,6 @@ class Sensor extends Component {
                                     <AccordionText>
                                         {uppercaseFirst(t("more_info"))}
                                     </AccordionText>
-                                    <AccordionIcon />
                                 </AccordionButton>
                                 <hr />
                                 <AccordionPanel style={accordionPanel}>
