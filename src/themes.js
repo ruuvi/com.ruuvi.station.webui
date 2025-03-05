@@ -228,6 +228,9 @@ export const ruuviTheme = extendTheme({
                 fontFamily: "montserrat",
                 fontWeight: 800,
             },
+            '.chakra-toast': {
+                fontFamily: "mulish",
+            }
         })
     },
     graph: {
