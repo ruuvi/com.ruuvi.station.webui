@@ -377,9 +377,10 @@ export const ruuviTheme = extendTheme({
                     bg: colors.menuButtonBg[props.colorMode],
                     border: "none",
                     boxShadow: props.colorMode === "dark" ? "0px 0px 10px #00000050 !important" : "0px 0px 10px #00000030 !important",
+                    overflow: "hidden",
                 },
                 item: {
-                    overflow: "none",
+                    overflow: "hidden",
                     bg: colors.menuItemBg[props.colorMode],
                     '@media (hover: hover) and (pointer: fine)': {
                         _hover: { bg: colors.colorMenuHover[props.colorMode] + " !important" },

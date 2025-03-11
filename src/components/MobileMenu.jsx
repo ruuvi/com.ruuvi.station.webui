@@ -27,7 +27,7 @@ const MobileMenu = ({ openSettings, myAccount }) => {
                 <MdMenu size={28} />
             </MenuButton>
             <MenuList mt="2" zIndex={10}>
-                <MenuItem className={(window.location.href.endsWith("/") ? "menuActive" : "") + " ddlItem"} style={{ borderTopRightRadius: 8, borderTopLeftRadius: 8 }} onClick={() => nav("/")}>{t("home")}</MenuItem>
+                <MenuItem className={(window.location.href.endsWith("/") ? "menuActive" : "") + " ddlItem"} onClick={() => nav("/")}>{t("home")}</MenuItem>
                 <MenuDivider />
                 <MenuItem className={(window.location.href.endsWith("/shares") ? "menuActive" : "") + " ddlItem"} onClick={() => nav("/shares")}>{t("share_sensors")}</MenuItem>
                 <MenuDivider />
