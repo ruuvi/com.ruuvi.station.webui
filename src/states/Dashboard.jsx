@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useEffect, useRef, useState } from "react";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
@@ -25,16 +25,114 @@ const infoText = {
 function DashboardGrid(props) {
     const [isLargeDisplay] = useMediaQuery("(min-width: 1700px)", { ssr: false })
     const [isMediumDisplay] = useMediaQuery("(min-width: 1024px)", { ssr: false })
-    //const isMobileDisplay = !isLargeDisplay && !isMediumDisplay
+    const gridRef = useRef(null);
+    const [containerWidth, setContainerWidth] = useState(0);
+    
     let size = ""
     if (isLargeDisplay) size = "large"
     else if (isMediumDisplay) size = "medium"
     else size = "mobile"
+    
     if (props.currSize !== size) props.onSizeChange(size)
-    //this.state.showBig ? "550px" : "400px"
-    return <Box style={{ marginBottom: 30, marginTop: 10 }} justifyItems="start" display="grid" gap={size === "mobile" ? "10px" : "20px"} gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "500px" : isMediumDisplay ? "400px" : props.showGraph ? "300px" : "360px"}, max-content))`}>
-        {props.children(size)}
-    </Box>
+    
+    const gap = size === "mobile" ? 10 : 20;
+    const minCardWidth = isLargeDisplay ? 450 : isMediumDisplay ? 350 : props.showGraph ? 280 : 320;
+    
+    // calculate optimal column count and column width
+    const calculateGridDimensions = () => {
+        if (!gridRef.current || !containerWidth) return { columnWidth: minCardWidth, columnCount: 1 };
+        
+        // calculate how many columns can fit
+        let columnCount = Math.max(1, Math.floor((containerWidth + gap) / (minCardWidth + gap)));
+        
+        // calculate the actual column width to fill the available space
+        const columnWidth = (containerWidth - (gap * (columnCount - 1))) / columnCount;
+        
+        return { columnWidth, columnCount };
+    }
+    
+    useEffect(() => {
+        // position items after they're rendered
+        const resizeObserver = new ResizeObserver(() => {
+            if (gridRef.current) {
+                setContainerWidth(gridRef.current.clientWidth);
+                
+                const items = gridRef.current.querySelectorAll('.masonry-item');
+                if (!items) return;
+                
+                positionItems(items);
+            }
+        });
+        
+        const positionItems = (items) => {
+            if (!gridRef.current) return;
+            
+            gridRef.current.style.height = '';
+            
+            const { columnWidth, columnCount } = calculateGridDimensions();
+            
+            // track the height of each column
+            const columnHeights = Array(columnCount).fill(0);
+            
+            Array.from(items).forEach(item => {
+                // find the shortest column
+                const minColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
+                
+                // position
+                const x = minColumnIndex * (columnWidth + gap);
+                const y = columnHeights[minColumnIndex];
+                
+                // set width to match column width
+                item.style.width = `${columnWidth}px`;
+                item.style.transform = `translate(${x}px, ${y}px)`;
+                
+                // update column height
+                columnHeights[minColumnIndex] += item.offsetHeight;
+            });
+            
+            // set the container height to the tallest column
+            gridRef.current.style.height = `${Math.max(...columnHeights) - gap}px`;
+        };
+        
+        // observe the grid container
+        if (gridRef.current) {
+            setContainerWidth(gridRef.current.clientWidth);
+            resizeObserver.observe(gridRef.current);
+            
+            window.addEventListener('resize', () => {
+                if (gridRef.current) {
+                    setContainerWidth(gridRef.current.clientWidth);
+                }
+            });
+        }
+        
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', () => {});
+        };
+    }, [containerWidth, props.order]);
+    
+    return (
+        <Box
+            ref={gridRef}
+            className="masonry-grid"
+            sx={{
+                marginBottom: "30px",
+                marginTop: "10px",
+                position: "relative",
+                display: "grid",
+                gridTemplateColumns: `repeat(auto-fill, minmax(${minCardWidth}px, 1fr))`,
+                columnGap: `${gap}px`,
+                rowGap: `${gap}px`,
+                "& > span": {
+                    position: "absolute",
+                    transition: "transform 0.2s ease, width 0.2s ease",
+                }
+            }}
+        >
+            {props.children(size)}
+        </Box>
+    );
 }
 
 const getSensorCache = () => {
@@ -296,7 +394,7 @@ class Dashboard extends Component {
         const sensorCard = (x, size, sensorsInSearch) => {
             if (!x) return <></>
             let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
-            return <span key={x.sensor} style={{ width: 640, maxWidth: "100%", display: hide ? "none" : undefined }}>
+            return <span className="masonry-item" key={x.sensor} style={{ maxWidth: "100%", display: hide ? "none" : undefined }}>
                 <a href={"/" + x.sensor}>
                     <SensorCard sensor={x}
                         size={size}
@@ -365,7 +463,7 @@ class Dashboard extends Component {
                                             </Flex>
                                         </div>
                                     }
-                                    <DashboardGrid showGraph={this.state.showGraph} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })}>
+                                    <DashboardGrid showGraph={this.state.showGraph} order={this.getOrder()} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })}>
                                         {size => {
                                             let sensorsInSearch = this.getSensors()
                                             if (order) {
