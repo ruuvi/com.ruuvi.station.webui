@@ -110,7 +110,7 @@ function MoreMenu(props) {
                 onClick={(e) => e.preventDefault() || handleButtonClick()}
                 icon={<MdMoreVert size={23} />}
                 variant="topbar"
-                style={{ 
+                style={{
                     zIndex: 2,
                     backgroundColor: "transparent",
                     transition: "color 0.2s ease-in-out"
@@ -458,8 +458,6 @@ class SensorCard extends Component {
             <div
                 style={{
                     height: graphHeight,
-                    marginLeft: simpleView ? 0 : 24,
-                    marginRight: 30,
                     paddingTop: simpleView ? 0 : 10,
                 }}
                 className="nodatatext"
@@ -835,13 +833,13 @@ class SensorCard extends Component {
                                                                             </center>
                                                                         ) : (
                                                                             showGraph && (
-                                                                                <>
+                                                                                <Box ml={"10px"}>
                                                                                     {noData(
                                                                                         this.state.errorFetchingData
                                                                                             ? "error"
                                                                                             : noHistoryStr
                                                                                     )}
-                                                                                </>
+                                                                                </Box>
                                                                             )
                                                                         )}
                                                                     </>
@@ -919,7 +917,7 @@ class SensorCard extends Component {
                                         ) : (
                                             <>
                                                 {/* No data available fallback */}
-                                                <div style={{ marginLeft: -24, marginTop: height / 6 }}>
+                                                <div style={{ marginTop: height / 6 }}>
                                                     {noData(
                                                         t("no_data")
                                                             .split("\n")
