@@ -153,6 +153,7 @@ class SensorCard extends Component {
             showRemoveDialog: false,
             errorFetchingData: false,
             hasDataForTypes: [],
+            demoBig: Math.random() > 0.5,
         };
         this.abortController = new AbortController();
     }
@@ -332,8 +333,12 @@ class SensorCard extends Component {
     getSmallDataFields() {
         let arr = ["humidity", "pressure", "movementCounter"];
         let latest = this.getLatestReading();
-
         if (!latest) return arr;
+
+        /*
+        let noShow = ["mac", "timestamp", "dataFormat", "txPower", this.props.graphType || "temperature"];
+        return Object.keys(latest).filter((x) => !arr.includes(x) && !noShow.includes(x));
+        */
 
         if (latest.dataFormat === 6) arr = ["pm1p0", "co2", "voc"];
         if (latest.dataFormat === "e0") arr = ["pm1p0", "co2", "voc", "aqi"];
@@ -359,6 +364,7 @@ class SensorCard extends Component {
                 ? 300
                 : 350
             : 180;
+        if (this.state.demoBig) height += 200;
         let graphHeight = height - 150;
         let imageWidth = "25%";
         let imageButtonSize = 80;
@@ -524,7 +530,9 @@ class SensorCard extends Component {
             if (!stats.includes("movementCounter")) stats.push("movementCounter");
 
             return (
-                <div>
+                <Box
+                    marginBottom={this.props.size === "mobile" ? "10px" : "20px"}
+                >
                     {altFileUplaod}
                     <Box
                         className="content sensorCard"
@@ -621,7 +629,7 @@ class SensorCard extends Component {
                         )}
                     </Box>
                     {removeSensorDialog}
-                </div>
+                </Box>
             );
         }
 
@@ -629,9 +637,15 @@ class SensorCard extends Component {
          * Default (detailed) card rendering
          */
         return (
-            <div>
+            <Box>
                 {altFileUplaod}
-                <Box className="content sensorCard" height={height} borderRadius="lg" overflow="hidden">
+                <Box
+                    className="content sensorCard"
+                    height={height}
+                    borderRadius="lg"
+                    overflow="hidden"
+                    marginBottom={this.props.size === "mobile" ? "10px" : "20px"}
+                >
                     <Box height="100%" margin="auto">
                         {/* Image section */}
                         {showImage && (
@@ -900,7 +914,7 @@ class SensorCard extends Component {
                                                         >
                                                             {this.getSmallDataFields().map((x) => {
                                                                 let value = latestReading[x];
-                                                                if (value === undefined) return null;
+                                                                if (value === undefined || typeof (value) === "object") return null;
                                                                 return (
                                                                     <GridItem
                                                                         key={x}
@@ -966,7 +980,7 @@ class SensorCard extends Component {
                 </Box>
 
                 {removeSensorDialog}
-            </div>
+            </Box>
         );
     }
 }
