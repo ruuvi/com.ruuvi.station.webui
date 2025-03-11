@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Menu, MenuButton, MenuList, MenuItem, MenuDivider, useColorMode } from '@chakra-ui/react';
+import { Button, Menu, MenuButton, MenuList, MenuItem, MenuDivider, useColorMode, useDisclosure } from '@chakra-ui/react';
 import { MdArrowDropDown, MdMenu, MdOpenInNew } from "react-icons/md"
 import i18next from 'i18next';
 import { logout } from '../utils/loginUtils';
@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 const MobileMenu = ({ openSettings, myAccount }) => {
     const [show, setShow] = React.useState(false);
     const [showMyProfile, setShowMyProfile] = React.useState(false);
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    
     const handleToggle = (e) => {
         setShow(!show);
         e.stopPropagation();
@@ -19,19 +21,23 @@ const MobileMenu = ({ openSettings, myAccount }) => {
         e.nativeEvent.stopImmediatePropagation();
     }
     const nav = useNavigate()
+    const navigateTo = (path) => {
+        onClose();
+        nav(path);
+    }
     const { t } = i18next
     const { colorMode, toggleColorMode } = useColorMode()
     return (
-        <Menu autoSelect={false} closeOnSelect={false}>
+        <Menu isOpen={isOpen} onClose={onClose} onOpen={onOpen} autoSelect={false} closeOnSelect={false}>
             <MenuButton as={Button} variant="topbar" style={{ backgroundColor: "transparent", paddingRight: 0, paddingLeft: 10 }}>
                 <MdMenu size={28} />
             </MenuButton>
             <MenuList mt="2" zIndex={10}>
-                <MenuItem className={(window.location.href.endsWith("/") ? "menuActive" : "") + " ddlItem"} onClick={() => nav("/")}>{t("home")}</MenuItem>
+                <MenuItem className={(window.location.href.endsWith("/") ? "menuActive" : "") + " ddlItem"} onClick={() => navigateTo("/")}>{t("home")}</MenuItem>
                 <MenuDivider />
-                <MenuItem className={(window.location.href.endsWith("/shares") ? "menuActive" : "") + " ddlItem"} onClick={() => nav("/shares")}>{t("share_sensors")}</MenuItem>
+                <MenuItem className={(window.location.href.endsWith("/shares") ? "menuActive" : "") + " ddlItem"} onClick={() => navigateTo("/shares")}>{t("share_sensors")}</MenuItem>
                 <MenuDivider />
-                <MenuItem className={(window.location.href.endsWith("/compare") ? "menuActive" : "") + " ddlItem"} onClick={() => nav("/compare")}>{t("compare")}</MenuItem>
+                <MenuItem className={(window.location.href.endsWith("/compare") ? "menuActive" : "") + " ddlItem"} onClick={() => navigateTo("/compare")}>{t("compare")}</MenuItem>
                 <MenuDivider />
                 <MenuItem className="ddlItem" onClick={handleToggle} display={"flex"} justifyContent={"space-between"}>
                     <span>
