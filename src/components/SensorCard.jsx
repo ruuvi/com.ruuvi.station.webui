@@ -152,6 +152,7 @@ class SensorCard extends Component {
             loadingImage: false,
             showRemoveDialog: false,
             errorFetchingData: false,
+            hasDataForTypes: [],
         };
     }
 
@@ -218,13 +219,19 @@ class SensorCard extends Component {
 
             // Parse the returned data
             let d = parse(graphData.data);
+            let hasDataForTypes = [];
+            if (d.measurements.length) {
+                hasDataForTypes = Object.keys(d.measurements[0].parsed);
+            }
             this.setState({
+                ...this.state,
                 data: d,
                 loading: false,
                 loadingHistory: false,
                 table: d.table,
                 resolvedMode: d.resolvedMode,
                 errorFetchingData: false,
+                hasDataForTypes: hasDataForTypes,
             });
         }
         else if (graphData.result === "error") {
@@ -783,6 +790,7 @@ class SensorCard extends Component {
                                                         }}
                                                     >
                                                         {this.state.data &&
+                                                            this.state.hasDataForTypes.includes(mainStat) &&
                                                             this.state.data.measurements.length ? (
                                                             <>
                                                                 {showGraph && (
