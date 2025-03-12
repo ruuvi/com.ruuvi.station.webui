@@ -154,6 +154,7 @@ class SensorCard extends Component {
             errorFetchingData: false,
             hasDataForTypes: [],
         };
+        this.abortController = new AbortController();
     }
 
     componentDidMount() {
@@ -162,6 +163,17 @@ class SensorCard extends Component {
 
     componentWillUnmount() {
         clearTimeout(this.fetchDataLoop);
+        this.abortController.abort();
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.dataFrom !== this.props.dataFrom) {
+            this.abortController.abort();
+            this.abortController = new AbortController();
+
+            this.setState({ ...this.state, loading: true, loadingHistory: true });
+            this.loadData();
+        }
     }
 
     /**
@@ -202,46 +214,60 @@ class SensorCard extends Component {
         const networkApi = new NetworkApi();
         const nowTs = Math.floor(new Date().getTime() / 1000);
         const rangeStart = nowTs - 60 * 60 * this.props.dataFrom;
-        const graphData = await networkApi.getAsync(
-            this.props.sensor.sensor,
-            parseInt(rangeStart),
-            null,
-            { mode: graphDataMode }
-        );
+        try {
+            const graphData = await networkApi.getAsync(
+                this.props.sensor.sensor,
+                parseInt(rangeStart),
+                null,
+                { mode: graphDataMode },
+                this.abortController.signal
+            );
 
-        if (graphData.result === "success") {
-            // Merge offsets from sensor
-            Object.keys(this.props.sensor)
-                .filter((x) => x.startsWith("offset"))
-                .forEach((x) => {
-                    graphData.data[x] = this.props.sensor[x];
+            if (graphData.result === "success") {
+                // Merge offsets from sensor
+                Object.keys(this.props.sensor)
+                    .filter((x) => x.startsWith("offset"))
+                    .forEach((x) => {
+                        graphData.data[x] = this.props.sensor[x];
+                    });
+
+                // Parse the returned data
+                let d = parse(graphData.data);
+                let hasDataForTypes = [];
+                if (d.measurements.length) {
+                    hasDataForTypes = Object.keys(d.measurements[0].parsed);
+                }
+                this.setState({
+                    ...this.state,
+                    data: d,
+                    loading: false,
+                    loadingHistory: false,
+                    table: d.table,
+                    resolvedMode: d.resolvedMode,
+                    errorFetchingData: false,
+                    hasDataForTypes: hasDataForTypes,
                 });
-
-            // Parse the returned data
-            let d = parse(graphData.data);
-            let hasDataForTypes = [];
-            if (d.measurements.length) {
-                hasDataForTypes = Object.keys(d.measurements[0].parsed);
             }
-            this.setState({
-                ...this.state,
-                data: d,
-                loading: false,
-                loadingHistory: false,
-                table: d.table,
-                resolvedMode: d.resolvedMode,
-                errorFetchingData: false,
-                hasDataForTypes: hasDataForTypes,
-            });
-        }
-        else if (graphData.result === "error") {
-            console.log(graphData.error);
-            this.setState({
-                ...this.state,
-                loading: false,
-                loadingHistory: false,
-                errorFetchingData: true,
-            });
+            else if (graphData.result === "error") {
+                console.log(graphData.error);
+                this.setState({
+                    ...this.state,
+                    loading: false,
+                    loadingHistory: false,
+                    errorFetchingData: true,
+                });
+            }
+        } catch (error) {
+            // Only log errors if they're not caused by aborted requests
+            if (error.name !== 'AbortError') {
+                console.log("Error fetching graph data:", error);
+                this.setState({
+                    ...this.state,
+                    loading: false,
+                    loadingHistory: false,
+                    errorFetchingData: true,
+                });
+            }
         }
     }
 
@@ -768,7 +794,6 @@ class SensorCard extends Component {
                                 <center
                                     style={{
                                         position: "relative",
-                                        top: "50%",
                                         marginTop: isSmallCard ? 0 : height / 3,
                                         transform: "translateY(-50%)",
                                     }}

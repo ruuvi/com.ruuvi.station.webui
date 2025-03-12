@@ -296,7 +296,7 @@ class Dashboard extends Component {
         const sensorCard = (x, size, sensorsInSearch) => {
             if (!x) return <></>
             let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
-            return <span key={x.sensor + this.state.from} style={{ width: 640, maxWidth: "100%", display: hide ? "none" : undefined }}>
+            return <span key={x.sensor} style={{ width: 640, maxWidth: "100%", display: hide ? "none" : undefined }}>
                 <a href={"/" + x.sensor}>
                     <SensorCard sensor={x}
                         size={size}
