@@ -344,6 +344,7 @@ class Graph extends Component {
                                     options={{
                                         title: this.props.title,
                                         width: width,
+                                        drawOrder: ["series", "axes"],
                                         height: height,
                                         plugins: plugins,
                                         legend: {
@@ -412,7 +413,7 @@ class Graph extends Component {
 
                                                         // Draw a small area under the datapoint to make it more visible
                                                         ctx.beginPath();
-                                                        
+
                                                         // Calculate area width based on device pixel ratio for better visibility on high-density screens
                                                         const devicePixelRatio = window.devicePixelRatio || 1;
                                                         // Base width scaled by pixel ratio
@@ -421,7 +422,7 @@ class Graph extends Component {
                                                         let areaToValue = u.valToPos(0, 'y', true);
                                                         if (u.scales.y.min > 0) areaToValue = u.valToPos(u.scales.y.min, 'y', true);
                                                         if (u.scales.y.max < 0) areaToValue = u.valToPos(u.scales.y.max, 'y', true);
-                                                        
+
                                                         // Create a small area that extends from the point to the zero line
                                                         ctx.moveTo(x - areaWidth, y);
                                                         ctx.lineTo(x - areaWidth, areaToValue);
@@ -434,7 +435,7 @@ class Graph extends Component {
                                                         ctx.fill();
                                                     }
                                                     ctx.restore();
-                                                    
+
                                                     if (alert && alert.enabled) {
                                                         ctx.save();
                                                         ctx.translate(offset, offset);
