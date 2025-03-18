@@ -294,12 +294,14 @@ class Graph extends Component {
                 dataMin = graphData[1][i];
             }
         }
+        let colorFillVar = this.props.cardView ? "fillCard" : "fill"
+
         if (isNaN(dataMin)) dataMin = -70000;
         dataMin -= 10;
         let fillGrad = [
-            [dataMin, ruuviTheme.graph.alert.fill[colorMode]],
-            [alertMin, ruuviTheme.graph.fill[colorMode]],
-            [alertMax, ruuviTheme.graph.alert.fill[colorMode]],
+            [dataMin, ruuviTheme.graph.alert[colorFillVar][colorMode]],
+            [alertMin, ruuviTheme.graph[colorFillVar][colorMode]],
+            [alertMax, ruuviTheme.graph.alert[colorFillVar][colorMode]],
         ];
         let strokeGrad = [
             [dataMin, ruuviTheme.graph.alert.stroke[colorMode]],
@@ -319,7 +321,7 @@ class Graph extends Component {
                 }
             }
             return {
-                fill: ruuviTheme.graph.fill[colorMode],
+                fill: ruuviTheme.graph[colorFillVar][colorMode],
                 stroke: ruuviTheme.graph.stroke[colorMode]
             }
         }
@@ -428,7 +430,7 @@ class Graph extends Component {
                                                         ctx.closePath();
 
                                                         // Use the fill color for series
-                                                        ctx.fillStyle = ruuviTheme.graph.fill[colorMode];
+                                                        ctx.fillStyle = ruuviTheme.graph[colorFillVar][colorMode];
                                                         ctx.fill();
                                                     }
                                                     ctx.restore();
