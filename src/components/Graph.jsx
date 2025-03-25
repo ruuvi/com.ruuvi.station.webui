@@ -34,6 +34,8 @@ function DataInfo(props) {
     const { graphData, t, type } = props;
     const [currZoom, setCurrZoom] = useState(null);
 
+    const uh = getUnitHelper(type);
+
     useEffect(() => {
         const listener = zoomData.registerListener(v => {
             setCurrZoom(v);
@@ -64,7 +66,10 @@ function DataInfo(props) {
             return acc;
         }, { min: Number.POSITIVE_INFINITY, max: Number.NEGATIVE_INFINITY, sum: 0 });
 
-        const avg = sum / filteredData.length;
+        let decimalPlaces = uh.decimals;
+        let avg = sum / filteredData.length;
+        avg = Math.round(avg * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
+
         return { min, max, avg };
     }, [filteredData]);
 
