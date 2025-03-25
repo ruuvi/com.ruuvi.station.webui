@@ -457,19 +457,14 @@ class Graph extends Component {
                                                         }
 
                                                         ctx.strokeStyle = ruuviTheme.graph.alert.stroke[colorMode];
-                                                        let yAxisVals = u.data[1]
-                                                        let graphYMin = Number.POSITIVE_INFINITY;
-                                                        let graphYMax = Number.NEGATIVE_INFINITY;
-
-                                                        for (let i = 0; i < yAxisVals.length; i++) {
-                                                            const value = yAxisVals[i];
-                                                            if (value < graphYMin) graphYMin = value;
-                                                            if (value > graphYMax) graphYMax = value;
+                                                        
+                                                        if (alertMax <= u.scales.y.max && alertMax >= u.scales.y.min) {
+                                                            lineAt(alertMax);
                                                         }
-                                                        graphYMax = graphYMax + 0.5
-                                                        graphYMin = graphYMin - 0.5
-                                                        if (alertMax < graphYMax && alertMax > graphYMin) lineAt(alertMax)
-                                                        if (alertMin > graphYMin && alertMin < graphYMax) lineAt(alertMin)
+                                                        
+                                                        if (alertMin >= u.scales.y.min && alertMin <= u.scales.y.max) {
+                                                            lineAt(alertMin);
+                                                        }
 
                                                         ctx.stroke();
                                                         ctx.translate(-offset, -offset);
