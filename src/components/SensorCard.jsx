@@ -258,7 +258,6 @@ class SensorCard extends Component {
                 });
             }
         } catch (error) {
-            // Only log errors if they're not caused by aborted requests
             if (error.name !== 'AbortError') {
                 console.log("Error fetching graph data:", error);
                 this.setState({
@@ -869,7 +868,7 @@ class SensorCard extends Component {
                                                                                 <Box ml={"10px"}>
                                                                                     {noData(
                                                                                         this.state.errorFetchingData
-                                                                                            ? "error"
+                                                                                            ? "network_error"
                                                                                             : noHistoryStr
                                                                                     )}
                                                                                 </Box>
