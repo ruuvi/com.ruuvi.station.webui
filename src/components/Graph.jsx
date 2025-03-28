@@ -379,6 +379,41 @@ class Graph extends Component {
                                                     let xd = u.data[0];
                                                     let yd = u.data[1]
 
+                                                    // ----- dashed line for data gaps
+
+                                                    ctx.beginPath();
+                                                    ctx.setLineDash([2, 4]); // Dashed line pattern
+                                                    ctx.strokeStyle = ruuviTheme.graph.stroke[colorMode];
+                                                    ctx.lineWidth = s.width;
+
+                                                    let lastValidIdx = -1;
+
+                                                    for (let i = 0; i < xd.length; i++) {
+                                                        // If current point has data
+                                                        if (yd[i] !== null) {
+                                                            // If we found a previous valid point and there's a gap between them
+                                                            if (lastValidIdx >= 0 && i - lastValidIdx > 1) {
+                                                                const x1 = u.valToPos(xd[lastValidIdx], 'x', true);
+                                                                const y1 = u.valToPos(yd[lastValidIdx], 'y', true);
+                                                                const x2 = u.valToPos(xd[i], 'x', true);
+                                                                const y2 = u.valToPos(yd[i], 'y', true);
+
+                                                                // Only draw if both points are visible
+                                                                if (x1 >= 0 && x2 <= u.width &&
+                                                                    u.scales.x.min <= xd[i] && u.scales.x.max >= xd[lastValidIdx]) {
+                                                                    ctx.moveTo(x1, y1);
+                                                                    ctx.lineTo(x2, y2);
+                                                                }
+                                                            }
+                                                            lastValidIdx = i;
+                                                        }
+                                                    }
+
+                                                    ctx.stroke();
+                                                    ctx.setLineDash([]); // Reset to solid line
+
+                                                    // -----
+
                                                     const timeToClosestDatapoint = (idx) => {
                                                         let closestToLeft = Number.POSITIVE_INFINITY
                                                         let closestToRight = Number.POSITIVE_INFINITY
