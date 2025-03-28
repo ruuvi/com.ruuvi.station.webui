@@ -423,7 +423,7 @@ class Sensor extends Component {
         alertDebouncer[alert.sensor + alert.type] = {
             alert: alert,
             prevEnabled: prevEnabled,
-            timestamp: ts 
+            timestamp: ts
         }
         let executeAfter = 0
         if (prev && prev.timestamp + 1000 > new Date().getTime()) {
@@ -557,26 +557,26 @@ class Sensor extends Component {
                                     let value = this.getLatestReading()[x];
                                     if (value === undefined) return null;
                                     return (
-                                        <SensorReading 
-                                            key={x} 
-                                            value={this.getLatestReading()[x] == null ? "-" : 
+                                        <SensorReading
+                                            key={x}
+                                            value={this.getLatestReading()[x] == null ? "-" :
                                                 localeNumber(
                                                     getUnitHelper(x).value(
-                                                        this.getLatestReading()[x], 
+                                                        this.getLatestReading()[x],
                                                         x === "humidity" ? this.getLatestReading()["temperature"] : undefined
-                                                    ), 
+                                                    ),
                                                     getUnitHelper(x).decimals
                                                 )
                                             }
-                                            info={x !== "battery" ? undefined : 
-                                                isBatteryLow(this.getLatestReading()[x], this.getLatestReading().temperature) ? 
-                                                "replace_battery" : "battery_ok"
+                                            info={x !== "battery" ? undefined :
+                                                isBatteryLow(this.getLatestReading()[x], this.getLatestReading().temperature) ?
+                                                    "replace_battery" : "battery_ok"
                                             }
                                             alertTriggered={this.isAlertTriggerd(x)}
                                             label={getUnitHelper(x).label}
                                             unit={getUnitHelper(x).unit}
                                             selected={this.state.graphKey === x}
-                                            onClick={() => this.setGraphKey(x)} 
+                                            onClick={() => this.setGraphKey(x)}
                                         />
                                     )
                                 })}
@@ -638,7 +638,20 @@ class Sensor extends Component {
                                         }
                                         <div style={graph}>
                                             {this.state.data?.measurements?.length &&
-                                                <Graph overrideColorMode={this.state.graphPDFMode ? "light" : null} width={this.state.graphPDFMode ? 1017 : null} key={"sensor_graph" + this.state.updateGraphKey} unit={this.getSelectedUnit()} setRef={(ref) => (this.chartRef = ref)} alert={tnpGetAlert(this.state.graphKey)} dataKey={this.state.graphKey} points={new Store().getGraphDrawDots()} dataName={t(getUnitHelper(this.state.graphKey).label)} data={this.getGraphData()} height={450} cursor={true} from={this.getFrom()} to={this.getTo()} />
+                                                <Graph
+                                                    overrideColorMode={this.state.graphPDFMode ? "light" : null}
+                                                    width={this.state.graphPDFMode ? 1017 : null}
+                                                    key={"sensor_graph" + this.state.updateGraphKey}
+                                                    unit={this.getSelectedUnit()}
+                                                    setRef={(ref) => (this.chartRef = ref)}
+                                                    alert={tnpGetAlert(this.state.graphKey)}
+                                                    dataKey={this.state.graphKey}
+                                                    dataName={t(getUnitHelper(this.state.graphKey).label)}
+                                                    data={this.getGraphData()}
+                                                    height={450} cursor={true}
+                                                    from={this.getFrom()}
+                                                    to={this.getTo()}
+                                                />
                                             }
                                         </div>
                                     </Box>
@@ -744,7 +757,7 @@ class Sensor extends Component {
                                         </Box>}
                                         {["temperature", "humidity", "pressure", "signal", "movement", "offline", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"].map(x => {
                                             if (!x) return null
-                                            
+
                                             const dataKey = getMappedAlertDataType(x);
                                             let latestValue = this.getLatestReading()[dataKey]
                                             if (latestValue === undefined && x !== "offline") return null;

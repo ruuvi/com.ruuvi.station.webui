@@ -10,6 +10,7 @@ import { IconButton } from "@chakra-ui/react";
 import { MdInfo } from "react-icons/md";
 import notify from "../utils/notify";
 import { date2digits, secondsToUserDateString, time2digits } from "../TimeHelper";
+import Store from "../Store";
 const UplotReact = React.lazy(() => import('uplot-react'));
 
 let zoomData = {
@@ -155,7 +156,6 @@ class Graph extends Component {
     }
     shouldComponentUpdate(nextProps) {
         if (this.props.unit !== nextProps.unit) return true;
-        if (this.props.points !== nextProps.points) return true
         if (this.props.height !== nextProps.height) return true;
         if (nextProps.colorMode.colorMode !== this.props.colorMode.colorMode) return true;
         if (nextProps.overrideColorMode !== this.props.overrideColorMode) return true;
@@ -195,6 +195,7 @@ class Graph extends Component {
         window.removeEventListener('resize', this.resize)
     }
     render() {
+        let showDots = new Store().getGraphDrawDots()
         let alert = this.props.alert
         let width = this.props.width || this.pRef?.current?.offsetWidth
         setTimeout(() => {
@@ -363,7 +364,7 @@ class Graph extends Component {
                                             label: this.props.dataName || this.props.t(this.props.dataKey),
                                             class: "graphLabel",
                                             spanGaps: false,
-                                            points: { show: this.props.points, size: 3, fill: ruuviTheme.graph.stroke[colorMode] },
+                                            points: { show: showDots, size: 3, fill: ruuviTheme.graph.stroke[colorMode] },
                                             width: 1,
                                             ...alertColor(),
                                             value: (self, rawValue) => localeNumber(rawValue)
@@ -445,7 +446,7 @@ class Graph extends Component {
 
                                                         if (u.scales.x.min > xd[i] || u.scales.x.max < xd[i]) continue;
 
-                                                        if (!this.props.points) {
+                                                        if (!showDots) {
                                                             ctx.beginPath();
                                                             ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
                                                             ctx.stroke();
