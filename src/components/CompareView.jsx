@@ -152,6 +152,9 @@ function CompareView(props) {
                     }
                     let data = await new NetworkApi().getAsync(sensor, since, until, { limit: pjson.settings.dataFetchPaginationSize });
                     if (data.result === "success") {
+                        data.data.measurements = data.data.measurements.filter((item) => {
+                            return item.timestamp >= since && item.timestamp <= until;
+                        });
                         if (!allData) allData = data;
                         else allData.data.measurements = allData.data.measurements.concat(data.data.measurements);
 
