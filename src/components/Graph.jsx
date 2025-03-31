@@ -380,7 +380,7 @@ class Graph extends Component {
                                                     let xd = u.data[0];
                                                     let yd = u.data[1]
 
-                                                    // ----- dashed line for data gaps
+                                                    // ----- dashed line for data gaps/
 
                                                     ctx.beginPath();
                                                     ctx.setLineDash([2, 4]); // Dashed line pattern
@@ -390,21 +390,26 @@ class Graph extends Component {
                                                     let lastValidIdx = -1;
 
                                                     for (let i = 0; i < xd.length; i++) {
-                                                        // If current point has data
                                                         if (yd[i] !== null) {
-                                                            // If we found a previous valid point and there's a gap between them
                                                             if (lastValidIdx >= 0 && i - lastValidIdx > 1) {
                                                                 const x1 = u.valToPos(xd[lastValidIdx], 'x', true);
                                                                 const y1 = u.valToPos(yd[lastValidIdx], 'y', true);
                                                                 const x2 = u.valToPos(xd[i], 'x', true);
                                                                 const y2 = u.valToPos(yd[i], 'y', true);
+                                                               
+                                                                let pointsVisibleInX =
+                                                                    u.scales.x.min <= xd[i] && u.scales.x.max >= xd[i] &&
+                                                                    u.scales.x.min <= xd[lastValidIdx] && u.scales.x.max >= xd[lastValidIdx];
 
-                                                                // Only draw if both points are visible
-                                                                if (x1 >= 0 && x2 <= u.width &&
-                                                                    u.scales.x.min <= xd[i] && u.scales.x.max >= xd[lastValidIdx]) {
+                                                                let pointsVisibleInY =
+                                                                    (u.scales.y.min <= yd[i] && yd[i] <= u.scales.y.max) &&
+                                                                    (u.scales.y.min <= yd[lastValidIdx] && yd[lastValidIdx] <= u.scales.y.max);
+                                                                    
+                                                                if (pointsVisibleInX && pointsVisibleInY) {
                                                                     ctx.moveTo(x1, y1);
                                                                     ctx.lineTo(x2, y2);
                                                                 }
+
                                                             }
                                                             lastValidIdx = i;
                                                         }
@@ -445,19 +450,26 @@ class Graph extends Component {
                                                         let y = u.valToPos(yd[i], 'y', true);
 
                                                         if (u.scales.x.min > xd[i] || u.scales.x.max < xd[i]) continue;
+                                                        let datapointIsInGraph = true;
+                                                        if (u.scales.y.min > yd[i]) {
+                                                            datapointIsInGraph = false;
+                                                            y = u.valToPos(u.scales.y.min, 'y', true);
+                                                        }
+                                                        if (u.scales.y.max < yd[i]) {
+                                                            datapointIsInGraph = false;
+                                                            y = u.valToPos(u.scales.y.max, 'y', true);
+                                                        }
 
-                                                        if (!showDots) {
+
+                                                        if (!showDots && datapointIsInGraph) {
                                                             ctx.beginPath();
                                                             ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
                                                             ctx.stroke();
                                                         }
 
-                                                        // Draw a small area under the datapoint to make it more visible
                                                         ctx.beginPath();
 
-                                                        // Calculate area width based on device pixel ratio for better visibility on high-density screens
                                                         const devicePixelRatio = window.devicePixelRatio || 1;
-                                                        // Base width scaled by pixel ratio
                                                         const areaWidth = Math.min(Math.max(1 * devicePixelRatio, 1), 3);
 
                                                         let areaToValue = u.valToPos(0, 'y', true);
@@ -471,7 +483,6 @@ class Graph extends Component {
                                                         ctx.lineTo(x + areaWidth, y);
                                                         ctx.closePath();
 
-                                                        // Use the fill color for series
                                                         ctx.fillStyle = ruuviTheme.graph[colorFillVar][colorMode];
                                                         ctx.fill();
                                                     }
@@ -493,11 +504,11 @@ class Graph extends Component {
                                                         }
 
                                                         ctx.strokeStyle = ruuviTheme.graph.alert.stroke[colorMode];
-                                                        
+
                                                         if (alertMax <= u.scales.y.max && alertMax >= u.scales.y.min) {
                                                             lineAt(alertMax);
                                                         }
-                                                        
+
                                                         if (alertMin >= u.scales.y.min && alertMin <= u.scales.y.max) {
                                                             lineAt(alertMin);
                                                         }
