@@ -12,6 +12,7 @@ import { getUnitHelper } from "../UnitHelper";
 import UplotTouchZoomPlugin from "./uplotPlugins/UplotTouchZoomPlugin";
 import UplotLegendHider from "./uplotPlugins/UplotLegendHider";
 import { date2digits, secondsToUserDateString, time2digits } from "../TimeHelper";
+import Store from "../Store";
 
 function getGraphColor(idx, fill) {
     const colors = [
@@ -201,6 +202,7 @@ function CompareView(props) {
 
     const { width } = useContainerDimensions(ref)
     const colorMode = useColorMode().colorMode;
+    let showDots = new Store().getGraphDrawDots()
     //if (loading) return <Box height={450}><Progress isIndeterminate /></Box>
     let graphData = getGraphData();
     return (
@@ -232,7 +234,7 @@ function CompareView(props) {
                                 ...sensorData.map((x, i) => {
                                     return {
                                         label: x.name || x.sensor,
-                                        points: { show: true, size: 2, fill: getGraphColor(i) },
+                                        points: { show: showDots, size: 3, fill: getGraphColor(i) },
                                         class: "graphLabel",
                                         stroke: getGraphColor(i),
                                     }
