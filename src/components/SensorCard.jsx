@@ -868,7 +868,7 @@ class SensorCard extends Component {
                                                                                 <Box ml={"10px"}>
                                                                                     {noData(
                                                                                         this.state.errorFetchingData
-                                                                                            ? "network_error"
+                                                                                            ? t("network_error")
                                                                                             : noHistoryStr
                                                                                     )}
                                                                                 </Box>
