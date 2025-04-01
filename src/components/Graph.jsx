@@ -374,14 +374,14 @@ class Graph extends Component {
                                                 (u) => {
                                                     let s = u.series[1];
                                                     if (!s.show) return;
-                                                    
+
                                                     let ctx = u.ctx;
                                                     const offset = (s.width % 2) / 2;
-            
+
                                                     ctx.save();
                                                     let xd = u.data[0];
                                                     let yd = u.data[1];
-            
+
                                                     // Draw the lone datapoint areas that extend to the zero-line
                                                     const timeToClosestDatapoint = (idx) => {
                                                         let closestToLeft = Number.POSITIVE_INFINITY;
@@ -405,13 +405,13 @@ class Graph extends Component {
                                                         if (closestToLeft < closestToRight) return closestToLeft;
                                                         return closestToRight;
                                                     };
-            
+
                                                     for (let i = 0; i < xd.length; i++) {
                                                         if (yd[i] === null) continue;
                                                         if (timeToClosestDatapoint(i) < 3600) continue;
                                                         let x = u.valToPos(xd[i], 'x', true);
                                                         let y = u.valToPos(yd[i], 'y', true);
-            
+
                                                         if (u.scales.x.min > xd[i] || u.scales.x.max < xd[i]) continue;
                                                         let datapointIsInGraph = true;
                                                         if (u.scales.y.min > yd[i]) {
@@ -422,23 +422,23 @@ class Graph extends Component {
                                                             datapointIsInGraph = false;
                                                             y = u.valToPos(u.scales.y.max, 'y', true);
                                                         }
-            
+
                                                         ctx.beginPath();
-            
+
                                                         const devicePixelRatio = window.devicePixelRatio || 1;
                                                         const areaWidth = Math.min(Math.max(1 * devicePixelRatio, 1), 3);
-            
+
                                                         let areaToValue = u.valToPos(0, 'y', true);
                                                         if (u.scales.y.min > 0) areaToValue = u.valToPos(u.scales.y.min, 'y', true) + 1;
                                                         if (u.scales.y.max < 0) areaToValue = u.valToPos(u.scales.y.max, 'y', true) - 1;
-            
+
                                                         // Create a small area that extends from the point to the zero line
                                                         ctx.moveTo(x - areaWidth, y);
                                                         ctx.lineTo(x - areaWidth, areaToValue);
                                                         ctx.lineTo(x + areaWidth, areaToValue);
                                                         ctx.lineTo(x + areaWidth, y);
                                                         ctx.closePath();
-            
+
                                                         ctx.fillStyle = ruuviTheme.graph[colorFillVar][colorMode];
                                                         ctx.fill();
                                                     }
@@ -448,23 +448,31 @@ class Graph extends Component {
                                             drawSeries: [
                                                 (u, si) => {
                                                     if (si !== 1) return; // only data series
-                                                    
+
                                                     let ctx = u.ctx;
                                                     let s = u.series[si];
                                                     const offset = (s.width % 2) / 2;
-            
+
                                                     ctx.save();
                                                     let xd = u.data[0];
                                                     let yd = u.data[1];
-            
+
                                                     // ----- dashed line for data gaps
                                                     ctx.beginPath();
-                                                    ctx.setLineDash([2, 4]); // Dashed line pattern
+
+                                                    const devicePixelRatio = window.devicePixelRatio || 1;
+                                                    const baseWidth = Math.max(s.width, 1.3); 
+
+                                                    const dashSize = Math.max(2 * devicePixelRatio, 2);
+                                                    const gapSize = Math.max(4 * devicePixelRatio, 4);
+
+                                                    ctx.setLineDash([dashSize, gapSize]); 
+                                                    ctx.lineWidth = baseWidth * Math.max(devicePixelRatio, 1.3); 
                                                     ctx.strokeStyle = ruuviTheme.graph.stroke[colorMode];
-                                                    ctx.lineWidth = s.width;
-            
+
+
                                                     let lastValidIdx = -1;
-            
+
                                                     for (let i = 0; i < xd.length; i++) {
                                                         if (yd[i] !== null) {
                                                             if (lastValidIdx >= 0 && i - lastValidIdx > 1) {
@@ -472,15 +480,15 @@ class Graph extends Component {
                                                                 const y1 = u.valToPos(yd[lastValidIdx], 'y', true);
                                                                 const x2 = u.valToPos(xd[i], 'x', true);
                                                                 const y2 = u.valToPos(yd[i], 'y', true);
-                                                               
+
                                                                 let pointsVisibleInX =
                                                                     u.scales.x.min <= xd[i] && u.scales.x.max >= xd[i] &&
                                                                     u.scales.x.min <= xd[lastValidIdx] && u.scales.x.max >= xd[lastValidIdx];
-            
+
                                                                 let pointsVisibleInY =
                                                                     (u.scales.y.min <= yd[i] && yd[i] <= u.scales.y.max) &&
                                                                     (u.scales.y.min <= yd[lastValidIdx] && yd[lastValidIdx] <= u.scales.y.max);
-                                                                    
+
                                                                 if (pointsVisibleInX && pointsVisibleInY) {
                                                                     ctx.moveTo(x1, y1);
                                                                     ctx.lineTo(x2, y2);
@@ -489,10 +497,10 @@ class Graph extends Component {
                                                             lastValidIdx = i;
                                                         }
                                                     }
-            
+
                                                     ctx.stroke();
                                                     ctx.setLineDash([]); // Reset to solid line
-            
+
                                                     // Draw small points for isolated datapoints if showDots is false
                                                     const timeToClosestDatapoint = (idx) => {
                                                         let closestToLeft = Number.POSITIVE_INFINITY;
@@ -516,14 +524,14 @@ class Graph extends Component {
                                                         if (closestToLeft < closestToRight) return closestToLeft;
                                                         return closestToRight;
                                                     };
-            
+
                                                     for (let i = 0; i < xd.length; i++) {
                                                         if (yd[i] === null) continue;
                                                         if (timeToClosestDatapoint(i) < 3600) continue;
-                                                        
+
                                                         let x = u.valToPos(xd[i], 'x', true);
                                                         let y = u.valToPos(yd[i], 'y', true);
-            
+
                                                         if (u.scales.x.min > xd[i] || u.scales.x.max < xd[i]) continue;
                                                         let datapointIsInGraph = true;
                                                         if (u.scales.y.min > yd[i]) {
@@ -534,14 +542,14 @@ class Graph extends Component {
                                                             datapointIsInGraph = false;
                                                             y = u.valToPos(u.scales.y.max, 'y', true);
                                                         }
-            
+
                                                         if (!showDots && datapointIsInGraph) {
                                                             ctx.beginPath();
                                                             ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
                                                             ctx.stroke();
                                                         }
                                                     }
-                                                    
+
                                                     // Draw alert lines
                                                     if (alert && alert.enabled) {
                                                         ctx.save();
@@ -557,25 +565,25 @@ class Graph extends Component {
                                                             ctx.moveTo(x0, y0);
                                                             ctx.lineTo(x1, y1);
                                                         }
-            
+
                                                         ctx.strokeStyle = ruuviTheme.graph.alert.stroke[colorMode];
-            
+
                                                         if (alertMax <= u.scales.y.max && alertMax >= u.scales.y.min) {
                                                             lineAt(alertMax);
                                                         }
-            
+
                                                         if (alertMin >= u.scales.y.min && alertMin <= u.scales.y.max) {
                                                             lineAt(alertMin);
                                                         }
-            
+
                                                         ctx.stroke();
                                                         ctx.translate(-offset, -offset);
                                                         ctx.restore();
                                                     }
-                                                    
+
                                                     ctx.restore();
                                                 }
-                                            ] 
+                                            ]
                                         },
                                         cursor: {
                                             show: this.props.cursor || false,
