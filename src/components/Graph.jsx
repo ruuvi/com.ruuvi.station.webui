@@ -97,7 +97,8 @@ let screenW = window.innerWidth
 var lastDataPointTs = -1;
 var dataUpdated = false;
 let dataKeyChanged = false;
-let xRangeUpdateThottle = 0;
+let fromComponentUpdate = false;
+
 class Graph extends Component {
     constructor(props) {
         super(props)
@@ -154,7 +155,9 @@ class Graph extends Component {
         state[k] = v;
         this.setState(state);
     }
-    shouldComponentUpdate(nextProps) {
+    shouldComponentUpdate(nextProps, nextState) {
+        fromComponentUpdate = true;
+        if (structuredClone(this.state.zoom) !== structuredClone(nextState.zoom)) return true;
         if (this.props.unit !== nextProps.unit) return true;
         if (this.props.height !== nextProps.height) return true;
         if (nextProps.colorMode.colorMode !== this.props.colorMode.colorMode) return true;
@@ -461,13 +464,13 @@ class Graph extends Component {
                                                     ctx.beginPath();
 
                                                     const devicePixelRatio = window.devicePixelRatio || 1;
-                                                    const baseWidth = Math.max(s.width, 1.3); 
+                                                    const baseWidth = Math.max(s.width, 1.3);
 
                                                     const dashSize = Math.max(2 * devicePixelRatio, 2);
                                                     const gapSize = Math.max(4 * devicePixelRatio, 4);
 
-                                                    ctx.setLineDash([dashSize, gapSize]); 
-                                                    ctx.lineWidth = baseWidth * Math.max(devicePixelRatio, 1.3); 
+                                                    ctx.setLineDash([dashSize, gapSize]);
+                                                    ctx.lineWidth = baseWidth * Math.max(devicePixelRatio, 1.3);
                                                     ctx.strokeStyle = ruuviTheme.graph.stroke[colorMode];
 
 
@@ -595,42 +598,29 @@ class Graph extends Component {
                                         },
                                         scales: {
                                             x: {
-                                                time: true, range: (_, fromX, toX) => {
-                                                    // redo this at some point, this will do as a workaround for now.
-                                                    let allowZoom = true;
-                                                    if (xRangeUpdateThottle + 20 > new Date().getTime()) {
-                                                        //console.log("throttle x-range updates")
-                                                        allowZoom = false;
-                                                    }
-                                                    xRangeUpdateThottle = new Date().getTime();
-                                                    let zoom = this.state.zoom;;
-                                                    if (allowZoom) {
-                                                        if (zoom && (dataKeyChanged || dataUpdated)) {
-                                                            // keep zoom range
-                                                            //console.log("keep zoom")
-                                                            dataKeyChanged = false
-                                                            dataUpdated = false;
-                                                            return zoom
-                                                        }
-                                                        if (Number.isInteger(fromX) && Number.isInteger(toX) && !dataKeyChanged) {
-                                                            // reset zoom
-                                                            //console.log("reset zoom")
-                                                            this.setStateVar("zoom", undefined)
-                                                            zoom = undefined;
-                                                        } else if (!dataUpdated && !dataKeyChanged) {
-                                                            // set zoom
-                                                            //console.log("set zoom")
-                                                            this.setStateVar("zoom", [fromX, toX])
-                                                            zoom = [fromX, toX]
-                                                        }
-                                                    }
-                                                    dataKeyChanged = false
-                                                    if (this.props.from && !zoom) {
-                                                        //console.log("update x range")
-                                                        dataUpdated = false;
+                                                time: true,
+                                                range: (_, fromX, toX) => {
+                                                    let propFrom = this.props.from
+                                                    let propTo = this.props.to
+                                                    if (!propFrom || !propTo) {
                                                         return this.getXRange()
                                                     }
-                                                    return [fromX, toX]
+                                                    if (this.state.zoom && fromComponentUpdate) {
+                                                        fromComponentUpdate = false;
+                                                        //console.log("keep zoom")
+                                                        return this.state.zoom;
+                                                    }
+                                                    if (Number.isInteger(fromX) && Number.isInteger(toX)) {
+                                                        //console.log("zoom reset")
+                                                        this.setState({ zoom: undefined })
+                                                        return this.getXRange()
+                                                    } else {
+                                                        //console.log("zoom", this.state.zoom)
+                                                        this.setState({ zoom: [fromX, toX] })
+                                                        return [fromX, toX]
+                                                    }
+
+                                                    return this.getXRange()
                                                 }
                                             },
                                             y: {

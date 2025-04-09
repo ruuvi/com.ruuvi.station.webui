@@ -822,8 +822,7 @@ class SensorCard extends Component {
                                                                         title=""
                                                                         key={
                                                                             this.props.sensor.sensor +
-                                                                            this.props.cardType +
-                                                                            mainStat
+                                                                            this.props.cardType
                                                                         }
                                                                         alert={tnpGetAlert(mainStat)}
                                                                         unit={getUnitHelper(mainStat).unit}
