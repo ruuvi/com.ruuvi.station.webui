@@ -99,6 +99,10 @@ var dataUpdated = false;
 let dataKeyChanged = false;
 let fromComponentUpdate = false;
 
+let isTouchZooming = false;
+let wasTouchZooming = false;
+let touchZoomState = undefined;
+
 class Graph extends Component {
     constructor(props) {
         super(props)
@@ -208,7 +212,10 @@ class Graph extends Component {
         }, 100)
         var plugins = [];
         if (!this.props.cardView) {
-            plugins.push(UplotTouchZoomPlugin(this.getXRange()))
+            plugins.push(UplotTouchZoomPlugin(this.getXRange(), (isZooming) => {
+                isTouchZooming = isZooming
+                wasTouchZooming = true;
+            }))
             plugins.push(UplotLegendHider())
         }
         let colorMode = this.props.overrideColorMode ? this.props.overrideColorMode : this.props.colorMode.colorMode;
@@ -605,6 +612,47 @@ class Graph extends Component {
                                                     if (!propFrom || !propTo) {
                                                         return this.getXRange()
                                                     }
+
+
+
+                                                    if (isTouchZooming) {
+                                                        // if zoom is close enought to full x range, assume fully zoomed out
+                                                        if (Math.abs(fromX - propFrom / 1000) < 1 && Math.abs(toX - propTo / 1000) < 1) {
+                                                            //console.log("touch zoom reset")
+                                                            touchZoomState = "reset"
+                                                        } else {
+                                                            touchZoomState = [fromX, toX]
+                                                        }
+                                                        return [fromX, toX]
+                                                    }
+
+                                                    if (wasTouchZooming) {
+                                                        if (touchZoomState) {
+                                                            if (touchZoomState === "reset") {
+                                                                //console.log("touch zoom reset")
+                                                                this.setState({ zoom: undefined })
+                                                                touchZoomState = undefined
+                                                                return this.getXRange()
+                                                            }
+                                                            this.setState({ zoom: touchZoomState })
+                                                            touchZoomState = undefined
+                                                        }
+                                                        wasTouchZooming = false;
+                                                        if (this.state.zoom && fromComponentUpdate) {
+                                                            fromComponentUpdate = false;
+                                                            //console.log("touch keep zoom")
+                                                            return this.state.zoom;
+                                                        }
+                                                        if (!fromComponentUpdate && Number.isInteger(fromX) && Number.isInteger(toX)) {
+                                                            //console.log("touch zoom reset")
+                                                            this.setState({ zoom: undefined })
+                                                            return this.getXRange()
+                                                        }
+                                                        return [fromX, toX]
+                                                    }
+
+
+
                                                     if (this.state.zoom && fromComponentUpdate) {
                                                         fromComponentUpdate = false;
                                                         //console.log("keep zoom")

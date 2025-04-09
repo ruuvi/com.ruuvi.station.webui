@@ -1,5 +1,5 @@
 
-export default function UplotTouchZoomPlugin(xRange) {
+export default function UplotTouchZoomPlugin(xRange, inZoomingCallback) {
     function ready(u) {
         let min = Number.POSITIVE_INFINITY;
         let max = Number.NEGATIVE_INFINITY;
@@ -133,6 +133,7 @@ export default function UplotTouchZoomPlugin(xRange) {
                 document.getElementsByClassName("u-legend")[0].style.visibility = '';
             }
             if (e.touches.length < 2) return;
+            inZoomingCallback(true);
             document.removeEventListener("touchmove", touchmovepan, { passive: true });
             rect = over.getBoundingClientRect();
 
@@ -152,6 +153,7 @@ export default function UplotTouchZoomPlugin(xRange) {
         });
 
         over.addEventListener("touchend", function (e) {
+            inZoomingCallback(false);
             document.removeEventListener("touchmove", touchmove, { passive: true });
             document.removeEventListener("touchmove", touchmovepan, { passive: true });
         });
