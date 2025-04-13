@@ -23,6 +23,7 @@ var timespans = [
     { k: "1", t: "hour", v: 1 },
     { k: "2", t: "hours", v: 2 },
     { k: "3", t: "hours", v: 3 },
+    { k: "6", t: "hours", v: 6 },
     { k: "12", t: "hours", v: 12 },
     { k: "1", t: "day", v: 24 },
     { k: "2", t: "days", v: 24 * 2 },
