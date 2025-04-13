@@ -741,7 +741,7 @@ class SensorCard extends Component {
                                                 <Heading
                                                     size="xs"
                                                     style={{
-                                                        lineHeight: 1,
+                                                        lineHeight: 1.1,
                                                         fontFamily: "montserrat",
                                                         fontSize: 16,
                                                         fontWeight: "bold",
