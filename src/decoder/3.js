@@ -2,8 +2,6 @@
 // which is licenced under BSD-3
 // Credits to GitHub user ojousima
 
-import { round } from "../UnitHelper";
-
 const parseRawRuuvi = function (manufacturerDataString) {
   let humidityStart = 6;
   let humidityEnd = 8;
@@ -25,7 +23,6 @@ const parseRawRuuvi = function (manufacturerDataString) {
   let humidity = manufacturerDataString.substring(humidityStart, humidityEnd);
   humidity = parseInt(humidity, 16);
   humidity /= 2; //scale
-  robject.humidity = round(humidity, 2);
 
 
   let temperatureString = manufacturerDataString.substring(temperatureStart, temperatureEnd);
@@ -36,7 +33,6 @@ const parseRawRuuvi = function (manufacturerDataString) {
     temperature = temperature - 128;
     temperature = 0 - temperature;
   }
-  robject.temperature = round(temperature, 2);
 
   let pressure = parseInt(manufacturerDataString.substring(pressureStart, pressureEnd), 16); // uint16_t pascals
   pressure += 50000; //Ruuvi format

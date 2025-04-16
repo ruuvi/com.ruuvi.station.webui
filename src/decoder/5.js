@@ -1,5 +1,3 @@
-import { round } from "../UnitHelper";
-
 const parseRawRuuvi = function (data) {
   const robject = {};
 
@@ -8,11 +6,9 @@ const parseRawRuuvi = function (data) {
     temperature -= 65536;
   }
   robject.temperature = temperature / 200.0;
-  robject.temperature = round(robject.temperature, 2);
 
   if (!(data[5] === 255 && data[6] === 255)) {
     robject.humidity = (((data[5] & 0xff) << 8) | (data[6] & 0xff)) / 400.0;
-    robject.humidity = round(robject.humidity, 2);
   }
 
   if (!(data[7] === 255 && data[8] === 255)) {
