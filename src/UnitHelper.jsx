@@ -523,3 +523,25 @@ export function pressureFromUserFormat(pressure, settings) {
 // pressure constants
 const mmMercuryMultiplier = 133.322368;
 const inchMercuryMultiplier = 3386.388666;
+
+
+
+export function getSensorTypeOnly(opt) {
+    if (opt == null) return null
+    let o = opt
+    let index = o.indexOf("_")
+    if (index !== -1) {
+        o = o.substring(0, index)
+    }
+    return o
+}
+
+export function getUnitOnly(opt) {
+    if (opt == null) return null
+    let o = opt
+    let index = o.indexOf("_")
+    if (index !== -1) {
+        o = o.substring(index + 1)
+    }
+    return o
+}

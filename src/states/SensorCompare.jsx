@@ -12,7 +12,8 @@ import ExportMenu from "../components/ExportMenu";
 import { uppercaseFirst } from "../TextHelper";
 import { exportMuliSensorCSV, exportMuliSensorXLSX } from "../utils/export";
 import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
-import { getUnitHelper, getUnitSettingFor } from "../UnitHelper";
+import { getSensorTypeOnly, getUnitHelper, getUnitOnly } from "../UnitHelper";
+import { useLocation, useNavigate } from "react-router-dom";
 
 let data = {};
 const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, maxWidth: "800px" }
@@ -20,15 +21,15 @@ let reloadIndex = 0;
 
 function SensorCompare(props) {
     const [sensors, setSensors] = useState([])
-    const [selectedSensors, setSelectedSensors] = useState([])
     const [durationPickerValue, setDurationPickerValue] = useState(24 * 7)
     const [from, setFrom] = useState((new Date().getTime() / 1000) - 60 * 60 * 24 * 7)
     const [to, setTo] = useState(new Date().getTime() / 1000)
-    const [dataKey, setDataKey] = useState(null)
     const [loading, setLoading] = useState(false)
     const [viewData, setViewData] = useState(null)
     const isWideVersion = useBreakpointValue({ base: false, md: true })
 
+    const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         (async () => {
@@ -43,23 +44,102 @@ function SensorCompare(props) {
         })()
     }, [])
 
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const urlFrom = params.get("from");
+        const urlTo = params.get("to");
+        const urlFromHours = params.get("fromHours");
+        if (urlFromHours) {
+            const hours = Number(urlFromHours);
+            setDurationPickerValue(hours);
+            const now = Math.floor(new Date().getTime() / 1000);
+            setFrom(now - 60 * 60 * hours);
+            setTo(now);
+        } else if (urlFrom && urlTo) {
+            setFrom(Number(urlFrom));
+            setTo(Number(urlTo));
+            setDurationPickerValue({
+                from: new Date(Number(urlFrom) * 1000),
+                to: new Date(Number(urlTo) * 1000)
+            });
+        } else if (urlFrom) {
+            setFrom(Number(urlFrom));
+        } else if (urlTo) {
+            setTo(Number(urlTo));
+        }
+    }, []);
+
+    const getDataKey = () => {
+        const params = new URLSearchParams(location.search);
+        return params.get("unit") || "temperature_C";
+    }
+    const setDataKey = (key) => {
+        const params = new URLSearchParams(location.search);
+        if (key) {
+            params.set("unit", key);
+        } else {
+            params.delete("unit");
+        }
+        setParams(params);
+    }
+    let dataKey = getDataKey();
+    console.log(dataKey)
+
+    const getSelectedSensors = () => {
+        const params = new URLSearchParams(location.search);
+        const selectedSensors = params.getAll("sensor");
+        return selectedSensors || [];
+    }
+
+    const setParams = (params) => {
+        const paramString = params.toString().replace(/%3A/g, ':');
+        navigate({ search: paramString });
+    }
+
+    const addSensorToUrl = (sensor) => {
+        const params = new URLSearchParams(location.search);
+        const selectedSensors = params.getAll("sensor");
+        if (Array.isArray(sensor)) {
+            sensor.forEach(s => {
+                if (!selectedSensors.includes(s)) {
+                    params.append("sensor", s);
+                }
+            });
+        } else {
+            if (!selectedSensors.includes(sensor)) {
+                params.append("sensor", sensor);
+            }
+        }
+        setParams(params);
+    }
+
+    const removeSensorFromUrl = (sensor) => {
+        const params = new URLSearchParams(location.search);
+
+        const newParams = new URLSearchParams();
+
+        for (const [key, value] of params.entries()) {
+            if (key === "sensor" && value === sensor) {
+                continue;
+            }
+            newParams.append(key, value);
+        }
+        setParams(newParams);
+    }
+
+    const clearSelectedSensors = () => {
+        const params = new URLSearchParams(location.search);
+        params.delete("sensor");
+        setParams(params);
+    }
+
+    let selectedSensors = getSelectedSensors();
     let canBeSelected = sensors.filter(sensor => !selectedSensors.includes(sensor.sensor));
 
     const graphTitle = (mobile) => {
-        if (dataKey === "measurementSequenceNumber") return "";
-        let unit = ""
-        let label = "";
-        if (typeof (dataKey) === "object") {
-            label = getUnitHelper(dataKey.sensorType)?.label || dataKey.sensorType
-            if (dataKey.unit) {
-                unit = t(dataKey.unit.translationKey)
-            } else {
-                unit = getUnitHelper(label).unit
-            }
-        } else {
-            label = getUnitHelper(dataKey).label
-            unit = getUnitHelper(dataKey).unit
-        }
+        let uh = getUnitHelper(getSensorTypeOnly(dataKey))
+        let unit = uh.units?.find(x => x.cloudStoreKey === getUnitOnly(dataKey))?.translationKey || uh.unit
+        let label = uh.label;
 
         return <div style={{ marginLeft: 30 }}>
             <span className="graphLengthText" style={{ fontSize: mobile ? "20px" : "24px" }}>
@@ -67,7 +147,7 @@ function SensorCompare(props) {
             </span>
             {!mobile && <br />}
             <span className="graphInfo" style={{ marginLeft: mobile ? 6 : undefined }}>
-                {unit}
+                {t(unit)}
             </span>
         </div>
     }
@@ -99,18 +179,26 @@ function SensorCompare(props) {
             showSelectAll
             canBeSelected={canBeSelected}
             buttonText={i18next.t("sensors_select_button")}
-            onSensorChange={s => setSelectedSensors(prev => [...prev, s])}
+            onSensorChange={s => addSensorToUrl(s)}
         />
         <Flex gap='2' wrap="wrap" mt={3} mb={3}>
-            {selectedSensors.map((sensor, index) => (
-                <Box key={index}>
-                    <EmailBox email={sensors.find(x => x.sensor === sensor).name || sensor} onRemove={s => {
-                        setSelectedSensors(selectedSensors.filter(x => x !== sensor))
+            {getSelectedSensors().map((sensor, index) => {
+                if (!sensors.find(x => x.sensor === sensor)) {
+                    return <Box key={index}>
+                        <EmailBox email={sensor} onRemove={() => {
+                            removeSensorFromUrl(sensor)
+                        }} />
+                    </Box>
+                }
+
+                return <Box key={index}>
+                    <EmailBox email={sensors.find(x => x.sensor === sensor).name || sensor} onRemove={() => {
+                        removeSensorFromUrl(sensor)
                     }} />
                 </Box>
-            ))}
+            })}
             {selectedSensors.length > 1 &&
-                <Button variant='link' onClick={() => setSelectedSensors([])}>
+                <Button variant='link' onClick={() => clearSelectedSensors([])}>
                     {i18next.t("clear_all")}
                 </Button>
             }
@@ -136,6 +224,21 @@ function SensorCompare(props) {
         }
     }
 
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        if (typeof durationPickerValue === "number") {
+            params.set("fromHours", durationPickerValue);
+            params.delete("from");
+            params.delete("to");
+            setParams(params);
+        } else if (from && to) {
+            params.set("from", Math.floor(from));
+            params.set("to", Math.floor(to));
+            params.delete("fromHours");
+            setParams(params);
+        }
+    }, [from, to, durationPickerValue]);
+
     const updateDuration = (v) => {
         if (loading) return
         setDurationPickerValue(v)
@@ -143,15 +246,16 @@ function SensorCompare(props) {
         if (typeof v === "object") {
             setFromTo = v.from.getTime() / 1000
             setToTo = v.to.getTime() / 1000
+            setFrom(setFromTo)
+            setTo(setToTo)
         } else {
             setFromTo = (new Date().getTime() / 1000) - 60 * 60 * v
             setToTo = new Date().getTime() / 1000
+            setFrom(setFromTo)
+            setTo(setToTo)
         }
         if (viewData) {
             load(setFromTo, setToTo)
-        } else {
-            setFrom(setFromTo)
-            setTo(setToTo)
         }
     }
     const durationPicker = <DurationPicker value={durationPickerValue} onChange={v => updateDuration(v)} />

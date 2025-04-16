@@ -1,4 +1,3 @@
-import { Progress } from "@chakra-ui/progress";
 import React, { useEffect, useRef, useState } from "react";
 import UplotReact from 'uplot-react';
 import 'uplot/dist/uPlot.min.css';
@@ -8,7 +7,7 @@ import parse from "../decoder/parser";
 import { ruuviTheme } from "../themes";
 import { Box, Spinner, useColorMode } from "@chakra-ui/react";
 import { t } from "i18next";
-import { getUnitHelper } from "../UnitHelper";
+import { getSensorTypeOnly, getUnitHelper, getUnitOnly } from "../UnitHelper";
 import UplotTouchZoomPlugin from "./uplotPlugins/UplotTouchZoomPlugin";
 import UplotLegendHider from "./uplotPlugins/UplotLegendHider";
 import { date2digits, secondsToUserDateString, time2digits } from "../TimeHelper";
@@ -55,18 +54,18 @@ function CompareView(props) {
 
     const getGraphData = () => {
         if (!sensorData) return [];
-        let dataKey = props.dataKey?.sensorType || props.dataKey || "";
-        let unit = props.dataKey?.unit || null;
+        let dataKey = getSensorTypeOnly(props.dataKey) || "";
+        let unit = getUnitOnly(props.dataKey) || null;
         let settings = undefined
         if (unit) {
             if (dataKey === "temperature" && unit) {
-                settings = { UNIT_TEMPERATURE: unit.cloudStoreKey }
+                settings = { UNIT_TEMPERATURE: unit }
             }
             if (dataKey === "humidity") {
-                settings = { UNIT_HUMIDITY: unit.cloudStoreKey }
+                settings = { UNIT_HUMIDITY: unit }
             }
             if (dataKey === "pressure") {
-                settings = { UNIT_PRESSURE: unit.cloudStoreKey }
+                settings = { UNIT_PRESSURE: unit }
             }
         }
         gdata = []
@@ -123,7 +122,7 @@ function CompareView(props) {
 
         uniqueKeysArray.forEach((key, index) => {
             keyIndexMap[key] = index + 1;
-            d.push([]);  // Initialize the array for each unique key
+            d.push([]); 
         });
 
         for (let i = 0; i < gdata.length; i++) {

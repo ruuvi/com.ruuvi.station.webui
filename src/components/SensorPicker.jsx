@@ -15,9 +15,8 @@ export const SensorPicker = ({ sensors, canBeSelected, onSensorChange, normalSty
         const selectableSensors = canBeSelected ? 
             sensors.filter(x => canBeSelected.map(y => y.sensor).includes(x.sensor)) : 
             sensors;
-        selectableSensors.forEach(sensor => {
-            handleSensorChange(sensor.sensor);
-        });
+        // Instead of calling for each, call once with all sensor IDs
+        onSensorChange(selectableSensors.map(sensor => sensor.sensor));
     };
 
     let style = {

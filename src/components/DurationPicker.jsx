@@ -17,7 +17,7 @@ import { MdArrowDropDown } from "react-icons/md"
 import { AiOutlineCalendar } from "react-icons/ai"
 import { useTranslation } from 'react-i18next';
 import DatePicker from "./DatePicker";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 var timespans = [
     { k: "1", t: "hour", v: 1 },
@@ -66,6 +66,13 @@ export default function DurationPicker(props) {
     const [custom, setCustom] = useState(typeof props.value === "object" ? props.value : null)
     const [showPicker, setShowPicker] = useState(false)
     const [showDropdown, setShowDropdown] = useState(false)
+
+    useEffect(() => {
+        if (typeof props.value === "object" && props.value && props.value.from && props.value.to) {
+            setCustom(props.value)
+            setLastCustom(props.value)
+        }
+    }, [props.value])
 
     const setDropdownFromClick = (state) => {
         wasInClose = false
