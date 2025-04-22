@@ -112,6 +112,8 @@ class Graph extends Component {
             resizing: false,
         }
         this.pRef = React.createRef();
+        this.prevDataKey = props.dataKey;
+        this.dataKeyChanged = false;
         this.resize.bind(this)
         this.resizeTimeout = undefined;
     }
@@ -175,6 +177,11 @@ class Graph extends Component {
         }
         if (this.state.zoom && this.props.data.length && nextProps.data.length && this.props.data[0].timestamp !== nextProps.data[0].timestamp) return false
         return dataKeyChanged || this.props.data.length !== nextProps.data.length || dataUpdated
+    }
+    componentDidUpdate(prevProps) {
+        if (prevProps.dataKey !== this.props.dataKey) {
+            this.dataKeyChanged = true;
+        }
     }
     getXRange() {
         return [this.props.from / 1000, this.props.to ? this.props.to / 1000 : new Date().getTime() / 1000]
@@ -613,8 +620,6 @@ class Graph extends Component {
                                                         return this.getXRange()
                                                     }
 
-
-
                                                     if (isTouchZooming) {
                                                         // if zoom is close enought to full x range, assume fully zoomed out
                                                         if (Math.abs(fromX - propFrom / 1000) < 1 && Math.abs(toX - propTo / 1000) < 1) {
@@ -655,20 +660,21 @@ class Graph extends Component {
 
                                                     if (this.state.zoom && fromComponentUpdate) {
                                                         fromComponentUpdate = false;
-                                                        //console.log("keep zoom")
                                                         return this.state.zoom;
                                                     }
+                                                    // full-range snap: reset zoom unless dataKey changed
                                                     if (Number.isInteger(fromX) && Number.isInteger(toX)) {
-                                                        //console.log("zoom reset")
-                                                        this.setState({ zoom: undefined })
-                                                        return this.getXRange()
+                                                        if (this.dataKeyChanged) {
+                                                            // preserve existing zoom on dataKey change
+                                                            this.dataKeyChanged = false;
+                                                            return this.state.zoom;
+                                                        }
+                                                        this.setState({ zoom: undefined });
+                                                        return this.getXRange();
                                                     } else {
-                                                        //console.log("zoom", this.state.zoom)
-                                                        this.setState({ zoom: [fromX, toX] })
-                                                        return [fromX, toX]
+                                                        this.setState({ zoom: [fromX, toX] });
+                                                        return [fromX, toX];
                                                     }
-
-                                                    return this.getXRange()
                                                 }
                                             },
                                             y: {

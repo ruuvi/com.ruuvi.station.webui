@@ -37,11 +37,32 @@ const graphLoadingOverlay = {
 }
 
 var gdata = []
+var touchZoomState = undefined
+var wasTouchZooming = false
+var fromComponentUpdate = false
+var isTouchZooming = false
+
 function CompareView(props) {
+    const getDataKey = () => {
+        const params = new URLSearchParams(location.search);
+        return params.get("unit") || "temperature_C";
+    }
+
     let sensors = props.sensors;
     const [sensorData, setSensorData] = useState([])
     const [loading, setLoading] = useState(false)
+    const [zoom, setZoom] = useState(undefined)
     const ref = useRef(null);
+
+    const dataKey = getDataKey();
+    const prevDataKeyRef = useRef(dataKey);
+    const dataKeyChangedRef = useRef(false);
+    useEffect(() => {
+        if (prevDataKeyRef.current !== dataKey) {
+            dataKeyChangedRef.current = true;
+        }
+        prevDataKeyRef.current = dataKey;
+    }, [dataKey]);
 
     const getUniqueKeys = () => {
         let uniqueKeysSet = new Set();
@@ -54,8 +75,8 @@ function CompareView(props) {
 
     const getGraphData = () => {
         if (!sensorData) return [];
-        let dataKey = getSensorTypeOnly(props.dataKey) || "";
-        let unit = getUnitOnly(props.dataKey) || null;
+        let dataKey = getSensorTypeOnly(getDataKey()) || "";
+        let unit = getUnitOnly(getDataKey()) || null;
         let settings = undefined
         if (unit) {
             if (dataKey === "temperature" && unit) {
@@ -122,7 +143,7 @@ function CompareView(props) {
 
         uniqueKeysArray.forEach((key, index) => {
             keyIndexMap[key] = index + 1;
-            d.push([]); 
+            d.push([]);
         });
 
         for (let i = 0; i < gdata.length; i++) {
@@ -195,6 +216,10 @@ function CompareView(props) {
         props.setData(sensorData);
     }, [sensorData]);
 
+    useEffect(() => {
+        fromComponentUpdate = true;
+    }, [zoom]);
+
     function getXRange() {
         return [props.from, props.to || new Date().getTime() / 1000]
     }
@@ -211,6 +236,7 @@ function CompareView(props) {
                     <div style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: "100%", textAlign: "center" }}><div style={{ position: "relative", top: "45%" }}><Spinner size="xl" /></div></div>
                 </div>
             }
+            {JSON.stringify(zoom)}
             {!graphData.length ?
                 <Box height={450}>
                     <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">
@@ -220,7 +246,10 @@ function CompareView(props) {
                 : (
                     <UplotReact
                         options={{
-                            plugins: [UplotTouchZoomPlugin(getXRange())],
+                            plugins: [UplotTouchZoomPlugin(getXRange(), (isZooming) => {
+                                isTouchZooming = isZooming
+                                wasTouchZooming = true;
+                            })],
                             padding: [10, 10, 0, -10],
                             width: width,
                             height: 450,
@@ -247,7 +276,71 @@ function CompareView(props) {
                                         return [fromY, toY]
                                     }
                                 }, x: {
-                                    range: loading ? getXRange() : undefined,
+                                    //range: getXRange(),
+                                    range: (_, fromX, toX) => {
+                                        console.log("from-to", fromX, toX)
+                                        let propFrom = props.from
+                                        let propTo = props.to
+                                        if (!propFrom || !propTo) {
+                                            console.log("no prop from or to")
+                                            return getXRange()
+                                        }
+
+                                        if (isTouchZooming) {
+                                            // if zoom is close enought to full x range, assume fully zoomed out
+                                            if (Math.abs(fromX - propFrom / 1000) < 1 && Math.abs(toX - propTo / 1000) < 1) {
+                                                console.log("touch zoom reset")
+                                                touchZoomState = "reset"
+                                            } else {
+                                                touchZoomState = [fromX, toX]
+                                            }
+                                            return [fromX, toX]
+                                        }
+
+                                        if (wasTouchZooming) {
+                                            if (touchZoomState) {
+                                                if (touchZoomState === "reset") {
+                                                    console.log("touch zoom reset")
+                                                    setZoom(undefined);
+                                                    touchZoomState = undefined
+                                                    return getXRange()
+                                                }
+                                                setZoom(touchZoomState)
+                                                touchZoomState = undefined
+                                            }
+                                            wasTouchZooming = false;
+                                            if (zoom && fromComponentUpdate) {
+                                                fromComponentUpdate = false;
+                                                console.log("touch keep zoom")
+                                                return zoom;
+                                            }
+                                            if (!fromComponentUpdate && Number.isInteger(fromX) && Number.isInteger(toX)) {
+                                                console.log("touch zoom reset")
+                                                setZoom(undefined)
+                                                return getXRange()
+                                            }
+                                            return [fromX, toX]
+                                        }
+
+
+
+                                        if (zoom && fromComponentUpdate) {
+                                            fromComponentUpdate = false;
+                                            //console.log("keep zoom")
+                                            return zoom;
+                                        }
+                                        if (Number.isInteger(fromX) && Number.isInteger(toX)) {
+                                            if (dataKeyChangedRef.current) {
+                                                dataKeyChangedRef.current = false;
+                                                return zoom || getXRange();
+                                            }
+                                            setZoom(undefined);
+                                            return getXRange();
+                                        } else {
+                                            setZoom([fromX, toX]);
+                                            return [fromX, toX];
+                                        }
+                                    }
                                 }
                             },
                             axes: [

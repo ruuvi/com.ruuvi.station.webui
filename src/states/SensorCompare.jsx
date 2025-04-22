@@ -83,7 +83,6 @@ function SensorCompare(props) {
         setParams(params);
     }
     let dataKey = getDataKey();
-    console.log(dataKey)
 
     const getSelectedSensors = () => {
         const params = new URLSearchParams(location.search);
@@ -217,7 +216,7 @@ function SensorCompare(props) {
 
     const load = (newFrom, newTo) => {
         reloadIndex++
-        setViewData({ sensors: selectedSensors, from: newFrom || from, to: newTo || to, dataKey, reloadIndex })
+        setViewData({ sensors: selectedSensors, from: newFrom || from, to: newTo || to, reloadIndex })
         if (newFrom && newTo) {
             setFrom(newFrom)
             setTo(newTo)
@@ -359,7 +358,7 @@ function SensorCompare(props) {
                 </div>
             </ScreenSizeWrapper>
             <br />
-            {viewData && <CompairView key={123} {...viewData} dataKey={dataKey} isLoading={s => setLoading(s)} setData={d => data = d} />}
+            {viewData && <CompairView key={123} {...viewData} isLoading={s => setLoading(s)} setData={d => data = d} />}
             {!viewData && <Box height={450}><EmptyGraph /></Box>}
             <Box height={90} />
         </Box >
