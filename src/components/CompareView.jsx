@@ -117,16 +117,13 @@ function CompareView(props) {
                     }
 
                     if (timestamp in timestampIndexMap) {
-                        // Update existing entry in gdata
                         gdata[timestampIndexMap[timestamp]][d.name || d.mac] = value;
                     } else {
-                        // Add new entry to gdata
                         gdata.push({
                             t: timestamp,
                             [d.name || d.mac]: value,
                         });
 
-                        // Update timestampIndexMap
                         timestampIndexMap[timestamp] = gdata.length - 1;
                     }
                 }
@@ -192,13 +189,13 @@ function CompareView(props) {
                             const newData = s.map(item => {
                                 if (item.sensor === sensor) {
                                     updated = true;
-                                    return d; // Replace the existing data for the sensor
+                                    return d;
                                 }
                                 return item;
                             });
 
                             if (!updated) {
-                                newData.push(d); // Add new data if the sensor was not found
+                                newData.push(d);
                             }
 
                             return newData;
@@ -236,7 +233,6 @@ function CompareView(props) {
                     <div style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: "100%", textAlign: "center" }}><div style={{ position: "relative", top: "45%" }}><Spinner size="xl" /></div></div>
                 </div>
             }
-            {JSON.stringify(zoom)}
             {!graphData.length ?
                 <Box height={450}>
                     <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">
@@ -278,18 +274,15 @@ function CompareView(props) {
                                 }, x: {
                                     //range: getXRange(),
                                     range: (_, fromX, toX) => {
-                                        console.log("from-to", fromX, toX)
                                         let propFrom = props.from
                                         let propTo = props.to
                                         if (!propFrom || !propTo) {
-                                            console.log("no prop from or to")
                                             return getXRange()
                                         }
 
                                         if (isTouchZooming) {
                                             // if zoom is close enought to full x range, assume fully zoomed out
                                             if (Math.abs(fromX - propFrom / 1000) < 1 && Math.abs(toX - propTo / 1000) < 1) {
-                                                console.log("touch zoom reset")
                                                 touchZoomState = "reset"
                                             } else {
                                                 touchZoomState = [fromX, toX]
@@ -300,7 +293,6 @@ function CompareView(props) {
                                         if (wasTouchZooming) {
                                             if (touchZoomState) {
                                                 if (touchZoomState === "reset") {
-                                                    console.log("touch zoom reset")
                                                     setZoom(undefined);
                                                     touchZoomState = undefined
                                                     return getXRange()
@@ -311,22 +303,17 @@ function CompareView(props) {
                                             wasTouchZooming = false;
                                             if (zoom && fromComponentUpdate) {
                                                 fromComponentUpdate = false;
-                                                console.log("touch keep zoom")
                                                 return zoom;
                                             }
                                             if (!fromComponentUpdate && Number.isInteger(fromX) && Number.isInteger(toX)) {
-                                                console.log("touch zoom reset")
                                                 setZoom(undefined)
                                                 return getXRange()
                                             }
                                             return [fromX, toX]
                                         }
 
-
-
                                         if (zoom && fromComponentUpdate) {
                                             fromComponentUpdate = false;
-                                            //console.log("keep zoom")
                                             return zoom;
                                         }
                                         if (Number.isInteger(fromX) && Number.isInteger(toX)) {
