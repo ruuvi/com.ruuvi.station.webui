@@ -9,9 +9,10 @@ import { Box, Spinner, useColorMode } from "@chakra-ui/react";
 import { t } from "i18next";
 import { getSensorTypeOnly, getUnitHelper, getUnitOnly } from "../UnitHelper";
 import UplotTouchZoomPlugin from "./uplotPlugins/UplotTouchZoomPlugin";
-import UplotLegendHider from "./uplotPlugins/UplotLegendHider";
 import { date2digits, secondsToUserDateString, time2digits } from "../TimeHelper";
 import Store from "../Store";
+import drawDataGapLines from "./uplotHooks/drawDataGapLines";
+import uPlot from "uplot";
 
 function getGraphColor(idx, fill) {
     const colors = [
@@ -89,19 +90,20 @@ function CompareView(props) {
                 settings = { UNIT_PRESSURE: unit }
             }
         }
-        gdata = []
-        let pd = [[], []];
-        const timestampIndexMap = {}
+        const oneHourInSeconds = 3600;
+        let tableData = [];
         const unitHelper = getUnitHelper(dataKey);
         sensorData.forEach(data => {
+            let thisSensorsData = [[], []];
             if (data.measurements.length) {
                 let d = data
 
-                if (pd.length < sensors.length + 2) pd.push([]);
+                d.measurements.sort((a, b) => a.timestamp - b.timestamp);
 
                 for (let j = 0; j < d.measurements.length; j++) {
                     if (!d.measurements[j].parsed) continue;
                     const timestamp = d.measurements[j].timestamp;
+
 
                     let value;
                     switch (dataKey) {
@@ -116,40 +118,29 @@ function CompareView(props) {
                             break
                     }
 
-                    if (timestamp in timestampIndexMap) {
-                        gdata[timestampIndexMap[timestamp]][d.name || d.mac] = value;
-                    } else {
-                        gdata.push({
-                            t: timestamp,
-                            [d.name || d.mac]: value,
-                        });
+                    if (j > 0) {
+                        const prevTimestamp = d.measurements[j - 1].timestamp;
+                        const timeDifference = timestamp - prevTimestamp;
 
-                        timestampIndexMap[timestamp] = gdata.length - 1;
+                        if (timeDifference >= oneHourInSeconds) {
+                            let insertTime = prevTimestamp + 1;
+                            thisSensorsData[0].push(insertTime);
+                            thisSensorsData[1].push(null);
+                        }
                     }
+                    thisSensorsData[0].push(timestamp);
+                    thisSensorsData[1].push(value);
+
                 }
             }
-        });
-        let uniqueKeysArray = getUniqueKeys();
 
-        let keyIndexMap = {};
-        let d = [[]];
-
-        gdata.sort((a, b) => a.t - b.t);
-
-        d[0] = gdata.map(entry => entry.t);
-
-        uniqueKeysArray.forEach((key, index) => {
-            keyIndexMap[key] = index + 1;
-            d.push([]);
+            tableData.push(thisSensorsData);
         });
 
-        for (let i = 0; i < gdata.length; i++) {
-            for (let j = 0; j < uniqueKeysArray.length; j++) {
-                d[keyIndexMap[uniqueKeysArray[j]]].push(gdata[i][uniqueKeysArray[j]]);
-            }
+        if (tableData.length) {
+            return uPlot.join(tableData, tableData.map(t => t.map(s => 2)))
         }
-
-        return d;
+        return [];
     };
 
     useEffect(() => {
@@ -157,7 +148,6 @@ function CompareView(props) {
             setLoading(true)
             props.isLoading(true)
             setSensorData([])
-            gdata = []
 
             for (const sensor of sensors) {
                 let until = props.to
@@ -260,6 +250,7 @@ function CompareView(props) {
                                         label: x.name || x.sensor,
                                         points: { show: showDots, size: 3, fill: getGraphColor(i) },
                                         class: "graphLabel",
+                                        spanGaps: false,
                                         stroke: getGraphColor(i),
                                     }
                                 })
@@ -329,6 +320,9 @@ function CompareView(props) {
                                         }
                                     }
                                 }
+                            },
+                            hooks: {
+                                drawSeries: [(u, si) => drawDataGapLines(u, si, getGraphColor(si - 1))],
                             },
                             axes: [
                                 {
