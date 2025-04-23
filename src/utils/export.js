@@ -15,7 +15,7 @@ function processData(data, t) {
     const sensorHeaders = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber", "txPower"]
     if (data.measurements.length > 0 && data.measurements[0].parsed !== null) {
         if (data.measurements[0].parsed.dataFormat === "e0") {
-            sensorHeaders.push("co2", "voc", "nox", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "illuminance", "soundLevelAvg", "soundLevelPeak")
+            sensorHeaders.push("co2", "voc", "nox", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "illuminance", "soundLevelAvg", "soundLevelPeak", "aqi")
         }
     }
     var csvHeader = [t('date')];
@@ -363,9 +363,9 @@ export function exportPDF(sensor, data, graphData, type, from, to, chartRef, t, 
         }
 
         let boxidx = 1;
-        drawInfoBox(min, t("graph_stat_min"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius);
-        drawInfoBox(max, t("graph_stat_max"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius);
-        drawInfoBox(avg, t("graph_stat_avg"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius);
+        drawInfoBox(min.toString(), t("graph_stat_min"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius);
+        drawInfoBox(max.toString(), t("graph_stat_max"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius);
+        drawInfoBox(avg.toString(), t("graph_stat_avg"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius);
         let alertsHit = hasAlertBeenHit(sensor.alerts, data.measurements, type)
         drawInfoBox("", t(alertsHit ? "limits_hit" : "no_limits_hit"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius, alertsHit);
 
