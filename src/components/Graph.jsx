@@ -667,7 +667,7 @@ class Graph extends Component {
                                                         if (this.dataKeyChanged) {
                                                             // preserve existing zoom on dataKey change
                                                             this.dataKeyChanged = false;
-                                                            return this.state.zoom;
+                                                            return this.state.zoom || this.getXRange();
                                                         }
                                                         this.setState({ zoom: undefined });
                                                         return this.getXRange();
