@@ -11,6 +11,7 @@ import { MdInfo } from "react-icons/md";
 import notify from "../utils/notify";
 import { date2digits, secondsToUserDateString, time2digits } from "../TimeHelper";
 import Store from "../Store";
+import drawDataGapLines from "./uplotHooks/drawDataGapLines";
 const UplotReact = React.lazy(() => import('uplot-react'));
 
 let zoomData = {
@@ -463,6 +464,7 @@ class Graph extends Component {
                                                 }
                                             ],
                                             drawSeries: [
+                                                (u, si) => drawDataGapLines(u, si, ruuviTheme.graph.stroke[colorMode]),
                                                 (u, si) => {
                                                     if (si !== 1) return; // only data series
 
@@ -473,50 +475,6 @@ class Graph extends Component {
                                                     ctx.save();
                                                     let xd = u.data[0];
                                                     let yd = u.data[1];
-
-                                                    // ----- dashed line for data gaps
-                                                    ctx.beginPath();
-
-                                                    const devicePixelRatio = window.devicePixelRatio || 1;
-                                                    const baseWidth = Math.max(s.width, 1.3);
-
-                                                    const dashSize = Math.max(2 * devicePixelRatio, 2);
-                                                    const gapSize = Math.max(4 * devicePixelRatio, 4);
-
-                                                    ctx.setLineDash([dashSize, gapSize]);
-                                                    ctx.lineWidth = baseWidth * Math.max(devicePixelRatio, 1.3);
-                                                    ctx.strokeStyle = ruuviTheme.graph.stroke[colorMode];
-
-
-                                                    let lastValidIdx = -1;
-
-                                                    for (let i = 0; i < xd.length; i++) {
-                                                        if (yd[i] !== null) {
-                                                            if (lastValidIdx >= 0 && i - lastValidIdx > 1) {
-                                                                const x1 = u.valToPos(xd[lastValidIdx], 'x', true);
-                                                                const y1 = u.valToPos(yd[lastValidIdx], 'y', true);
-                                                                const x2 = u.valToPos(xd[i], 'x', true);
-                                                                const y2 = u.valToPos(yd[i], 'y', true);
-
-                                                                let pointsVisibleInX =
-                                                                    u.scales.x.min <= xd[i] && u.scales.x.max >= xd[i] &&
-                                                                    u.scales.x.min <= xd[lastValidIdx] && u.scales.x.max >= xd[lastValidIdx];
-
-                                                                let pointsVisibleInY =
-                                                                    (u.scales.y.min <= yd[i] && yd[i] <= u.scales.y.max) &&
-                                                                    (u.scales.y.min <= yd[lastValidIdx] && yd[lastValidIdx] <= u.scales.y.max);
-
-                                                                if (pointsVisibleInX && pointsVisibleInY) {
-                                                                    ctx.moveTo(x1, y1);
-                                                                    ctx.lineTo(x2, y2);
-                                                                }
-                                                            }
-                                                            lastValidIdx = i;
-                                                        }
-                                                    }
-
-                                                    ctx.stroke();
-                                                    ctx.setLineDash([]); // Reset to solid line
 
                                                     // Draw small points for isolated datapoints if showDots is false
                                                     const timeToClosestDatapoint = (idx) => {
