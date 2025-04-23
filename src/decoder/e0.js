@@ -105,6 +105,7 @@ const parseRawRuuvi = function (data) {
   }
   const distance = Math.sqrt(distances.reduce((acc, val) => acc + val * val, 0) / distances.length);
   robject.aqi = Math.max(0, 100 - distance);
+  robject.aqi = round(robject.aqi, 2);
 
   /*
   100...66 -> green,
