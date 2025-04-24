@@ -151,21 +151,16 @@ function SensorCompare(props) {
         </div>
     }
     const graphCtrl = (isMobile) => {
-        let key = ""
-        if (typeof (dataKey) === "object") {
-            key = dataKey.sensorType
-        } else {
-            key = dataKey
-        }
+        let key = getSensorTypeOnly(dataKey)
         return <>
             <ZoomInfo />
             <ExportMenu buttonText={uppercaseFirst(t("export"))} noPdf onClick={val => {
                 switch (val) {
                     case "XLSX":
-                        exportMuliSensorXLSX(data, i18next.t, dataKey)
+                        exportMuliSensorXLSX(data, i18next.t, key)
                         break
                     default:
-                        exportMuliSensorCSV(data, i18next.t, dataKey)
+                        exportMuliSensorCSV(data, i18next.t, key)
                 }
             }} />
         </>
