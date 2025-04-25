@@ -23,7 +23,7 @@ const parseRawRuuvi = function (manufacturerDataString) {
   let humidity = manufacturerDataString.substring(humidityStart, humidityEnd);
   humidity = parseInt(humidity, 16);
   humidity /= 2; //scale
-
+  robject.humidity = humidity;
 
   let temperatureString = manufacturerDataString.substring(temperatureStart, temperatureEnd);
   let temperature = parseInt(temperatureString.substring(0, 2), 16); //Full degrees
@@ -33,6 +33,7 @@ const parseRawRuuvi = function (manufacturerDataString) {
     temperature = temperature - 128;
     temperature = 0 - temperature;
   }
+  robject.temperature = temperature;
 
   let pressure = parseInt(manufacturerDataString.substring(pressureStart, pressureEnd), 16); // uint16_t pascals
   pressure += 50000; //Ruuvi format
