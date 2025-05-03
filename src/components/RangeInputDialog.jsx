@@ -37,9 +37,10 @@ class RangeInputDialog extends Component {
                     return false
                 }
             }
-            if (parseFloat(value[0]) < this.props.range.min) return false
-            if (parseFloat(value[1]) > this.props.range.max) return false
             if (value[0] > value[1]) return false
+            if (this.props.allowOutOfRange) return true
+            if (value[0] < this.props.range.min) return false
+            if (value[1] > this.props.range.max) return false
             return true;
         } else {
             value[index] = parseFloat(value[index]);
