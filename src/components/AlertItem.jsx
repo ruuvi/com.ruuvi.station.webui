@@ -75,6 +75,10 @@ class AlertItem extends Component {
                 min = extended.min
                 max = extended.max
             }
+            if (type === "temperature") {
+                min = -Infinity
+                max = +Infinity
+            }
             if (type === "offline") {
                 if (alert.max < min) alert.max = min
                 if (alert.max > max) alert.max = max
@@ -242,6 +246,7 @@ class AlertItem extends Component {
                         range={validRange}
                         title={t("alert_dialog_title_" + type)}
                         buttonText={t("update")}
+                        allowOutOfRange={type === "temperature"}
                         unit={() => {
                             if (type === "humidity") return "%";
                             return uh.unit;

@@ -32,7 +32,6 @@ class AlertSlider extends React.Component {
             var uh = getUnitHelper(this.props.type)
             range.max = uh.value(max)
             range.min = uh.value(min)
-            return range
         }
         if (this.props.value.max > range.max) range.max = this.props.value.max
         if (this.props.value.min < range.min) range.min = this.props.value.min
@@ -73,6 +72,7 @@ class AlertSlider extends React.Component {
             max = tmp
         }
         var sliderValues = [min, max]
+       
         return <div style={{ display: 'flex', alignItems: 'center', marginLeft: 4, marginRight: 4 }}>
             <Range {...this.getRange()} values={sliderValues}
                 step={this.props.type === "pressure" && uh.unit === "Pa" ? 100 : 1}
