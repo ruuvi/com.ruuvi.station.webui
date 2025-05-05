@@ -47,9 +47,10 @@ class RangeInputDialog extends Component {
             if (isNaN(value[index])) {
                 return false
             }
+            if (value[0] > value[1]) return false
+            if (this.props.allowOutOfRange) return true
             if (index === 0 && value[index] < this.props.range.min) return false
             if (index === 1 && value[index] > this.props.range.max) return false
-            if (value[0] > value[1]) return false
             return true;
         }
     }
