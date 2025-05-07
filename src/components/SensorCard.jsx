@@ -14,6 +14,7 @@ import {
     MenuItem,
     MenuDivider,
     Spinner,
+    Portal,
 } from "@chakra-ui/react";
 import "uplot/dist/uPlot.min.css";
 import Graph from "./Graph";
@@ -124,18 +125,20 @@ function MoreMenu(props) {
                 mt={props.mt}
             />
 
-            <MenuList mt="2" zIndex={3}>
-                {menuItems.map((item, index) => (
-                    item.condition !== false && (
-                        <React.Fragment key={item.key}>
-                            {index > 0 && <MenuDivider />}
-                            <MenuItem className="ddlItem" onClick={(e) => handleAction(e, item)}>
-                                {item.icon}{t(item.label)}
-                            </MenuItem>
-                        </React.Fragment>
-                    )
-                ))}
-            </MenuList>
+            <Portal>
+                <MenuList mt="2" zIndex="popover">
+                    {menuItems.map((item, index) => (
+                        item.condition !== false && (
+                            <React.Fragment key={item.key}>
+                                {index > 0 && <MenuDivider />}
+                                <MenuItem className="ddlItem" onClick={(e) => handleAction(e, item)}>
+                                    {item.icon}{t(item.label)}
+                                </MenuItem>
+                            </React.Fragment>
+                        )
+                    ))}
+                </MenuList>
+            </Portal>
         </Menu>
     );
 }
@@ -332,11 +335,15 @@ class SensorCard extends Component {
     getSmallDataFields() {
         let arr = ["humidity", "pressure", "movementCounter"];
         let latest = this.getLatestReading();
-
         if (!latest) return arr;
 
+        /*
+        let noShow = ["mac", "timestamp", "dataFormat", "txPower", this.props.graphType || "temperature"];
+        return Object.keys(latest).filter((x) => !arr.includes(x) && !noShow.includes(x));
+        */
+
         if (latest.dataFormat === 6) arr = ["pm1p0", "co2", "voc"];
-        if (latest.dataFormat === "e0") arr = ["pm1p0", "co2", "voc", "aqi"];
+        if (latest.dataFormat === "e0") arr = ["pm1p0", "co2", "voc", "illuminance", "nox", "aqi"];
         if ((this.props.graphType || "temperature") !== "temperature") {
             arr.push("temperature");
         }
@@ -396,7 +403,7 @@ class SensorCard extends Component {
         let infoRow = (
             <div
                 className="dashboardUpdatedAt"
-                style={{ ...lastUpdatedText, width: "100%" }}
+                style={{ ...lastUpdatedText, width: "100%", marginTop: -4 }}
             >
                 <Flex justifyContent={"space-between"}>
                     <span>
@@ -524,15 +531,15 @@ class SensorCard extends Component {
             if (!stats.includes("movementCounter")) stats.push("movementCounter");
 
             return (
-                <div>
+                <Box
+                    className="content sensorCard"
+                    borderRadius="lg"
+                    marginBottom={this.props.size === "mobile" ? "10px" : "20px"}
+                >
                     {altFileUplaod}
                     <Box
-                        className="content sensorCard"
-                        height={105}
-                        borderRadius="lg"
                         overflow="hidden"
                         padding={4}
-                        pt={3}
                     >
                         {/* Header */}
                         <Flex>
@@ -565,10 +572,10 @@ class SensorCard extends Component {
                         {latestReading ? (
                             <>
                                 <SimpleGrid
+                                    pt={3}
                                     columns={2}
                                     style={{
                                         width: "100%",
-                                        height: "49px",
                                         overflow: "hidden",
                                         whiteSpace: "nowrap",
                                         opacity: 0.8,
@@ -610,7 +617,6 @@ class SensorCard extends Component {
                                         );
                                     })}
                                 </SimpleGrid>
-                                {infoRow}
                             </>
                         ) : (
                             noData(
@@ -620,8 +626,11 @@ class SensorCard extends Component {
                             )
                         )}
                     </Box>
+                    {latestReading && <Box pr={4} pl={4} pb={2}>
+                        {infoRow}
+                    </Box>}
                     {removeSensorDialog}
-                </div>
+                </Box>
             );
         }
 
@@ -629,21 +638,26 @@ class SensorCard extends Component {
          * Default (detailed) card rendering
          */
         return (
-            <div>
+            <Box>
                 {altFileUplaod}
-                <Box className="content sensorCard" height={height} borderRadius="lg" overflow="hidden">
-                    <Box height="100%" margin="auto">
+                <Box
+                    className="content sensorCard"
+                    borderRadius="lg"
+                    overflow="hidden"
+                    marginBottom={this.props.size === "mobile" ? "10px" : "20px"}
+                >
+                    <Flex>
                         {/* Image section */}
                         {showImage && (
                             <Box
-                                float="left"
                                 width={imageWidth}
                                 className="imageBackgroundColor"
-                                position={"relative"}
+                                position="relative"
                                 backgroundImage={this.props.sensor.picture}
                                 backgroundSize="cover"
                                 backgroundPosition="center"
-                                height="100%"
+                                display="flex"
+                                flexDirection="column"
                                 onMouseEnter={() => this.setHover(true)}
                                 onMouseLeave={() => this.setHover(false)}
                             >
@@ -652,320 +666,329 @@ class SensorCard extends Component {
                                     backgroundImage={bglayer}
                                     backgroundSize="cover"
                                     backgroundPosition="center"
-                                    width={"100%"}
-                                    height={height}
+                                    width="100%"
+                                    flex={1}
                                 >
-                                    <div style={{ height: "100%" }}></div>
+                                    <div style={{ height: "100%" }} />
                                 </Box>
-                                {(!this.props.sensor.picture ||
-                                    (!this.props.sensor.picture && this.state.imageHover)) && (
-                                        <Box>
-                                            <label htmlFor={"up" + this.props.sensor.sensor}>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    style={{ display: "none" }}
-                                                    id={"up" + this.props.sensor.sensor}
-                                                    onChange={(f) => {
-                                                        this.setState({ ...this.state, loadingImage: true });
-                                                        uploadBackgroundImage(this.props.sensor, f, t, (res) => {
-                                                            this.setState({ ...this.state, loadingImage: false });
-                                                        });
-                                                    }}
-                                                />
-                                                <center
-                                                    style={{
-                                                        position: "absolute",
-                                                        top: 0,
-                                                        bottom: 0,
-                                                        width: "100%",
-                                                        cursor: "pointer",
-                                                    }}
+                                {(!this.props.sensor.picture || (this.state.imageHover)) && (
+                                    <Box position="absolute" top="0" left="0" w="100%" h="100%">
+                                        <label
+                                            htmlFor={"up" + this.props.sensor.sensor}
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                position: "relative",   // for absolute child
+                                                width: "100%",
+                                                height: "100%",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                style={{ display: "none" }}
+                                                id={"up" + this.props.sensor.sensor}
+                                                onChange={(f) => {
+                                                    this.setState({ ...this.state, loadingImage: true });
+                                                    uploadBackgroundImage(this.props.sensor, f, t, () => {
+                                                        this.setState({ ...this.state, loadingImage: false });
+                                                    });
+                                                }}
+                                            />
+                                            <Avatar
+                                                boxSize={`${imageButtonSize}px`}
+                                                icon={
+                                                    this.state.loadingImage ? (
+                                                        <Spinner color="white" />
+                                                    ) : this.state.imageHover ? (
+                                                        <MdAdd size="30px" color="white" />
+                                                    ) : (
+                                                        <MdCameraAlt size="30px" color="white" />
+                                                    )
+                                                }
+                                            />
+
+                                            {this.props.size !== "mobile" && this.state.imageHover && (
+                                                <Box
+                                                    position="absolute"
+                                                    top={`calc(50% + ${imageButtonSize / 2}px + 8px)`}
+                                                    color="primary"
+                                                    style={smallSensorValue}
                                                 >
-                                                    <Avatar
-                                                        style={{
-                                                            marginTop: height / 2 - imageButtonSize / 2,
-                                                        }}
-                                                        height={imageButtonSize + "px"}
-                                                        width={imageButtonSize + "px"}
-                                                        icon={
-                                                            this.state.loadingImage ? (
-                                                                <Spinner color="white" />
-                                                            ) : this.state.imageHover ? (
-                                                                <MdAdd size="30px" color="white" />
-                                                            ) : (
-                                                                <MdCameraAlt size="30px" color="white" />
-                                                            )
-                                                        }
-                                                    />
-                                                    {this.props.size !== "mobile" && this.state.imageHover && (
-                                                        <Box color="primary" mt="2" style={smallSensorValue}>
-                                                            Add image
-                                                        </Box>
-                                                    )}
-                                                </center>
-                                            </label>
-                                        </Box>
-                                    )}
+                                                    Add image
+                                                </Box>
+                                            )}
+                                        </label>
+                                    </Box>
+                                )}
                             </Box>
                         )}
 
                         {/* Info & Graph section */}
-                        <Box padding="15px" marginLeft={showImage ? imageWidth : 0} height="100%" display="flex" flexDirection="column">
-                            <Box>
-                                <Flex>
-                                    {/* Sensor Heading */}
-                                    <Flex grow={1} width="calc(100% - 41px)">
-                                        <Link
-                                            to={`/${this.props.sensor.sensor}`}
-                                            style={{ width: "100%" }}
-                                        >
-                                            {isSmallCard ? (
-                                                <Heading
-                                                    size="xs"
-                                                    style={{
-                                                        fontFamily: "montserrat",
-                                                        fontSize: 16,
-                                                        fontWeight: "bold",
-                                                        overflow: "hidden",
-                                                        textOverflow: "ellipsis",
-                                                        maxLines: 2,
-                                                        lineHeight: "19px",
-                                                        maxHeight: "38px",
-                                                        marginRight: 2,
-                                                    }}
-                                                >
-                                                    {this.props.sensor.name}
-                                                </Heading>
+                        <Box flex={1} display="flex" flexDirection="column">
+                            <Box flex={1} p={4} display="flex" flexDirection="column">
+                                <Box>
+                                    <Flex>
+                                        {/* Sensor Heading */}
+                                        <Flex grow={1} width="calc(100% - 41px)">
+                                            <Link
+                                                to={`/${this.props.sensor.sensor}`}
+                                                style={{ width: "100%" }}
+                                            >
+                                                {isSmallCard ? (
+                                                    <Heading
+                                                        size="xs"
+                                                        style={{
+                                                            fontFamily: "montserrat",
+                                                            fontSize: 16,
+                                                            fontWeight: "bold",
+                                                            overflow: "hidden",
+                                                            textOverflow: "ellipsis",
+                                                            maxLines: 2,
+                                                            lineHeight: "19px",
+                                                            maxHeight: "38px",
+                                                            marginRight: 2,
+                                                        }}
+                                                    >
+                                                        {this.props.sensor.name}
+                                                    </Heading>
+                                                ) : (
+                                                    <Heading
+                                                        size="xs"
+                                                        style={{
+                                                            lineHeight: 1.1,
+                                                            fontFamily: "montserrat",
+                                                            fontSize: 16,
+                                                            fontWeight: "bold",
+                                                            whiteSpace: "nowrap",
+                                                            overflow: "hidden",
+                                                            textOverflow: "ellipsis",
+                                                            marginRight: 2,
+                                                        }}
+                                                    >
+                                                        {this.props.sensor.name}
+                                                    </Heading>
+                                                )}
+                                            </Link>
+                                        </Flex>
+
+                                        <Flex width="20px" mt={1}>
+                                            {alertIcon}
+                                        </Flex>
+                                        <Flex width="30px" height={"20px"}>
+                                            {moreDropdonw}
+                                        </Flex>
+                                    </Flex>
+
+                                    {/* Large main temperature or chosen stat */}
+                                    {latestReading && (
+                                        <Box>
+                                            <BigValue
+                                                value={getDisplayValue(
+                                                    mainStat,
+                                                    localeNumber(
+                                                        getUnitHelper(mainStat).value(
+                                                            latestReading[mainStat],
+                                                            mainStat === "humidity"
+                                                                ? latestReading.temperature
+                                                                : undefined
+                                                        ),
+                                                        getUnitHelper(mainStat).decimals
+                                                    )
+                                                )}
+                                                unit={getUnitHelper(mainStat).unit}
+                                                alertActive={this.getAlertState(mainStat) > 0}
+                                            />
+                                        </Box>
+                                    )}
+                                </Box>
+
+                                {/* Loading spinner or Graph */}
+                                {this.state.loading ? (
+                                    <center
+                                        style={{
+                                            position: "relative",
+                                            marginTop: isSmallCard ? 0 : height / 3,
+                                            transform: "translateY(-50%)",
+                                        }}
+                                    >
+                                        <Spinner size="xl" />
+                                    </center>
+                                ) : (
+                                    <Flex direction="column" flex={1} justifyContent="space-between">
+                                        <Link to={`/${this.props.sensor.sensor}`} style={{}}>
+                                            {latestReading ? (
+                                                <Flex direction="column" flex={1} justifyContent="space-between">
+                                                    <Box flexGrow={1} display="flex" flexDir="column" justifyContent="space-between">
+                                                        <div>
+                                                            {this.state.data &&
+                                                                this.state.hasDataForTypes.includes(mainStat) &&
+                                                                this.state.data.measurements.length ? (
+                                                                <>
+                                                                    {showGraph && (
+                                                                        <div
+                                                                            style={{
+                                                                                paddingTop: 10,
+                                                                                marginRight: -15,
+                                                                                marginBottom: -10,
+                                                                            }}
+                                                                        >
+
+                                                                            <Graph
+                                                                                title=""
+                                                                                key={
+                                                                                    this.props.sensor.sensor +
+                                                                                    this.props.cardType
+                                                                                }
+                                                                                alert={tnpGetAlert(mainStat)}
+                                                                                unit={getUnitHelper(mainStat).unit}
+                                                                                dataKey={mainStat}
+                                                                                data={this.getMeasurements()}
+                                                                                height={graphHeight}
+                                                                                legend={false}
+                                                                                cardView={true}
+                                                                                from={
+                                                                                    new Date().getTime() -
+                                                                                    60 * 60 * 1000 * this.props.dataFrom
+                                                                                }
+                                                                            />
+                                                                        </div>
+                                                                    )}
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    {/* No measurements */}
+                                                                    {showGraph && (
+                                                                        <>
+                                                                            {this.state.loadingHistory ? (
+                                                                                <center
+                                                                                    style={{
+                                                                                        fontFamily: "montserrat",
+                                                                                        fontSize: 16,
+                                                                                        fontWeight: "bold",
+                                                                                        height: graphHeight - 10,
+                                                                                    }}
+                                                                                >
+                                                                                    <div
+                                                                                        style={{
+                                                                                            position: "relative",
+                                                                                            top: "50%",
+                                                                                            transform: "translateY(-50%)",
+                                                                                        }}
+                                                                                    >
+                                                                                        <Spinner size="xl" />
+                                                                                    </div>
+                                                                                </center>
+                                                                            ) : (
+                                                                                showGraph && (
+                                                                                    <Box>
+                                                                                        {noData(
+                                                                                            this.state.errorFetchingData
+                                                                                                ? t("network_error")
+                                                                                                : noHistoryStr
+                                                                                        )}
+                                                                                    </Box>
+                                                                                )
+                                                                            )}
+                                                                        </>
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Small data fields */}
+                                                        <div
+                                                            style={{
+                                                                minHeight: 42,
+                                                                maxWidth:
+                                                                    this.props.size === "mobile" && !this.props.showGraph
+                                                                        ? "300px"
+                                                                        : undefined,
+                                                            }}
+                                                        >
+                                                            <SimpleGrid
+                                                                pt={2}
+                                                                columns={2}
+                                                                style={{
+                                                                    width: "100%",
+                                                                    overflow: "hidden",
+                                                                    whiteSpace: "nowrap",
+                                                                }}
+                                                            >
+                                                                {this.getSmallDataFields().map((x) => {
+                                                                    let value = latestReading[x];
+                                                                    if (value === undefined || typeof (value) === "object") return null;
+                                                                    return (
+                                                                        <GridItem
+                                                                            key={x}
+                                                                            alignSelf="flex-end"
+                                                                            lineHeight="1.3"
+                                                                            style={{
+                                                                                color:
+                                                                                    this.getAlertState(x) > 0
+                                                                                        ? ruuviTheme.colors.sensorCardValueAlertState
+                                                                                        : undefined,
+                                                                            }}
+                                                                        >
+                                                                            <span style={smallSensorValue}>
+                                                                                {value == null
+                                                                                    ? "-"
+                                                                                    : getDisplayValue(
+                                                                                        x,
+                                                                                        localeNumber(
+                                                                                            getUnitHelper(x).value(
+                                                                                                latestReading[x],
+                                                                                                x === "humidity"
+                                                                                                    ? latestReading.temperature
+                                                                                                    : undefined
+                                                                                            ),
+                                                                                            getUnitHelper(x).decimals
+                                                                                        )
+                                                                                    )}
+                                                                            </span>
+                                                                            <span style={smallSensorValueUnit}>
+                                                                                {x === "movementCounter"
+                                                                                    ? t(
+                                                                                        getUnitHelper(x).unit.toLocaleLowerCase()
+                                                                                    )
+                                                                                    : getUnitHelper(x).unit}
+                                                                            </span>
+                                                                        </GridItem>
+                                                                    );
+                                                                })}
+                                                            </SimpleGrid>
+                                                        </div>
+                                                    </Box>
+                                                </Flex>
                                             ) : (
-                                                <Heading
-                                                    size="xs"
-                                                    style={{
-                                                        lineHeight: 1.1,
-                                                        fontFamily: "montserrat",
-                                                        fontSize: 16,
-                                                        fontWeight: "bold",
-                                                        whiteSpace: "nowrap",
-                                                        overflow: "hidden",
-                                                        textOverflow: "ellipsis",
-                                                        marginRight: 2,
-                                                    }}
-                                                >
-                                                    {this.props.sensor.name}
-                                                </Heading>
+                                                <>
+                                                    {/* No data available fallback */}
+                                                    <Box pt={4} pb={4}>
+                                                        {noData(
+                                                            t("no_data")
+                                                                .split("\n")
+                                                                .map((x) => <div key={x}>{x}</div>)
+                                                        )}
+                                                    </Box>
+                                                </>
                                             )}
                                         </Link>
                                     </Flex>
-
-                                    <Flex width="20px" mt={1}>
-                                        {alertIcon}
-                                    </Flex>
-                                    <Flex width="30px" height={"20px"}>
-                                        {moreDropdonw}
-                                    </Flex>
-                                </Flex>
-
-                                {/* Large main temperature or chosen stat */}
-                                {latestReading && (
-                                    <div style={{ marginTop: -10 }}>
-                                        <BigValue
-                                            value={getDisplayValue(
-                                                mainStat,
-                                                localeNumber(
-                                                    getUnitHelper(mainStat).value(
-                                                        latestReading[mainStat],
-                                                        mainStat === "humidity"
-                                                            ? latestReading.temperature
-                                                            : undefined
-                                                    ),
-                                                    getUnitHelper(mainStat).decimals
-                                                )
-                                            )}
-                                            unit={getUnitHelper(mainStat).unit}
-                                            alertActive={this.getAlertState(mainStat) > 0}
-                                        />
-                                    </div>
                                 )}
                             </Box>
-
-                            {/* Loading spinner or Graph */}
-                            {this.state.loading ? (
-                                <center
-                                    style={{
-                                        position: "relative",
-                                        marginTop: isSmallCard ? 0 : height / 3,
-                                        transform: "translateY(-50%)",
-                                    }}
-                                >
-                                    <Spinner size="xl" />
-                                </center>
-                            ) : (
-                                <Flex direction="column" height="100%" justifyContent="space-between">
-                                    <Link to={`/${this.props.sensor.sensor}`} style={{ height: "100%" }}>
-                                        {latestReading ? (
-                                            <Flex direction="column" height="100%" justifyContent="space-between">
-                                                <Box flexGrow={1} display="flex" flexDir="column" justifyContent="space-between">
-                                                    <div
-                                                        style={{
-                                                            marginLeft: -10,
-                                                            marginRight: -20,
-                                                            marginBottom: -10,
-                                                            paddingBottom: -50,
-                                                        }}
-                                                    >
-                                                        {this.state.data &&
-                                                            this.state.hasDataForTypes.includes(mainStat) &&
-                                                            this.state.data.measurements.length ? (
-                                                            <>
-                                                                {showGraph && (
-                                                                    <Graph
-                                                                        title=""
-                                                                        key={
-                                                                            this.props.sensor.sensor +
-                                                                            this.props.cardType
-                                                                        }
-                                                                        alert={tnpGetAlert(mainStat)}
-                                                                        unit={getUnitHelper(mainStat).unit}
-                                                                        dataKey={mainStat}
-                                                                        data={this.getMeasurements()}
-                                                                        height={graphHeight}
-                                                                        legend={false}
-                                                                        cardView={true}
-                                                                        from={
-                                                                            new Date().getTime() -
-                                                                            60 * 60 * 1000 * this.props.dataFrom
-                                                                        }
-                                                                    />
-                                                                )}
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                {/* No measurements */}
-                                                                {showGraph && (
-                                                                    <>
-                                                                        {this.state.loadingHistory ? (
-                                                                            <center
-                                                                                style={{
-                                                                                    fontFamily: "montserrat",
-                                                                                    fontSize: 16,
-                                                                                    fontWeight: "bold",
-                                                                                    height: graphHeight,
-                                                                                }}
-                                                                            >
-                                                                                <div
-                                                                                    style={{
-                                                                                        position: "relative",
-                                                                                        top: "50%",
-                                                                                        transform: "translateY(-50%)",
-                                                                                    }}
-                                                                                >
-                                                                                    <Spinner size="xl" />
-                                                                                </div>
-                                                                            </center>
-                                                                        ) : (
-                                                                            showGraph && (
-                                                                                <Box ml={"10px"}>
-                                                                                    {noData(
-                                                                                        this.state.errorFetchingData
-                                                                                            ? t("network_error")
-                                                                                            : noHistoryStr
-                                                                                    )}
-                                                                                </Box>
-                                                                            )
-                                                                        )}
-                                                                    </>
-                                                                )}
-                                                            </>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Small data fields */}
-                                                    <div
-                                                        style={{
-                                                            minHeight: 42,
-                                                            maxWidth:
-                                                                this.props.size === "mobile" && !this.props.showGraph
-                                                                    ? "300px"
-                                                                    : undefined,
-                                                        }}
-                                                    >
-                                                        <SimpleGrid
-                                                            columns={2}
-                                                            style={{
-                                                                width: "100%",
-                                                                overflow: "hidden",
-                                                                whiteSpace: "nowrap",
-                                                            }}
-                                                        >
-                                                            {this.getSmallDataFields().map((x) => {
-                                                                let value = latestReading[x];
-                                                                if (value === undefined) return null;
-                                                                return (
-                                                                    <GridItem
-                                                                        key={x}
-                                                                        alignSelf="flex-end"
-                                                                        lineHeight="1.3"
-                                                                        style={{
-                                                                            color:
-                                                                                this.getAlertState(x) > 0
-                                                                                    ? ruuviTheme.colors.sensorCardValueAlertState
-                                                                                    : undefined,
-                                                                        }}
-                                                                    >
-                                                                        <span style={smallSensorValue}>
-                                                                            {value == null
-                                                                                ? "-"
-                                                                                : getDisplayValue(
-                                                                                    x,
-                                                                                    localeNumber(
-                                                                                        getUnitHelper(x).value(
-                                                                                            latestReading[x],
-                                                                                            x === "humidity"
-                                                                                                ? latestReading.temperature
-                                                                                                : undefined
-                                                                                        ),
-                                                                                        getUnitHelper(x).decimals
-                                                                                    )
-                                                                                )}
-                                                                        </span>
-                                                                        <span style={smallSensorValueUnit}>
-                                                                            {x === "movementCounter"
-                                                                                ? t(
-                                                                                    getUnitHelper(x).unit.toLocaleLowerCase()
-                                                                                )
-                                                                                : getUnitHelper(x).unit}
-                                                                        </span>
-                                                                    </GridItem>
-                                                                );
-                                                            })}
-                                                        </SimpleGrid>
-                                                    </div>
-                                                </Box>
-                                                <Box h={"10px"}>
-                                                    {infoRow}
-                                                </Box>
-                                            </Flex>
-                                        ) : (
-                                            <>
-                                                {/* No data available fallback */}
-                                                <div style={{ marginTop: height / 6 }}>
-                                                    {noData(
-                                                        t("no_data")
-                                                            .split("\n")
-                                                            .map((x) => <div key={x}>{x}</div>)
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-                                    </Link>
-                                </Flex>
+                            {latestReading && (
+                                <Box pr={4} pl={4} pb={2}>
+                                    {infoRow}
+                                </Box>
                             )}
                         </Box>
-                    </Box>
+                    </Flex>
                 </Box>
 
                 {removeSensorDialog}
-            </div>
+            </Box>
         );
     }
 }

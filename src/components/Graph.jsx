@@ -666,7 +666,7 @@ class Graph extends Component {
                                             }, {
                                                 grid: { stroke: ruuviTheme.graph.grid[colorMode], width: 2 },
                                                 stroke: ruuviTheme.graph.axisLabels[colorMode],
-                                                size: 55,
+                                                size: 45,
                                                 ticks: {
                                                     size: 0
                                                 },
