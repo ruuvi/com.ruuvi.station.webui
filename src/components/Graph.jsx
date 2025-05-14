@@ -464,7 +464,15 @@ class Graph extends Component {
                                                 }
                                             ],
                                             drawSeries: [
-                                                (u, si) => drawDataGapLines(u, si, ruuviTheme.graph.stroke[colorMode]),
+                                                (u, si) => {
+                                                    let color;
+                                                    if (alert && alert.enabled) {
+                                                        color = scaleGradient(u, 'y', 1, strokeGrad, true);
+                                                    } else {
+                                                        color = ruuviTheme.graph.stroke[colorMode];
+                                                    }
+                                                    drawDataGapLines(u, si, color);
+                                                },
                                                 (u, si) => {
                                                     if (si !== 1) return; // only data series
 
