@@ -5,7 +5,6 @@ import {
     Box,
     SimpleGrid,
     GridItem,
-    Avatar,
     Flex,
     IconButton,
     Menu,
@@ -25,7 +24,7 @@ import DurationText from "./DurationText";
 import BigValue from "./BigValue";
 import { withColorMode } from "../utils/withColorMode";
 import bglayer from "../img/bg-layer.png";
-import { MdAdd, MdCameraAlt, MdMoreVert } from "react-icons/md";
+import { MdMoreVert } from "react-icons/md";
 import uploadBackgroundImage from "../BackgroundUploader";
 import { isBatteryLow } from "../utils/battery";
 import lowBattery from "../img/low_battery.svg";
@@ -151,7 +150,6 @@ class SensorCard extends Component {
             lastParsedReading: null,
             loading: false,
             loadingHistory: true,
-            imageHover: false,
             loadingImage: false,
             showRemoveDialog: false,
             errorFetchingData: false,
@@ -316,14 +314,6 @@ class SensorCard extends Component {
         return 0;
     }
 
-    setHover(state) {
-        this.setState({
-            ...this.state,
-            imageHover: state,
-            avatarHover: false,
-        });
-    }
-
     getMeasurements() {
         let measurements = JSON.parse(JSON.stringify(this.state.data.measurements));
         if (measurements && this.props.sensor.measurements.length) {
@@ -368,7 +358,6 @@ class SensorCard extends Component {
             : 180;
         let graphHeight = height - 150;
         let imageWidth = "25%";
-        let imageButtonSize = 80;
 
         if (this.props.size === "mobile") imageButtonSize = 60;
         if (this.props.size === "medium") graphHeight = 150;
@@ -496,20 +485,19 @@ class SensorCard extends Component {
         const noData = (str) => (
             <div
                 style={{
-                    height: graphHeight,
-                    paddingTop: simpleView ? 0 : 10,
+                    height: showGraph ? graphHeight : undefined
                 }}
                 className="nodatatext"
             >
                 <div
                     style={{
                         position: "relative",
-                        top: simpleView
+                        top: simpleView || !showGraph
                             ? undefined
                             : this.props.size === "medium"
                                 ? "44%"
                                 : "50%",
-                        transform: simpleView ? undefined : "translateY(-50%)",
+                        transform: simpleView || !showGraph ? undefined : "translateY(-50%)",
                     }}
                 >
                     {str}
@@ -560,10 +548,10 @@ class SensorCard extends Component {
                                     {this.props.sensor.name}
                                 </Heading>
                             </Flex>
-                            <Flex width="15px" mt={1}>
+                            <Flex width="15px" mt="0.5">
                                 {alertIcon}
                             </Flex>
-                            <Flex width="25px" height={"20px"}>
+                            <Flex width="24px" height={"20px"}>
                                 {moreDropdonw}
                             </Flex>
                         </Flex>
@@ -658,8 +646,6 @@ class SensorCard extends Component {
                                 backgroundPosition="center"
                                 display="flex"
                                 flexDirection="column"
-                                onMouseEnter={() => this.setHover(true)}
-                                onMouseLeave={() => this.setHover(false)}
                             >
                                 <Box
                                     className="imageBackgroundOverlay"
@@ -671,58 +657,6 @@ class SensorCard extends Component {
                                 >
                                     <div style={{ height: "100%" }} />
                                 </Box>
-                                {(!this.props.sensor.picture || (this.state.imageHover)) && (
-                                    <Box position="absolute" top="0" left="0" w="100%" h="100%">
-                                        <label
-                                            htmlFor={"up" + this.props.sensor.sensor}
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                position: "relative",   // for absolute child
-                                                width: "100%",
-                                                height: "100%",
-                                                cursor: "pointer",
-                                            }}
-                                        >
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                style={{ display: "none" }}
-                                                id={"up" + this.props.sensor.sensor}
-                                                onChange={(f) => {
-                                                    this.setState({ ...this.state, loadingImage: true });
-                                                    uploadBackgroundImage(this.props.sensor, f, t, () => {
-                                                        this.setState({ ...this.state, loadingImage: false });
-                                                    });
-                                                }}
-                                            />
-                                            <Avatar
-                                                boxSize={`${imageButtonSize}px`}
-                                                icon={
-                                                    this.state.loadingImage ? (
-                                                        <Spinner color="white" />
-                                                    ) : this.state.imageHover ? (
-                                                        <MdAdd size="30px" color="white" />
-                                                    ) : (
-                                                        <MdCameraAlt size="30px" color="white" />
-                                                    )
-                                                }
-                                            />
-
-                                            {this.props.size !== "mobile" && this.state.imageHover && (
-                                                <Box
-                                                    position="absolute"
-                                                    top={`calc(50% + ${imageButtonSize / 2}px + 8px)`}
-                                                    color="primary"
-                                                    style={smallSensorValue}
-                                                >
-                                                    Add image
-                                                </Box>
-                                            )}
-                                        </label>
-                                    </Box>
-                                )}
                             </Box>
                         )}
 
@@ -732,7 +666,7 @@ class SensorCard extends Component {
                                 <Box>
                                     <Flex>
                                         {/* Sensor Heading */}
-                                        <Flex grow={1} width="calc(100% - 41px)">
+                                        <Flex grow={1} width="calc(100% - 40px)">
                                             <Link
                                                 to={`/${this.props.sensor.sensor}`}
                                                 style={{ width: "100%" }}
@@ -774,10 +708,10 @@ class SensorCard extends Component {
                                             </Link>
                                         </Flex>
 
-                                        <Flex width="20px" mt={1}>
+                                        <Flex width="15px" mt={0.5}>
                                             {alertIcon}
                                         </Flex>
-                                        <Flex width="30px" height={"20px"}>
+                                        <Flex width="24px" height={"20px"}>
                                             {moreDropdonw}
                                         </Flex>
                                     </Flex>
@@ -901,7 +835,6 @@ class SensorCard extends Component {
                                                         {/* Small data fields */}
                                                         <div
                                                             style={{
-                                                                minHeight: 42,
                                                                 maxWidth:
                                                                     this.props.size === "mobile" && !this.props.showGraph
                                                                         ? "300px"
