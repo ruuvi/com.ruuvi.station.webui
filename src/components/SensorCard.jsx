@@ -358,6 +358,7 @@ class SensorCard extends Component {
             : 180;
         let graphHeight = height - 150;
         let imageWidth = "25%";
+        let imageButtonSize = 80;
 
         if (this.props.size === "mobile") imageButtonSize = 60;
         if (this.props.size === "medium") graphHeight = 150;
