@@ -22,96 +22,133 @@ const infoText = {
     fontSize: 16,
 }
 
+// Simple debounce function
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+}
+
 function DashboardGrid(props) {
-    const [isLargeDisplay] = useMediaQuery("(min-width: 1700px)", { ssr: false })
-    const [isMediumDisplay] = useMediaQuery("(min-width: 1024px)", { ssr: false })
+    const [isLargeDisplay] = useMediaQuery("(min-width: 1700px)", { ssr: false });
+    const [isMediumDisplay] = useMediaQuery("(min-width: 1024px)", { ssr: false });
     const gridRef = useRef(null);
     const [containerWidth, setContainerWidth] = useState(0);
-    
-    let size = ""
-    if (isLargeDisplay) size = "large"
-    else if (isMediumDisplay) size = "medium"
-    else size = "mobile"
-    
-    if (props.currSize !== size) props.onSizeChange(size)
-    
+    const debouncedOnSizeChange = useRef(debounce(props.onSizeChange, 300)).current;
+
+    let size = "";
+    if (isLargeDisplay) size = "large";
+    else if (isMediumDisplay) size = "medium";
+    else size = "mobile";
+
+    if (props.currSize !== size) {
+        debouncedOnSizeChange(size);
+    }
+
     const gap = size === "mobile" ? 10 : 20;
     const minCardWidth = isLargeDisplay ? 450 : isMediumDisplay ? 350 : props.showGraph ? 280 : 320;
-    
-    // calculate optimal column count and column width
-    const calculateGridDimensions = () => {
-        if (!gridRef.current || !containerWidth) return { columnWidth: minCardWidth, columnCount: 1 };
-        
-        // calculate how many columns can fit
-        let columnCount = Math.max(1, Math.floor((containerWidth + gap) / (minCardWidth + gap)));
-        
-        // calculate the actual column width to fill the available space
-        const columnWidth = (containerWidth - (gap * (columnCount - 1))) / columnCount;
-        
-        return { columnWidth, columnCount };
-    }
-    
+
+    // Effect for setting up observers and listeners that update containerWidth
+    const debouncedWindowResizeHandlerRef = useRef(null);
+    const debouncedResizeObserverHandlerRef = useRef(null);
+
     useEffect(() => {
-        // position items after they're rendered
-        const resizeObserver = new ResizeObserver(() => {
-            if (gridRef.current) {
-                setContainerWidth(gridRef.current.clientWidth);
-                
-                const items = gridRef.current.querySelectorAll('.masonry-item');
-                if (!items) return;
-                
-                positionItems(items);
-            }
-        });
-        
-        const positionItems = (items) => {
-            if (!gridRef.current) return;
-            
-            gridRef.current.style.height = '';
-            
-            const { columnWidth, columnCount } = calculateGridDimensions();
-            
-            // track the height of each column
-            const columnHeights = Array(columnCount).fill(0);
-            
-            Array.from(items).forEach(item => {
-                // find the shortest column
-                const minColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
-                
-                // position
-                const x = minColumnIndex * (columnWidth + gap);
-                const y = columnHeights[minColumnIndex];
-                
-                // set width to match column width
-                item.style.width = `${columnWidth}px`;
-                item.style.transform = `translate(${x}px, ${y}px)`;
-                
-                // update column height
-                columnHeights[minColumnIndex] += item.offsetHeight;
-            });
-            
-            // set the container height to the tallest column
-            gridRef.current.style.height = `${Math.max(...columnHeights) - gap}px`;
-        };
-        
-        // observe the grid container
-        if (gridRef.current) {
-            setContainerWidth(gridRef.current.clientWidth);
-            resizeObserver.observe(gridRef.current);
-            
-            window.addEventListener('resize', () => {
+        if (!debouncedWindowResizeHandlerRef.current) {
+            debouncedWindowResizeHandlerRef.current = debounce(() => {
                 if (gridRef.current) {
                     setContainerWidth(gridRef.current.clientWidth);
                 }
-            });
+            }, 200);
+        }
+
+        if (!debouncedResizeObserverHandlerRef.current) {
+            debouncedResizeObserverHandlerRef.current = debounce(newWidth => {
+                setContainerWidth(newWidth);
+            }, 200);
+        }
+
+        const resizeObserverInstance = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                debouncedResizeObserverHandlerRef.current(entry.contentRect.width);
+            }
+        });
+
+        if (gridRef.current) {
+            resizeObserverInstance.observe(gridRef.current);
+            window.addEventListener('resize', debouncedWindowResizeHandlerRef.current);
+            // Set initial width, which will trigger the layout effect
+            setContainerWidth(gridRef.current.clientWidth);
+        }
+
+        const handlerToRemove = debouncedWindowResizeHandlerRef.current;
+        return () => {
+            resizeObserverInstance.disconnect();
+            if (handlerToRemove) {
+                window.removeEventListener('resize', handlerToRemove);
+            }
+            // Clear timeouts from debounce on unmount
+            if (debouncedWindowResizeHandlerRef.current && typeof debouncedWindowResizeHandlerRef.current.cancel === 'function') {
+                debouncedWindowResizeHandlerRef.current.cancel();
+            }
+            if (debouncedResizeObserverHandlerRef.current && typeof debouncedResizeObserverHandlerRef.current.cancel === 'function') {
+                debouncedResizeObserverHandlerRef.current.cancel();
+            }
+        };
+    }, []); // Empty dependency array: setup observers once.
+
+    // Effect for actual positioning when relevant data changes
+    useEffect(() => {
+        if (!gridRef.current || containerWidth === 0) {
+            if (gridRef.current) gridRef.current.style.height = '0px';
+            return;
+        }
+
+        const items = gridRef.current.querySelectorAll('.masonry-item');
+        if (!items || items.length === 0) {
+            gridRef.current.style.height = '0px';
+            return;
+        }
+
+        const calculateGridDimensions = () => {
+            if (!gridRef.current || !containerWidth) return { columnWidth: minCardWidth, columnCount: 1 };
+            let columnCount = Math.max(1, Math.floor((containerWidth + gap) / (minCardWidth + gap)));
+            const columnWidthVal = (containerWidth - (gap * (columnCount - 1))) / columnCount;
+            return { columnWidth: columnWidthVal, columnCount };
+        };
+
+        gridRef.current.style.height = ''; // Reset height
+        const { columnWidth: calculatedColumnWidth, columnCount } = calculateGridDimensions();
+        
+        if (columnCount <= 0 || calculatedColumnWidth <= 0) { // Avoid issues with zero or negative columns/width
+            gridRef.current.style.height = '0px';
+            return;
         }
         
-        return () => {
-            resizeObserver.disconnect();
-            window.removeEventListener('resize', () => {});
-        };
-    }, [containerWidth, props.order]);
-    
+        const columnHeights = Array(columnCount).fill(0);
+
+        Array.from(items).forEach(item => {
+            const minColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
+            const x = minColumnIndex * (calculatedColumnWidth + gap);
+            const y = columnHeights[minColumnIndex];
+
+            item.style.width = `${calculatedColumnWidth}px`;
+            item.style.transform = `translate(${x}px, ${y}px)`;
+            columnHeights[minColumnIndex] += item.offsetHeight; // Assumes item.offsetHeight is correct
+        });
+
+        if (columnHeights.length > 0) {
+            const maxHeight = Math.max(...columnHeights);
+            // Safely apply original-like logic for height calculation
+            gridRef.current.style.height = `${Math.max(0, maxHeight - gap)}px`;
+        } else {
+            gridRef.current.style.height = '0px';
+        }
+
+    }, [containerWidth, size, props.order, gap, minCardWidth]); // Dependencies for re-calculating layout
+
     return (
         <Box
             ref={gridRef}
@@ -394,7 +431,7 @@ class Dashboard extends Component {
         const sensorCard = (x, size, sensorsInSearch) => {
             if (!x) return <></>
             let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
-            return <span className="masonry-item" key={x.sensor + '-' + size} style={{ maxWidth: "100%", display: hide ? "none" : undefined }}>
+            return <span className="masonry-item" key={x.sensor} style={{ maxWidth: "100%", display: hide ? "none" : undefined }}>
                 <a href={"/" + x.sensor}>
                     <SensorCard sensor={x}
                         size={size}

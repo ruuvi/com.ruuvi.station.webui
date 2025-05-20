@@ -200,7 +200,7 @@ class Graph extends Component {
             this.resizeTimeout = undefined;
             this.setState({ ...this.state, resizing: false })
             this.forceUpdate()
-        }, 100)
+        }, 500)
     }
     componentDidMount() {
         if (this.props.setRef) this.props.setRef(this.pRef)
