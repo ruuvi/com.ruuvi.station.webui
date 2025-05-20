@@ -361,7 +361,6 @@ class SensorCard extends Component {
         let imageButtonSize = 80;
 
         if (this.props.size === "mobile") imageButtonSize = 60;
-        if (this.props.size === "medium") graphHeight = 150;
 
         let isSmallCard = this.props.size === "mobile" && !showGraph;
         let mainStat = this.props.graphType || "temperature";
@@ -681,9 +680,11 @@ class SensorCard extends Component {
                                                             fontWeight: "bold",
                                                             overflow: "hidden",
                                                             textOverflow: "ellipsis",
-                                                            maxLines: 2,
-                                                            lineHeight: "19px",
-                                                            maxHeight: "38px",
+                                                            display: "-webkit-box",
+                                                            WebkitLineClamp: 2,
+                                                            WebkitBoxOrient: "vertical",
+                                                            lineHeight: "1.2em",
+                                                            maxHeight: "2.4em",
                                                             marginRight: 2,
                                                         }}
                                                     >
@@ -697,9 +698,13 @@ class SensorCard extends Component {
                                                             fontFamily: "montserrat",
                                                             fontSize: 16,
                                                             fontWeight: "bold",
-                                                            whiteSpace: "nowrap",
                                                             overflow: "hidden",
                                                             textOverflow: "ellipsis",
+                                                            display: "-webkit-box",
+                                                            WebkitLineClamp: 2,
+                                                            WebkitBoxOrient: "vertical",
+                                                            lineHeight: "1.2em",
+                                                            maxHeight: "2.4em",
                                                             marginRight: 2,
                                                         }}
                                                     >
