@@ -99,6 +99,7 @@ const graphLoadingOverlay = {
 const graph = {
     position: "relative",
     zIndex: 0,
+    paddingLeft: 10,
     float: "left",
     width: "100%",
     height: "450px"
@@ -537,6 +538,7 @@ class Sensor extends Component {
                 </span>
             </div>
         }
+        
         return (
             <Box>
                 <Box minHeight={1500}>
