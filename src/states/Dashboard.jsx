@@ -192,7 +192,8 @@ class Dashboard extends Component {
             search: "",
             currSize: '',
             rename: null,
-            showResetOrderConfirmation: false
+            showResetOrderConfirmation: false,
+            order: this.getOrder(),
         }
         var from = store.getDashboardFrom();
         if (from) {
@@ -347,7 +348,7 @@ class Dashboard extends Component {
         return this.state.cardType === "simple_view"
     }
     updateOrder(order) {
-        this.setState({ ...this.state, order: order })
+        this.setState({ ...this.state, order: [...order] })
         new NetworkApi().setSetting("SENSOR_ORDER", JSON.stringify(order), b => {
             if (b.result === "success") {
                 //notify.success(this.props.t("successfully_saved"))
@@ -393,7 +394,7 @@ class Dashboard extends Component {
     }
     render() {
         var { t } = this.props;
-        let order = this.getOrder()
+        let order = this.state.order;
         if (this.props.params.id) SessionStore.setBackRoute(`/${this.props.params.id}`)
         else SessionStore.setBackRoute("/")
         const dropdowns = <>
