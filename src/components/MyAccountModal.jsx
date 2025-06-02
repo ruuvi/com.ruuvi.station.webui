@@ -77,10 +77,18 @@ function MyAccountModal(props) {
         return <a href="https://cloud.ruuvi.com" target={"_blank"} style={{ textDecoration: "underline" }} rel="noreferrer">cloud.ruuvi.com ⇗</a>
     }
     const handleCodePaste = e => {
+        e.preventDefault();
+        
+        const plainText = e.clipboardData.getData('text/plain');
+        if (plainText) {
+            updateValidationCode(plainText);
+            return;
+        }
+        
         if (e.clipboardData.items.length > 0) {
             e.clipboardData.items[0].getAsString(code => {
-                updateValidationCode(code)
-            })
+                updateValidationCode(code);
+            });
         }
     }
     const deleteAccount = async () => {
