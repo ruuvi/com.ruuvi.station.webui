@@ -599,7 +599,7 @@ class SensorCard extends Component {
                                                 <span style={smallSensorValueUnit}>
                                                     {x === "movementCounter"
                                                         ? t(getUnitHelper(x).unit.toLocaleLowerCase())
-                                                        : getUnitHelper(x).unit}
+                                                        : t(getUnitHelper(x).unit || getUnitHelper(x).label)}
                                                 </span>
                                             </GridItem>
                                         );
@@ -738,7 +738,7 @@ class SensorCard extends Component {
                                                         getUnitHelper(mainStat).decimals
                                                     )
                                                 )}
-                                                unit={getUnitHelper(mainStat).unit}
+                                                unit={t(getUnitHelper(mainStat).unit || getUnitHelper(mainStat).label)}
                                                 alertActive={this.getAlertState(mainStat) > 0}
                                             />
                                         </Box>
@@ -892,7 +892,7 @@ class SensorCard extends Component {
                                                                                     ? t(
                                                                                         getUnitHelper(x).unit.toLocaleLowerCase()
                                                                                     )
-                                                                                    : getUnitHelper(x).unit}
+                                                                                    : t(getUnitHelper(x).unit || getUnitHelper(x).label)}
                                                                             </span>
                                                                         </GridItem>
                                                                     );

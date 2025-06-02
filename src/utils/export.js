@@ -25,7 +25,7 @@ function processData(data, t) {
         let header = t(uHelp[x].exportLabel || uHelp[x].label)
         if (x === "rssi") header = "RSSI";
         if (header === "Tx Power") header = "TX Power";
-        if (uHelp[x].unit) header += ` (${t(uHelp[x].unit)})`
+        if (!uHelp[x].noUnitInExport && uHelp[x].unit) header += ` (${t(uHelp[x].unit)})`
         csvHeader.push(header)
     })
     data = data.measurements.map(x => {

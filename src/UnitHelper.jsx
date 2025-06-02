@@ -150,16 +150,14 @@ const unitHelper = {
         graphable: true
     },
     "voc": {
-        label: "voc",
-        unit: "VOC Index",
+        label: "unit_voc",
         value: (value) => value,
         fromUser: (value) => value,
         decimals: 0,
         graphable: true
     },
     "nox": {
-        label: "nox",
-        unit: "NOx Index",
+        label: "unit_nox",
         value: (value) => value,
         fromUser: (value) => value,
         decimals: 0,
@@ -190,11 +188,13 @@ const unitHelper = {
         graphable: true
     },
     "aqi": {
-        label: "aqi",
-        unit: "AQI",
+        label: "air_quality",
+        unit: "/100",
+        noUnitInExport: true,
+        exportLabel: "aqi",
         value: (value) => value,
         fromUser: (value) => value,
-        decimals: 1,
+        decimals: 0,
         graphable: true
     },
 };
