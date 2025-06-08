@@ -22,7 +22,6 @@ const infoText = {
     fontSize: 16,
 }
 
-// Simple debounce function
 function debounce(func, delay) {
     let timeout;
     return function(...args) {
@@ -37,7 +36,7 @@ function DashboardGrid(props) {
     const [isMediumDisplay] = useMediaQuery("(min-width: 1024px)", { ssr: false });
     const gridRef = useRef(null);
     const [containerWidth, setContainerWidth] = useState(0);
-    const debouncedOnSizeChange = useRef(debounce(props.onSizeChange, 300)).current;
+    const debouncedOnSizeChange = useRef(debounce(props.onSizeChange, 150)).current;
 
     let size = "";
     if (isLargeDisplay) size = "large";
@@ -61,13 +60,13 @@ function DashboardGrid(props) {
                 if (gridRef.current) {
                     setContainerWidth(gridRef.current.clientWidth);
                 }
-            }, 200);
+            }, 100);
         }
 
         if (!debouncedResizeObserverHandlerRef.current) {
             debouncedResizeObserverHandlerRef.current = debounce(newWidth => {
                 setContainerWidth(newWidth);
-            }, 200);
+            }, 50);
         }
 
         const resizeObserverInstance = new ResizeObserver(entries => {
@@ -79,7 +78,6 @@ function DashboardGrid(props) {
         if (gridRef.current) {
             resizeObserverInstance.observe(gridRef.current);
             window.addEventListener('resize', debouncedWindowResizeHandlerRef.current);
-            // Set initial width, which will trigger the layout effect
             setContainerWidth(gridRef.current.clientWidth);
         }
 
@@ -89,7 +87,6 @@ function DashboardGrid(props) {
             if (handlerToRemove) {
                 window.removeEventListener('resize', handlerToRemove);
             }
-            // Clear timeouts from debounce on unmount
             if (debouncedWindowResizeHandlerRef.current && typeof debouncedWindowResizeHandlerRef.current.cancel === 'function') {
                 debouncedWindowResizeHandlerRef.current.cancel();
             }
@@ -97,9 +94,8 @@ function DashboardGrid(props) {
                 debouncedResizeObserverHandlerRef.current.cancel();
             }
         };
-    }, []); // Empty dependency array: setup observers once.
+    }, []);
 
-    // Effect for actual positioning when relevant data changes
     useEffect(() => {
         if (!gridRef.current || containerWidth === 0) {
             if (gridRef.current) gridRef.current.style.height = '0px';
@@ -119,33 +115,43 @@ function DashboardGrid(props) {
             return { columnWidth: columnWidthVal, columnCount };
         };
 
-        gridRef.current.style.height = ''; // Reset height
-        const { columnWidth: calculatedColumnWidth, columnCount } = calculateGridDimensions();
-        
-        if (columnCount <= 0 || calculatedColumnWidth <= 0) { // Avoid issues with zero or negative columns/width
-            gridRef.current.style.height = '0px';
-            return;
-        }
-        
-        const columnHeights = Array(columnCount).fill(0);
+        const performLayout = () => {
+            if (!gridRef.current) return;
+            
+            gridRef.current.style.height = '';
+            const { columnWidth: calculatedColumnWidth, columnCount } = calculateGridDimensions();
+            
+            if (columnCount <= 0 || calculatedColumnWidth <= 0) { // Avoid issues with zero or negative columns/width
+                gridRef.current.style.height = '0px';
+                return;
+            }
+            
+            const columnHeights = Array(columnCount).fill(0);
 
-        Array.from(items).forEach(item => {
-            const minColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
-            const x = minColumnIndex * (calculatedColumnWidth + gap);
-            const y = columnHeights[minColumnIndex];
+            Array.from(items).forEach(item => {
+                item.style.width = `${calculatedColumnWidth}px`;
+            });
 
-            item.style.width = `${calculatedColumnWidth}px`;
-            item.style.transform = `translate(${x}px, ${y}px)`;
-            columnHeights[minColumnIndex] += item.offsetHeight; // Assumes item.offsetHeight is correct
-        });
+            gridRef.current.offsetHeight;
 
-        if (columnHeights.length > 0) {
-            const maxHeight = Math.max(...columnHeights);
-            // Safely apply original-like logic for height calculation
-            gridRef.current.style.height = `${Math.max(0, maxHeight - gap)}px`;
-        } else {
-            gridRef.current.style.height = '0px';
-        }
+            Array.from(items).forEach(item => {
+                const minColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
+                const x = minColumnIndex * (calculatedColumnWidth + gap);
+                const y = columnHeights[minColumnIndex];
+
+                item.style.transform = `translate(${x}px, ${y}px)`;
+                columnHeights[minColumnIndex] += item.offsetHeight;
+            });
+
+            if (columnHeights.length > 0) {
+                const maxHeight = Math.max(...columnHeights);
+                gridRef.current.style.height = `${Math.max(0, maxHeight - gap)}px`;
+            } else {
+                gridRef.current.style.height = '0px';
+            }
+        };
+
+        requestAnimationFrame(performLayout);
 
     }, [containerWidth, size, props.order, gap, minCardWidth]); // Dependencies for re-calculating layout
 
