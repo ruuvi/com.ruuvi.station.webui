@@ -694,7 +694,6 @@ class SensorCard extends Component {
                                                     <Heading
                                                         size="xs"
                                                         style={{
-                                                            lineHeight: 1.1,
                                                             fontFamily: "montserrat",
                                                             fontSize: 16,
                                                             fontWeight: "bold",
@@ -808,7 +807,7 @@ class SensorCard extends Component {
                                                                                         fontFamily: "montserrat",
                                                                                         fontSize: 16,
                                                                                         fontWeight: "bold",
-                                                                                        height: graphHeight - 10,
+                                                                                        height: graphHeight,
                                                                                     }}
                                                                                 >
                                                                                     <div
