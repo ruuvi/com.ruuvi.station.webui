@@ -686,6 +686,8 @@ class SensorCard extends Component {
                                                             lineHeight: "1.2em",
                                                             maxHeight: "2.4em",
                                                             marginRight: 2,
+                                                            wordBreak: "break-word",
+                                                            overflowWrap: "break-word",
                                                         }}
                                                     >
                                                         {this.props.sensor.name}
@@ -705,6 +707,8 @@ class SensorCard extends Component {
                                                             lineHeight: "1.2em",
                                                             maxHeight: "2.4em",
                                                             marginRight: 2,
+                                                            wordBreak: "break-word",
+                                                            overflowWrap: "break-word",
                                                         }}
                                                     >
                                                         {this.props.sensor.name}
