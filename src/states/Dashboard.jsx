@@ -24,7 +24,7 @@ const infoText = {
 
 function debounce(func, delay) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
         const context = this;
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(context, args), delay);
@@ -117,15 +117,15 @@ function DashboardGrid(props) {
 
         const performLayout = () => {
             if (!gridRef.current) return;
-            
+
             gridRef.current.style.height = '';
             const { columnWidth: calculatedColumnWidth, columnCount } = calculateGridDimensions();
-            
+
             if (columnCount <= 0 || calculatedColumnWidth <= 0) { // Avoid issues with zero or negative columns/width
                 gridRef.current.style.height = '0px';
                 return;
             }
-            
+
             const columnHeights = Array(columnCount).fill(0);
 
             Array.from(items).forEach(item => {
@@ -152,6 +152,21 @@ function DashboardGrid(props) {
         };
 
         requestAnimationFrame(performLayout);
+
+        const cardResizeObserver = new ResizeObserver(debounce(() => {
+            requestAnimationFrame(performLayout);
+        }, 50));
+
+        const resizeObsTimeout = setTimeout(() => {
+            Array.from(items).forEach(item => {
+                cardResizeObserver.observe(item);
+            });
+        }, 100);
+
+        return () => {
+            clearTimeout(resizeObsTimeout);
+            cardResizeObserver.disconnect();
+        };
 
     }, [containerWidth, size, props.order, gap, minCardWidth]); // Dependencies for re-calculating layout
 
