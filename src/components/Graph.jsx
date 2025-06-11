@@ -103,6 +103,7 @@ let fromComponentUpdate = false;
 let isTouchZooming = false;
 let wasTouchZooming = false;
 let touchZoomState = undefined;
+let yZoomState = undefined;
 
 class Graph extends Component {
     constructor(props) {
@@ -603,6 +604,7 @@ class Graph extends Component {
                                                                 //console.log("touch zoom reset")
                                                                 this.setState({ zoom: undefined })
                                                                 touchZoomState = undefined
+                                                                yZoomState = undefined
                                                                 return this.getXRange()
                                                             }
                                                             this.setState({ zoom: touchZoomState })
@@ -617,6 +619,7 @@ class Graph extends Component {
                                                         if (!fromComponentUpdate && Number.isInteger(fromX) && Number.isInteger(toX)) {
                                                             //console.log("touch zoom reset")
                                                             this.setState({ zoom: undefined })
+                                                            yZoomState = undefined
                                                             return this.getXRange()
                                                         }
                                                         return [fromX, toX]
@@ -636,6 +639,7 @@ class Graph extends Component {
                                                             return this.state.zoom || this.getXRange();
                                                         }
                                                         this.setState({ zoom: undefined });
+                                                        yZoomState = undefined;
                                                         return this.getXRange();
                                                     } else {
                                                         this.setState({ zoom: [fromX, toX] });
@@ -645,9 +649,36 @@ class Graph extends Component {
                                             },
                                             y: {
                                                 range: (_, fromY, toY) => {
-                                                    fromY -= 0.5
-                                                    toY += 0.5
-                                                    return [fromY, toY]
+                                                    if (yZoomState && fromComponentUpdate) {
+                                                        fromComponentUpdate = false;
+                                                        return yZoomState;
+                                                    }
+
+                                                    if (isTouchZooming) {
+                                                        return [fromY, toY];
+                                                    }
+
+                                                    if (wasTouchZooming) {
+                                                        yZoomState = [fromY, toY];
+                                                        return [fromY, toY];
+                                                    }
+
+                                                    if (dataKeyChanged) {
+                                                        yZoomState = undefined;
+                                                    }
+
+                                                    if (yZoomState && !fromComponentUpdate) {
+                                                        return yZoomState;
+                                                    }
+
+                                                    if (!fromComponentUpdate && fromY !== undefined && toY !== undefined) {
+                                                        yZoomState = [fromY, toY];
+                                                        return [fromY, toY];
+                                                    }
+
+                                                    const bufferedFromY = fromY - 0.5;
+                                                    const bufferedToY = toY + 0.5;
+                                                    return [bufferedFromY, bufferedToY];
                                                 }
                                             }
                                         },
