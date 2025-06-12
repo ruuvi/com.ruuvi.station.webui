@@ -672,8 +672,8 @@ class Graph extends Component {
                                                     }
 
                                                     if (!fromComponentUpdate && fromY !== undefined && toY !== undefined) {
-                                                        yZoomState = [fromY, toY];
-                                                        return [fromY, toY];
+                                                        yZoomState = undefined;
+                                                        //return [fromY, toY];
                                                     }
 
                                                     const bufferedFromY = fromY - 0.5;
