@@ -20,7 +20,7 @@
     "date-fns": "^3.6.0",
     "framer-motion": "^11.5.4",
     "i18next": "^23.15.1",
-    "jspdf": "^2.5.1",
+    "jspdf": "^3.0.1",
     "localforage": "^1.10.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
@@ -32,13 +32,13 @@
     "typeface-montserrat": "^1.1.13",
     "typeface-mulish": "^1.1.13",
     "typeface-oswald": "^1.1.13",
-    "uplot": "^1.6.30",
+    "uplot": "^1.6.32",
     "uplot-react": "^1.2.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.3/xlsx-0.19.3.tgz"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.5"
+    "@vitejs/plugin-react": "^4.5.2",
+    "vite": "^6.3.5"
   },
   "scripts": {
     "start": "vite",
