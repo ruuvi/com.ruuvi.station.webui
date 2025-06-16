@@ -581,6 +581,10 @@ class Graph extends Component {
                                             x: {
                                                 time: true,
                                                 range: (_, fromX, toX) => {
+                                                    if (this.props.cardView) {
+                                                        return this.getXRange();
+                                                    }
+
                                                     let propFrom = this.props.from
                                                     let propTo = this.props.to
                                                     if (!propFrom || !propTo) {
@@ -649,6 +653,12 @@ class Graph extends Component {
                                             },
                                             y: {
                                                 range: (_, fromY, toY) => {
+                                                    if (this.props.cardView) {
+                                                        const bufferedFromY = fromY - 0.5;
+                                                        const bufferedToY = toY + 0.5;
+                                                        return [bufferedFromY, bufferedToY];
+                                                    }
+
                                                     if (yZoomState && fromComponentUpdate) {
                                                         fromComponentUpdate = false;
                                                         return yZoomState;
