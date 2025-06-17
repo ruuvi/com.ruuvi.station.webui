@@ -259,7 +259,7 @@
       "remove_share_title": "Remove share",
       "share_center": "Share sensors",
       "share_center_subtitle": "Share your sensors with other Ruuvi users and manage the sensor sharing settings",
-      "share_center_description": "Select one or more sensors from the list, enter the email addresses to share with, and tap Add. You can add multiple email addresses at once. To share, tap the Share button.",
+      "share_center_description": "Select one or more sensors from the list, enter the email addresses to share with, and tap Add. You can add multiple email addresses at once. To share, tap the Share button. Receiver will be notified by email. If the receiver doesn't have a Ruuvi account, a free Ruuvi account will automatically be created at first log in.",
       "shared_by_me": "Sensors shared by me",
       "shared_to_me": "Sensors shared to me",
       "sharing_progress": "Sharing {}/{}...",
@@ -286,7 +286,7 @@
       "compare_subtitle": "Compare history data from multiple sensors on a unified chart",
       "unit": "Unit",
       "compare": "Compare",
-      "compare_description": "First, select all Ruuvi sensors you want to compare with each other. Then, select the unit of measurement. Finally, tap Compare and wait for the data to be loaded into the chart.",
+      "compare_description": "First, select all Ruuvi sensors you want to compare with each other. Then tap Compare and wait for the data to be loaded into the chart.",
       "sensors_select_label": "Sensors",
       "sensors_select_button": "Select",
       "image_format_not_supported": "Image format not supported",
@@ -308,7 +308,15 @@
       "soundLevelAvg": "Sound level (average)",
       "soundLevelPeak": "Sound level (peak)",
       "luminosity": "Luminosity",
-      "illuminance": "Illuminance"
+      "illuminance": "Illuminance",
+      "unit_voc": "VOC Index",
+      "unit_nox": "NOx Index",
+      "aqi": "AQI",
+      "air_quality": "Air Quality",
+      "image_history_cards": "Image + History cards",
+      "select_all": "Select all",
+      "clear_all": "Clear all",
+      "network_error": "Network error"
     }
   },
   "fi": {
@@ -571,7 +579,7 @@
       "remove_share_title": "Poista jako",
       "share_center": "Jaa antureita",
       "share_center_subtitle": "Jaa antureitasi muiden Ruuvi-käyttäjien kanssa ja hallitse antureiden jakoasetuksia",
-      "share_center_description": "Valitse yksi tai useampi anturi listasta, syötä sähköpostiosoitteet ja napauta Lisää. Voit lisätä useita sähköpostiosoitteita kerralla. Jaa napauttamalla Jaa-painiketta.",
+      "share_center_description": "Valitse yksi tai useampi anturi listasta, syötä sähköpostiosoitteet ja napauta Lisää. Voit lisätä useita sähköpostiosoitteita kerralla. Jaa napauttamalla Jaa-painiketta. Vastaanottaja saa jakamisesta ilmoituksen sähköpostilla. Ilmainen Ruuvi-tili luodaan ensimmäisen sisäänkirjautumisen yhteydessä, mikäli vastaanottajalla ei ole vielä Ruuvi-tiliä.",
       "shared_by_me": "Jakamani anturit",
       "shared_to_me": "Minulle jaetut anturit",
       "sharing_progress": "Jaetaan {}/{}...",
@@ -598,7 +606,7 @@
       "compare_subtitle": "Vertaile usean anturin hisoriatietoja yhdessä kuvaajassa",
       "unit": "Yksikkö",
       "compare": "Vertaile",
-      "compare_description": "Valitse ensin kaikki Ruuvi-anturit, joita haluat vertailla keskenään. Valitse sitten mittayksikkö. Valitse lopuksi Vertaa ja odota, että tiedot ladataan kuvaajaan.",
+      "compare_description": "Valitse ensin kaikki Ruuvi-anturit, joita haluat vertailla keskenään. Valitse sitten Vertaa ja odota, että tiedot ladataan kuvaajaan.",
       "sensors_select_label": "Anturit",
       "sensors_select_button": "Valitse",
       "image_format_not_supported": "Kuvamuotoa ei tueta",
@@ -620,7 +628,15 @@
       "soundLevelAvg": "Äänitaso (keskiarvo)",
       "soundLevelPeak": "Äänitaso (huippu)",
       "luminosity": "Valoisuus",
-      "illuminance": "Valaistusvoimakkuus"
+      "illuminance": "Valaistusvoimakkuus",
+      "unit_voc": "VOC Index",
+      "unit_nox": "NOx Index",
+      "aqi": "AQI",
+      "air_quality": "Ilmanlaatu",
+      "image_history_cards": "Kuva + Historiakortit",
+      "select_all": "Valitse kaikki",
+      "clear_all": "Tyhjennä kaikki",
+      "network_error": "Verkkovirhe"
     }
   },
   "sv": {
@@ -883,7 +899,7 @@
       "remove_share_title": "Ta bort delning",
       "share_center": "Dela sensorer",
       "share_center_subtitle": "Dela dina sensorer med andra Ruuvi-användare och hantera inställningar för sensordelning",
-      "share_center_description": "Välj en eller flera sensorer från listan, ange e-postadresserna att dela med och tryck på Lägg till. Du kan lägga till flera e-postadresser samtidigt. För att dela, tryck på Dela-knappen.",
+      "share_center_description": "Välj en eller flera sensorer från listan, ange e-postadresserna att dela med och tryck på Lägg till. Du kan lägga till flera e-postadresser samtidigt. För att dela, tryck på Dela-knappen. Mottagaren meddelas via e-post. Om mottagaren inte har ett Ruuvi-konto skapas ett gratis Ruuvi-konto automatiskt vid första inloggningen.",
       "shared_by_me": "Sensorer som delas av mig",
       "shared_to_me": "Sensorer delade till mig",
       "sharing_progress": "Delar {}/{}...",
@@ -910,7 +926,7 @@
       "compare_subtitle": "Jämför historiska data från flera sensorer på ett enhetligt diagram",
       "unit": "Enhet",
       "compare": "Jämför",
-      "compare_description": "Välj först alla Ruuvi-sensorer du vill jämföra med varandra. Välj sedan måttenhet. Slutligen väljer du Jämför och väntar på att data ska laddas in i diagrammet.",
+      "compare_description": "Välj först alla Ruuvi-sensorer du vill jämföra. Tryck sedan på Jämför och vänta tills datan har laddats in i diagrammet.",
       "sensors_select_label": "Sensorer",
       "sensors_select_button": "Välj",
       "image_format_not_supported": "Bildformat stöds inte",
@@ -932,7 +948,15 @@
       "soundLevelAvg": "Ljudnivå (genomsnitt)",
       "soundLevelPeak": "Ljudnivå (topp)",
       "luminosity": "Luminans",
-      "illuminance": "Illuminans"
+      "illuminance": "Illuminans",
+      "unit_voc": "VOC Index",
+      "unit_nox": "NOx Index",
+      "aqi": "AQI",
+      "air_quality": "Luftkvalitet",
+      "image_history_cards": "Bild + Historikkort",
+      "select_all": "Välj alla",
+      "clear_all": "Rensa alla",
+      "network_error": "Nätverksfel"
     }
   },
   "fr": {
@@ -1195,7 +1219,7 @@
       "remove_share_title": "Supprimer le partage",
       "share_center": "Partager des capteurs",
       "share_center_subtitle": "Partagez vos capteurs avec d'autres utilisateurs de Ruuvi et gérez les paramètres de partage de capteurs",
-      "share_center_description": "Sélectionnez un ou plusieurs capteurs dans la liste, entrez les adresses e-mail pour partager, puis appuyez sur Ajouter. Vous pouvez ajouter plusieurs adresses e-mail à la fois. Pour partager, appuyez sur le bouton Partager.",
+      "share_center_description": "Sélectionnez un ou plusieurs capteurs dans la liste, entrez les adresses e-mail pour partager, puis appuyez sur Ajouter. Vous pouvez ajouter plusieurs adresses e-mail à la fois. Pour partager, appuyez sur le bouton Partager. L'utilisateur recevra une notification par mail. Le compte Ruuvi est créé en utilisant une adresse mailf si l'utilisateur n'en possède pas encore.",
       "shared_by_me": "Capteurs partagés par moi",
       "shared_to_me": "Capteurs partagés avec moi",
       "sharing_progress": "Partage {}/{}...",
@@ -1222,7 +1246,7 @@
       "compare_subtitle": "Comparez les données historiques de plusieurs capteurs sur un graphique unifié",
       "unit": "Unité",
       "compare": "Comparer",
-      "compare_description": "Tout d'abord, sélectionnez tous les capteurs Ruuvi que vous souhaitez comparer entre eux. Ensuite, sélectionnez l'unité de mesure. Enfin, choisissez Comparer et attendez que les données soient chargées dans le graphique.",
+      "compare_description": "Tout d'abord, sélectionnez tous les capteurs Ruuvi que vous souhaitez comparer. Ensuite, appuyez sur Comparer et attendez que les données se chargent dans le graphique.",
       "sensors_select_label": "Capteurs",
       "sensors_select_button": "Sélectionner",
       "image_format_not_supported": "Format d'image non pris en charge",
@@ -1244,7 +1268,15 @@
       "soundLevelAvg": "Niveau sonore (moyenne)",
       "soundLevelPeak": "Niveau sonore (crête)",
       "luminosity": "Luminosité",
-      "illuminance": "Éclairement"
+      "illuminance": "Éclairement",
+      "unit_voc": "VOC Index",
+      "unit_nox": "NOx Index",
+      "aqi": "AQI",
+      "air_quality": "Qualité de l'air",
+      "image_history_cards": "Image + Cartes d'historique",
+      "select_all": "Tout sélectionner",
+      "clear_all": "Tout effacer",
+      "network_error": "Erreur réseau"
     }
   },
   "de": {
@@ -1507,7 +1539,7 @@
       "remove_share_title": "Freigabe entfernen",
       "share_center": "Sensoren teilen",
       "share_center_subtitle": "Teilen Sie Ihre Sensoren mit anderen Ruuvi-Benutzern und verwalten Sie die Einstellungen für die Sensorfreigabe",
-      "share_center_description": "Wählen Sie einen oder mehrere Sensoren aus der Liste aus, geben Sie die E-Mail-Adressen ein, mit denen Sie teilen möchten, und tippen Sie auf Hinzufügen. Sie können mehrere E-Mail-Adressen auf einmal hinzufügen. Zum Teilen tippen Sie auf die Schaltfläche Teilen.",
+      "share_center_description": "Wählen Sie einen oder mehrere Sensoren aus der Liste aus, geben Sie die E-Mail-Adressen ein, mit denen Sie teilen möchten, und tippen Sie auf Hinzufügen. Sie können mehrere E-Mail-Adressen auf einmal hinzufügen. Zum Teilen tippen Sie auf die Schaltfläche Teilen. Der Empfänger wird per E-Mail benachrichtigt. Wenn der Empfänger kein Ruuvi-Konto hat, wird beim ersten Anmelden automatisch ein kostenloses Ruuvi-Konto erstellt.",
       "shared_by_me": "Von mir freigegebene Sensoren",
       "shared_to_me": "Mit mir geteilte Sensoren",
       "sharing_progress": "Teilen {}/{}...",
@@ -1534,7 +1566,7 @@
       "compare_subtitle": "Vergleichen Sie historische Daten von mehreren Sensoren auf einem einheitlichen Diagramm",
       "unit": "Einheit",
       "compare": "Vergleichen",
-      "compare_description": "Wählen Sie zuerst alle Ruuvi-Sensoren aus, die Sie miteinander vergleichen möchten. Wählen Sie dann die Maßeinheit aus. Wählen Sie schließlich Vergleichen und warten Sie, bis die Daten in das Diagramm geladen sind.",
+      "compare_description": "Wählen Sie zuerst alle Ruuvi-Sensoren aus, die Sie vergleichen möchten. Tippen Sie dann auf Vergleichen und warten Sie, bis die Daten in das Diagramm geladen werden.",
       "sensors_select_label": "Sensoren",
       "sensors_select_button": "Auswählen",
       "image_format_not_supported": "Bildformat wird nicht unterstützt",
@@ -1556,7 +1588,15 @@
       "soundLevelAvg": "Schalldruckpegel (Durchschnitt)",
       "soundLevelPeak": "Schalldruckpegel (Spitze)",
       "luminosity": "Helligkeit",
-      "illuminance": "Beleuchtungsstärke"
+      "illuminance": "Beleuchtungsstärke",
+      "unit_voc": "VOC Index",
+      "unit_nox": "NOx Index",
+      "aqi": "AQI",
+      "air_quality": "Luftqualität",
+      "image_history_cards": "Bild + Historie-Karten",
+      "select_all": "Alle auswählen",
+      "clear_all": "Alle löschen",
+      "network_error": "Netzwerkfehler"
     }
   }
 }
