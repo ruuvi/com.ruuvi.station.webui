@@ -50,6 +50,13 @@ const smallSensorValueUnit = {
     opacity: 0.8,
 };
 
+const truncateUnit = (text, maxLength = 15) => {
+    if (text && text.length > maxLength) {
+        return text.substring(0, maxLength) + '...';
+    }
+    return text;
+};
+
 const lastUpdatedText = {
     fontFamily: "mulish",
     fontWeight: 600,
@@ -597,9 +604,9 @@ class SensorCard extends Component {
                                                         )}
                                                 </span>
                                                 <span style={smallSensorValueUnit}>
-                                                    {x === "movementCounter"
+                                                    {truncateUnit(x === "movementCounter"
                                                         ? t(getUnitHelper(x).unit.toLocaleLowerCase())
-                                                        : t(getUnitHelper(x).unit || getUnitHelper(x).label)}
+                                                        : t(getUnitHelper(x).unit || getUnitHelper(x).label))}
                                                 </span>
                                             </GridItem>
                                         );
@@ -891,11 +898,11 @@ class SensorCard extends Component {
                                                                                     )}
                                                                             </span>
                                                                             <span style={smallSensorValueUnit}>
-                                                                                {x === "movementCounter"
+                                                                                {truncateUnit(x === "movementCounter"
                                                                                     ? t(
                                                                                         getUnitHelper(x).unit.toLocaleLowerCase()
                                                                                     )
-                                                                                    : t(getUnitHelper(x).unit || getUnitHelper(x).label)}
+                                                                                    : t(getUnitHelper(x).unit || getUnitHelper(x).label))}
                                                                             </span>
                                                                         </GridItem>
                                                                     );

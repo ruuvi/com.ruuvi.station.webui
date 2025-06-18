@@ -7,6 +7,7 @@ const valueStyle = {
 }
 const unitStyle = {
     fontFamily: "oswald",
+    maxWidth: 100,
     fontSize: 14,
     marginLeft: 2,
     top: 9,
