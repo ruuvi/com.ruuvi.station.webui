@@ -171,6 +171,14 @@ const unitHelper = {
         decimals: 0,
         graphable: true
     },
+    "soundLevelInstant": {
+        label: "soundLevelInstant",
+        unit: "dBA",
+        value: (value) => value,
+        fromUser: (value) => value,
+        decimals: 1,
+        graphable: true
+    },
     "soundLevelAvg": {
         label: "soundLevelAvg",
         unit: "dBA",

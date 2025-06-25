@@ -3,6 +3,7 @@ import df5 from './5';
 import df6 from './6';
 import dfC5 from './c5';
 import dfE0 from './e0';
+import dfE1 from './e1';
 import df2and4 from './2and4';
 
 const ruu_vi = "ruu.vi/#"
@@ -37,6 +38,8 @@ function decoder(data) {
                 return dfC5.parse(inBytes)
             case "E0":
                 return dfE0.parse(hexToBytes(data))
+            case "E1":
+                return dfE1.parse(hexToBytes(data))
             default:
                 console.log("Unknown data format", rData.substring(4, 6))
                 return null;
