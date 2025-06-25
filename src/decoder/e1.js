@@ -33,39 +33,39 @@ const parse = function (data) {
   const co2 = ((data[19] << 8) | data[20])
   if (co2 !== 0xFFFF) robject.co2 = co2
 
-  const voc = (((data[21] & 0b00000001) << 8) | data[22])
+  const voc = (((data[32] & 0b01000000) << 2) | data[21])
   if (voc !== 511) robject.voc = voc
 
-  const nox = (((data[23] & 0b00000001) << 8) | data[24])
+  const nox = (((data[32] & 0b10000000) << 1) | data[22])
   if (nox !== 511) robject.nox = nox
 
-  const illuminance = ((data[25] << 8) | data[26])
-  if (illuminance !== 0xFFFF) robject.illuminance = illuminance
+  const illuminance = ((data[23] << 16) | (data[24] << 8) | data[25])
+  if (illuminance !== 0xFFFFFF) robject.illuminance = illuminance * 0.01
 
-  if (data[27] !== 0xFF) robject.soundLevelAvg = data[27] * 0.5
+  const soundLevelInstant = ((data[32] & 0b00001000) << 5) | data[26];
+  if (soundLevelInstant !== 511) robject.soundLevelInstant = soundLevelInstant * 0.2 + 18;
 
-  if (data[28] !== 0xFF) robject.soundLevelPeak = data[28] * 0.5
+  const soundLevelAvg = ((data[32] & 0b00010000) << 4) | data[27];
+  if (soundLevelAvg !== 511) robject.soundLevelAvg = soundLevelAvg * 0.2 + 18
 
-  const measurementSequenceNumber = ((data[29] & 0xff) << 8) | (data[30] & 0xff);
-  if (robject.measurementSequenceNumber !== 0xFFFF) robject.measurementSequenceNumber = measurementSequenceNumber
+  const soundLevelPeak = ((data[32] & 0b00100000) << 3) | data[28];
+  if (soundLevelPeak !== 511) robject.soundLevelPeak = soundLevelPeak * 0.2 + 18
 
-  if (data[31] === 0xFF) robject.battery = data[31] * 0.03 * 1000;
-
+  const measurementSequenceNumber = (data[29] << 16) | (data[30] << 8 ) | data[31];
+  if (robject.measurementSequenceNumber !== 0xFFFFFF) robject.measurementSequenceNumber = measurementSequenceNumber
 
   robject.flags = {
-    usbOn: (data[32] & 0b00000001),
-    lowBattery: (data[32] & 0b00000010) >> 1,
-    calibration: (data[32] & 0b00000100) >> 2,
-    boostMode: (data[32] & 0b00001000) >> 3
+    calibrating: (data[32] & 0b00000001),
+    buttonPressed: (data[32] & 0b00000010) >> 1,
+    rtcOnBoot: (data[32] & 0b00000100) >> 2,
   }
 
-  //robject.flags = data[32].toString(2).padStart(8, '0')
-
+  // reserved
   // 33 fw version
-  // 34 movement
-  // 35 acc x
-  // 36 acc y
-  // 37 acc z
+  // 34 sraw_voc
+  // 35 sraw_voc
+  // 36 sraw_nox
+  // 37 sraw_nox
 
   robject.mac = [
     int2Hex(data[38]),
@@ -89,7 +89,7 @@ const parse = function (data) {
   function scoreCo2(co2) {
     return Math.max(0, (co2 - 600) / 10);
   }
-  
+
   let distances = [];
   if (robject.pm2p5 !== undefined) {
     distances.push(scorePpm(robject.pm2p5));
@@ -113,7 +113,7 @@ const parse = function (data) {
   33...0 -> red
   */
 
-  robject.dataFormat = "e0";
+  robject.dataFormat = "e1";
   return robject;
 };
 
