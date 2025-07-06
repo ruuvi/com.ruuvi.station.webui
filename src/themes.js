@@ -33,6 +33,7 @@ let colors = {
     graphStrokeAlert: { dark: "#ce5325", light: "#f47546" },
     graphGrid: { dark: "rgba(68, 201, 185, 0.1)", light: "#083c3d1a" },
     sensorCardBackground: { light: undefined, dark: "#083c3d !important" },
+    modalBackground: { light: undefined, dark: "#294d4d !important" },
     signinInputBg: { light: "white", dark: undefined },
     dashboardUpdatedAtColor: { light: "#1b484780", dark: "#ffffff80" },
     toastErrorBackground: { light: "#f15a24", dark: "#f15a24" },
@@ -232,6 +233,14 @@ export const ruuviTheme = extendTheme({
             },
             '.chakra-toast': {
                 fontFamily: "mulish",
+            },
+            '.visibilitySettingsTitle': {
+                backgroundColor: colors.accordionPanel[props.colorMode],
+                padding: "10px",
+            },
+            '.visibilitySettingsItem': {
+                backgroundColor: colors.accordionButton[props.colorMode],
+                padding: "10px"
             }
         })
     },
@@ -367,7 +376,7 @@ export const ruuviTheme = extendTheme({
                 },
                 dialog: {
                     fontFamily: "Mulish",
-                    bg: colors.sensorCardBackground[props.colorMode]
+                    bg: colors.modalBackground[props.colorMode]
                 }
             }),
         },

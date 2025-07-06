@@ -19,7 +19,7 @@ import "uplot/dist/uPlot.min.css";
 import Graph from "./Graph";
 import parse from "../decoder/parser";
 import { useTranslation, withTranslation } from "react-i18next";
-import { getDisplayValue, getUnitHelper, localeNumber } from "../UnitHelper";
+import { getDisplayValue, getUnitHelper, localeNumber, DEFAULT_VISIBLE_SENSOR_TYPES } from "../UnitHelper";
 import DurationText from "./DurationText";
 import BigValue from "./BigValue";
 import { withColorMode } from "../utils/withColorMode";
@@ -35,6 +35,7 @@ import { ArrowDownIcon, ArrowUpIcon } from "@chakra-ui/icons";
 import UpgradePlanButton from "./UpgradePlanButton";
 import RemoveSensorDialog from "./RemoveSensorDialog";
 import notify from "../utils/notify";
+import Store from "../Store";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -294,10 +295,6 @@ class SensorCard extends Component {
         return Math.floor((now - lastUpdate) / 60);
     }
 
-    /**
-     * Gets alert object by type, or null if none.
-     * @param {string} type 
-     */
     getAlert(type) {
         if (!this.props.sensor) return null;
         if (type === "rssi") type = "signal";
@@ -308,10 +305,6 @@ class SensorCard extends Component {
         return null;
     }
 
-    /**
-     * Returns alert state code (-1=disabled, 0=enabled/not alerting, 1=alerting)
-     * @param {string} type 
-     */
     getAlertState(type) {
         if (type === "movementCounter") type = "movement";
         if (type === "rssi") type = "signal";
@@ -329,22 +322,72 @@ class SensorCard extends Component {
         return measurements;
     }
 
-    getSmallDataFields() {
-        let arr = ["humidity", "pressure", "movementCounter"];
-        let latest = this.getLatestReading();
-        if (!latest) return arr;
-
-        /*
-        let noShow = ["mac", "timestamp", "dataFormat", "txPower", this.props.graphType || "temperature"];
-        return Object.keys(latest).filter((x) => !arr.includes(x) && !noShow.includes(x));
-        */
-
-        if (latest.dataFormat === 6) arr = ["pm1p0", "co2", "voc"];
-        if (latest.dataFormat === "e0") arr = ["pm1p0", "co2", "voc", "illuminance", "nox", "aqi"];
-        if ((this.props.graphType || "temperature") !== "temperature") {
-            arr.push("temperature");
+    getAllVisibleFields() {
+        // Check for prop override first (used for preview)
+        if (this.props.visibleSensorTypes) {
+            return this.props.visibleSensorTypes;
         }
-        return arr;
+
+        // Get per-sensor visible types from store
+        const store = new Store();
+        const sensorId = this.props.sensor?.sensor; // MAC address
+        let visibleTypes = null;
+        
+        if (sensorId) {
+            visibleTypes = store.getPerSensorVisibleTypes(sensorId);
+            if (visibleTypes && visibleTypes.length > 0) {
+                return visibleTypes;
+            }
+        }
+        
+        const defaultTypes = DEFAULT_VISIBLE_SENSOR_TYPES
+        
+        let latest = this.getLatestReading();
+        if (!latest) {
+            return defaultTypes;
+        }
+
+        return defaultTypes
+    }
+
+    getMainStatType() {
+        if (this.props.graphType === null) {
+            const allVisibleFields = this.getAllVisibleFields();
+            if (allVisibleFields && allVisibleFields.length > 0) {
+                const latest = this.getLatestReading();
+                if (latest) {
+                    const availableTypes = Object.keys(latest);
+                    for (const field of allVisibleFields) {
+                        if (availableTypes.includes(field)) {
+                            return field;
+                        }
+                    }
+                }
+                return allVisibleFields[0];
+            }
+            
+            const latest = this.getLatestReading();
+            if (latest && latest.parsed) {
+                const availableTypes = Object.keys(latest.parsed);
+                for (const type of DEFAULT_VISIBLE_SENSOR_TYPES) {
+                    if (availableTypes.includes(type)) {
+                        return type;
+                    }
+                }
+                return availableTypes[0] || "temperature";
+            }
+            return "temperature";
+        }
+        return this.props.graphType || "temperature";
+    }
+
+    getSmallDataFields() {
+        const allVisibleFields = this.getAllVisibleFields();
+        const mainGraphType = this.getMainStatType();
+        
+        let filteredTypes = allVisibleFields.filter(type => type !== mainGraphType);
+        
+        return filteredTypes;
     }
 
     render() {
@@ -370,7 +413,7 @@ class SensorCard extends Component {
         if (this.props.size === "mobile") imageButtonSize = 60;
 
         let isSmallCard = this.props.size === "mobile" && !showGraph;
-        let mainStat = this.props.graphType || "temperature";
+        let mainStat = this.getMainStatType();
         let latestReading = this.getLatestReading();
         let alertIcon = getAlertIcon(this.props.sensor);
 
@@ -520,10 +563,11 @@ class SensorCard extends Component {
 
         if (simpleView) {
             let stats = [mainStat];
-            if (mainStat !== "humidity") stats.push("humidity");
-            if (mainStat !== "pressure") stats.push("pressure");
-            if (mainStat !== "temperature") stats.push("temperature");
-            if (!stats.includes("movementCounter")) stats.push("movementCounter");
+            for (const type of DEFAULT_VISIBLE_SENSOR_TYPES) {
+                if (type !== mainStat && !stats.includes(type)) {
+                    stats.push(type);
+                }
+            }
 
             return (
                 <Box

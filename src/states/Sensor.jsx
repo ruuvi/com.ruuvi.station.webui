@@ -15,6 +15,7 @@ import {
     CircularProgress,
     Spinner,
     Flex,
+    Button,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
@@ -22,7 +23,7 @@ import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
 import { MdChevronRight } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
-import { getUnitHelper, localeNumber } from "../UnitHelper";
+import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, localeNumber } from "../UnitHelper";
 import { exportCSV, exportPDF, exportXLSX } from "../utils/export";
 import withRouter from "../utils/withRouter"
 import DurationText from "../components/DurationText";
@@ -45,12 +46,7 @@ import RemoveSensorDialog from "../components/RemoveSensorDialog";
 import ExportMenu from "../components/ExportMenu";
 import UpgradePlanButton from "../components/UpgradePlanButton";
 import ZoomInfo from "../components/ZoomInfo";
-
-var mainSensorFields = ["temperature", "humidity", "pressure", "movementCounter", "battery",
-    "accelerationX", "accelerationY", "accelerationZ", "rssi",
-    "measurementSequenceNumber", "pm1p0", "pm2p5", "pm4p0",
-    "pm10p0", "co2", "voc", "nox", "illuminance", "soundLevelAvg", "soundLevelPeak", "aqi"];
-var sensorInfoOrder = ["mac", "dataFormat", "txPower"];
+import SensorTypeVisibilityDialog from "../components/SensorTypeVisibilityDialog";
 
 const collapseText = {
     fontFamily: "montserrat",
@@ -187,10 +183,15 @@ let alertDebouncer = {}
 class Sensor extends Component {
     constructor(props) {
         super(props)
+        let initialGraphKey = "temperature";
+        let keys = this.getSensorMainFields();
+        if (keys.length > 0) {
+            initialGraphKey = keys[0];
+        }
         this.state = {
             data: null,
             loading: true,
-            graphKey: "temperature",
+            graphKey: initialGraphKey,
             from: new Store().getGraphFrom() || 24,
             to: null,
             table: "",
@@ -199,7 +200,8 @@ class Sensor extends Component {
             offsetDialog: null,
             loadingImage: false,
             updateGraphKey: 0,
-            graphPDFMode: false
+            graphPDFMode: false,
+            sensorVisibilityDialog: false
         }
         this.isLoading = false;
         this.applyAccordionSetting()
@@ -493,6 +495,24 @@ class Sensor extends Component {
     sensorHasData() {
         return this.getLatestReadingFromProps() !== null
     }
+    getSensorMainFields() {
+        let mainSensorFields = [];
+        let visibleTypes = new Store().getPerSensorVisibleTypes(this.props.sensor.sensor);
+        let readings = this.getLatestReadingFromProps();
+        
+        if (readings) {
+            const allReadingKeys = Object.keys(readings);
+            
+            const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0 
+                ? visibleTypes 
+                : DEFAULT_VISIBLE_SENSOR_TYPES;
+            
+            mainSensorFields = effectiveVisibleTypes.filter(x => {
+                return allReadingKeys.includes(x) && getUnitHelper(x).graphable;
+            });
+        }
+        return mainSensorFields;
+    }
     render() {
         var { t } = this.props
         let lastReading = this.getLatestReading()
@@ -538,7 +558,8 @@ class Sensor extends Component {
                 </span>
             </div>
         }
-        
+
+        let mainSensorFields = this.getSensorMainFields();
         return (
             <Box>
                 <Box minHeight={1500}>
@@ -737,6 +758,27 @@ class Sensor extends Component {
                                                 </table>
                                             </ListItem>
                                         }
+                                        <hr />
+                                        <ListItem style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, sensorVisibilityDialog: true })}>
+                                            <table style={accordionContent}>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style={detailedTitle}>
+                                                            {t("visible_measurements")}
+                                                        </td>
+                                                        <td style={detailedText}>
+                                                            {(() => {
+                                                                const useDefault = new Store().getPerSensorUseDefault(this.props.sensor.sensor)
+                                                                if (useDefault) return t("use_default")
+                                                                const visibleFields = new Store().getPerSensorCustomTypes(this.props.sensor.sensor) || [];
+                                                                return visibleFields.length > 0 ? visibleFields.length : t("no_visible_measurements");
+                                                            })()}
+                                                            <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </ListItem>
                                     </List>
                                 </AccordionPanel>
                             </AccordionItem>
@@ -758,12 +800,16 @@ class Sensor extends Component {
                                             })()}
                                         </Box>}
                                         {["temperature", "humidity", "pressure", "signal", "movement", "offline", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"].map(x => {
-                                            if (!x) return null
-
                                             const dataKey = getMappedAlertDataType(x);
                                             let latestValue = this.getLatestReading()[dataKey]
                                             if (latestValue === undefined && x !== "offline") return null;
+
                                             var alert = this.getAlert(x)
+                                            // if not visible, skip
+                                            let visibility = new Store().getPerSensorVisibleTypes(this.props.sensor.sensor);
+                                            let ignoreVisibleTypes = ["signal", "offline"];
+                                            if (!alert?.enabled && !ignoreVisibleTypes.includes(x) && visibility && !visibility.includes(dataKey)) return null;
+
                                             let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description + x : x
                                             return <AlertItem key={key} alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
                                                 latestValue={latestValue}
@@ -819,33 +865,55 @@ class Sensor extends Component {
                                     <AccordionText>
                                         {uppercaseFirst(t("more_info"))}
                                     </AccordionText>
+                                    <AccordionIcon />
                                 </AccordionButton>
                                 <hr />
                                 <AccordionPanel style={accordionPanel}>
                                     <List>
-                                        {sensorInfoOrder.map((order, i) => {
-                                            var x = this.getLatestReading(true).find(x => x.key === order);
-                                            if (order === "mac") {
-                                                x = { key: "mac", value: this.props.sensor.sensor }
-                                            }
-                                            if (!x) return null
-                                            let uh = getUnitHelper(x.key)
-                                            return (
-                                                <ListItem key={x.key}>
-                                                    <table style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : console.log("Not graphable")}>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style={detailedTitle}> {t(uh.label || x.key)}</td>
-                                                                <td style={{ ...detailedText, textDecoration: uh.graphable ? "underline" : "" }}>
-                                                                    {localeNumber(uh.value(x.value), uh.decimals)} {uh.unit}
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                    {i !== sensorInfoOrder.length - 1 && <hr />}
-                                                </ListItem>
-                                            )
-                                        })}
+                                        {(() => {
+                                            let readings = this.getLatestReadingFromProps();
+                                            if (!readings) return null;
+                                            
+                                            const allReadingKeys = Object.keys(readings);
+                                            const visibleTypes = new Store().getPerSensorVisibleTypes(this.props.sensor.sensor);
+                                            const DONTT_SHOW_TYPES = ["txPower", "mac", "flags"];
+                                            
+                                            const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0 
+                                                ? visibleTypes 
+                                                : DEFAULT_VISIBLE_SENSOR_TYPES;
+                                            
+                                            const originalSensorInfoOther = ["mac", "dataFormat", "txPower"];
+                                            const dynamicSensorInfoOther = allReadingKeys.filter(key => 
+                                                !effectiveVisibleTypes.includes(key) && 
+                                                !DONTT_SHOW_TYPES.includes(key)
+                                            ).concat(originalSensorInfoOther.filter(key => !DONTT_SHOW_TYPES.includes(key)));
+                                            
+                                            const uniqueSensorInfoOther = [...new Set(dynamicSensorInfoOther)];
+                                            
+                                            return uniqueSensorInfoOther.map((order, i) => {
+                                                var x = this.getLatestReading(true).find(x => x.key === order);
+                                                if (order === "mac") {
+                                                    x = { key: "mac", value: this.props.sensor.sensor }
+                                                }
+                                                if (!x) return null
+                                                let uh = getUnitHelper(x.key)
+                                                return (
+                                                    <ListItem key={x.key}>
+                                                        <table style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : console.log("Not graphable")}>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td style={detailedTitle}> {t(uh.label || x.key)}</td>
+                                                                    <td style={{ ...detailedText, textDecoration: uh.graphable ? "underline" : "" }}>
+                                                                        {localeNumber(uh.value(x.value), uh.decimals)} {uh.unit}
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        {i !== uniqueSensorInfoOther.length - 1 && <hr />}
+                                                    </ListItem>
+                                                )
+                                            });
+                                        })()}
                                         {this.getLatestReading(true).find(x => x.key === "flags") && <ListItem>
                                             <table style={accordionContent}>
                                                 <tbody>
@@ -897,6 +965,11 @@ class Sensor extends Component {
                     <EditNameDialog open={this.state.editName} onClose={() => this.editName(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
                     <OffsetDialog open={this.state.offsetDialog} onClose={() => this.setState({ ...this.state, offsetDialog: null })} sensor={this.props.sensor} offsets={{ "Humidity": this.props.sensor.offsetHumidity, "Pressure": this.props.sensor.offsetPressure, "Temperature": this.props.sensor.offsetTemperature }} lastReading={this.getLatestReading()} updateSensor={this.props.updateSensor} />
                     <RemoveSensorDialog open={this.state.removeSensor} onClose={() => this.setState({ ...this.state, removeSensor: null })} sensor={this.props.sensor} updateSensor={this.props.updateSensor} t={t} remove={() => this.props.remove()} />
+                    <SensorTypeVisibilityDialog
+                        sensor={this.props.sensor}
+                        open={this.state.sensorVisibilityDialog}
+                        onClose={() => this.setState({ ...this.state, sensorVisibilityDialog: false })}
+                    />
                 </Box>
             </Box>
         )

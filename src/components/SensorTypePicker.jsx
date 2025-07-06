@@ -66,7 +66,11 @@ export default function SensorTypePicker(props) {
         }
     }
 
-    if (props.value === null) {
+    if (props.dashboard) {
+        opts = [null, ...opts];
+    }
+
+    if (props.value === null && !props.dashboard) {
         if (props.allUnits) {
             props.onChange(opts[0])
         } else {
@@ -75,8 +79,13 @@ export default function SensorTypePicker(props) {
     }
 
     const getLabelForOption = (value) => {
+        if (value === null) {
+            return t("not_selected") || "Not selected";
+        }
+        
         let label = ""
         if (value == null) return ""
+        
         if (props.allUnits) {
             let sensorType = getSensorTypeOnly(value)
             let unit = getUnitOnly(value)
@@ -115,15 +124,31 @@ export default function SensorTypePicker(props) {
             </MenuButton>
             <MenuList maxHeight="600px" overflowY="auto" zIndex={100}>
                 {opts.map((op, i) => {
-                    let x = getSensorTypeOnly(op)
+                    let x = op === null ? "null" : getSensorTypeOnly(op)
                     let divider = <></>
                     let borderStyle = {};
                     if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
                     if (i === opts.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                     else divider = <MenuDivider />
-                    return <div key={x + i + "s"}>
-                        <MenuItem className={props.value === op ? "menuActive ddlItemAlt" : "ddlItemAlt"}
-                            style={{ ...borderStyle }} onClick={() => props.onChange(props.allUnits ? op : x)}>
+                    
+                    // Handle the click action for different option types
+                    const handleOptionClick = () => {
+                        if (op === null) {
+                            props.onChange(null);
+                        } else if (props.allUnits) {
+                            props.onChange(op);
+                        } else {
+                            props.onChange(getSensorTypeOnly(op));
+                        }
+                    };
+                    
+                    return <div key={`option-${i}-${x}`}>
+                        <MenuItem className={
+                            (props.value === null && op === null) || 
+                            (props.value !== null && props.value === op) ? 
+                            "menuActive ddlItemAlt" : "ddlItemAlt"
+                        }
+                            style={{ ...borderStyle }} onClick={handleOptionClick}>
                             {getLabelForOption(op)}
                         </MenuItem>
                         {divider}

@@ -209,7 +209,7 @@ class Dashboard extends Component {
             from: 24 * 3,
             cardType: store.getDashboardCardType(),
             showBig: true,
-            graphType: store.getDashboardGraphType(),
+            graphType: null,
             search: "",
             currSize: '',
             rename: null,
@@ -350,7 +350,6 @@ class Dashboard extends Component {
     }
     setGraphType(type) {
         this.setState({ ...this.state, graphType: type })
-        new Store().setDashboardGraphType(type)
     }
     getSensors() {
         if (this.state.search === "") return this.state.sensors
@@ -420,7 +419,7 @@ class Dashboard extends Component {
         else SessionStore.setBackRoute("/")
         const dropdowns = <>
             <DashboardViewType value={this.state.cardType} onChange={this.setDashboardViewType.bind(this)} showResetOrder={this.getOrder() !== null} resetOrder={() => this.setState({ ...this.state, showResetOrderConfirmation: true })} />
-            <SensorTypePicker value={this.state.graphType} onChange={type => this.setGraphType(type)} sensors={this.state.sensors} />
+            <SensorTypePicker dashboard value={this.state.graphType} onChange={type => this.setGraphType(type)} sensors={this.state.sensors} />
             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard disabled={this.shouldDurationBeDisabled()} />
         </>
         const search = width => {
@@ -453,6 +452,7 @@ class Dashboard extends Component {
         const sensorCard = (x, size, sensorsInSearch) => {
             if (!x) return <></>
             let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
+            console.log("size", size)
             return <span className="masonry-item" key={x.sensor} style={{ maxWidth: "100%", display: hide ? "none" : undefined }}>
                 <a href={"/" + x.sensor}>
                     <SensorCard sensor={x}
