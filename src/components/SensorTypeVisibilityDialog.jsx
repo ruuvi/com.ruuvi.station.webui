@@ -23,7 +23,7 @@ import { getMappedAlertDataType } from "../utils/alertHelper";
 import NetworkApi from "../NetworkApi";
 import { addVariablesInString } from "../TextHelper";
 
-const DONTT_SHOW_TYPES = ["txPower", "mac", "dataFormat"];
+const DONTT_SHOW_TYPES = ["txPower", "mac", "dataFormat", "flags", "timestamp"];
 
 const getVisibleSensorTypesForSensor = (sensorId, graphType = "temperature") => {
     const store = new Store();
@@ -37,13 +37,35 @@ const getVisibleSensorTypesForSensor = (sensorId, graphType = "temperature") => 
 };
 
 const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => {
-    const getInitialVisibleTypes = () => {
-        let defaultTypes = getVisibleSensorTypesForSensor(sensor?.sensor);
-        return defaultTypes.length > 0 ? defaultTypes : [...DEFAULT_VISIBLE_SENSOR_TYPES];
+    // Get available sensor types for filtering
+    const getAvailableSensorTypes = () => {
+        let availableTypes = [];
+        if (sensor && sensor.measurements && sensor.measurements.length > 0) {
+            if (sensor.measurements[0].parsed) {
+                availableTypes = Object.keys(sensor.measurements[0].parsed);
+            }
+        }
+        // filter out types that should not be shown
+        return availableTypes.filter(type => !DONTT_SHOW_TYPES.includes(type));
     };
 
-    const [visibleTypes, setVisibleTypes] = useState(getInitialVisibleTypes());
-    const [customVisibleTypes, setCustomVisibleTypes] = useState(getInitialVisibleTypes());
+    const getInitialVisibleTypes = () => {
+        let defaultTypes = getVisibleSensorTypesForSensor(sensor?.sensor);
+        if (defaultTypes.length === 0) {
+            defaultTypes = [...DEFAULT_VISIBLE_SENSOR_TYPES];
+        }
+        
+        // Filter default types to only include those available on this sensor
+        const availableTypes = getAvailableSensorTypes();
+        if (availableTypes.length > 0) {
+            defaultTypes = defaultTypes.filter(type => availableTypes.includes(type));
+        }
+        
+        return defaultTypes;
+    };
+
+    const [visibleTypes, setVisibleTypes] = useState([]);
+    const [customVisibleTypes, setCustomVisibleTypes] = useState([]);
     const [draggedItem, setDraggedItem] = useState(null);
     const [dragOverIndex, setDragOverIndex] = useState(null);
     const [useDefault, setUseDefault] = useState(false);
@@ -52,12 +74,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
 
     const dragOverBg = useColorModeValue("blue.50", "blue.900");
 
-    let avaiableSensorTypes = [];
-    if (sensor && sensor.measurements && sensor.measurements.length > 0) {
-        if (sensor.measurements[0].parsed) {
-            avaiableSensorTypes = Object.keys(sensor.measurements[0].parsed);
-        }
-    }
+    let avaiableSensorTypes = getAvailableSensorTypes();
 
     // if some sensor is selected but no measurements are available, add those to the list
     for (const type of visibleTypes) {
@@ -65,9 +82,6 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
             avaiableSensorTypes.push(type);
         }
     }
-
-    // filter out types that should not be shown
-    avaiableSensorTypes = avaiableSensorTypes.filter(type => !DONTT_SHOW_TYPES.includes(type));
 
     useEffect(() => {
         if (open && sensor?.sensor) {
@@ -94,6 +108,11 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
             } else {
                 setVisibleTypes(initialTypes);
             }
+        } else if (open && !sensor?.sensor) {
+            // Fallback when no sensor data available yet, should not happen in normal use
+            const fallbackTypes = getInitialVisibleTypes();
+            setVisibleTypes(fallbackTypes);
+            setCustomVisibleTypes(fallbackTypes);
         }
     }, [open, sensor?.sensor]);
 

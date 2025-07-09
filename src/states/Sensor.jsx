@@ -876,7 +876,7 @@ class Sensor extends Component {
                                             
                                             const allReadingKeys = Object.keys(readings);
                                             const visibleTypes = new Store().getPerSensorVisibleTypes(this.props.sensor.sensor);
-                                            const DONTT_SHOW_TYPES = ["txPower", "mac", "flags"];
+                                            const DONTT_SHOW_TYPES = ["txPower", "mac", "flags", "timestamp"];
                                             
                                             const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0 
                                                 ? visibleTypes 
@@ -915,6 +915,7 @@ class Sensor extends Component {
                                             });
                                         })()}
                                         {this.getLatestReading(true).find(x => x.key === "flags") && <ListItem>
+                                            <hr />
                                             <table style={accordionContent}>
                                                 <tbody>
                                                     <tr>
