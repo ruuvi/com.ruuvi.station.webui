@@ -33,25 +33,25 @@ const parse = function (data) {
   const co2 = ((data[19] << 8) | data[20])
   if (co2 !== 0xFFFF) robject.co2 = co2
 
-  const voc = (((data[32] & 0b01000000) << 2) | data[21])
+  const voc = data[21] << 1 | (data[32] & 0b01000000) >> 6;
   if (voc !== 511) robject.voc = voc
 
-  const nox = (((data[32] & 0b10000000) << 1) | data[22])
+  const nox = data[22] << 1 | (data[32] & 0b10000000) >> 7;
   if (nox !== 511) robject.nox = nox
 
   const illuminance = ((data[23] << 16) | (data[24] << 8) | data[25])
   if (illuminance !== 0xFFFFFF) robject.illuminance = illuminance * 0.01
 
-  const soundLevelInstant = ((data[32] & 0b00001000) << 5) | data[26];
+  const soundLevelInstant = data[26] << 1 | (data[32] & 0b00001000) >> 3;
   if (soundLevelInstant !== 511) robject.soundLevelInstant = soundLevelInstant * 0.2 + 18;
 
-  const soundLevelAvg = ((data[32] & 0b00010000) << 4) | data[27];
+  const soundLevelAvg = data[27] << 1 | (data[32] & 0b00010000) >> 4;
   if (soundLevelAvg !== 511) robject.soundLevelAvg = soundLevelAvg * 0.2 + 18
 
-  const soundLevelPeak = ((data[32] & 0b00100000) << 3) | data[28];
+  const soundLevelPeak = data[28] << 1 | (data[32] & 0b00100000) >> 5;
   if (soundLevelPeak !== 511) robject.soundLevelPeak = soundLevelPeak * 0.2 + 18
 
-  const measurementSequenceNumber = (data[29] << 16) | (data[30] << 8 ) | data[31];
+  const measurementSequenceNumber = (data[29] << 16) | (data[30] << 8) | data[31];
   if (robject.measurementSequenceNumber !== 0xFFFFFF) robject.measurementSequenceNumber = measurementSequenceNumber
 
   robject.flags = {
