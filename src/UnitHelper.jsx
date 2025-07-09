@@ -172,7 +172,7 @@ const unitHelper = {
         graphable: true
     },
     "soundLevelInstant": {
-        label: "soundLevelInstant",
+        label: "sound_instant",
         unit: "dBA",
         value: (value) => value,
         fromUser: (value) => value,
@@ -180,7 +180,7 @@ const unitHelper = {
         graphable: true
     },
     "soundLevelAvg": {
-        label: "soundLevelAvg",
+        label: "sound_avg",
         unit: "dBA",
         value: (value) => value,
         fromUser: (value) => value,
@@ -188,7 +188,7 @@ const unitHelper = {
         graphable: true
     },
     "soundLevelPeak": {
-        label: "soundLevelPeak",
+        label: "sound_peak",
         unit: "dBA",
         value: (value) => value,
         fromUser: (value) => value,
