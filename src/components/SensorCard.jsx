@@ -36,6 +36,7 @@ import UpgradePlanButton from "./UpgradePlanButton";
 import RemoveSensorDialog from "./RemoveSensorDialog";
 import notify from "../utils/notify";
 import Store from "../Store";
+import i18next from "i18next";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -52,6 +53,9 @@ const smallSensorValueUnit = {
 };
 
 const truncateUnit = (text, maxLength = 15) => {
+    console.log("Truncating unit:", text);
+    if (typeof text !== 'string') return text;
+    text = i18next.t(text);
     if (text && text.length > maxLength) {
         return text.substring(0, maxLength) + '...';
     }
@@ -946,7 +950,7 @@ class SensorCard extends Component {
                                                                                     ? t(
                                                                                         getUnitHelper(x).unit.toLocaleLowerCase()
                                                                                     )
-                                                                                    : t(getUnitHelper(x).unit || getUnitHelper(x).label))}
+                                                                                    : getUnitHelper(x).unit || getUnitHelper(x).label)}
                                                                             </span>
                                                                         </GridItem>
                                                                     );
