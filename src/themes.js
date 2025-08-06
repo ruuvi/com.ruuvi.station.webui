@@ -242,6 +242,10 @@ export const ruuviTheme = extendTheme({
                 backgroundColor: colors.accordionButton[props.colorMode],
                 padding: "10px"
             }
+            ,
+            '.visibilityListIcons': {
+                color: colors.buttonBackground[props.colorMode],
+            },
         })
     },
     graph: {

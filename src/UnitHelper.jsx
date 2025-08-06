@@ -6,6 +6,9 @@ const unitHelper = {
         unit: "°C",
         units: [{ translationKey: "°C", cloudStoreKey: "C" }, { translationKey: "°F", cloudStoreKey: "F" }, { translationKey: "K", cloudStoreKey: "K" }],
         value: (value, offset, settings) => temperatureToUserFormat(value, offset, settings),
+        valueWithUnit: (value, unitKey) => {
+            return temperatureToUserFormat(value, null, { UNIT_TEMPERATURE: unitKey });
+        },
         fromUser: (value) => temperatureFromUserFormat(value),
         decimals: 2,
         graphable: true
@@ -15,6 +18,9 @@ const unitHelper = {
         unit: "%",
         units: [{ translationKey: "%", cloudStoreKey: "0" }, { translationKey: "g/m³", cloudStoreKey: "1" }, { translationKey: "dewpoint", cloudStoreKey: "2" }],
         value: (value, temperature, settings) => humidityToUserFormat(value, temperature, settings),
+        valueWithUnit: (value, unitKey, temperature) => {
+            return humidityToUserFormat(value, temperature, { UNIT_HUMIDITY: unitKey });
+        },
         fromUser: (value) => value,
         decimals: 2,
         graphable: true
@@ -24,6 +30,9 @@ const unitHelper = {
         unit: "hPa",
         units: [{ translationKey: "Pa", cloudStoreKey: "0" }, { translationKey: "hPa", cloudStoreKey: "1" }, { translationKey: "mmHg", cloudStoreKey: "2" }, { translationKey: "inHg", cloudStoreKey: "3" }],
         value: (value, settings) => pressureToUserFormat(value, settings),
+        valueWithUnit: (value, unitKey) => {
+            return pressureToUserFormat(value, { UNIT_PRESSURE: unitKey });
+        },
         fromUser: (value) => pressureFromUserFormat(value),
         decimals: 2,
         graphable: true
@@ -109,7 +118,7 @@ const unitHelper = {
         decimals: 0,
         graphable: true
     },
-    "pm1p0": {
+    "pm10": {
         label: "pm10",
         unit: "µg/m³",
         value: (value) => value,
@@ -117,7 +126,7 @@ const unitHelper = {
         decimals: 1,
         graphable: true
     },
-    "pm2p5": {
+    "pm25": {
         label: "pm25",
         unit: "µg/m³",
         value: (value) => value,
@@ -125,7 +134,7 @@ const unitHelper = {
         decimals: 1,
         graphable: true
     },
-    "pm4p0": {
+    "pm40": {
         label: "pm40",
         unit: "µg/m³",
         value: (value) => value,
@@ -133,7 +142,7 @@ const unitHelper = {
         decimals: 1,
         graphable: true
     },
-    "pm10p0": {
+    "pm100": {
         label: "pm100",
         unit: "µg/m³",
         value: (value) => value,
@@ -211,7 +220,7 @@ export const allUnits = unitHelper;
 
 export const alertTypes = ["temperature", "humidity", "pressure", "signal", "movement", "offline", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
 
-export const DEFAULT_VISIBLE_SENSOR_TYPES = ["aqi", "temperature", "humidity", "illuminance", "soundLevelAvg", "co2", "voc", "nox", "pm2p5", "pressure", "movementCounter"];
+export const DEFAULT_VISIBLE_SENSOR_TYPES = ["aqi", "temperature", "humidity", "illuminance", "soundLevelAvg", "co2", "voc", "nox", "pm25", "pressure", "movementCounter"];
 
 export function getUnitSettingFor(key) {
     let map = { 'temperature': 'UNIT_TEMPERATURE', 'humidity': 'UNIT_HUMIDITY', 'pressure': 'UNIT_PRESSURE' }
@@ -533,7 +542,6 @@ export function pressureFromUserFormat(pressure, settings) {
 // pressure constants
 const mmMercuryMultiplier = 133.322368;
 const inchMercuryMultiplier = 3386.388666;
-
 
 
 export function getSensorTypeOnly(opt) {

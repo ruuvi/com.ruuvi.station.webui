@@ -19,7 +19,7 @@ const parse = function (data) {
     robject.pressure = (((data[9] & 0xff) << 8) | (data[10] & 0xff)) + 50000;
   }
 
-  const pmTypes = ["pm1p0", "pm2p5", "pm4p0", "pm10p0"];
+  const pmTypes = ["pm10", "pm25", "pm40", "pm100"];
   const pmOffsets = [11, 13, 15, 17];
 
   pmOffsets.forEach((offset, index) => {
@@ -91,17 +91,19 @@ const parse = function (data) {
   }
 
   let distances = [];
-  if (robject.pm2p5 !== undefined) {
-    distances.push(scorePpm(robject.pm2p5));
+  if (robject.pm25 !== undefined) {
+    distances.push(scorePpm(robject.pm25));
   }
+  /*
   if (robject.voc !== undefined) {
     distances.push(scoreVoc(robject.voc));
   }
-  if (robject.co2 !== undefined) {
-    distances.push(scoreCo2(robject.co2));
-  }
   if (robject.nox !== undefined) {
     distances.push(scoreNox(robject.nox));
+  }
+  */
+  if (robject.co2 !== undefined) {
+    distances.push(scoreCo2(robject.co2));
   }
   const distance = Math.sqrt(distances.reduce((acc, val) => acc + val * val, 0) / distances.length);
   robject.aqi = Math.max(0, 100 - distance);

@@ -47,6 +47,7 @@ import ExportMenu from "../components/ExportMenu";
 import UpgradePlanButton from "../components/UpgradePlanButton";
 import ZoomInfo from "../components/ZoomInfo";
 import SensorTypeVisibilityDialog from "../components/SensorTypeVisibilityDialog";
+import { visibilityFromCloudToWeb } from "../utils/cloudTranslator";
 
 const collapseText = {
     fontFamily: "montserrat",
@@ -187,6 +188,9 @@ class Sensor extends Component {
         let keys = this.getSensorMainFields();
         if (keys.length > 0) {
             initialGraphKey = keys[0];
+            if (Array.isArray(initialGraphKey)) {
+                initialGraphKey = initialGraphKey[0];
+            }
         }
         this.state = {
             data: null,
@@ -363,15 +367,6 @@ class Sensor extends Component {
     isAlertTriggerd(type) {
         if (type === "movementCounter") type = "movement";
         if (type === "rssi") type = "signal";
-        if (type.indexOf("pm") !== -1) {
-            const pmMapping = {
-                "pm1p0": "pm10",
-                "pm2p5": "pm25",
-                "pm4p0": "pm40",
-                "pm10p0": "pm100"
-            };
-            type = pmMapping[type] || type;
-        }
         var alert = this.getAlert(type.toLocaleLowerCase())
         if (!alert) return false
         return isAlerting(this.props.sensor, type)
@@ -497,21 +492,51 @@ class Sensor extends Component {
     }
     getSensorMainFields() {
         let mainSensorFields = [];
-        let visibleTypes = new Store().getPerSensorVisibleTypes(this.props.sensor.sensor);
+        let visibleTypes// = new Store().getPerSensorVisibleTypes(this.props.sensor.sensor);
         let readings = this.getLatestReadingFromProps();
-        
+
         if (readings) {
+
+            let settings = this.props.sensor.settings;
+            if (settings?.defaultDisplayOrder === "true") {
+                visibleTypes = DEFAULT_VISIBLE_SENSOR_TYPES;
+            } else if (settings?.displayOrder && settings.displayOrder.length > 0) {
+                try {
+                    let webTypes = []
+                    let cTypes = JSON.parse(settings.displayOrder);
+                    for (const cType of cTypes) {
+                        let webType = this.convertToWebSensorType(cType);
+                        if (webType) {
+                            webTypes.push(webType);
+                        }
+                    }
+                    if (webTypes.length === 0) {
+                        webTypes = DEFAULT_VISIBLE_SENSOR_TYPES;
+                    }
+                    visibleTypes = webTypes;
+                } catch (e) {
+                    console.warn("Failed to parse displayOrder, using default", e);
+                    visibleTypes = DEFAULT_VISIBLE_SENSOR_TYPES;
+                }
+            }
             const allReadingKeys = Object.keys(readings);
-            
-            const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0 
-                ? visibleTypes 
+
+            const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0
+                ? visibleTypes
                 : DEFAULT_VISIBLE_SENSOR_TYPES;
-            
-            mainSensorFields = effectiveVisibleTypes.filter(x => {
-                return allReadingKeys.includes(x) && getUnitHelper(x).graphable;
+
+            mainSensorFields = effectiveVisibleTypes.filter(type => {
+                let name = type;
+                if (Array.isArray(type)) {
+                    name = type[0];
+                }
+                return allReadingKeys.includes(name) && getUnitHelper(name).graphable;
             });
         }
         return mainSensorFields;
+    }
+    convertToWebSensorType(sensorType) {
+        return visibilityFromCloudToWeb(sensorType);
     }
     render() {
         var { t } = this.props
@@ -576,28 +601,48 @@ class Sensor extends Component {
                         />
                         <div>
                             <SensorValueGrid>
-                                {mainSensorFields.map(x => {
+                                {mainSensorFields.map(type => {
+                                    let showValue = null;
+                                    let unitKey = null;
+                                    if (Array.isArray(type)) {
+                                        unitKey = type[1];
+                                        type = type[0];
+                                    }
+                                    let x = type;
+                                    let unitHelper = getUnitHelper(x);
                                     let value = this.getLatestReading()[x];
-                                    if (value === undefined) return null;
+                                    if (value === undefined || !unitHelper) return null;
+                                    let unit = unitHelper.unit;
+                                    if (unitKey && unitHelper.valueWithUnit) {
+                                        showValue = localeNumber(
+                                            unitHelper.valueWithUnit(
+                                                this.getLatestReading()[x],
+                                                unitKey,
+                                                this.getLatestReading()["temperature"]
+                                            ),
+                                            unitHelper.decimals
+                                        )
+                                        unit = unitHelper?.units?.find(u => u.cloudStoreKey === unitKey)?.translationKey;
+                                    } else {
+                                        showValue = localeNumber(
+                                            unitHelper.value(
+                                                this.getLatestReading()[x],
+                                                x === "humidity" ? this.getLatestReading()["temperature"] : undefined
+                                            ),
+                                            unitHelper.decimals
+                                        )
+                                    }
                                     return (
                                         <SensorReading
-                                            key={x}
-                                            value={this.getLatestReading()[x] == null ? "-" :
-                                                localeNumber(
-                                                    getUnitHelper(x).value(
-                                                        this.getLatestReading()[x],
-                                                        x === "humidity" ? this.getLatestReading()["temperature"] : undefined
-                                                    ),
-                                                    getUnitHelper(x).decimals
-                                                )
-                                            }
+                                            key={x + unit}
+                                            value={showValue || "-"}
                                             info={x !== "battery" ? undefined :
                                                 isBatteryLow(this.getLatestReading()[x], this.getLatestReading().temperature) ?
                                                     "replace_battery" : "battery_ok"
                                             }
                                             alertTriggered={this.isAlertTriggerd(x)}
-                                            label={getUnitHelper(x).label}
-                                            unit={getUnitHelper(x).unit}
+                                            label={unitHelper.label}
+                                            unit={unit}
                                             selected={this.state.graphKey === x}
                                             onClick={() => this.setGraphKey(x)}
                                         />
@@ -768,9 +813,9 @@ class Sensor extends Component {
                                                         </td>
                                                         <td style={detailedText}>
                                                             {(() => {
-                                                                const useDefault = new Store().getPerSensorUseDefault(this.props.sensor.sensor)
-                                                                if (useDefault) return t("use_default")
-                                                                const visibleFields = new Store().getPerSensorCustomTypes(this.props.sensor.sensor) || [];
+                                                                const useDefault = this.props.sensor.settings?.defaultDisplayOrder || "true"
+                                                                if (useDefault === "true") return t("use_default")
+                                                                const visibleFields = this.props.sensor.settings?.displayOrder ? JSON.parse(this.props.sensor.settings.displayOrder) : [];
                                                                 return visibleFields.length > 0 ? visibleFields.length : t("no_visible_measurements");
                                                             })()}
                                                             <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
@@ -806,9 +851,9 @@ class Sensor extends Component {
 
                                             var alert = this.getAlert(x)
                                             // if not visible, skip
-                                            let visibility = new Store().getPerSensorVisibleTypes(this.props.sensor.sensor);
-                                            let ignoreVisibleTypes = ["signal", "offline"];
-                                            if (!alert?.enabled && !ignoreVisibleTypes.includes(x) && visibility && !visibility.includes(dataKey)) return null;
+                                            let visibility// = this.getSensorMainFields().map(x => x[0]);
+                                            let ignoreVisibleTypes = ["offline"];
+                                            if (!ignoreVisibleTypes.includes(x) && visibility && !visibility.includes(dataKey)) return null;
 
                                             let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description + x : x
                                             return <AlertItem key={key} alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
@@ -873,23 +918,23 @@ class Sensor extends Component {
                                         {(() => {
                                             let readings = this.getLatestReadingFromProps();
                                             if (!readings) return null;
-                                            
+
                                             const allReadingKeys = Object.keys(readings);
-                                            const visibleTypes = new Store().getPerSensorVisibleTypes(this.props.sensor.sensor);
+                                            const visibleTypes = this.getSensorMainFields().map(x => x[0])
                                             const DONTT_SHOW_TYPES = ["txPower", "mac", "flags", "timestamp"];
-                                            
-                                            const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0 
-                                                ? visibleTypes 
+
+                                            const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0
+                                                ? visibleTypes
                                                 : DEFAULT_VISIBLE_SENSOR_TYPES;
-                                            
+
                                             const originalSensorInfoOther = ["mac", "dataFormat", "txPower"];
-                                            const dynamicSensorInfoOther = allReadingKeys.filter(key => 
-                                                !effectiveVisibleTypes.includes(key) && 
+                                            const dynamicSensorInfoOther = allReadingKeys.filter(key =>
+                                                !effectiveVisibleTypes.includes(key) &&
                                                 !DONTT_SHOW_TYPES.includes(key)
                                             ).concat(originalSensorInfoOther.filter(key => !DONTT_SHOW_TYPES.includes(key)));
-                                            
+
                                             const uniqueSensorInfoOther = [...new Set(dynamicSensorInfoOther)];
-                                            
+
                                             return uniqueSensorInfoOther.map((order, i) => {
                                                 var x = this.getLatestReading(true).find(x => x.key === order);
                                                 if (order === "mac") {
@@ -970,6 +1015,7 @@ class Sensor extends Component {
                         sensor={this.props.sensor}
                         open={this.state.sensorVisibilityDialog}
                         onClose={() => this.setState({ ...this.state, sensorVisibilityDialog: false })}
+                        updateSensor={this.props.updateSensor}
                     />
                 </Box>
             </Box>

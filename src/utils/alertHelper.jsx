@@ -33,10 +33,6 @@ export function getMappedAlertDataType(type) {
     const dataKeyMapping = {
         "movement": "movementCounter",
         "signal": "rssi",
-        "pm10": "pm1p0",
-        "pm25": "pm2p5",
-        "pm40": "pm4p0",
-        "pm100": "pm10p0",
         "luminosity": "illuminance",
         "sound": "soundLevelAvg"
     };

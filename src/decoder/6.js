@@ -12,10 +12,10 @@ const parseRawRuuvi = function (data) {
     return round(pm / 10.0, 2);
   }
 
-  robject.pm1p0 = pmFrom(3)
-  robject.pm2p5 = pmFrom(5)
-  robject.pm4p0 = pmFrom(7)
-  robject.pm10p0 = pmFrom(9)
+  robject.pm10 = pmFrom(3)
+  robject.pm25 = pmFrom(5)
+  robject.pm40 = pmFrom(7)
+  robject.pm100 = pmFrom(9)
 
   let co2 = (data[11] << 8) | data[12];
   robject.co2 = round(co2, 2);

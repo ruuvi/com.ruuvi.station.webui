@@ -15,48 +15,30 @@ import {
 import { withTranslation } from 'react-i18next';
 import RDialog from "./RDialog";
 import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper } from "../UnitHelper";
-import Store from "../Store";
 import SensorCard from "./SensorCard";
 import { MdAdd, MdClose, MdUnfoldMore } from "react-icons/md";
 import ConfirmationDialog from "./ConfirmationDialog";
-import { getMappedAlertDataType } from "../utils/alertHelper";
 import NetworkApi from "../NetworkApi";
-import { addVariablesInString } from "../TextHelper";
+import { visibilityCodes, visibilityFromCloudToWeb } from "../utils/cloudTranslator";
 
-const DONTT_SHOW_TYPES = ["txPower", "mac", "dataFormat", "flags", "timestamp"];
-
-const getVisibleSensorTypesForSensor = (sensorId, graphType = "temperature") => {
-    const store = new Store();
-    const perSensorTypes = store.getPerSensorVisibleTypes(sensorId);
-
-    if (perSensorTypes && perSensorTypes.length > 0) {
-        return perSensorTypes;
-    }
-
-    return [...DEFAULT_VISIBLE_SENSOR_TYPES];
-};
-
-const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => {
+const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updateSensor }) => {
     // Get available sensor types for filtering
-    const getAvailableSensorTypes = () => {
+    const getAvailableSensorTypes = (dataObj) => {
         let availableTypes = [];
         if (sensor && sensor.measurements && sensor.measurements.length > 0) {
             if (sensor.measurements[0].parsed) {
                 availableTypes = Object.keys(sensor.measurements[0].parsed);
             }
         }
-        // filter out types that should not be shown
-        return availableTypes.filter(type => !DONTT_SHOW_TYPES.includes(type));
+        if (dataObj) return availableTypes;
+        return visibilityCodes.filter(code => availableTypes.includes(code[1])).map(code => code[0]);
     };
 
     const getInitialVisibleTypes = () => {
-        let defaultTypes = getVisibleSensorTypesForSensor(sensor?.sensor);
-        if (defaultTypes.length === 0) {
-            defaultTypes = [...DEFAULT_VISIBLE_SENSOR_TYPES];
-        }
+        let defaultTypes = [...DEFAULT_VISIBLE_SENSOR_TYPES];
         
         // Filter default types to only include those available on this sensor
-        const availableTypes = getAvailableSensorTypes();
+        const availableTypes = getAvailableSensorTypes(true);
         if (availableTypes.length > 0) {
             defaultTypes = defaultTypes.filter(type => availableTypes.includes(type));
         }
@@ -85,19 +67,14 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
 
     useEffect(() => {
         if (open && sensor?.sensor) {
-            const sensorId = sensor.sensor;
-            const store = new Store();
-            const savedCustomTypes = store.getPerSensorCustomTypes(sensorId);
-            const savedUseDefault = store.getPerSensorUseDefault(sensorId);
-            let initialTypes;
+            const savedCustomTypes = sensor.settings?.displayOrder ? JSON.parse(sensor.settings.displayOrder) : [];
+            const savedUseDefault = (sensor.settings?.defaultDisplayOrder || "true") === "true";
+            let initialTypes = [];
 
             if (savedCustomTypes && savedCustomTypes.length > 0) {
-                console.log("Found custom settings for sensor:", savedCustomTypes, "useDefault:", savedUseDefault);
                 initialTypes = savedCustomTypes;
                 setCustomVisibleTypes(initialTypes);
             } else {
-                console.log("No custom settings for sensor, creating default custom types, useDefault:", savedUseDefault);
-                initialTypes = getInitialVisibleTypes();
                 setCustomVisibleTypes(initialTypes);
             }
 
@@ -110,7 +87,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
             }
         } else if (open && !sensor?.sensor) {
             // Fallback when no sensor data available yet, should not happen in normal use
-            const fallbackTypes = getInitialVisibleTypes();
+            const fallbackTypes = [];
             setVisibleTypes(fallbackTypes);
             setCustomVisibleTypes(fallbackTypes);
         }
@@ -134,10 +111,10 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
             "co2": "co2",
             "voc": "voc",
             "nox": "nox",
-            "pm1p0": "pm10",
-            "pm2p5": "pm25",
-            "pm4p0": "pm40",
-            "pm10p0": "pm100",
+            "pm10": "pm10",
+            "pm25": "pm25",
+            "pm40": "pm40",
+            "pm100": "pm100",
             "illuminance": "luminosity",
             "soundLevelAvg": "sound"
         };
@@ -222,30 +199,6 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
         }
     };
 
-    const moveSensorUp = (index) => {
-        if (index > 0) {
-            const newTypes = [...visibleTypes];
-            [newTypes[index], newTypes[index - 1]] = [newTypes[index - 1], newTypes[index]];
-            setVisibleTypes(newTypes);
-
-            if (!useDefault) {
-                setCustomVisibleTypes(newTypes);
-            }
-        }
-    };
-
-    const moveSensorDown = (index) => {
-        if (index < visibleTypes.length - 1) {
-            const newTypes = [...visibleTypes];
-            [newTypes[index], newTypes[index + 1]] = [newTypes[index + 1], newTypes[index]];
-            setVisibleTypes(newTypes);
-
-            if (!useDefault) {
-                setCustomVisibleTypes(newTypes);
-            }
-        }
-    };
-
     const handleDragStart = (e, index) => {
         setDraggedItem(index);
         e.dataTransfer.effectAllowed = 'move';
@@ -295,44 +248,64 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
         dragCounter.current = 0;
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!sensor?.sensor) {
             console.warn("No sensor ID available for saving visibility settings");
             return;
         }
 
-        const sensorId = sensor.sensor;
-        const store = new Store();
-
-        store.setPerSensorVisibleTypes(sensorId, customVisibleTypes, useDefault);
+        try {
+            new NetworkApi().updateSensorSetting(sensor.sensor, ["defaultDisplayOrder", "displayOrder"], [useDefault ? "true" : "false", JSON.stringify(customVisibleTypes)]);
+            
+            // Update the sensor object with the new visibility settings
+            if (updateSensor) {
+                const updatedSensor = {
+                    ...sensor,
+                    settings: {
+                        ...(sensor.settings || {}),
+                        defaultDisplayOrder: useDefault ? "true" : "false",
+                        displayOrder: JSON.stringify(customVisibleTypes)
+                    }
+                };
+                updateSensor(updatedSensor);
+            }
+        } catch (error) {
+            console.error("Failed to save visibility settings:", error);
+        }
 
         onClose();
     };
 
-    const handleReset = () => {
-        const resetTypes = getInitialVisibleTypes();
-
-        setVisibleTypes(resetTypes);
-
-        if (!useDefault) {
-            setCustomVisibleTypes(resetTypes);
-        }
-    };
-
     const getSensorDisplayName = (sensorType) => {
+        if (sensorType.indexOf("_") !== -1) {
+            const [type, _] = visibilityFromCloudToWeb(sensorType);
+            return t(type);
+        }
         const unitHelper = getUnitHelper(sensorType);
         return t(unitHelper.label || sensorType);
     };
 
     const getSensorUnit = (sensorType) => {
+        if (sensorType.indexOf("_") !== -1) {
+            const [type, unit] = visibilityFromCloudToWeb(sensorType);
+            let uh = getUnitHelper(type);
+            if (uh && uh.units) {
+                for (const u of uh.units) {
+                    if (u.cloudStoreKey === unit) {
+                        return u.translationKey;
+                    }
+                }
+            }
+            return unit;
+        }
         const unitHelper = getUnitHelper(sensorType);
         return unitHelper.unit || "";
     };
 
     const unselectedSensors = avaiableSensorTypes.filter(type => !visibleTypes.includes(type));
 
-
     const sensorTypeLeftSide = sensorType => {
+        console.log("sensorType", sensorType)
         return <Box>
             <Text fontSize="md" fontWeight="medium">
                 {getSensorDisplayName(sensorType)}
@@ -360,6 +333,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
                     <Switch
                         size="md"
                         isChecked={useDefault}
+                        colorScheme="buttonIconScheme" 
                         onChange={(e) => setUseDefault(e.target.checked)}
                     />
                 </Flex>
@@ -373,7 +347,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
 
             <Box mb={4}>
                 <div style={{ width: "75%", margin: "0 auto" }}>
-                    {sensor && <SensorCard sensor={sensor} visibleSensorTypes={visibleTypes} graphType={null} />}
+                    {sensor && <SensorCard sensor={sensor} visibleSensorTypes={useDefault ? "default" : visibleTypes} graphType={null} />}
                 </div>
             </Box>
 
@@ -422,13 +396,12 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
                                 >
                                     <Flex justify="space-between" align="center">
                                         <HStack spacing={3}>
+                                            <MdUnfoldMore opacity={0.6} className="visibilityListIcons" />
                                             {sensorTypeLeftSide(sensorType)}
                                         </HStack>
                                         <HStack spacing={2}>
-                                            <MdUnfoldMore />
-
                                             <IconButton
-                                                icon={<MdClose />}
+                                                icon={<MdClose className="visibilityListIcons"  />}
                                                 variant="ghost"
                                                 onClick={() => toggleSensorType(sensorType)}
                                             />
@@ -453,7 +426,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType }) => 
                                     <Flex justify="space-between" align="center">
                                         {sensorTypeLeftSide(sensorType)}
                                         <IconButton
-                                            icon={<MdAdd />}
+                                            icon={<MdAdd className="visibilityListIcons" />}
                                             variant="ghost"
                                             onClick={() => toggleSensorType(sensorType)}
                                         />

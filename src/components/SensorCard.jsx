@@ -37,6 +37,7 @@ import RemoveSensorDialog from "./RemoveSensorDialog";
 import notify from "../utils/notify";
 import Store from "../Store";
 import i18next from "i18next";
+import { visibilityFromCloudToWeb } from "../utils/cloudTranslator";
 
 const smallSensorValue = {
     fontFamily: "montserrat",
@@ -309,6 +310,7 @@ class SensorCard extends Component {
     }
 
     getAlertState(type) {
+        if (Array.isArray(type)) type = type[0];
         if (type === "movementCounter") type = "movement";
         if (type === "rssi") type = "signal";
         let alert = this.getAlert(type.toLocaleLowerCase());
@@ -325,59 +327,76 @@ class SensorCard extends Component {
         return measurements;
     }
 
-    getAllVisibleFields() {
-        // Check for prop override first (used for preview)
-        if (this.props.visibleSensorTypes) {
-            return this.props.visibleSensorTypes;
-        }
-
-        // Get per-sensor visible types from store
-        const store = new Store();
-        const sensorId = this.props.sensor?.sensor; // MAC address
-        let visibleTypes = null;
-        
-        if (sensorId) {
-            visibleTypes = store.getPerSensorVisibleTypes(sensorId);
-            if (visibleTypes && visibleTypes.length > 0) {
-                return visibleTypes;
+    parseDisplayOrderToWebTypes(displayOrder) {
+        try {
+            let webTypes = []
+            let cTypes = JSON.parse(displayOrder);
+            for (const cType of cTypes) {
+                let webType = this.convertToWebSensorType(cType);
+                if (webType) {
+                    webTypes.push(webType);
+                }
             }
+            if (webTypes.length === 0) {
+                //webTypes = DEFAULT_VISIBLE_SENSOR_TYPES;
+            }
+            return webTypes;
+        } catch (e) {
+            console.warn("Failed to parse displayOrder, using default", e);
+            return DEFAULT_VISIBLE_SENSOR_TYPES;
         }
-        
-        const defaultTypes = DEFAULT_VISIBLE_SENSOR_TYPES
-        
-        let latest = this.getLatestReading();
-        if (!latest) {
-            return defaultTypes;
+    }
+
+    getSensorMainFields() {
+        if (this.props.visibleSensorTypes && this.props.visibleSensorTypes !== "default") {
+            return this.parseDisplayOrderToWebTypes(JSON.stringify(this.props.visibleSensorTypes));
         }
 
-        return defaultTypes
+        let mainSensorFields = [];
+        let visibleTypes;
+        let readings = this.getLatestReading();
+
+        if (readings) {
+            let settings = this.props.sensor.settings;
+            if (settings?.defaultDisplayOrder === "true" || this.props.visibleSensorTypes === "default") {
+                visibleTypes = DEFAULT_VISIBLE_SENSOR_TYPES;
+            } else if (settings?.displayOrder && settings.displayOrder.length > 0) {
+                visibleTypes = this.parseDisplayOrderToWebTypes(settings.displayOrder);
+            } else {
+                visibleTypes = DEFAULT_VISIBLE_SENSOR_TYPES;
+            }
+
+            const allReadingKeys = Object.keys(readings);
+
+            const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0
+                ? visibleTypes
+                : DEFAULT_VISIBLE_SENSOR_TYPES;
+
+            mainSensorFields = effectiveVisibleTypes.filter(type => {
+                let name = type;
+                if (Array.isArray(type)) {
+                    name = type[0];
+                }
+                return allReadingKeys.includes(name) && getUnitHelper(name).graphable;
+            });
+        }
+        return mainSensorFields;
+    }
+
+    convertToWebSensorType(sensorType) {
+        return visibilityFromCloudToWeb(sensorType);
     }
 
     getMainStatType() {
         if (this.props.graphType === null) {
-            const allVisibleFields = this.getAllVisibleFields();
-            if (allVisibleFields && allVisibleFields.length > 0) {
-                const latest = this.getLatestReading();
-                if (latest) {
-                    const availableTypes = Object.keys(latest);
-                    for (const field of allVisibleFields) {
-                        if (availableTypes.includes(field)) {
-                            return field;
-                        }
-                    }
+            const mainFields = this.getSensorMainFields();
+            if (mainFields && mainFields.length > 0) {
+                let firstField = mainFields[0];
+                // Handle array format [sensorType, unitKey]
+                if (Array.isArray(firstField)) {
+                    return firstField[0];
                 }
-                return allVisibleFields[0];
-            }
-            
-            const latest = this.getLatestReading();
-            if (latest && latest.parsed) {
-                const availableTypes = Object.keys(latest.parsed);
-                for (const type of DEFAULT_VISIBLE_SENSOR_TYPES) {
-                    if (availableTypes.includes(type)) {
-                        return type;
-                    }
-                }
-                return availableTypes[0] || "temperature";
+                return firstField;
             }
             return "temperature";
         }
@@ -385,11 +404,26 @@ class SensorCard extends Component {
     }
 
     getSmallDataFields() {
-        const allVisibleFields = this.getAllVisibleFields();
+        const allVisibleFields = this.getSensorMainFields();
         const mainGraphType = this.getMainStatType();
-        
-        let filteredTypes = allVisibleFields.filter(type => type !== mainGraphType);
-        
+
+        const mainFieldConfig = allVisibleFields.find(field => {
+            if (Array.isArray(field)) {
+                return field[0] === mainGraphType;
+            }
+            return field === mainGraphType;
+        });
+
+        let filteredTypes = allVisibleFields.filter(type => {
+            if (Array.isArray(type) && Array.isArray(mainFieldConfig)) {
+                return !(type[0] === mainFieldConfig[0] && type[1] === mainFieldConfig[1]);
+            } else if (!Array.isArray(type) && !Array.isArray(mainFieldConfig)) {
+                return type !== mainFieldConfig;
+            } else {
+                return true;
+            }
+        });
+
         return filteredTypes;
     }
 
@@ -565,9 +599,27 @@ class SensorCard extends Component {
         );
 
         if (simpleView) {
-            let stats = [mainStat];
+            // Use sensor main fields for consistency with detailed view
+            const mainFields = this.getSensorMainFields();
+            let stats = [];
+
+            // First add the main stat
+            stats.push(mainStat);
+
+            // Then add other fields, but extract just the sensor type for simple view
+            for (const field of mainFields) {
+                let fieldType = field;
+                if (Array.isArray(field)) {
+                    fieldType = field[0];
+                }
+                if (fieldType !== mainStat && !stats.includes(fieldType)) {
+                    stats.push(fieldType);
+                }
+            }
+
+            // Fill with defaults if we don't have enough
             for (const type of DEFAULT_VISIBLE_SENSOR_TYPES) {
-                if (type !== mainStat && !stats.includes(type)) {
+                if (!stats.includes(type)) {
                     stats.push(type);
                 }
             }
@@ -782,22 +834,50 @@ class SensorCard extends Component {
                                     {/* Large main temperature or chosen stat */}
                                     {latestReading && (
                                         <Box>
-                                            <BigValue
-                                                value={getDisplayValue(
-                                                    mainStat,
-                                                    localeNumber(
-                                                        getUnitHelper(mainStat).value(
+                                            {(() => {
+                                                // Find the main stat configuration from sensor fields
+                                                const mainFields = this.getSensorMainFields();
+                                                let mainFieldConfig = mainFields.find(field => {
+                                                    if (Array.isArray(field)) {
+                                                        return field[0] === mainStat;
+                                                    }
+                                                    return field === mainStat;
+                                                });
+
+                                                let showValue, unit;
+                                                let unitHelper = getUnitHelper(mainStat);
+
+                                                // Handle array format [sensorType, unitKey]
+                                                if (Array.isArray(mainFieldConfig) && mainFieldConfig[1] && unitHelper.valueWithUnit) {
+                                                    let unitKey = mainFieldConfig[1];
+                                                    showValue = localeNumber(
+                                                        unitHelper.valueWithUnit(
                                                             latestReading[mainStat],
-                                                            mainStat === "humidity"
-                                                                ? latestReading.temperature
-                                                                : undefined
+                                                            unitKey,
+                                                            latestReading["temperature"]
                                                         ),
-                                                        getUnitHelper(mainStat).decimals
-                                                    )
-                                                )}
-                                                unit={t(getUnitHelper(mainStat).unit || getUnitHelper(mainStat).label)}
-                                                alertActive={this.getAlertState(mainStat) > 0}
-                                            />
+                                                        unitHelper.decimals
+                                                    );
+                                                    unit = unitHelper?.units?.find(u => u.cloudStoreKey === unitKey)?.translationKey;
+                                                } else {
+                                                    showValue = localeNumber(
+                                                        unitHelper.value(
+                                                            latestReading[mainStat],
+                                                            mainStat === "humidity" ? latestReading.temperature : undefined
+                                                        ),
+                                                        unitHelper.decimals
+                                                    );
+                                                    unit = unitHelper.unit || unitHelper.label;
+                                                }
+
+                                                return (
+                                                    <BigValue
+                                                        value={getDisplayValue(mainStat, showValue)}
+                                                        unit={t(unit)}
+                                                        alertActive={this.getAlertState(mainStat) > 0}
+                                                    />
+                                                );
+                                            })()}
                                         </Box>
                                     )}
                                 </Box>
@@ -913,12 +993,49 @@ class SensorCard extends Component {
                                                                     whiteSpace: "nowrap",
                                                                 }}
                                                             >
-                                                                {this.getSmallDataFields().map((x) => {
+                                                                {this.getSmallDataFields().map((type) => {
+                                                                    let showValue = null;
+                                                                    let unitKey = null;
+                                                                    let x = type;
+
+                                                                    // Handle array format [sensorType, unitKey]
+                                                                    if (Array.isArray(type)) {
+                                                                        unitKey = type[1];
+                                                                        x = type[0];
+                                                                    }
+
                                                                     let value = latestReading[x];
                                                                     if (value === undefined || typeof (value) === "object") return null;
+
+                                                                    let unitHelper = getUnitHelper(x);
+                                                                    if (!unitHelper) return null;
+
+                                                                    let unit = unitHelper.unit;
+
+                                                                    // Handle custom unit variant
+                                                                    if (unitKey && unitHelper.valueWithUnit) {
+                                                                        showValue = localeNumber(
+                                                                            unitHelper.valueWithUnit(
+                                                                                value,
+                                                                                unitKey,
+                                                                                latestReading["temperature"]
+                                                                            ),
+                                                                            unitHelper.decimals
+                                                                        );
+                                                                        unit = unitHelper?.units?.find(u => u.cloudStoreKey === unitKey)?.translationKey;
+                                                                    } else {
+                                                                        showValue = localeNumber(
+                                                                            unitHelper.value(
+                                                                                value,
+                                                                                x === "humidity" ? latestReading.temperature : undefined
+                                                                            ),
+                                                                            unitHelper.decimals
+                                                                        );
+                                                                    }
+
                                                                     return (
                                                                         <GridItem
-                                                                            key={x}
+                                                                            key={x + (unitKey || '')}
                                                                             alignSelf="flex-end"
                                                                             lineHeight="1.3"
                                                                             style={{
@@ -929,27 +1046,12 @@ class SensorCard extends Component {
                                                                             }}
                                                                         >
                                                                             <span style={smallSensorValue}>
-                                                                                {value == null
-                                                                                    ? "-"
-                                                                                    : getDisplayValue(
-                                                                                        x,
-                                                                                        localeNumber(
-                                                                                            getUnitHelper(x).value(
-                                                                                                latestReading[x],
-                                                                                                x === "humidity"
-                                                                                                    ? latestReading.temperature
-                                                                                                    : undefined
-                                                                                            ),
-                                                                                            getUnitHelper(x).decimals
-                                                                                        )
-                                                                                    )}
+                                                                                {showValue == null ? "-" : getDisplayValue(x, showValue)}
                                                                             </span>
                                                                             <span style={smallSensorValueUnit}>
                                                                                 {truncateUnit(x === "movementCounter"
-                                                                                    ? t(
-                                                                                        getUnitHelper(x).unit.toLocaleLowerCase()
-                                                                                    )
-                                                                                    : getUnitHelper(x).unit || getUnitHelper(x).label)}
+                                                                                    ? t(unitHelper.unit.toLocaleLowerCase())
+                                                                                    : unit || unitHelper.label)}
                                                                             </span>
                                                                         </GridItem>
                                                                     );

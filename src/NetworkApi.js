@@ -250,6 +250,7 @@ class NetworkApi {
         q += "&measurements=true"
         q += "&alerts=true"
         q += "&sharedToOthers=true"
+        q += "&settings=true"
         const resp = await fetch(this.url + "/sensors-dense" + q, this.options)
         checkStatusCode(resp)
         const respData = await resp.json()
@@ -401,6 +402,25 @@ class NetworkApi {
             return response.json();
         })
             .then(response => success(response))
+    }
+    async updateSensorSetting(sensorId, type, value) {
+        try {
+            const response = await fetch(this.url + "/sensor-settings", {
+                ...this.options,
+                method: 'POST',
+                body: JSON.stringify({ sensor: sensorId, type, value, timestamp: Math.floor(Date.now() / 1000) }),
+            });
+            
+            checkStatusCode(response);
+            
+            if (response.status === 200) {
+                return await response.json();
+            }
+            throw response;
+        } catch (e) {
+            console.error("Error updating sensor setting:", e);
+            throw e;
+        }
     }
     resetImage(sensor, success, error) {
         fetch(this.url + "/upload", {

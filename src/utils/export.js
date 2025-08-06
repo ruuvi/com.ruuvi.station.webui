@@ -15,7 +15,7 @@ function processData(data, t) {
     const sensorHeaders = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber", "txPower"]
     if (data.measurements.length > 0 && data.measurements[0].parsed !== null) {
         if (data.measurements[0].parsed.dataFormat === "e0") {
-            sensorHeaders.push("co2", "voc", "nox", "pm1p0", "pm2p5", "pm4p0", "pm10p0", "illuminance", "soundLevelAvg", "soundLevelPeak", "aqi")
+            sensorHeaders.push("co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "illuminance", "soundLevelAvg", "soundLevelPeak", "aqi")
         }
     }
     var csvHeader = [t('date')];
