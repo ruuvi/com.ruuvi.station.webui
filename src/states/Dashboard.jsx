@@ -168,7 +168,7 @@ function DashboardGrid(props) {
             cardResizeObserver.disconnect();
         };
 
-    }, [containerWidth, size, props.order, gap, minCardWidth]); // Dependencies for re-calculating layout
+    }, [containerWidth, size, props.order, props.sensors, gap, minCardWidth]); // Dependencies for re-calculating layout
 
     return (
         <Box
@@ -522,7 +522,7 @@ class Dashboard extends Component {
                                             </Flex>
                                         </div>
                                     }
-                                    <DashboardGrid showGraph={this.state.showGraph} order={this.getOrder()} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })}>
+                                    <DashboardGrid showGraph={this.state.showGraph} order={this.getOrder()} sensors={this.state.sensors} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })}>
                                         {size => {
                                             let sensorsInSearch = this.getSensors()
                                             if (order) {
