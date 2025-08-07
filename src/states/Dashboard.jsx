@@ -525,7 +525,7 @@ class Dashboard extends Component {
                                     <DashboardGrid showGraph={this.state.showGraph} order={this.getOrder()} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })}>
                                         {size => {
                                             let sensorsInSearch = this.getSensors()
-                                            if (order) {
+                                            if (order && order.length > 0) {
                                                 return <>
                                                     {order.map(m => {
                                                         return sensorCard(this.state.sensors.find(x => x.sensor === m), size, sensorsInSearch)
