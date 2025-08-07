@@ -452,7 +452,6 @@ class Dashboard extends Component {
         const sensorCard = (x, size, sensorsInSearch) => {
             if (!x) return <></>
             let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
-            console.log("size", size)
             return <span className="masonry-item" key={x.sensor} style={{ maxWidth: "100%", display: hide ? "none" : undefined }}>
                 <a href={"/" + x.sensor}>
                     <SensorCard sensor={x}
