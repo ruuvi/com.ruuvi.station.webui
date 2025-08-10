@@ -159,9 +159,24 @@ const unitHelper = {
         graphable: true
     },
     "voc": {
-        label: "unit_voc",
+        label: "voc",
+        unit: "index",
+        units: [{ translationKey: "index", cloudStoreKey: "index" }, { translationKey: "ethanol_mgm3", cloudStoreKey: "ethanol_mgm3" }, { translationKey: "isobutylene_mgm3", cloudStoreKey: "isobutylene_mgm3" }, { translationKey: "molhave_mgm3", cloudStoreKey: "molhave_mgm3" }],
         value: (value) => value,
         fromUser: (value) => value,
+        valueWithUnit: (value, unitKey) => {
+            let voc_ethanol_ppb = (Math.log(501 - value) - 6.24) * -381.97;
+            switch (unitKey) {
+                case "ethanol_mgm3":
+                    return voc_ethanol_ppb / 1.8843;
+                case "isobutylene_mgm3":
+                    return voc_ethanol_ppb * 2.3;
+                case "molhave_mgm3":
+                    return voc_ethanol_ppb * 4.5;
+                default:
+                    return value; // index
+            }
+        },
         decimals: 0,
         graphable: true
     },
@@ -214,6 +229,30 @@ const unitHelper = {
         decimals: 0,
         graphable: true
     },
+    "tvoc_ethanol": {
+        label: "tvoc_ethanol",
+        unit: "mg/m³",
+        value: (value) => value,
+        fromUser: (value) => value,
+        decimals: 2,
+        graphable: true
+    },
+    "tvoc_isobutylene": {
+        label: "tvoc_isobutylene",
+        unit: "mg/m³",
+        value: (value) => value,
+        fromUser: (value) => value,
+        decimals: 2,
+        graphable: true
+    },
+    "tvoc_molhave": {
+        label: "tvoc_molhave",
+        unit: "mg/m³",
+        value: (value) => value,
+        fromUser: (value) => value,
+        decimals: 2,
+        graphable: true
+    }
 };
 
 export const allUnits = unitHelper;

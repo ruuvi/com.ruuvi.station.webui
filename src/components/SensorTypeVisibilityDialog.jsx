@@ -278,7 +278,9 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
 
     const getSensorDisplayName = (sensorType) => {
         if (sensorType.indexOf("_") !== -1) {
-            const [type, _] = visibilityFromCloudToWeb(sensorType);
+            let webType = visibilityFromCloudToWeb(sensorType)
+            if (!webType) return sensorType;
+            const [type, _] = webType;
             return t(type);
         }
         const unitHelper = getUnitHelper(sensorType);
@@ -287,7 +289,9 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
 
     const getSensorUnit = (sensorType) => {
         if (sensorType.indexOf("_") !== -1) {
-            const [type, unit] = visibilityFromCloudToWeb(sensorType);
+            let webType = visibilityFromCloudToWeb(sensorType)
+            if (!webType) return sensorType;
+            const [type, unit] = webType;
             let uh = getUnitHelper(type);
             if (uh && uh.units) {
                 for (const u of uh.units) {
