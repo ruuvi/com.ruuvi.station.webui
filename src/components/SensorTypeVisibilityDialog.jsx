@@ -20,9 +20,10 @@ import { MdAdd, MdClose, MdUnfoldMore } from "react-icons/md";
 import ConfirmationDialog from "./ConfirmationDialog";
 import NetworkApi from "../NetworkApi";
 import { visibilityCodes, visibilityFromCloudToWeb } from "../utils/cloudTranslator";
+import notify from "../utils/notify";
 
 const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updateSensor }) => {
-    // Get available sensor types for filtering
+    const [isSaving, setIsSaving] = useState(false);
     const getAvailableSensorTypes = (dataObj) => {
         let availableTypes = [];
         if (sensor && sensor.measurements && sensor.measurements.length > 0) {
@@ -36,13 +37,13 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
 
     const getInitialVisibleTypes = () => {
         let defaultTypes = [...DEFAULT_VISIBLE_SENSOR_TYPES];
-        
+
         // Filter default types to only include those available on this sensor
         const availableTypes = getAvailableSensorTypes(true);
         if (availableTypes.length > 0) {
             defaultTypes = defaultTypes.filter(type => availableTypes.includes(type));
         }
-        
+
         return defaultTypes;
     };
 
@@ -253,10 +254,15 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             console.warn("No sensor ID available for saving visibility settings");
             return;
         }
-
+        setIsSaving(true);
         try {
-            new NetworkApi().updateSensorSetting(sensor.sensor, ["defaultDisplayOrder", "displayOrder"], [useDefault ? "true" : "false", JSON.stringify(customVisibleTypes)]);
-            
+            let data = await new NetworkApi().updateSensorSetting(sensor.sensor, ["defaultDisplayOrder", "displayOrder"], [useDefault ? "true" : "false", JSON.stringify(customVisibleTypes)]);
+            if (!data || data.result !== "success") {
+                notify.error(t("failed_to_save_visibility_settings"));
+                setIsSaving(false);
+                return
+            }
+
             // Update the sensor object with the new visibility settings
             if (updateSensor) {
                 const updatedSensor = {
@@ -269,11 +275,12 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                 };
                 updateSensor(updatedSensor);
             }
+            onClose();
         } catch (error) {
             console.error("Failed to save visibility settings:", error);
+        } finally {
+            setIsSaving(false);
         }
-
-        onClose();
     };
 
     const getSensorDisplayName = (sensorType) => {
@@ -309,7 +316,6 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
     const unselectedSensors = avaiableSensorTypes.filter(type => !visibleTypes.includes(type));
 
     const sensorTypeLeftSide = sensorType => {
-        console.log("sensorType", sensorType)
         return <Box>
             <Text fontSize="md" fontWeight="medium">
                 {getSensorDisplayName(sensorType)}
@@ -337,7 +343,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                     <Switch
                         size="md"
                         isChecked={useDefault}
-                        colorScheme="buttonIconScheme" 
+                        colorScheme="buttonIconScheme"
                         onChange={(e) => setUseDefault(e.target.checked)}
                     />
                 </Flex>
@@ -405,7 +411,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                                         </HStack>
                                         <HStack spacing={2}>
                                             <IconButton
-                                                icon={<MdClose className="visibilityListIcons"  />}
+                                                icon={<MdClose className="visibilityListIcons" />}
                                                 variant="ghost"
                                                 onClick={() => toggleSensorType(sensorType)}
                                             />
@@ -449,7 +455,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                     <Button onClick={onClose}>
                         {t("cancel")}
                     </Button>
-                    <Button onClick={handleSave}>
+                    <Button onClick={handleSave} isLoading={isSaving}>
                         {t("ok")}
                     </Button>
                 </Flex>
