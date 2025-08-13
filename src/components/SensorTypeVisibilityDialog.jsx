@@ -288,7 +288,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             let webType = visibilityFromCloudToWeb(sensorType)
             if (!webType) return sensorType;
             const [type, _] = webType;
-            return t(type);
+            sensorType = type
         }
         const unitHelper = getUnitHelper(sensorType);
         return t(unitHelper.label || sensorType);
