@@ -445,14 +445,16 @@ class SensorCard extends Component {
             : 180;
         let graphHeight = height - 150;
         let imageWidth = "25%";
-        let imageButtonSize = 80;
-
-        if (this.props.size === "mobile") imageButtonSize = 60;
 
         let isSmallCard = this.props.size === "mobile" && !showGraph;
         let mainStat = this.getMainStatType();
         let latestReading = this.getLatestReading();
         let alertIcon = getAlertIcon(this.props.sensor);
+        const smallDataFields = this.getSmallDataFields();
+
+        const smallDataRowHeight = 26;
+        const smallDataMinRows = 2;
+        const smallDataMinHeight = smallDataRowHeight * smallDataMinRows;
 
         const sensorHasData = () => {
             let lastParsedReading =
@@ -672,6 +674,7 @@ class SensorCard extends Component {
                                         width: "100%",
                                         overflow: "hidden",
                                         whiteSpace: "nowrap",
+                                        minHeight: `${smallDataMinHeight}px`,
                                         opacity: 0.8,
                                     }}
                                 >
@@ -982,6 +985,7 @@ class SensorCard extends Component {
                                                                     this.props.size === "mobile" && !this.props.showGraph
                                                                         ? "300px"
                                                                         : undefined,
+                                                                minHeight: `${smallDataMinHeight}px`,
                                                             }}
                                                         >
                                                             <SimpleGrid
@@ -993,7 +997,7 @@ class SensorCard extends Component {
                                                                     whiteSpace: "nowrap",
                                                                 }}
                                                             >
-                                                                {this.getSmallDataFields().map((type) => {
+                                                                {smallDataFields.map((type) => {
                                                                     let showValue = null;
                                                                     let unitKey = null;
                                                                     let x = type;
