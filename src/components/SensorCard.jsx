@@ -474,8 +474,8 @@ class SensorCard extends Component {
                                 </span>
                                 <span style={smallSensorValueUnit}>
                                     {truncateUnit(sensorType === "movementCounter"
-                                        ? t(unitHelper.unit.toLocaleLowerCase())
-                                        : t(unitLabel))}
+                                        ? unitHelper.unit.toLocaleLowerCase()
+                                        : unitLabel)}
                                 </span>
                             </GridItem>
                         );
