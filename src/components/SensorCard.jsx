@@ -403,6 +403,88 @@ class SensorCard extends Component {
         return this.props.graphType || "temperature";
     }
 
+    renderSmallStats(fields, latestReading, options = {}) {
+        const { t } = this.props;
+        const { minHeight, opacity = 1 } = options;
+        if (!latestReading) return null;
+        if (!fields || !fields.length) return null;
+
+        return (
+            <Box minH={minHeight ? `${minHeight}px` : undefined}>
+                <SimpleGrid
+                    pt={options.pt ?? 2}
+                    columns={2}
+                    style={{
+                        width: "100%",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                        minHeight: minHeight ? `${minHeight}px` : undefined,
+                        opacity: opacity,
+                    }}
+                >
+                    {fields.map((conf) => {
+                        let sensorType = conf;
+                        let unitKey = null;
+                        if (Array.isArray(conf)) {
+                            sensorType = conf[0];
+                            unitKey = conf[1];
+                        }
+                        let value = latestReading[sensorType];
+                        if (value === undefined || typeof value === "object") return null;
+                        const unitHelper = getUnitHelper(sensorType);
+                        if (!unitHelper) return null;
+
+                        let showValue;
+                        let unitLabel = unitHelper.unit || unitHelper.label;
+
+                        if (unitKey && unitHelper.valueWithUnit) {
+                            showValue = localeNumber(
+                                unitHelper.valueWithUnit(
+                                    value,
+                                    unitKey,
+                                    latestReading["temperature"]
+                                ),
+                                unitHelper.decimals
+                            );
+                            const unitDef = unitHelper.units?.find(u => u.cloudStoreKey === unitKey);
+                            if (unitDef?.translationKey) unitLabel = unitDef.translationKey;
+                        } else {
+                            showValue = localeNumber(
+                                unitHelper.value(
+                                    value,
+                                    sensorType === "humidity" ? latestReading.temperature : undefined
+                                ),
+                                unitHelper.decimals
+                            );
+                        }
+
+                        return (
+                            <GridItem
+                                key={sensorType + (unitKey || '')}
+                                style={{
+                                    color: this.getAlertState(sensorType) > 0
+                                        ? ruuviTheme.colors.sensorCardValueAlertState
+                                        : undefined,
+                                    alignSelf: 'flex-start'
+                                }}
+                                lineHeight="1.3"
+                            >
+                                <span style={smallSensorValue}>
+                                    {showValue == null ? "-" : getDisplayValue(sensorType, showValue)}
+                                </span>
+                                <span style={smallSensorValueUnit}>
+                                    {truncateUnit(sensorType === "movementCounter"
+                                        ? t(unitHelper.unit.toLocaleLowerCase())
+                                        : t(unitLabel))}
+                                </span>
+                            </GridItem>
+                        );
+                    })}
+                </SimpleGrid>
+            </Box>
+        );
+    }
+
     getSmallDataFields() {
         const allVisibleFields = this.getSensorMainFields();
         const mainGraphType = this.getMainStatType();
@@ -601,29 +683,18 @@ class SensorCard extends Component {
         );
 
         if (simpleView) {
-            // Use sensor main fields for consistency with detailed view
-            const mainFields = this.getSensorMainFields();
+            const mainFields = this.getSensorMainFields(); // may contain strings or [sensorType, unitKey]
             let stats = [];
 
-            // First add the main stat
-            stats.push(mainStat);
-
-            // Then add other fields, but extract just the sensor type for simple view
-            for (const field of mainFields) {
-                let fieldType = field;
-                if (Array.isArray(field)) {
-                    fieldType = field[0];
+            if (mainFields && mainFields.length) {
+                let mainIdx = mainFields.findIndex(f => (Array.isArray(f) ? f[0] : f) === mainStat);
+                if (mainIdx > 0) {
+                    stats = [mainFields[mainIdx], ...mainFields.slice(0, mainIdx), ...mainFields.slice(mainIdx + 1)];
+                } else {
+                    stats = [...mainFields];
                 }
-                if (fieldType !== mainStat && !stats.includes(fieldType)) {
-                    stats.push(fieldType);
-                }
-            }
-
-            // Fill with defaults if we don't have enough
-            for (const type of DEFAULT_VISIBLE_SENSOR_TYPES) {
-                if (!stats.includes(type)) {
-                    stats.push(type);
-                }
+            } else {
+                stats = [...DEFAULT_VISIBLE_SENSOR_TYPES];
             }
 
             return (
@@ -638,7 +709,7 @@ class SensorCard extends Component {
                         padding={4}
                     >
                         {/* Header */}
-                        <Flex>
+                        <Flex pb={1}>
                             <Flex grow={1} width="calc(100% - 40px)">
                                 <Heading
                                     size="xs"
@@ -666,55 +737,7 @@ class SensorCard extends Component {
 
                         {/* Stats */}
                         {latestReading ? (
-                            <>
-                                <SimpleGrid
-                                    pt={3}
-                                    columns={2}
-                                    style={{
-                                        width: "100%",
-                                        overflow: "hidden",
-                                        whiteSpace: "nowrap",
-                                        minHeight: `${smallDataMinHeight}px`,
-                                        opacity: 0.8,
-                                    }}
-                                >
-                                    {stats.map((x) => {
-                                        let value = latestReading[x];
-                                        if (value === undefined) return null;
-                                        return (
-                                            <GridItem
-                                                key={Math.random()}
-                                                style={{
-                                                    color:
-                                                        this.getAlertState(x) > 0
-                                                            ? ruuviTheme.colors.sensorCardValueAlertState
-                                                            : undefined,
-                                                }}
-                                            >
-                                                <span style={smallSensorValue}>
-                                                    {value == null
-                                                        ? "-"
-                                                        : getDisplayValue(
-                                                            x,
-                                                            localeNumber(
-                                                                getUnitHelper(x).value(
-                                                                    value,
-                                                                    latestReading["temperature"]
-                                                                ),
-                                                                getUnitHelper(x).decimals
-                                                            )
-                                                        )}
-                                                </span>
-                                                <span style={smallSensorValueUnit}>
-                                                    {truncateUnit(x === "movementCounter"
-                                                        ? t(getUnitHelper(x).unit.toLocaleLowerCase())
-                                                        : t(getUnitHelper(x).unit || getUnitHelper(x).label))}
-                                                </span>
-                                            </GridItem>
-                                        );
-                                    })}
-                                </SimpleGrid>
-                            </>
+                            this.renderSmallStats(stats, latestReading, { minHeight: smallDataMinHeight, pt: 2, opacity: 0.8, alignBottom: false })
                         ) : (
                             noData(
                                 t("no_data")
@@ -988,79 +1011,7 @@ class SensorCard extends Component {
                                                                 minHeight: `${smallDataMinHeight}px`,
                                                             }}
                                                         >
-                                                            <SimpleGrid
-                                                                pt={2}
-                                                                columns={2}
-                                                                style={{
-                                                                    width: "100%",
-                                                                    overflow: "hidden",
-                                                                    whiteSpace: "nowrap",
-                                                                }}
-                                                            >
-                                                                {smallDataFields.map((type) => {
-                                                                    let showValue = null;
-                                                                    let unitKey = null;
-                                                                    let x = type;
-
-                                                                    // Handle array format [sensorType, unitKey]
-                                                                    if (Array.isArray(type)) {
-                                                                        unitKey = type[1];
-                                                                        x = type[0];
-                                                                    }
-
-                                                                    let value = latestReading[x];
-                                                                    if (value === undefined || typeof (value) === "object") return null;
-
-                                                                    let unitHelper = getUnitHelper(x);
-                                                                    if (!unitHelper) return null;
-
-                                                                    let unit = unitHelper.unit;
-
-                                                                    // Handle custom unit variant
-                                                                    if (unitKey && unitHelper.valueWithUnit) {
-                                                                        showValue = localeNumber(
-                                                                            unitHelper.valueWithUnit(
-                                                                                value,
-                                                                                unitKey,
-                                                                                latestReading["temperature"]
-                                                                            ),
-                                                                            unitHelper.decimals
-                                                                        );
-                                                                        unit = unitHelper?.units?.find(u => u.cloudStoreKey === unitKey)?.translationKey;
-                                                                    } else {
-                                                                        showValue = localeNumber(
-                                                                            unitHelper.value(
-                                                                                value,
-                                                                                x === "humidity" ? latestReading.temperature : undefined
-                                                                            ),
-                                                                            unitHelper.decimals
-                                                                        );
-                                                                    }
-
-                                                                    return (
-                                                                        <GridItem
-                                                                            key={x + (unitKey || '')}
-                                                                            alignSelf="flex-end"
-                                                                            lineHeight="1.3"
-                                                                            style={{
-                                                                                color:
-                                                                                    this.getAlertState(x) > 0
-                                                                                        ? ruuviTheme.colors.sensorCardValueAlertState
-                                                                                        : undefined,
-                                                                            }}
-                                                                        >
-                                                                            <span style={smallSensorValue}>
-                                                                                {showValue == null ? "-" : getDisplayValue(x, showValue)}
-                                                                            </span>
-                                                                            <span style={smallSensorValueUnit}>
-                                                                                {truncateUnit(x === "movementCounter"
-                                                                                    ? t(unitHelper.unit.toLocaleLowerCase())
-                                                                                    : unit || unitHelper.label)}
-                                                                            </span>
-                                                                        </GridItem>
-                                                                    );
-                                                                })}
-                                                            </SimpleGrid>
+                                                            {this.renderSmallStats(smallDataFields, latestReading, { pt: 2, alignBottom: true })}
                                                         </div>
                                                     </Box>
                                                 </Flex>
