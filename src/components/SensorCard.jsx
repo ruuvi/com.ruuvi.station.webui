@@ -530,6 +530,9 @@ class SensorCard extends Component {
 
         let isSmallCard = this.props.size === "mobile" && !showGraph;
         let mainStat = this.getMainStatType();
+        const mainFieldsFull = this.getSensorMainFields();
+        const mainFieldConfig = mainFieldsFull.find(field => Array.isArray(field) ? field[0] === mainStat : field === mainStat);
+        const mainStatUnitKey = Array.isArray(mainFieldConfig) ? mainFieldConfig[1] : null;
         let latestReading = this.getLatestReading();
         let alertIcon = getAlertIcon(this.props.sensor);
         const smallDataFields = this.getSmallDataFields();
@@ -943,11 +946,32 @@ class SensorCard extends Component {
                                                                                 title=""
                                                                                 key={
                                                                                     this.props.sensor.sensor +
-                                                                                    this.props.cardType
+                                                                                    this.props.cardType +
+                                                                                    (mainStatUnitKey || "")
                                                                                 }
                                                                                 alert={tnpGetAlert(mainStat)}
-                                                                                unit={getUnitHelper(mainStat).unit}
+                                                                                unit={(() => {
+                                                                                    const uh = getUnitHelper(mainStat);
+                                                                                    if (mainStatUnitKey && uh?.units) {
+                                                                                        const uDef = uh.units.find(u => u.cloudStoreKey === mainStatUnitKey);
+                                                                                        return uDef ? this.props.t(uDef.translationKey) : uh.unit;
+                                                                                    }
+                                                                                    return uh.unit;
+                                                                                })()}
                                                                                 dataKey={mainStat}
+                                                                                unitKey={mainStatUnitKey}
+                                                                                dataName={(() => {
+                                                                                    const uh = getUnitHelper(mainStat);
+                                                                                    const baseLabel = this.props.t(uh.label);
+                                                                                    if (mainStatUnitKey && uh?.units) {
+                                                                                        const uDef = uh.units.find(u => u.cloudStoreKey === mainStatUnitKey);
+                                                                                        if (uDef) {
+                                                                                            const unitTxt = this.props.t(uDef.translationKey);
+                                                                                            return `${baseLabel} (${unitTxt || uDef.translationKey})`;
+                                                                                        }
+                                                                                    }
+                                                                                    return baseLabel;
+                                                                                })()}
                                                                                 data={this.getMeasurements()}
                                                                                 height={graphHeight}
                                                                                 legend={false}

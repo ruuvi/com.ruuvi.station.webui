@@ -185,17 +185,22 @@ class Sensor extends Component {
     constructor(props) {
         super(props)
         let initialGraphKey = "temperature";
+        let initialGraphUnitKey = null;
         let keys = this.getSensorMainFields();
         if (keys.length > 0) {
-            initialGraphKey = keys[0];
-            if (Array.isArray(initialGraphKey)) {
-                initialGraphKey = initialGraphKey[0];
+            let first = keys[0];
+            if (Array.isArray(first)) {
+                initialGraphKey = first[0];
+                initialGraphUnitKey = first[1];
+            } else {
+                initialGraphKey = first;
             }
         }
         this.state = {
             data: null,
             loading: true,
             graphKey: initialGraphKey,
+            graphUnitKey: initialGraphUnitKey,
             from: new Store().getGraphFrom() || 24,
             to: null,
             table: "",
@@ -353,7 +358,13 @@ class Sensor extends Component {
         })
     }
     setGraphKey(key) {
-        this.setState({ ...this.state, graphKey: key });
+        let graphKey = key;
+        let unitKey = null;
+        if (Array.isArray(key)) {
+            graphKey = key[0];
+            unitKey = key[1];
+        }
+        this.setState({ ...this.state, graphKey, graphUnitKey: unitKey });
     }
     getAlert(type) {
         if (!this.props.sensor) return null
@@ -483,7 +494,14 @@ class Sensor extends Component {
     }
     getSelectedUnit() {
         if (this.state.graphKey === "measurementSequenceNumber") return "";
-        let unit = getUnitHelper(this.state.graphKey).unit
+        const uh = getUnitHelper(this.state.graphKey);
+        if (this.state.graphUnitKey && uh?.units) {
+            const uDef = uh.units.find(u => u.cloudStoreKey === this.state.graphUnitKey);
+            if (uDef) {
+                return `(${this.props.t(uDef.translationKey)})`;
+            }
+        }
+        let unit = uh.unit;
         if (this.state.graphKey === "movementCounter") return `(${this.props.t(unit)})`;
         return <>({unit})</>
     }
@@ -601,52 +619,57 @@ class Sensor extends Component {
                         />
                         <div>
                             <SensorValueGrid>
-                                {mainSensorFields.map(type => {
-                                    let showValue = null;
+                                {mainSensorFields.map(field => {
+                                    let sensorType = field;
                                     let unitKey = null;
-                                    if (Array.isArray(type)) {
-                                        unitKey = type[1];
-                                        type = type[0];
+                                    if (Array.isArray(field)) {
+                                        sensorType = field[0];
+                                        unitKey = field[1];
                                     }
-                                    let x = type;
-                                    let unitHelper = getUnitHelper(x);
-                                    let value = this.getLatestReading()[x];
-                                    if (value === undefined || !unitHelper) return null;
-                                    let unit = unitHelper.unit;
+                                    const latest = this.getLatestReading();
+                                    if (!latest) return null;
+                                    const unitHelper = getUnitHelper(sensorType);
+                                    if (!unitHelper) return null;
+                                    let rawValue = latest[sensorType];
+                                    if (rawValue === undefined) return null;
+                                    let unitDisplay = unitHelper.unit;
+                                    let showValue;
                                     if (unitKey && unitHelper.valueWithUnit) {
                                         showValue = localeNumber(
                                             unitHelper.valueWithUnit(
-                                                this.getLatestReading()[x],
+                                                rawValue,
                                                 unitKey,
-                                                this.getLatestReading()["temperature"]
+                                                latest["temperature"]
                                             ),
                                             unitHelper.decimals
-                                        )
-                                        unit = unitHelper?.units?.find(u => u.cloudStoreKey === unitKey)?.translationKey;
+                                        );
+                                        const uDef = unitHelper.units?.find(u => u.cloudStoreKey === unitKey);
+                                        if (uDef?.translationKey) unitDisplay = uDef.translationKey;
                                     } else {
                                         showValue = localeNumber(
                                             unitHelper.value(
-                                                this.getLatestReading()[x],
-                                                x === "humidity" ? this.getLatestReading()["temperature"] : undefined
+                                                rawValue,
+                                                sensorType === "humidity" ? latest["temperature"] : undefined
                                             ),
                                             unitHelper.decimals
-                                        )
+                                        );
                                     }
+                                    const selected = this.state.graphKey === sensorType && (this.state.graphUnitKey || null) === (unitKey || null);
                                     return (
                                         <SensorReading
-                                            key={x + unit}
+                                            key={sensorType + (unitKey || "")}
                                             value={showValue || "-"}
-                                            info={x !== "battery" ? undefined :
-                                                isBatteryLow(this.getLatestReading()[x], this.getLatestReading().temperature) ?
+                                            info={sensorType !== "battery" ? undefined :
+                                                isBatteryLow(rawValue, latest.temperature) ?
                                                     "replace_battery" : "battery_ok"
                                             }
-                                            alertTriggered={this.isAlertTriggerd(x)}
+                                            alertTriggered={this.isAlertTriggerd(sensorType)}
                                             label={unitHelper.label}
-                                            unit={unit}
-                                            selected={this.state.graphKey === x}
-                                            onClick={() => this.setGraphKey(x)}
+                                            unit={unitDisplay}
+                                            selected={selected}
+                                            onClick={() => this.setGraphKey([sensorType, unitKey])}
                                         />
-                                    )
+                                    );
                                 })}
                             </SensorValueGrid>
 
@@ -714,7 +737,18 @@ class Sensor extends Component {
                                                     setRef={(ref) => (this.chartRef = ref)}
                                                     alert={tnpGetAlert(this.state.graphKey)}
                                                     dataKey={this.state.graphKey}
-                                                    dataName={t(getUnitHelper(this.state.graphKey).label)}
+                                                    unitKey={this.state.graphUnitKey}
+                                                    dataName={(() => {
+                                                        const uh = getUnitHelper(this.state.graphKey);
+                                                        if (this.state.graphUnitKey && uh?.units) {
+                                                            const uDef = uh.units.find(u => u.cloudStoreKey === this.state.graphUnitKey);
+                                                            if (uDef) {
+                                                                const translatedUnit = t(uDef.translationKey);
+                                                                return `${t(uh.label)} (${translatedUnit || uDef.translationKey})`;
+                                                            }
+                                                        }
+                                                        return t(uh.label);
+                                                    })()}
                                                     data={this.getGraphData()}
                                                     height={450} cursor={true}
                                                     from={this.getFrom()}

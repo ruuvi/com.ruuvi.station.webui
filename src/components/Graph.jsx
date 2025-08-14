@@ -124,6 +124,7 @@ class Graph extends Component {
 
         const dataKey = this.props.dataKey;
         const unitHelper = getUnitHelper(dataKey);
+        const variantUnitKey = this.props.unitKey; // e.g. humidity absolute, voc mg/m3 etc.
 
         // Filter and sort the data
         const filteredData = [];
@@ -142,7 +143,12 @@ class Graph extends Component {
         for (let i = 0; i < filteredData.length; i++) {
             const x = filteredData[i];
             timestamps.push(x.timestamp);
-            values.push(unitHelper.value(x.parsed[dataKey], dataKey === "humidity" ? x.parsed.temperature : undefined));
+            if (variantUnitKey && unitHelper.valueWithUnit) {
+                const maybeTemp = dataKey === "humidity" ? x.parsed.temperature : undefined;
+                values.push(unitHelper.valueWithUnit(x.parsed[dataKey], variantUnitKey, maybeTemp));
+            } else {
+                values.push(unitHelper.value(x.parsed[dataKey], dataKey === "humidity" ? x.parsed.temperature : undefined));
+            }
         }
 
         // Insert null values for time gaps
