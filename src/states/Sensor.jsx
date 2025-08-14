@@ -884,7 +884,8 @@ class Sensor extends Component {
                                             if (latestValue === undefined && x !== "offline") return null;
 
                                             var alert = this.getAlert(x)
-                                            let visibility = this.getSensorMainFields().map(x => x[0]);
+                                            let visibility = this.getSensorMainFields().map(f => Array.isArray(f) ? f[0] : f);
+                                            if (!visibility.length) visibility = DEFAULT_VISIBLE_SENSOR_TYPES;
                                             let ignoreVisibleTypes = ["offline"];
                                             if (!ignoreVisibleTypes.includes(x) && visibility && !visibility.includes(dataKey)) return null;
 
@@ -953,7 +954,7 @@ class Sensor extends Component {
                                             if (!readings) return null;
 
                                             const allReadingKeys = Object.keys(readings);
-                                            const visibleTypes = this.getSensorMainFields().map(x => x[0])
+                                            const visibleTypes = this.getSensorMainFields().map(f => Array.isArray(f) ? f[0] : f)
                                             const DONTT_SHOW_TYPES = ["txPower", "mac", "flags", "timestamp"];
 
                                             const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0
