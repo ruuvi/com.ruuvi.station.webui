@@ -850,8 +850,7 @@ class Sensor extends Component {
                                             if (latestValue === undefined && x !== "offline") return null;
 
                                             var alert = this.getAlert(x)
-                                            // if not visible, skip
-                                            let visibility// = this.getSensorMainFields().map(x => x[0]);
+                                            let visibility = this.getSensorMainFields().map(x => x[0]);
                                             let ignoreVisibleTypes = ["offline"];
                                             if (!ignoreVisibleTypes.includes(x) && visibility && !visibility.includes(dataKey)) return null;
 

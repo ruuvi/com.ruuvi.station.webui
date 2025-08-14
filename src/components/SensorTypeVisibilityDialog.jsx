@@ -104,30 +104,30 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
 
     const getAlertTypeFromSensorType = (sensorType) => {
         const sensorTypeToAlertType = {
-            "temperature": "temperature",
-            "humidity": "humidity",
-            "pressure": "pressure",
             "movementCounter": "movement",
             "rssi": "signal",
-            "co2": "co2",
-            "voc": "voc",
-            "nox": "nox",
-            "pm10": "pm10",
-            "pm25": "pm25",
-            "pm40": "pm40",
-            "pm100": "pm100",
             "illuminance": "luminosity",
             "soundLevelAvg": "sound"
         };
 
-        return sensorTypeToAlertType[sensorType] || null;
+        return sensorTypeToAlertType[sensorType] || sensorType || null;
     };
 
     const hasEnabledAlerts = (sensorType) => {
         if (!sensor?.alerts) return [];
 
-        const alertType = getAlertTypeFromSensorType(sensorType);
+
+        let webTypeSensorType = getWebTypeFromSensorType(sensorType);
+        const alertType = getAlertTypeFromSensorType(webTypeSensorType);
         if (!alertType) return [];
+
+        const otherVisibleSameAlertType = visibleTypes.some(vt => {
+            if (vt === sensorType) return false;
+            const vtWeb = getWebTypeFromSensorType(vt);
+            return getAlertTypeFromSensorType(vtWeb) === alertType;
+        });
+        if (otherVisibleSameAlertType) return [];
+
 
         return sensor.alerts.filter(alert =>
             alert.type === alertType && alert.enabled
@@ -281,6 +281,15 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const getWebTypeFromSensorType = (sensorType) => {
+        if (sensorType.indexOf("_") !== -1) {
+            let webType = visibilityFromCloudToWeb(sensorType);
+            if (!webType) return sensorType;
+            return webType[0];
+        }
+        return sensorType;
     };
 
     const getSensorDisplayName = (sensorType) => {
