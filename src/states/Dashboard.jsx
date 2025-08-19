@@ -49,6 +49,9 @@ function DashboardGrid(props) {
 
     const gap = size === "mobile" ? 10 : 20;
     const minCardWidth = isLargeDisplay ? 450 : isMediumDisplay ? 350 : props.showGraph ? 280 : 320;
+    const columnCount = containerWidth > 0
+        ? Math.max(1, Math.floor((containerWidth + gap) / (minCardWidth + gap)))
+        : 1;
 
     // Effect for setting up observers and listeners that update containerWidth
     const debouncedWindowResizeHandlerRef = useRef(null);
@@ -188,7 +191,7 @@ function DashboardGrid(props) {
                 }
             }}
         >
-            {props.children(size)}
+            {props.children(size, columnCount)}
         </Box>
     );
 }
@@ -449,13 +452,14 @@ class Dashboard extends Component {
                 />
             </InputGroup>
         }
-        const sensorCard = (x, size, sensorsInSearch) => {
+        const sensorCard = (x, size, sensorsInSearch, columnCount) => {
             if (!x) return <></>
             let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
             return <span className="masonry-item" key={x.sensor} style={{ maxWidth: "100%", display: hide ? "none" : undefined }}>
                 <a href={"/" + x.sensor}>
                     <SensorCard sensor={x}
                         size={size}
+                        columnCount={columnCount}
                         dataFrom={this.state.from}
                         cardType={this.state.cardType}
                         graphType={this.state.graphType}
@@ -522,18 +526,18 @@ class Dashboard extends Component {
                                         </div>
                                     }
                                     <DashboardGrid showGraph={this.state.showGraph} order={this.getOrder()} sensors={this.state.sensors} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })}>
-                                        {size => {
+                                        {(size, columnCount) => {
                                             let sensorsInSearch = this.getSensors()
                                             if (order && order.length > 0) {
                                                 return <>
                                                     {order.map(m => {
-                                                        return sensorCard(this.state.sensors.find(x => x.sensor === m), size, sensorsInSearch)
+                                                        return sensorCard(this.state.sensors.find(x => x.sensor === m), size, sensorsInSearch, columnCount)
                                                     })}
                                                 </>
                                             }
                                             return <>
                                                 {this.state.sensors.map(x => {
-                                                    return sensorCard(x, size, sensorsInSearch)
+                                                    return sensorCard(x, size, sensorsInSearch, columnCount)
                                                 })}
                                             </>
                                         }}

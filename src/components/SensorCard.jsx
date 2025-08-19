@@ -510,7 +510,7 @@ class SensorCard extends Component {
     }
 
     render() {
-        const { t } = this.props;
+        const { t, columnCount } = this.props;
 
         let showGraph =
             this.props.cardType === "graph_view" ||
@@ -539,7 +539,10 @@ class SensorCard extends Component {
 
         const smallDataRowHeight = 26;
         const smallDataMinRows = 2;
-        const smallDataMinHeight = smallDataRowHeight * smallDataMinRows;
+        let smallDataMinHeight = smallDataRowHeight * smallDataMinRows;
+        if (columnCount === 1) {
+            smallDataMinHeight = 0;
+        }
 
         const sensorHasData = () => {
             let lastParsedReading =
