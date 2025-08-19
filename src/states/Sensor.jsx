@@ -47,7 +47,7 @@ import ExportMenu from "../components/ExportMenu";
 import UpgradePlanButton from "../components/UpgradePlanButton";
 import ZoomInfo from "../components/ZoomInfo";
 import SensorTypeVisibilityDialog from "../components/SensorTypeVisibilityDialog";
-import { visibilityFromCloudToWeb } from "../utils/cloudTranslator";
+import { visibilityFromCloudToWeb, visibilityCodes } from "../utils/cloudTranslator";
 
 const collapseText = {
     fontFamily: "montserrat",
@@ -850,7 +850,13 @@ class Sensor extends Component {
                                                                 const useDefault = this.props.sensor.settings?.defaultDisplayOrder || "true"
                                                                 if (useDefault === "true") return t("use_default")
                                                                 const visibleFields = this.props.sensor.settings?.displayOrder ? JSON.parse(this.props.sensor.settings.displayOrder) : [];
-                                                                return visibleFields.length > 0 ? visibleFields.length : t("no_visible_measurements");
+                                                                let maxAvailable = 0;
+                                                                const parsed0 = this.props.sensor?.measurements?.[0]?.parsed;
+                                                                if (parsed0) {
+                                                                    const presentKeys = Object.keys(parsed0);
+                                                                    maxAvailable = visibilityCodes.filter(vc => presentKeys.includes(vc[1])).length;
+                                                                }
+                                                                return visibleFields.length > 0 ? `${visibleFields.length}/${maxAvailable || visibleFields.length}` : t("no_visible_measurements");
                                                             })()}
                                                             <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
                                                         </td>
