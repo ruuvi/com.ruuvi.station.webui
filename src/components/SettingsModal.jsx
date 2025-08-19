@@ -1,17 +1,15 @@
-import React, { Component } from "react";
-import { withTranslation } from 'react-i18next';
+import React from "react";
+import { useTranslation } from 'react-i18next';
 import Settings from "../states/Settings";
 import RDialog from "./RDialog";
 
-class SettingsModal extends Component {
-    render() {
-        var { t } = this.props;
-        return (
-            <RDialog title={t("settings")} isOpen={this.props.open} onClose={this.props.onClose}>
-                <Settings isModal updateApp={this.props.updateApp} />
-            </RDialog>
-        )
-    }
-}
+const SettingsModal = ({ open, onClose, updateApp }) => {
+    const { t } = useTranslation();
+    return (
+        <RDialog title={t("settings")} isOpen={open} onClose={onClose}>
+            <Settings isModal updateApp={updateApp} />
+        </RDialog>
+    );
+};
 
-export default withTranslation()(SettingsModal);
+export default SettingsModal;

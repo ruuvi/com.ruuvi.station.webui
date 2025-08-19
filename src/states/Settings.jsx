@@ -65,6 +65,7 @@ class Settings extends Component {
             },
             CHART_DRAW_DOTS: new Store().getGraphDrawDots(),
             savingSettings: [],
+            savingSettingsStarted: {},
         }
     }
     componentDidMount() {
@@ -79,32 +80,56 @@ class Settings extends Component {
         })
     }
     updateSetting(key, value) {
-        var settings = this.state.settings;
-        settings[key] = value;
-        var saving = this.state.savingSettings;
-        saving.push(key)
-        this.setState({ ...this.state, settings: settings, savingSettings: saving });
+        const prevValue = this.state.settings[key]; // keep original to allow revert
+        const settings = { ...this.state.settings, [key]: value };
+        const saving = this.state.savingSettings.includes(key) ? this.state.savingSettings : [...this.state.savingSettings, key];
+        const savingSettingsStarted = { ...this.state.savingSettingsStarted, [key]: Date.now() };
+        this.setState({ ...this.state, settings, savingSettings: saving, savingSettingsStarted });
+
+        const clearSaving = () => {
+            const startedAt = this.state.savingSettingsStarted[key] || Date.now();
+            const elapsed = Date.now() - startedAt;
+            const remaining = 1000 - elapsed; // ensure at least 1s loading time
+            const doClear = () => this.setState(prev => ({
+                ...prev,
+                savingSettings: prev.savingSettings.filter(x => x !== key),
+                savingSettingsStarted: Object.fromEntries(Object.entries(prev.savingSettingsStarted).filter(([k]) => k !== key))
+            }));
+            if (remaining > 0) {
+                setTimeout(doClear, remaining);
+            } else {
+                doClear();
+            }
+        };
+
+        const revert = () => {
+            this.setState(prev => ({
+                ...prev,
+                settings: { ...prev.settings, [key]: prevValue }
+            }));
+        }
+
         new NetworkApi().setSetting(key, value, b => {
             if (b.result === "success") {
-                notify.success(this.props.t("successfully_saved"))
-                var saving = this.state.savingSettings;
-                saving = saving.filter(x => x !== key)
-                this.setState({ ...this.state, savingSettings: saving });
-                // reload settings in the safest way possible, will be improved in another issue
+                notify.success(this.props.t("successfully_saved"));
+                clearSaving();
                 new NetworkApi().getSettings(settings => {
                     if (settings.result === "success") {
-                        localStorage.setItem("settings", JSON.stringify(settings.data.settings))
-                        if (this.props.updateApp) this.props.updateApp()
+                        localStorage.setItem("settings", JSON.stringify(settings.data.settings));
+                        if (this.props.updateApp) this.props.updateApp();
                     }
-
-                })
+                });
             } else if (b.result === "error") {
-                notify.error(`UserApiError.${this.props.t(b.code)}`)
+                notify.error(`UserApiError.${this.props.t(b.code)}`);
+                revert();
+                clearSaving();
             }
         }, error => {
             console.log(error);
-            notify.error(this.props.t("something_went_wrong"))
-        })
+            notify.error(this.props.t("something_went_wrong"));
+            revert();
+            clearSaving();
+        });
     }
     updateLocalSetting(key, value) {
         if (key === "CHART_DRAW_DOTS") {
@@ -144,9 +169,9 @@ class Settings extends Component {
                     }
                     <RadioInput label={"settings_chart_draw_dots"} value={this.state.CHART_DRAW_DOTS} options={boolOpt} onChange={v => this.updateLocalSetting("CHART_DRAW_DOTS", JSON.parse(v))} />
                     <br />
-                    <RadioInput label={"settings_email_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_EMAIL_NOTIFICATIONS)} options={boolOpt} onChange={v => console.log(v) || this.updateSetting("DISABLE_EMAIL_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} />
+                    <RadioInput label={"settings_email_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_EMAIL_NOTIFICATIONS)} options={boolOpt} onChange={v => this.updateSetting("DISABLE_EMAIL_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} loading={this.state.savingSettings.indexOf("DISABLE_EMAIL_NOTIFICATIONS") !== -1} />
                     <br />
-                    <RadioInput label={"settings_mobile_push_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_PUSH_NOTIFICATIONS)} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} />
+                    <RadioInput label={"settings_mobile_push_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_PUSH_NOTIFICATIONS)} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} loading={this.state.savingSettings.indexOf("DISABLE_PUSH_NOTIFICATIONS") !== -1} />
                 </>
             )}
         </>
