@@ -837,6 +837,7 @@ class Sensor extends Component {
                                                 </table>
                                             </ListItem>
                                         }
+                                        {/* 
                                         <hr />
                                         <ListItem style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, sensorVisibilityDialog: true })}>
                                             <table style={accordionContent}>
@@ -864,6 +865,7 @@ class Sensor extends Component {
                                                 </tbody>
                                             </table>
                                         </ListItem>
+                                        */}
                                     </List>
                                 </AccordionPanel>
                             </AccordionItem>
@@ -961,7 +963,7 @@ class Sensor extends Component {
 
                                             const allReadingKeys = Object.keys(readings);
                                             const visibleTypes = this.getSensorMainFields().map(f => Array.isArray(f) ? f[0] : f)
-                                            const DONTT_SHOW_TYPES = ["txPower", "mac", "flags", "timestamp"];
+                                            const DONTT_SHOW_TYPES = ["flags", "timestamp"];
 
                                             const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0
                                                 ? visibleTypes

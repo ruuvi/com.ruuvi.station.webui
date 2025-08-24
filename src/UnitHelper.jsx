@@ -259,7 +259,7 @@ export const allUnits = unitHelper;
 
 export const alertTypes = ["temperature", "humidity", "pressure", "signal", "movement", "offline", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
 
-export const DEFAULT_VISIBLE_SENSOR_TYPES = ["aqi", "temperature", "humidity", "illuminance", "soundLevelAvg", "co2", "voc", "nox", "pm25", "pressure", "movementCounter"];
+export const DEFAULT_VISIBLE_SENSOR_TYPES = ["aqi", "temperature", "humidity", "illuminance", "soundLevelAvg", "co2", "voc", "nox", "pm25", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"];
 
 export function getUnitSettingFor(key) {
     let map = { 'temperature': 'UNIT_TEMPERATURE', 'humidity': 'UNIT_HUMIDITY', 'pressure': 'UNIT_PRESSURE' }

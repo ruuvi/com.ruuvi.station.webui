@@ -348,6 +348,21 @@ class SensorCard extends Component {
     }
 
     getSensorMainFields() {
+        let arr = ["humidity", "pressure", "movementCounter"];
+        let latest = this.getLatestReading();
+        if (!latest) return arr;
+
+        /*
+        let noShow = ["mac", "timestamp", "dataFormat", "txPower", this.props.graphType || "temperature"];
+        return Object.keys(latest).filter((x) => !arr.includes(x) && !noShow.includes(x));
+        */
+
+        if (latest.dataFormat === 6) arr = ["pm1p0", "co2", "voc"];
+        if (latest.dataFormat === "e0") arr = ["pm1p0", "co2", "voc", "illuminance", "nox", "aqi"];
+        if ((this.props.graphType || "temperature") !== "temperature") {
+            arr.push("temperature");
+        }
+        return arr;
         if (this.props.visibleSensorTypes && this.props.visibleSensorTypes !== "default") {
             return this.parseDisplayOrderToWebTypes(JSON.stringify(this.props.visibleSensorTypes));
         }
