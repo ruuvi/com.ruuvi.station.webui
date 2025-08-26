@@ -1,4 +1,5 @@
 import { round } from "../UnitHelper";
+import { aqi } from "./untils";
 
 const parse = function (data) {
   const robject = {};
@@ -76,44 +77,7 @@ const parse = function (data) {
     int2Hex(data[43])
   ].join(':');
 
-  // aqi
-  function scorePpm(ppm) {
-    return Math.max(0, (ppm - 12) * 2);
-  }
-  function scoreVoc(voc) {
-    return Math.max(0, (voc - 200));
-  }
-  function scoreNox(nox) {
-    return Math.max(0, (nox - 200));
-  }
-  function scoreCo2(co2) {
-    return Math.max(0, (co2 - 600) / 10);
-  }
-
-  let distances = [];
-  if (robject.pm25 !== undefined) {
-    distances.push(scorePpm(robject.pm25));
-  }
-  /*
-  if (robject.voc !== undefined) {
-    distances.push(scoreVoc(robject.voc));
-  }
-  if (robject.nox !== undefined) {
-    distances.push(scoreNox(robject.nox));
-  }
-  */
-  if (robject.co2 !== undefined) {
-    distances.push(scoreCo2(robject.co2));
-  }
-  const distance = Math.sqrt(distances.reduce((acc, val) => acc + val * val, 0) / distances.length);
-  robject.aqi = Math.max(0, 100 - distance);
-  robject.aqi = round(robject.aqi, 2);
-
-  /*
-  100...66 -> green,
-  66..33 -> yellow,
-  33...0 -> red
-  */
+  robject.aqi = aqi(robject.pm25, robject.co2);
 
   robject.dataFormat = "e1";
   return robject;
