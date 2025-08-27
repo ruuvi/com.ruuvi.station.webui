@@ -1,3 +1,5 @@
+import { round } from "../UnitHelper";
+
 export function aqi(pm25, co2) {
     if (pm25 === undefined && co2 === undefined) return null;
     if (isNaN(pm25) || isNaN(co2)) return null;
