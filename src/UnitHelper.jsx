@@ -507,7 +507,7 @@ export function getAlertRange(type) {
         case "pm100":
             return { max: 250, min: 0 }
         case "luminosity":
-            return { max: 10000, min: 0 }
+            return { max: 144284, min: 0 }
         case "sound":
             return { max: 127, min: 0 }
         default:
