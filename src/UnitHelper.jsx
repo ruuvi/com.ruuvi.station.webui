@@ -38,8 +38,8 @@ const unitHelper = {
         graphable: true
     },
     "movementCounter": {
-        label: "movement_counter",
-        unit: "movements",
+        label: "movements",
+        unit: "",
         value: (value) => value,
         fromUser: (value) => value,
         decimals: 0,
@@ -364,6 +364,30 @@ export function getDisplayValue(key, value, settings) {
     return value
 }
 
+export function getUnitHelperWithUnit(key, plaintext, unit) {
+    if (key === "humidity") {
+        let settings = { UNIT_HUMIDITY: unit };
+        let thing = unitHelper[key];
+        if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "1") {
+            thing.unit = plaintext ? "g/m³" : <span>g/m<sup>3</sup></span>
+            return thing;
+        } else if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "2") {
+            thing.label = "dewpoint"
+            thing.unit = "°C"
+            if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
+                thing.unit = "°F";
+            }
+            else if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
+                thing.unit = "K";
+            }
+            return thing;
+        } else {
+            thing.unit = "%"
+            return thing;
+        }
+    }
+}
+
 export function getUnitHelper(key, plaintext) {
     if (key === "temperature") {
         let settings = localStorage.getItem("settings");
@@ -385,25 +409,9 @@ export function getUnitHelper(key, plaintext) {
     }
     if (key === "humidity") {
         let settings = localStorage.getItem("settings");
-        let thing = unitHelper[key];
         if (settings) {
             settings = JSON.parse(settings)
-            if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "1") {
-                thing.unit = plaintext ? "g/m³" : <span>g/m<sup>3</sup></span>
-                return thing;
-            } else if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "2") {
-                thing.unit = "°C"
-                if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
-                    thing.unit = "°F";
-                }
-                else if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
-                    thing.unit = "K";
-                }
-                return thing;
-            } else {
-                thing.unit = "%"
-                return thing;
-            }
+            return getUnitHelperWithUnit(key, plaintext, settings.UNIT_HUMIDITY);
         }
     }
     if (key === "pressure") {

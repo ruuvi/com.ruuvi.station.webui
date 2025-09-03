@@ -19,7 +19,7 @@ import "uplot/dist/uPlot.min.css";
 import Graph from "./Graph";
 import parse from "../decoder/parser";
 import { useTranslation, withTranslation } from "react-i18next";
-import { getDisplayValue, getUnitHelper, localeNumber, DEFAULT_VISIBLE_SENSOR_TYPES } from "../UnitHelper";
+import { getDisplayValue, getUnitHelper, localeNumber, DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelperWithUnit } from "../UnitHelper";
 import DurationText from "./DurationText";
 import BigValue from "./BigValue";
 import { withColorMode } from "../utils/withColorMode";
@@ -443,7 +443,7 @@ class SensorCard extends Component {
                         if (!unitHelper) return null;
 
                         let showValue;
-                        let unitLabel = unitHelper.unit || unitHelper.label;
+                        let unitLabel = unitHelper.unit;
 
                         if (unitKey && unitHelper.valueWithUnit) {
                             showValue = localeNumber(
@@ -456,6 +456,7 @@ class SensorCard extends Component {
                             );
                             const unitDef = unitHelper.units?.find(u => u.cloudStoreKey === unitKey);
                             if (unitDef?.translationKey) unitLabel = unitDef.translationKey;
+                            unitLabel = getUnitHelperWithUnit(sensorType, false, unitKey)?.unit || unitLabel;
                         } else {
                             showValue = localeNumber(
                                 unitHelper.value(
@@ -481,9 +482,7 @@ class SensorCard extends Component {
                                     {showValue == null ? "-" : getDisplayValue(sensorType, showValue)}
                                 </span>
                                 <span style={smallSensorValueUnit}>
-                                    {truncateUnit(sensorType === "movementCounter"
-                                        ? unitHelper.unit.toLocaleLowerCase()
-                                        : unitLabel)}
+                                    {truncateUnit(unitLabel)}
                                 </span>
                                 {!options.simpleView &&
                                     <div style={smallSensorLabel}>
@@ -904,6 +903,7 @@ class SensorCard extends Component {
                                                         unitHelper.decimals
                                                     );
                                                     unit = unitHelper?.units?.find(u => u.cloudStoreKey === unitKey)?.translationKey;
+                                                    unit = getUnitHelperWithUnit(mainStat, false, unitKey)?.unit || unit;
                                                 } else {
                                                     showValue = localeNumber(
                                                         unitHelper.value(

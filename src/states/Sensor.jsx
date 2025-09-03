@@ -23,7 +23,7 @@ import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
 import { MdChevronRight } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
-import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, localeNumber } from "../UnitHelper";
+import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, getUnitHelperWithUnit, localeNumber } from "../UnitHelper";
 import { exportCSV, exportPDF, exportXLSX } from "../utils/export";
 import withRouter from "../utils/withRouter"
 import DurationText from "../components/DurationText";
@@ -645,6 +645,7 @@ class Sensor extends Component {
                                         );
                                         const uDef = unitHelper.units?.find(u => u.cloudStoreKey === unitKey);
                                         if (uDef?.translationKey) unitDisplay = uDef.translationKey;
+                                        unitDisplay = getUnitHelperWithUnit(sensorType, false, unitKey)?.unit || unitDisplay;
                                     } else {
                                         showValue = localeNumber(
                                             unitHelper.value(
