@@ -884,7 +884,7 @@ class Sensor extends Component {
                                                 return <div>{parts[0]}<a style={{ color: "teal" }} target="blank" href={t("cloud_ruuvi_link_url")}>{t("cloud_ruuvi_link")}</a>{parts[1]}</div>
                                             })()}
                                         </Box>}
-                                        {["temperature", "humidity", "pressure", "signal", "movement", "offline", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"].map(x => {
+                                        {["temperature", "humidity", "pressure", "signal", "movement", "offline", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"].map(x => {
                                             const dataKey = getMappedAlertDataType(x);
                                             let latestValue = this.getLatestReading()[dataKey]
                                             if (latestValue === undefined && x !== "offline") return null;

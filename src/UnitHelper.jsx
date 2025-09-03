@@ -257,7 +257,7 @@ const unitHelper = {
 
 export const allUnits = unitHelper;
 
-export const alertTypes = ["temperature", "humidity", "pressure", "signal", "movement", "offline", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
+export const alertTypes = ["temperature", "humidity", "pressure", "signal", "movement", "offline", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
 
 export const DEFAULT_VISIBLE_SENSOR_TYPES = ["aqi", "temperature", "humidity", "illuminance", "soundLevelAvg", "co2", "voc", "nox", "pm25", "pressure", "movementCounter"];
 
@@ -492,6 +492,8 @@ export function getAlertRange(type) {
             return { max: 0, min: -105 }
         case "offline":
             return { max: +Infinity, min: 120 }
+        case "aqi":
+            return { max: 100, min: 0 }
         case "co2":
             return { max: 2500, min: 350 }
         case "voc":
