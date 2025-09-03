@@ -40,9 +40,9 @@ import i18next from "i18next";
 import { visibilityFromCloudToWeb } from "../utils/cloudTranslator";
 
 const smallSensorValue = {
-    fontFamily: "montserrat",
+    fontFamily: "mulish",
     fontSize: 16,
-    fontWeight: 600,
+    fontWeight: 800,
 };
 
 const smallSensorValueUnit = {
@@ -50,8 +50,15 @@ const smallSensorValueUnit = {
     fontWeight: 600,
     fontSize: 12,
     marginLeft: 6,
-    opacity: 0.8,
 };
+
+const smallSensorLabel = {
+    fontFamily: "mulish",
+    fontSize: 12,
+    opacity: 0.7,
+    marginTop: -3,
+    marginBottom: 4,
+}
 
 const truncateUnit = (text, maxLength = 15) => {
     if (typeof text !== 'string') return text;
@@ -66,6 +73,7 @@ const lastUpdatedText = {
     fontFamily: "mulish",
     fontWeight: 600,
     fontSize: 12,
+    opacity: 0.5,
 };
 
 function MoreMenu(props) {
@@ -477,6 +485,11 @@ class SensorCard extends Component {
                                         ? unitHelper.unit.toLocaleLowerCase()
                                         : unitLabel)}
                                 </span>
+                                {!options.simpleView &&
+                                    <div style={smallSensorLabel}>
+                                        {t(unitHelper.label)}
+                                    </div>
+                                }
                             </GridItem>
                         );
                     })}
@@ -537,10 +550,10 @@ class SensorCard extends Component {
         let alertIcon = getAlertIcon(this.props.sensor);
         const smallDataFields = this.getSmallDataFields();
 
-        const smallDataRowHeight = 26;
+        const smallDataRowHeight = 42;
         const smallDataMinRows = 2;
         let smallDataMinHeight = smallDataRowHeight * smallDataMinRows;
-        if (columnCount === 1) {
+        if (columnCount === 1 || simpleView) {
             smallDataMinHeight = 0;
         }
 
@@ -743,7 +756,7 @@ class SensorCard extends Component {
 
                         {/* Stats */}
                         {latestReading ? (
-                            this.renderSmallStats(stats, latestReading, { minHeight: smallDataMinHeight, pt: 2, opacity: 0.8, alignBottom: false })
+                            this.renderSmallStats(stats, latestReading, { minHeight: smallDataMinHeight, pt: 2, opacity: 0.8, alignBottom: false, simpleView: true })
                         ) : (
                             noData(
                                 t("no_data")
@@ -907,6 +920,7 @@ class SensorCard extends Component {
                                                         value={getDisplayValue(mainStat, showValue)}
                                                         unit={t(unit)}
                                                         alertActive={this.getAlertState(mainStat) > 0}
+                                                        label={t(getUnitHelper(mainStat).label)}
                                                     />
                                                 );
                                             })()}

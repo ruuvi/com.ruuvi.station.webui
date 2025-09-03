@@ -35,7 +35,7 @@ let colors = {
     sensorCardBackground: { light: undefined, dark: "#083c3d !important" },
     modalBackground: { light: undefined, dark: "#294d4d !important" },
     signinInputBg: { light: "white", dark: undefined },
-    dashboardUpdatedAtColor: { light: "#1b484780", dark: "#ffffff80" },
+    dashboardUpdatedAtColor: { light: "#1b4847", dark: "#ffffff" },
     toastErrorBackground: { light: "#f15a24", dark: "#f15a24" },
     toastInfoBackground: { light: "#e6f6f2", dark: "#003434" },
     toastSuccessBackground: { light: "#44c9b9", dark: "#44c9b9" },

@@ -43,25 +43,6 @@ function info(e, t, sensorType) {
     notify.info(text)
 }
 
-
-/*
-    let settings = localStorage.getItem("settings");
-    if (settings) {
-        settings = JSON.parse(settings)
-        let resolution = 2;
-        if (ms.temperature != null) {
-            if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE)
-            ms.temperature = +ms.temperature.toFixed(resolution)
-        }
-        if (ms.humidity != null) {
-            if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_HUMIDITY)
-        }
-        if (ms.pressure != null) {
-            if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
-        }
-    }
-*/
-
 export default function SensorReading(props) {
     let mode = useColorMode().colorMode;
     const { t } = useTranslation();
