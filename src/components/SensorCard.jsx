@@ -470,15 +470,15 @@ class SensorCard extends Component {
                         return (
                             <GridItem
                                 key={sensorType + (unitKey || '')}
-                                style={{
-                                    color: this.getAlertState(sensorType) > 0
-                                        ? ruuviTheme.colors.sensorCardValueAlertState
-                                        : undefined,
-                                    alignSelf: 'flex-start'
-                                }}
+                                style={{ alignSelf: 'flex-start' }}
                                 lineHeight="1.3"
                             >
-                                <span style={smallSensorValue}>
+                                <span style={{
+                                    ...smallSensorValue,
+                                    color: this.getAlertState(sensorType) > 0
+                                        ? ruuviTheme.colors.sensorCardValueAlertState
+                                        : undefined
+                                }}>
                                     {showValue == null ? "-" : getDisplayValue(sensorType, showValue)}
                                 </span>
                                 <span style={smallSensorValueUnit}>

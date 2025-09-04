@@ -117,8 +117,8 @@ export default function BigValue(props) {
     }
     return (
         <div>
-            <div style={{ position: "relative", color: alertActive ? ruuviTheme.colors.sensorCardValueAlertState : undefined }}>
-                <span style={valueStyle}>
+            <div style={{ position: "relative", }}>
+                <span style={{ ...valueStyle, color: alertActive ? ruuviTheme.colors.sensorCardValueAlertState : undefined }}>
                     {value ?? "-"}
                 </span>
                 <span style={unitStyle}>
