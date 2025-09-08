@@ -41,7 +41,7 @@ const parse = function (data) {
   if (nox !== 511) robject.nox = nox
 
   const illuminance = ((data[23] << 16) | (data[24] << 8) | data[25])
-  if (illuminance !== 0xFFFFFF) robject.illuminance = illuminance * 0.01
+  if (illuminance !== 0xFFFFFF) robject.illuminance = round(illuminance * 0.01, 2)
 
   const soundLevelInstant = data[26] << 1 | (data[32] & 0b00001000) >> 3;
   if (soundLevelInstant !== 511) robject.soundLevelInstant = soundLevelInstant * 0.2 + 18;

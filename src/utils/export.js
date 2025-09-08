@@ -16,6 +16,8 @@ function processData(data, t) {
     if (data.measurements.length > 0 && data.measurements[0].parsed !== null) {
         if (data.measurements[0].parsed.dataFormat === "e0") {
             sensorHeaders.push("co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "illuminance", "soundLevelAvg", "soundLevelPeak", "aqi")
+        } else if (data.measurements[0].parsed.dataFormat === "e1") {
+            sensorHeaders.push("co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "illuminance", "soundLevelAvg", "soundLevelPeak", "soundLevelInstant", "aqi")
         }
     }
     var csvHeader = [t('date')];
