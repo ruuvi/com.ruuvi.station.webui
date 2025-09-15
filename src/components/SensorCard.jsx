@@ -709,10 +709,10 @@ class SensorCard extends Component {
 
             if (mainFields && mainFields.length) {
                 let mainIdx = mainFields.findIndex(f => (Array.isArray(f) ? f[0] : f) === mainStat);
-                if (mainIdx > 0) {
+                if (mainIdx >= 0) {
                     stats = [mainFields[mainIdx], ...mainFields.slice(0, mainIdx), ...mainFields.slice(mainIdx + 1)];
                 } else {
-                    stats = [...mainFields];
+                    stats = [mainStat, ...mainFields];
                 }
             } else {
                 stats = [...DEFAULT_VISIBLE_SENSOR_TYPES];
