@@ -23,7 +23,7 @@ import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
 import { MdChevronRight } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
-import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, getUnitHelperWithUnit, localeNumber } from "../UnitHelper";
+import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, localeNumber } from "../UnitHelper";
 import { exportCSV, exportPDF, exportXLSX } from "../utils/export";
 import withRouter from "../utils/withRouter"
 import DurationText from "../components/DurationText";
@@ -503,6 +503,7 @@ class Sensor extends Component {
         }
         let unit = uh.unit;
         if (this.state.graphKey === "movementCounter") return `(${this.props.t(unit)})`;
+        if (!unit || unit === "") return "";
         return <>({unit})</>
     }
     sensorHasData() {
@@ -591,13 +592,29 @@ class Sensor extends Component {
         }
 
         let graphTitle = (mobile) => {
+            const uh = getUnitHelper(this.state.graphKey);
+            let mainLabel = uh ? t(uh.label) : "";
+            let unitPart = this.getSelectedUnit();
+
+            if (this.state.graphUnitKey && uh?.units) {
+                const uDef = uh.units.find(u => u.cloudStoreKey === this.state.graphUnitKey);
+                if (uDef) {
+                    const translatedUnit = t(uDef.translationKey);
+                    const uhWithUnit = getUnitHelper(this.state.graphKey, false, this.state.graphUnitKey);
+                    if (uhWithUnit && uhWithUnit.label) {
+                        mainLabel = t(uhWithUnit.label);
+                    }
+                    unitPart = uhWithUnit.unit ? <>({uhWithUnit.unit})</> : "";
+                }
+            }
+
             return <div style={{ marginLeft: 30 }}>
                 <span className="graphLengthText" style={{ fontSize: mobile ? "20px" : "24px" }}>
-                    {t(getUnitHelper(this.state.graphKey).label)}
+                    {mainLabel}
                 </span>
                 {!mobile && <br />}
                 <span className="graphInfo" style={{ marginLeft: mobile ? 6 : undefined }}>
-                    {this.getSelectedUnit()}
+                    {unitPart}
                 </span>
             </div>
         }
@@ -633,6 +650,7 @@ class Sensor extends Component {
                                     let rawValue = latest[sensorType];
                                     if (rawValue === undefined) return null;
                                     let unitDisplay = unitHelper.unit;
+                                    let label = unitHelper.shortLabel || unitHelper.label;
                                     let showValue;
                                     if (unitKey && unitHelper.valueWithUnit) {
                                         showValue = localeNumber(
@@ -645,7 +663,19 @@ class Sensor extends Component {
                                         );
                                         const uDef = unitHelper.units?.find(u => u.cloudStoreKey === unitKey);
                                         if (uDef?.translationKey) unitDisplay = uDef.translationKey;
-                                        unitDisplay = getUnitHelperWithUnit(sensorType, false, unitKey)?.unit || unitDisplay;
+                                        let uhWithUnit = getUnitHelper(sensorType, false, unitKey);
+                                        if (uhWithUnit) {
+                                            showValue = localeNumber(
+                                                uhWithUnit.valueWithUnit(
+                                                    rawValue,
+                                                    unitKey,
+                                                    latest["temperature"]
+                                                ),
+                                                uhWithUnit.decimals
+                                            );
+                                            unitDisplay = uhWithUnit.unit;
+                                            label = uhWithUnit.shortLabel || unitHelper.shortLabel || uhWithUnit.label;
+                                        }
                                     } else {
                                         showValue = localeNumber(
                                             unitHelper.value(
@@ -665,7 +695,7 @@ class Sensor extends Component {
                                                     "replace_battery" : "battery_ok"
                                             }
                                             alertTriggered={this.isAlertTriggerd(sensorType)}
-                                            label={unitHelper.label}
+                                            label={label}
                                             unit={unitDisplay}
                                             selected={selected}
                                             onClick={() => this.setGraphKey([sensorType, unitKey])}

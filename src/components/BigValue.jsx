@@ -13,6 +13,7 @@ const unitStyle = {
     top: 9,
     position: "absolute",
     marginLeft: 6,
+    whiteSpace: 'nowrap'
 }
 const labelStyle = {
     fontFamily: "mulish",

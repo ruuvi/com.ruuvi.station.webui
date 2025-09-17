@@ -19,7 +19,7 @@ import "uplot/dist/uPlot.min.css";
 import Graph from "./Graph";
 import parse from "../decoder/parser";
 import { useTranslation, withTranslation } from "react-i18next";
-import { getDisplayValue, getUnitHelper, localeNumber, DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelperWithUnit } from "../UnitHelper";
+import { getDisplayValue, getUnitHelper, localeNumber, DEFAULT_VISIBLE_SENSOR_TYPES } from "../UnitHelper";
 import DurationText from "./DurationText";
 import BigValue from "./BigValue";
 import { withColorMode } from "../utils/withColorMode";
@@ -444,6 +444,7 @@ class SensorCard extends Component {
 
                         let showValue;
                         let unitLabel = unitHelper.unit;
+                        let label = unitHelper.shortLabel || unitHelper.label;
 
                         if (unitKey && unitHelper.valueWithUnit) {
                             showValue = localeNumber(
@@ -456,7 +457,19 @@ class SensorCard extends Component {
                             );
                             const unitDef = unitHelper.units?.find(u => u.cloudStoreKey === unitKey);
                             if (unitDef?.translationKey) unitLabel = unitDef.translationKey;
-                            unitLabel = getUnitHelperWithUnit(sensorType, false, unitKey)?.unit || unitLabel;
+                            let uhWithUnit = getUnitHelper(sensorType, false, unitKey)
+                            if (uhWithUnit) {
+                                showValue = localeNumber(
+                                    uhWithUnit.valueWithUnit(
+                                        value,
+                                        unitKey,
+                                        latestReading["temperature"]
+                                    ),
+                                    uhWithUnit.decimals
+                                );
+                                unitLabel = uhWithUnit.unit || unitLabel;
+                                label = uhWithUnit.shortLabel || unitHelper.shortLabel || unitHelper.label;
+                            }
                         } else {
                             showValue = localeNumber(
                                 unitHelper.value(
@@ -479,14 +492,14 @@ class SensorCard extends Component {
                                         ? ruuviTheme.colors.sensorCardValueAlertState
                                         : undefined
                                 }}>
-                                    {showValue == null ? "-" : getDisplayValue(sensorType, showValue)}
+                                    {showValue == null ? "-" : showValue}
                                 </span>
                                 <span style={smallSensorValueUnit}>
                                     {truncateUnit(unitLabel)}
                                 </span>
                                 {!options.simpleView &&
                                     <div style={smallSensorLabel}>
-                                        {t(unitHelper.label)}
+                                        {typeof label === "object" ? label : t(label)}
                                     </div>
                                 }
                             </GridItem>
@@ -903,7 +916,7 @@ class SensorCard extends Component {
                                                         unitHelper.decimals
                                                     );
                                                     unit = unitHelper?.units?.find(u => u.cloudStoreKey === unitKey)?.translationKey;
-                                                    unit = getUnitHelperWithUnit(mainStat, false, unitKey)?.unit || unit;
+                                                    unit = getUnitHelper(mainStat, false, unitKey)?.unit || unit;
                                                 } else {
                                                     showValue = localeNumber(
                                                         unitHelper.value(

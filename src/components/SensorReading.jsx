@@ -60,7 +60,7 @@ export default function SensorReading(props) {
                     value={val}
                     unit={props.unit}
                 />
-                <span style={labelStyle}>{t(props.label)}</span>
+                <span style={labelStyle}>{typeof props.label === "object" ? props.label : t(props.label)}</span>
                 {props.info && <span style={{ ...labelStyle, ...infoLabel }}>({t(props.info)})</span>}
             </div>
         </Stat >

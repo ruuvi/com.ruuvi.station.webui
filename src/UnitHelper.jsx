@@ -1,10 +1,28 @@
 import { relativeToAbsolute, relativeToDewpoint } from "./utils/humidity";
 
 const unitHelper = {
+    _common: {
+        degreeC: "°C",
+        degreeF: "°F",
+        kelvin: "K",
+        percent: "%",
+        gm3Plain: "g/m³",
+        gm3JSX: <span>g/m<sup>3</sup></span>,
+        mgm3Plain: "mg/m³",
+        mgm3JSX: <span>mg/m<sup>3</sup></span>,
+        dewpointLabel: "dewpoint",
+        vocLabel: "volatile_organic_compounds",
+        airPressurePa: "Pa",
+        airPressureHPa: "hPa",
+        airPressureMmHg: "mmHg",
+        airPressureInHg: "inHg"
+    },
     "temperature": {
         label: "temperature",
+        shortLabel: "temperature",
         unit: "°C",
         units: [{ translationKey: "°C", cloudStoreKey: "C" }, { translationKey: "°F", cloudStoreKey: "F" }, { translationKey: "K", cloudStoreKey: "K" }],
+        displayUnits: { C: "°C", F: "°F", K: "K" },
         value: (value, offset, settings) => temperatureToUserFormat(value, offset, settings),
         valueWithUnit: (value, unitKey) => {
             return temperatureToUserFormat(value, null, { UNIT_TEMPERATURE: unitKey });
@@ -17,6 +35,11 @@ const unitHelper = {
         label: "humidity",
         unit: "%",
         units: [{ translationKey: "%", cloudStoreKey: "0" }, { translationKey: "g/m³", cloudStoreKey: "1" }, { translationKey: "dewpoint", cloudStoreKey: "2" }],
+        displayVariants: {
+            "0": { unitKey: "%", label: "humidity" },
+            "1": { unitKey: "g/m³", label: "humidity" },
+            "2": { unitKey: "dewpoint", label: "dewpoint" }
+        },
         value: (value, temperature, settings) => humidityToUserFormat(value, temperature, settings),
         valueWithUnit: (value, unitKey, temperature) => {
             return humidityToUserFormat(value, temperature, { UNIT_HUMIDITY: unitKey });
@@ -26,9 +49,11 @@ const unitHelper = {
         graphable: true
     },
     "pressure": {
-        label: "pressure",
+        label: "air_pressure",
+        shortLabel: "air_pressure",
         unit: "hPa",
         units: [{ translationKey: "Pa", cloudStoreKey: "0" }, { translationKey: "hPa", cloudStoreKey: "1" }, { translationKey: "mmHg", cloudStoreKey: "2" }, { translationKey: "inHg", cloudStoreKey: "3" }],
+        displayUnits: { "0": "Pa", "1": "hPa", "2": "mmHg", "3": "inHg" },
         value: (value, settings) => pressureToUserFormat(value, settings),
         valueWithUnit: (value, unitKey) => {
             return pressureToUserFormat(value, { UNIT_PRESSURE: unitKey });
@@ -38,7 +63,8 @@ const unitHelper = {
         graphable: true
     },
     "movementCounter": {
-        label: "movements",
+        label: "movementCounter",
+        shortLabel: "movements",
         unit: "",
         value: (value) => value,
         fromUser: (value) => value,
@@ -47,6 +73,7 @@ const unitHelper = {
     },
     "battery": {
         label: "battery_voltage",
+        shortLabel: "battery",
         exportLabel: "voltage",
         unit: "V",
         value: (value) => value / 1000,
@@ -56,6 +83,7 @@ const unitHelper = {
     },
     "accelerationX": {
         label: "acceleration_x",
+        shortLabel: "acc_x",
         unit: "g",
         value: (value) => value / 1000,
         fromUser: (value) => value,
@@ -64,6 +92,7 @@ const unitHelper = {
     },
     "accelerationY": {
         label: "acceleration_y",
+        shortLabel: "acc_y",
         unit: "g",
         value: (value) => value / 1000,
         fromUser: (value) => value,
@@ -72,6 +101,7 @@ const unitHelper = {
     },
     "accelerationZ": {
         label: "acceleration_z",
+        shortLabel: "acc_z",
         unit: "g",
         value: (value) => value / 1000,
         fromUser: (value) => value,
@@ -80,6 +110,7 @@ const unitHelper = {
     },
     "rssi": {
         label: "signal_strength",
+        shortLabel: "signal_strength",
         unit: "dBm",
         value: (value) => value,
         fromUser: (value) => value,
@@ -112,6 +143,7 @@ const unitHelper = {
     },
     "measurementSequenceNumber": {
         label: "measurement_sequence_number",
+        shortLabel: "meas_seq_number",
         unit: "",
         value: (value) => value,
         fromUser: (value) => value,
@@ -119,7 +151,8 @@ const unitHelper = {
         graphable: true
     },
     "pm10": {
-        label: "pm10",
+        label: "particulate_matter_10",
+        shortLabel: "pm10",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
@@ -127,7 +160,8 @@ const unitHelper = {
         graphable: true
     },
     "pm25": {
-        label: "pm25",
+        label: "particulate_matter_25",
+        shortLabel: "pm25",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
@@ -135,7 +169,8 @@ const unitHelper = {
         graphable: true
     },
     "pm40": {
-        label: "pm40",
+        label: "particulate_matter_40",
+        shortLabel: "pm40",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
@@ -143,7 +178,8 @@ const unitHelper = {
         graphable: true
     },
     "pm100": {
-        label: "pm100",
+        label: "particulate_matter_100",
+        shortLabel: "pm100",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
@@ -151,7 +187,8 @@ const unitHelper = {
         graphable: true
     },
     "co2": {
-        label: "co2",
+        label: "carbon_dioxide",
+        shortLabel: "co2",
         unit: "ppm",
         value: (value) => value,
         fromUser: (value) => value,
@@ -159,9 +196,11 @@ const unitHelper = {
         graphable: true
     },
     "voc": {
-        label: "voc",
-        unit: "index",
+        label: "volatile_organic_compounds",
+        shortLabel: "voc",
+        unit: "",
         units: [{ translationKey: "index", cloudStoreKey: "index" }, { translationKey: "ethanol_mgm3", cloudStoreKey: "ethanol_mgm3" }, { translationKey: "isobutylene_mgm3", cloudStoreKey: "isobutylene_mgm3" }, { translationKey: "molhave_mgm3", cloudStoreKey: "molhave_mgm3" }],
+        displayUnits: { index: "", ethanol_mgm3: "mg/m³", isobutylene_mgm3: "mg/m³", molhave_mgm3: "mg/m³" },
         value: (value) => value,
         fromUser: (value) => value,
         valueWithUnit: (value, unitKey) => {
@@ -181,7 +220,8 @@ const unitHelper = {
         graphable: true
     },
     "nox": {
-        label: "unit_nox",
+        label: "nitrogen_oxides",
+        shortLabel: "nox",
         value: (value) => value,
         fromUser: (value) => value,
         decimals: 0,
@@ -189,6 +229,7 @@ const unitHelper = {
     },
     "illuminance": {
         label: "illuminance",
+        shortLabel: "light",
         unit: "lx",
         value: (value) => value,
         fromUser: (value) => value,
@@ -221,36 +262,13 @@ const unitHelper = {
     },
     "aqi": {
         label: "air_quality",
+        shortLabel: "air_quality",
         unit: "/100",
         noUnitInExport: true,
         exportLabel: "aqi",
         value: (value) => value,
         fromUser: (value) => value,
         decimals: 0,
-        graphable: true
-    },
-    "tvoc_ethanol": {
-        label: "tvoc_ethanol",
-        unit: "mg/m³",
-        value: (value) => value,
-        fromUser: (value) => value,
-        decimals: 2,
-        graphable: true
-    },
-    "tvoc_isobutylene": {
-        label: "tvoc_isobutylene",
-        unit: "mg/m³",
-        value: (value) => value,
-        fromUser: (value) => value,
-        decimals: 2,
-        graphable: true
-    },
-    "tvoc_molhave": {
-        label: "tvoc_molhave",
-        unit: "mg/m³",
-        value: (value) => value,
-        fromUser: (value) => value,
-        decimals: 2,
         graphable: true
     }
 };
@@ -342,16 +360,12 @@ export function getDisplayValue(key, value, settings) {
                     if (settings.UNIT_PRESSURE === "0") resolution = 0
                 }
                 if (typeof value === "string") {
-                    // Remove non-breaking spaces and replace minus sign
                     value = value.replace(" ", "").replace("−", "-");
                     const locale = navigator.language;
-                    // Create a NumberFormat object for the user's locale
                     const numberFormat = new Intl.NumberFormat(locale);
-                    // Use the NumberFormat object to parse the number
                     const parts = numberFormat.formatToParts(12345.6);
                     const groupSeparator = parts.find(part => part.type === 'group').value;
                     const decimalSeparator = parts.find(part => part.type === 'decimal').value;
-                    // Replace group separators with empty string and decimal separators with dot
                     value = value.replace(new RegExp(`\\${groupSeparator}`, 'g'), '').replace(decimalSeparator, '.');
                 }
                 value = parseFloat(value).toFixed(resolution)
@@ -364,80 +378,91 @@ export function getDisplayValue(key, value, settings) {
     return value
 }
 
-export function getUnitHelperWithUnit(key, plaintext, unit) {
-    if (key === "humidity") {
-        let settings = { UNIT_HUMIDITY: unit };
-        let thing = unitHelper[key];
-        if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "1") {
-            thing.unit = plaintext ? "g/m³" : <span>g/m<sup>3</sup></span>
-            return thing;
-        } else if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "2") {
-            thing.label = "dewpoint"
-            thing.unit = "°C"
-            if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
-                thing.unit = "°F";
-            }
-            else if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
-                thing.unit = "K";
-            }
-            return thing;
-        } else {
-            thing.unit = "%"
-            return thing;
+export function getUnitHelper(key, plaintext, unit) {
+    let originalKey = key;
+    let settings = null;
+    try {
+        let raw = localStorage.getItem("settings");
+        if (raw) settings = JSON.parse(raw);
+    } catch (e) { /* ignore */ }
+
+    if (key && key.startsWith("tvoc_")) {
+        const suffix = key.substring("tvoc_".length); // ethanol, isobutylene, molhave
+        key = "voc";
+        if (!unit) {
+            if (suffix === "ethanol") unit = "ethanol_mgm3";
+            else if (suffix === "isobutylene") unit = "isobutylene_mgm3";
+            else if (suffix === "molhave") unit = "molhave_mgm3";
         }
     }
+
+    const C = unitHelper._common;
+
+    if (key === "temperature") {
+        const setting = unit || settings?.UNIT_TEMPERATURE || "C";
+        let thing = { ...unitHelper[key] };
+        thing.unit = thing.displayUnits?.[setting] || thing.unit;
+        return thing;
+    }
+
+    if (key === "humidity") {
+        const humSetting = unit ?? settings?.UNIT_HUMIDITY ?? "0";
+        let thing = { ...unitHelper[key] };
+        const variant = thing.displayVariants?.[humSetting];
+        if (variant) {
+            if (humSetting === "1") {
+                thing.unit = plaintext ? C.gm3Plain : C.gm3JSX;
+            } else if (humSetting === "2") {
+                thing.label = variant.label;
+                const tempSetting = settings?.UNIT_TEMPERATURE || "C";
+                thing.unit = tempSetting === "F" ? C.degreeF : tempSetting === "K" ? C.kelvin : C.degreeC;
+            } else {
+                thing.unit = C.percent;
+            }
+        }
+        return thing;
+    }
+
+    if (key === "pressure") {
+        const pSetting = unit ?? settings?.UNIT_PRESSURE ?? "1"; // default hPa
+        let thing = { ...unitHelper[key] };
+        thing.unit = thing.displayUnits?.[pSetting] || thing.unit;
+        if (pSetting === "0") thing.decimals = 0; // Pa, no decimals
+        return thing;
+    }
+
+    if (key === "voc") {
+        let thing = { ...unitHelper[key] };
+        const vocUnit = unit ?? settings?.UNIT_VOC ?? "index";
+        if (["ethanol_mgm3", "isobutylene_mgm3", "molhave_mgm3"].includes(vocUnit)) {
+            thing.unit = plaintext ? C.mgm3Plain : C.mgm3JSX;
+            const suffix = vocUnit.substring(0, vocUnit.indexOf("_"));
+            thing.shortLabel = "TVOC" + suffix.charAt(0).toUpperCase() + suffix.slice(1);
+            if (!plaintext) {
+                thing.shortLabel = <span>TVOC<sub>{suffix.charAt(0).toUpperCase() + suffix.slice(1)}</sub></span>;
+            }
+            thing.label = "total_volatile_organic_compounds";
+            thing.decimals = 2;
+        } else {
+            thing.unit = thing.displayUnits?.[vocUnit] ?? "";
+        }
+        return thing;
+    }
+
+    if (key.startsWith("pm") && !plaintext) {
+        let thing = { ...unitHelper[key] };
+        thing.shortLabel = <span>{"PM"}<sub>{key.substring(2, key.length-1)}</sub></span>
+        return thing;
+    }
+
+    if (key === "signal") key = "rssi"; // alias
+
+    if (unitHelper[key]) return { ...unitHelper[key] };
+    return { label: "", unit: "", value: (value) => value, decimals: 0 };
 }
 
-export function getUnitHelper(key, plaintext) {
-    if (key === "temperature") {
-        let settings = localStorage.getItem("settings");
-        if (settings) {
-            settings = JSON.parse(settings);
-            var thing = unitHelper[key];
-            if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
-                thing.unit = "°F";
-                return thing;
-            }
-            else if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
-                thing.unit = "K";
-                return thing;
-            } else {
-                thing.unit = "°C";
-                return thing;
-            }
-        }
-    }
-    if (key === "humidity") {
-        let settings = localStorage.getItem("settings");
-        if (settings) {
-            settings = JSON.parse(settings)
-            return getUnitHelperWithUnit(key, plaintext, settings.UNIT_HUMIDITY);
-        }
-    }
-    if (key === "pressure") {
-        let settings = localStorage.getItem("settings");
-        let thing = unitHelper[key];
-        if (settings) {
-            settings = JSON.parse(settings)
-            if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "0") {
-                thing.unit = "Pa"
-                return thing;
-            } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
-                thing.unit = "mmHg"
-                return thing;
-            } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "3") {
-                thing.unit = "inHg"
-                return thing;
-            } else {
-                thing.unit = "hPa"
-                return thing;
-            }
-        }
-    }
-    if (key === "signal") key = "rssi"
-    if (unitHelper[key])
-        return unitHelper[key];
-    return { label: "", unit: "", value: (value) => value, decimals: 0 };
+export function getUnitHelperWithUnit(key, plaintext, unit) {
+    return getUnitHelper(key, plaintext, unit);
 }
 
 export function localeNumber(value, decimals) {
