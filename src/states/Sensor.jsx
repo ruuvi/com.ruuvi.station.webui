@@ -560,7 +560,7 @@ class Sensor extends Component {
     render() {
         var { t } = this.props
         let lastReading = this.getLatestReading()
-        let sensorSubscription = this.props.sensor?.subscription.subscriptionName
+        let sensorSubscription = this.props.sensor?.subscription
         let freeMode = this.props.sensor?.subscription.maxHistoryDays === 0
         let noHistoryStrKey = "no_data_in_range"
         if (this.props.sensor?.subscription.maxHistoryDays === 0) noHistoryStrKey = "no_data_free_mode"
@@ -575,7 +575,7 @@ class Sensor extends Component {
         let graphCtrl = () => {
             return <>
                 <ZoomInfo />
-                <ExportMenu buttonText={uppercaseFirst(t("export"))} enablePDF={sensorSubscription === "Business Starter"} onClick={val => {
+                <ExportMenu buttonText={uppercaseFirst(t("export"))} enablePDF={sensorSubscription.pdfExportAllowed} onClick={val => {
                     switch (val) {
                         case "XLSX":
                             this.export_XLSX()
@@ -908,7 +908,7 @@ class Sensor extends Component {
                                 <hr />
                                 <AccordionPanel style={accordionPanel}>
                                     <List style={accordionContent}>
-                                        {sensorSubscription === "Free" && <Box pt={6} pb={6} style={detailedSubText}>
+                                        {sensorSubscription.subscriptionName === "Free" && <Box pt={6} pb={6} style={detailedSubText}>
                                             {(() => {
                                                 let text = t("sensor_alert_free_info")
                                                 let parts = text.split(t("cloud_ruuvi_link"))
@@ -930,8 +930,8 @@ class Sensor extends Component {
                                             return <AlertItem key={key} alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
                                                 latestValue={latestValue}
                                                 noUpgradeButton={this.isSharedSensor() || !this.sensorHasData()}
-                                                showOffline={!["Free", "Basic"].includes(sensorSubscription)}
-                                                showDelay={sensorSubscription === "Business Starter"}
+                                                showOffline={sensorSubscription.offlineAlertAllowed}
+                                                showDelay={sensorSubscription.delayedAlertAllowed}
                                                 detailedTitle={detailedTitle}
                                                 detailedText={detailedText} detailedSubText={detailedSubText}
                                                 type={x} dataKey={dataKey} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />
