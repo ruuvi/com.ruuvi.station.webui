@@ -925,7 +925,7 @@ class SensorCard extends Component {
                                                         ),
                                                         unitHelper.decimals
                                                     );
-                                                    unit = unitHelper.unit || unitHelper.label;
+                                                    unit = unitHelper.unit;
                                                 }
 
                                                 return (
