@@ -696,6 +696,7 @@ class Sensor extends Component {
                                             }
                                             alertTriggered={this.isAlertTriggerd(sensorType)}
                                             label={label}
+                                            sensorType={sensorType}
                                             unit={unitDisplay}
                                             selected={selected}
                                             onClick={() => this.setGraphKey([sensorType, unitKey])}

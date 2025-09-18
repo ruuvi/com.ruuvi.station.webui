@@ -179,12 +179,25 @@ class AlertItem extends Component {
             return {}
         }
 
+        const showUnitInTitle = !["movement", "signal", "offline"].includes(type);
+        let titleUnitNode = null;
+        if (showUnitInTitle) {
+            if (uh.unit) {
+                titleUnitNode = <> ({uh.unit})</>;
+            }
+        }
+        const latestUnitNode = () => {
+            if (!showUnitInTitle) return null;
+            if (!uh.unit) return null;
+            return <span> {uh.unit}</span>;
+        }
+
         return (
             <ListItem key={type}>
                 <div style={{ paddingTop: 30, paddingBottom: 20 }}>
                     <div style={{ ...this.props.detailedTitle, width: undefined, display: "flex", justifyContent: "space-between" }}>
                         <span>
-                            {t(label) + (type !== "movement" && type !== "signal" && type !== "offline" ? ` (${type === "humidity" ? "%" : uh.unit})` : "")}
+                            {t(label)}{titleUnitNode}
                             {type === "offline" && !this.props.showOffline && !this.props.noUpgradeButton && <><Box ml={2} display="inline" /><UpgradePlanButton /></>}
                         </span>
                         <span style={gayedOutOffline()}>
@@ -216,7 +229,7 @@ class AlertItem extends Component {
                                 {this.props.latestValue !== undefined &&
                                     <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
                                         <span style={{ ...this.props.detailedSubText, opacity: 0.5 }}>
-                                            {t("latest_measured_value").replace(/{(.*?)}/, type === "humidity" ? this.props.latestValue : getDisplayValue(this.props.type.toLowerCase(), uh.value(this.props.latestValue)))} {getUnit()}
+                                            {t("latest_measured_value").replace(/{(.*?)}/, type === "humidity" ? this.props.latestValue : getDisplayValue(this.props.type.toLowerCase(), uh.value(this.props.latestValue)))}{latestUnitNode()}
                                         </span>
                                     </div>
                                 }

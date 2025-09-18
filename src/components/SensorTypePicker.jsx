@@ -86,26 +86,31 @@ export default function SensorTypePicker(props) {
         let label = ""
         if (value == null) return ""
         
+        let sensorType = getSensorTypeOnly(value)
+        let uh = getUnitHelper(sensorType, true)
         if (props.allUnits) {
-            let sensorType = getSensorTypeOnly(value)
             let unit = getUnitOnly(value)
             if (sensorType === "humidity") {
                 if (unit === "0") {
-                    label = t(getUnitHelper(sensorType).label) + " (" + t("humidity_relative_name") + ")"
+                    label = t(uh.label) + " (" + t("humidity_relative_name") + ")"
                 }
                 else if (unit === "1") {
-                    label = t(getUnitHelper(sensorType).label) + " (" + t("humidity_absolute_name") + ")"
+                    label = t(uh.label) + " (" + t("humidity_absolute_name") + ")"
                 }
                 else if (unit === "2") {
-                    let unitTranslationKey = getUnitHelper(sensorType).units.find(x => x.cloudStoreKey === unit)?.translationKey
-                    label = t(getUnitHelper(sensorType).label) + " (" + t(unitTranslationKey) + " (" + t(getUnitHelper("temperature").unit) + "))"
+                    let unitTranslationKey = uh.units.find(x => x.cloudStoreKey === unit)?.translationKey
+                    label = t(uh.label) + " (" + t(unitTranslationKey) + " (" + t(getUnitHelper("temperature").unit) + "))"
                 }
             }
             else {
-                let unitTranslationKey = getUnitHelper(sensorType).units?.find(x => x.cloudStoreKey === unit)?.translationKey || ""
-                label = t(getUnitHelper(sensorType).label) + (unitTranslationKey ? ` (${t(unitTranslationKey)})` : "")
+                let unitTranslationKey = uh.units?.find(x => x.cloudStoreKey === unit)?.translationKey || ""
+                let uhLabel = uh.shortLabel || uh.label || ""
+                label = t(uhLabel) + (unitTranslationKey ? ` (${t(unitTranslationKey)})` : "")
             }
-        } else label = t((value ? getUnitHelper(value)?.label : null) || "");
+        } else {
+            let uhLabel = uh?.shortLabel || uh?.label || ""
+            label = t((value ? uhLabel : null) || "");
+        }
 
         let valueTextMaxLength = props.allUnits ? 30 : 15
         if (label.length > valueTextMaxLength) label = label.substring(0, valueTextMaxLength) + "..."

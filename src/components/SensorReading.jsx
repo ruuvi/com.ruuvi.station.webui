@@ -52,7 +52,7 @@ export default function SensorReading(props) {
     val = getDisplayValue(props.label, val)
     return (
         <Stat className="sensorValueBox" style={{ width, maxWidth: "100%", height: height, backgroundColor: props.alertTriggered ? ruuviTheme.colors.errorBackground : undefined, border: props.selected ? props.alertTriggered ? "2px solid " + ruuviTheme.colors.error : "2px solid " + ruuviTheme.newColors.sensorValueBoxActiveBorder[mode] : "2px solid rgba(0,0,0,0)", borderRadius: "10px", cursor: "pointer" }} onClick={props.onClick}>
-            <IconButton style={{ position: "absolute", right: 0, margin: -8 }} variant="ghost" onClick={e => info(e, t, props.label)}>
+            <IconButton style={{ position: "absolute", right: 0, margin: -8 }} variant="ghost" onClick={e => info(e, t, props.sensorType)}>
                 <MdInfo className="buttonSideIcon" size="16" />
             </IconButton>
             <div style={middle}>
