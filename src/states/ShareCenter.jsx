@@ -24,8 +24,8 @@ const SensorSharedWithMeBox = ({ email, sensor, onRemove }) => {
                     setRemove(true)
                 }} />
             </div>
-            <div style={{ fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {sensor.owner.toLowerCase()} | {sensor.subscription.subscriptionName}
+                <div style={{ fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {sensor.owner.toLowerCase()} | {sensor.subscription?.subscriptionName || JSON.stringify(sensor.subscription)}
             </div>
             <RemoveSensorDialog open={remove} sensor={sensor} t={i18next.t} onClose={() => setRemove(false)} remove={() => {
                 setRemove(false)

@@ -824,17 +824,17 @@ class Sensor extends Component {
                                             :
                                             <ListItem>
                                                 <table style={accordionContent}>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td style={detailedTitle}>
-                                                                {t("owners_plan")}
-                                                            </td>
-                                                            <td style={detailedText}>
-                                                                {sensorSubscription}
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style={detailedTitle}>
+                                                            {t("owners_plan")}
+                                                        </td>
+                                                        <td style={detailedText}>
+                                                            {sensorSubscription?.subscriptionName || JSON.stringify(sensorSubscription)}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                             </ListItem>
                                         }
                                         {/* 
