@@ -82,25 +82,17 @@ export default function SensorTypePicker(props) {
         if (value === null) {
             return t("not_selected") || "Not selected";
         }
-        
+
         let label = ""
         if (value == null) return ""
-        
+
         let sensorType = getSensorTypeOnly(value)
         let uh = getUnitHelper(sensorType, true)
         if (props.allUnits) {
             let unit = getUnitOnly(value)
-            if (sensorType === "humidity") {
-                if (unit === "0") {
-                    label = t(uh.label) + " (" + t("humidity_relative_name") + ")"
-                }
-                else if (unit === "1") {
-                    label = t(uh.label) + " (" + t("humidity_absolute_name") + ")"
-                }
-                else if (unit === "2") {
-                    let unitTranslationKey = uh.units.find(x => x.cloudStoreKey === unit)?.translationKey
-                    label = t(uh.label) + " (" + t(unitTranslationKey) + " (" + t(getUnitHelper("temperature").unit) + "))"
-                }
+            if (sensorType === "humidity" && unit === "2") {
+                let unitTranslationKey = uh.units.find(x => x.cloudStoreKey === unit)?.translationKey
+                label = t(unitTranslationKey) + " (" + t(getUnitHelper("temperature").unit) + ")"
             }
             else {
                 let unitTranslationKey = uh.units?.find(x => x.cloudStoreKey === unit)?.translationKey || ""
@@ -135,7 +127,7 @@ export default function SensorTypePicker(props) {
                     if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
                     if (i === opts.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                     else divider = <MenuDivider />
-                    
+
                     // Handle the click action for different option types
                     const handleOptionClick = () => {
                         if (op === null) {
@@ -146,12 +138,12 @@ export default function SensorTypePicker(props) {
                             props.onChange(getSensorTypeOnly(op));
                         }
                     };
-                    
+
                     return <div key={`option-${i}-${x}`}>
                         <MenuItem className={
-                            (props.value === null && op === null) || 
-                            (props.value !== null && props.value === op) ? 
-                            "menuActive ddlItemAlt" : "ddlItemAlt"
+                            (props.value === null && op === null) ||
+                                (props.value !== null && props.value === op) ?
+                                "menuActive ddlItemAlt" : "ddlItemAlt"
                         }
                             style={{ ...borderStyle }} onClick={handleOptionClick}>
                             {getLabelForOption(op)}

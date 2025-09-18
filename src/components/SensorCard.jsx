@@ -56,7 +56,7 @@ const smallSensorLabel = {
     fontFamily: "mulish",
     fontSize: 12,
     opacity: 0.7,
-    marginTop: -3,
+    marginTop: -1,
     marginBottom: 4,
 }
 

@@ -67,6 +67,13 @@ export default function DurationPicker(props) {
     const [custom, setCustom] = useState(typeof props.value === "object" ? props.value : null)
     const [showPicker, setShowPicker] = useState(false)
     const [showDropdown, setShowDropdown] = useState(false)
+    const disabled = !!props.disabled;
+    useEffect(() => {
+        if (disabled) {
+            setShowPicker(false)
+            setShowDropdown(false)
+        }
+    }, [disabled])
 
     useEffect(() => {
         if (typeof props.value === "object" && props.value && props.value.from && props.value.to) {
@@ -76,6 +83,7 @@ export default function DurationPicker(props) {
     }, [props.value])
 
     const setDropdownFromClick = (state) => {
+        if (disabled) return
         wasInClose = false
         setShowDropdown(state)
     }
@@ -98,11 +106,16 @@ export default function DurationPicker(props) {
                         setShowDropdown(false)
                     }}>
                         <PopoverAnchor>
-                            <span className="durationPicker" style={{ height: "40px", display: "inline-block", borderRadius: "4px" }} >
+                            <span className="durationPicker" style={{ height: "40px", display: "inline-block", borderRadius: "4px", opacity: disabled ? 0.5 : 1, cursor: disabled ? 'default' : 'pointer' }} aria-disabled={disabled} >
                                 <Flex>
                                     {!props.dashboard &&
-                                        <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px' }}
-                                            onClick={e => setDropdownFromClick(false) || setShowPicker(!showPicker)} >
+                                        <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px', cursor: disabled ? 'default' : undefined }}
+                                            isDisabled={disabled}
+                                            onClick={e => {
+                                                if (disabled) return
+                                                setDropdownFromClick(false)
+                                                setShowPicker(!showPicker)
+                                            }} >
                                             <AiOutlineCalendar {...iconProps} />
                                         </Button>
                                     }
@@ -124,8 +137,10 @@ export default function DurationPicker(props) {
                                         )}
                                     </span>
                                     <Divider orientation="vertical" height={"38px"} mt={"1px"} className="bodybg" width={"2px"} borderStyle="none" />
-                                    <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px' }}
+                                    <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px', cursor: disabled ? 'default' : undefined }}
+                                        isDisabled={disabled}
                                         onClick={e => {
+                                            if (disabled) return
                                             if (wasInClose) {
                                                 wasInClose = false
                                                 return
@@ -135,7 +150,7 @@ export default function DurationPicker(props) {
                                         }}>
                                         <MdArrowDropDown {...iconProps} />
                                     </Button>
-                                    <MenuButton height={"40px"} >
+                                    <MenuButton height={"40px"} isDisabled={disabled} style={{ cursor: disabled ? 'default' : undefined }}>
                                     </MenuButton>
                                 </Flex>
                             </span>
@@ -152,6 +167,7 @@ export default function DurationPicker(props) {
                                 return <div key={x.v + "p"}>
                                     <MenuItem key={x.v} className={!custom && ts.v === x.v ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }}
                                         onClick={() => {
+                                            if (disabled) return
                                             setCustom(null)
                                             props.onChange(x.v)
                                         }}>

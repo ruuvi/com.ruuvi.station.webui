@@ -36,8 +36,8 @@ const unitHelper = {
         unit: "%",
         units: [{ translationKey: "%", cloudStoreKey: "0" }, { translationKey: "g/m³", cloudStoreKey: "1" }, { translationKey: "dewpoint", cloudStoreKey: "2" }],
         displayVariants: {
-            "0": { unitKey: "%", label: "humidity" },
-            "1": { unitKey: "g/m³", label: "humidity" },
+            "0": { unitKey: "%", label: "relative_humidity" },
+            "1": { unitKey: "g/m³", label: "absolute_humidity" },
             "2": { unitKey: "dewpoint", label: "dewpoint" }
         },
         value: (value, temperature, settings) => humidityToUserFormat(value, temperature, settings),
@@ -410,14 +410,22 @@ export function getUnitHelper(key, plaintext, unit) {
         let thing = { ...unitHelper[key] };
         const variant = thing.displayVariants?.[humSetting];
         if (variant) {
-            if (humSetting === "1") {
+            if (humSetting === "0") {
+                // relative humidity
+                thing.label = variant.label;
+                thing.shortLabel = "rel_humidity";
+                thing.unit = C.percent;
+            } else if (humSetting === "1") {
+                // absolute humidity
+                thing.label = variant.label;
+                thing.shortLabel = "abs_humidity";
                 thing.unit = plaintext ? C.gm3Plain : C.gm3JSX;
             } else if (humSetting === "2") {
+                // dew point
                 thing.label = variant.label;
+                thing.shortLabel = "dewpoint";
                 const tempSetting = settings?.UNIT_TEMPERATURE || "C";
                 thing.unit = tempSetting === "F" ? C.degreeF : tempSetting === "K" ? C.kelvin : C.degreeC;
-            } else {
-                thing.unit = C.percent;
             }
         }
         return thing;

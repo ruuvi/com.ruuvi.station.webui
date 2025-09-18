@@ -367,8 +367,10 @@ class Dashboard extends Component {
         return sensors
     }
     shouldDurationBeDisabled() {
-        if (this.state.currSize === 'mobile' && this.state.cardType === 'image_view') return true
-        return this.state.cardType === "simple_view"
+        // Duration should be disabled when the current dashboard card does not show a graph.
+        // Graphs are shown for 'graph_view' and 'image_graph_view'. Enable duration only for those.
+        const graphCardTypes = ['graph_view', 'image_graph_view'];
+        return !graphCardTypes.includes(this.state.cardType);
     }
     updateOrder(order) {
         this.setState({ ...this.state, order: [...order] })
