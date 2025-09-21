@@ -219,6 +219,9 @@ class Dashboard extends Component {
             showResetOrderConfirmation: false,
             order: this.getOrder(),
         }
+        this._isUnmounted = false;
+        this._fetchInProgress = false;
+        this.dataRefreshTimer = null;
         var from = store.getDashboardFrom();
         if (from) {
             // apply new dashboard history length limit to old stored value
@@ -244,62 +247,46 @@ class Dashboard extends Component {
         document.title = "Ruuvi Station"
     }
     componentWillUnmount() {
-        clearTimeout(this.alertUpdateLoop);
+        this._isUnmounted = true;
+        clearTimeout(this.dataRefreshTimer);
     }
-    async fetchData(initialSensors) {
-        clearTimeout(this.alertUpdateLoop);
-        this.alertUpdateLoop = setTimeout(() => {
-            this.fetchData()
-        }, 60 * 1000);
+    async fetchData() {
+        if (this._isUnmounted) return;
+        if (this._fetchInProgress) return;
 
+        this._fetchInProgress = true;
+        const api = new NetworkApi();
+        let success = false;
         try {
-            let resp = await new NetworkApi().getAllSensorsAsync();
-            if (resp.result === "success") {
-                let sensors = this.state.sensors;
-                if (initialSensors) sensors = initialSensors
-                sensors.forEach((x, i) => {
-                    let newSensor = resp.data.sensors.find(y => y.sensor === x.sensor)
-                    if (newSensor) {
-                        sensors[i] = { ...x, ...newSensor }
-                    }
-                })
-                this.setState({ ...this.state, sensors: sensors, loading: false }, () => {
-                    localStorage.setItem("sensors", JSON.stringify(sensors))
-                    this.checkSensorOrder()
-                })
-                return
+            const resp = await api.getAllSensorsAsync(true);
+            if (!this._isUnmounted && resp.result === "success") {
+                success = true;
+                const sensors = resp.data.sensors;
+                if (!this._isUnmounted) {
+                    this.setState(prev => ({ ...prev, sensors, loading: false }), () => {
+                        localStorage.setItem("sensors", JSON.stringify(sensors));
+                        this.checkSensorOrder();
+                    });
+                }
             }
         } catch (e) {
-            console.log("failed to load sensors", e)
+            console.log("failed to load sensors", e);
+        } finally {
+            this._fetchInProgress = false;
         }
 
-        setTimeout(() => {
-            this.fetchData(initialSensors)
-        }, 2000);
+        if (this._isUnmounted) return;
+
+        clearTimeout(this.dataRefreshTimer);
+        const delay = success ? 60_000 : 2_000; // 1 min normal refresh, 2s retry on failure
+        this.dataRefreshTimer = setTimeout(() => this.fetchData(), delay);
     }
     updateFrom(v) {
         this.setState({ ...this.state, from: v })
         new Store().setDashboardFrom(v)
     }
-    loadSensors() {
-        new NetworkApi().user(uresp => {
-            if (uresp.result === "success") {
-                this.fetchData(uresp.data.sensors)
-                return
-            } else if (uresp.result === "error") {
-                notify.error(this.props.t(`UserApiError.${uresp.code}`))
-            }
-            setTimeout(() => {
-                this.loadSensors()
-            }, 60000)
-        }, () => {
-            setTimeout(() => {
-                this.loadSensors()
-            }, 60000)
-        })
-    }
     componentDidMount() {
-        this.loadSensors()
+        this.fetchData();
     }
     nextIndex(direction) {
         var current = this.getCurrentSensor().sensor;
@@ -319,6 +306,7 @@ class Dashboard extends Component {
     removeSensor() {
         var current = this.getCurrentSensor().sensor;
         this.setState({ ...this.state, sensors: this.state.sensors.filter(x => x.sensor !== current) })
+        localStorage.removeItem("sensors");
         this.props.navigate('/')
         this.props.reloadTags();
     }
@@ -328,6 +316,7 @@ class Dashboard extends Component {
             var sensors = this.state.sensors;
             sensors[idx] = sensor
             this.setState({ ...this.state, sensors: sensors })
+            localStorage.removeItem("sensors");
         }
         this.props.reloadTags()
     }

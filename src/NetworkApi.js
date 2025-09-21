@@ -3,6 +3,8 @@ import DataCache from './DataCache';
 import parse from './decoder/parser';
 import { logout } from './utils/loginUtils';
 
+let GET_ALL_SENSORS_CACHE;
+
 // api docs: https://docs.ruuvi.com/communication/ruuvi-network/backends/serverless/user-api
 
 function sortSensors(sensors) {
@@ -245,21 +247,31 @@ class NetworkApi {
     
         return respData;
     }
-    async getAllSensorsAsync() {
-        var q = "?sharedToMe=true"
-        q += "&measurements=true"
-        q += "&alerts=true"
-        q += "&sharedToOthers=true"
-        q += "&settings=true"
-        const resp = await fetch(this.url + "/sensors-dense" + q, this.options)
-        checkStatusCode(resp)
-        const respData = await resp.json()
-        respData.data?.sensors.forEach(x => {
-            parse(x)
-        })
-        if (respData.data && respData.data.sensors.length > 0) {
-            respData.data.sensors = sortSensors(respData.data.sensors)
+    async getAllSensorsAsync(noCache) {
+        const now = Date.now();
+        const cacheTTL = 65_000;
+        if (!GET_ALL_SENSORS_CACHE) {
+            GET_ALL_SENSORS_CACHE = { ts: 0, data: null };
         }
+        if (!noCache && GET_ALL_SENSORS_CACHE.data && (now - GET_ALL_SENSORS_CACHE.ts) < cacheTTL) {
+            return GET_ALL_SENSORS_CACHE.data;
+        }
+
+        let q = "?sharedToMe=true";
+        q += "&measurements=true";
+        q += "&alerts=true";
+        q += "&sharedToOthers=true";
+        q += "&settings=true";
+        const resp = await fetch(this.url + "/sensors-dense" + q, this.options);
+        checkStatusCode(resp);
+        const respData = await resp.json();
+        respData.data?.sensors.forEach(x => {
+            parse(x);
+        });
+        if (respData.data && respData.data.sensors.length > 0) {
+            respData.data.sensors = sortSensors(respData.data.sensors);
+        }
+        GET_ALL_SENSORS_CACHE = { ts: now, data: respData };
         return respData;
     }
     share(mac, email, success) {
