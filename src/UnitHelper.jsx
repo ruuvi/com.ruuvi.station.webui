@@ -459,7 +459,9 @@ export function getUnitHelper(key, plaintext, unit) {
 
     if (key.startsWith("pm") && !plaintext) {
         let thing = { ...unitHelper[key] };
-        thing.shortLabel = <span>{"PM"}<sub>{key.substring(2, key.length-1)}</sub></span>
+        const pmValue = parseInt(key.substring(2), 10) / 10;
+        const pmLabel = Number.isInteger(pmValue) ? pmValue.toFixed(1) : pmValue.toString();
+        thing.shortLabel = <span>{"PM"}<sub>{pmLabel}</sub></span>;
         return thing;
     }
 
