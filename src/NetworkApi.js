@@ -1,5 +1,5 @@
 import pjson from '../package.json';
-import DataCache from './DataCache';
+import cache from './DataCache';
 import parse from './decoder/parser';
 import { logout } from './utils/loginUtils';
 
@@ -64,6 +64,9 @@ class NetworkApi {
         return localStorage.getItem("env") === "staging"
     }
     setEnv(env) {
+        cache.clear()
+        localStorage.removeItem("sensors")
+        localStorage.removeItem("settings")
         localStorage.setItem("env", env)
     }
     register(email, success, fail) {
