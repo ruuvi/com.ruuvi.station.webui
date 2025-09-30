@@ -163,9 +163,9 @@ class NetworkApi {
             if (data.measurements.length < 100) return;
     
             try {
-                const cacheData = await DataCache.getData(mac, mode) || {};
+                const cacheData = await cache.getData(mac, mode) || {};
                 cacheData[until] = data;
-                await DataCache.setData(mac, mode, cacheData);
+                await cache.setData(mac, mode, cacheData);
             } catch (error) {
                 console.error("Error saving data to cache", error);
             }
@@ -174,7 +174,7 @@ class NetworkApi {
         // Helper function to get the closest cached data within the time range
         const getClosestCacheData = async () => {
             try {
-                const cacheData = await DataCache.getData(mac, mode) || {};
+                const cacheData = await cache.getData(mac, mode) || {};
                 const timestamps = Object.keys(cacheData)
                     .map(Number)
                     .filter(ts => !isNaN(ts) && ts <= until && ts > since)  // Ensure valid timestamps
@@ -363,7 +363,7 @@ class NetworkApi {
             .then(function (response) {
                 checkStatusCode(response)
                 if (response.status === 200) {
-                    DataCache.removeData(mac)
+                    cache.removeData(mac)
                     return response.json();
                 }
                 throw (response)
