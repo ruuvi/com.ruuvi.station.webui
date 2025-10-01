@@ -18,23 +18,21 @@ class AlertSlider extends React.Component {
     getRange() {
         var range = getAlertRange(this.props.type)
         if (this.props.type === "temperature" || this.props.type === "pressure") {
-            let min = range.min
-            let max = range.max
             if (range.extended) {
-                if (this.props.value.min < range.min) {
-                    min = range.extended.min
-                    max = range.extended.max
-                } else if (this.props.value.max > range.max) {
-                    min = range.extended.min
-                    max = range.extended.max
+                if (this.props.value.min < range.min ||
+                    this.props.value.max > range.max) {
+                    range.min = range.extended.min
+                    range.max = range.extended.max
                 }
             }
-            var uh = getUnitHelper(this.props.type)
-            range.max = uh.value(max)
-            range.min = uh.value(min)
         }
         if (this.props.value.max > range.max) range.max = this.props.value.max
         if (this.props.value.min < range.min) range.min = this.props.value.min
+        if (this.props.type === "pressure") {
+            var uh = getUnitHelper(this.props.type)
+            range.max = uh.value(range.max)
+            range.min = uh.value(range.min)
+        }
         return range
     }
     onChange(values, final) {
@@ -63,8 +61,8 @@ class AlertSlider extends React.Component {
         if (min == null) min = range.min;
         var uh = getUnitHelper(this.props.type)
         if (this.props.type === "temperature" || this.props.type === "pressure") {
-            max = uh.value(max)
             min = uh.value(min)
+            max = uh.value(max)
         }
         if (min > max) {
             var tmp = min
@@ -72,7 +70,7 @@ class AlertSlider extends React.Component {
             max = tmp
         }
         var sliderValues = [min, max]
-       
+
         return <div style={{ display: 'flex', alignItems: 'center', marginLeft: 4, marginRight: 4 }}>
             <Range {...this.getRange()} values={sliderValues}
                 step={this.props.type === "pressure" && uh.unit === "Pa" ? 100 : 1}
