@@ -206,9 +206,10 @@ class Dashboard extends Component {
     constructor(props) {
         super(props)
         let store = new Store();
+        let cachedSensors = getSensorCache();
         this.state = {
-            loading: getSensorCache().length === 0,
-            sensors: getSensorCache(),
+            loading: cachedSensors.length === 0,
+            sensors: cachedSensors,
             from: 24 * 3,
             cardType: store.getDashboardCardType(),
             showBig: true,
@@ -286,6 +287,8 @@ class Dashboard extends Component {
         new Store().setDashboardFrom(v)
     }
     componentDidMount() {
+        this._isUnmounted = false;
+        this._fetchInProgress = false;
         this.fetchData();
     }
     nextIndex(direction) {
