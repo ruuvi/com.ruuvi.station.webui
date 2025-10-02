@@ -207,7 +207,7 @@ class Dashboard extends Component {
         super(props)
         let store = new Store();
         this.state = {
-            loading: true,
+            loading: getSensorCache().length === 0,
             sensors: getSensorCache(),
             from: 24 * 3,
             cardType: store.getDashboardCardType(),
