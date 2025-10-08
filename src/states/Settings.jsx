@@ -6,7 +6,7 @@ import { withTranslation } from 'react-i18next';
 import NavClose from "../components/NavClose";
 import notify from "../utils/notify";
 import LanguageMenu from '../components/LanguageMenu';
-import { getUnitFor } from "../UnitHelper";
+import { getUnitFor, localeNumber } from "../UnitHelper";
 import Store from "../Store";
 
 const header = {
@@ -39,9 +39,9 @@ const pressureOptions = [
 let resolutionOptions = (type, unitVal) => {
     let unit = getUnitFor(type, unitVal)
     return [
-        { value: "0", label: "1 " + unit },
-        { value: "1", label: "0,1 " + unit },
-        { value: "2", label: "0,01 " + unit },
+        { value: "0", label: `${localeNumber(1)} ${unit}`},
+        { value: "1", label: `${localeNumber(0.1)} ${unit}`},
+        { value: "2", label: `${localeNumber(0.01)} ${unit}`},
     ]
 }
 
