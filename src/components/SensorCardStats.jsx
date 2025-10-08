@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, GridItem, SimpleGrid } from "@chakra-ui/react";
+import { Box, GridItem, SimpleGrid, useColorMode } from "@chakra-ui/react";
 import i18next from "i18next";
 import { getUnitHelper, localeNumber } from "../UnitHelper";
 import { ruuviTheme } from "../themes";
@@ -44,6 +44,8 @@ const SmallStats = ({
     if (!latestReading || !fields || !fields.length) return null;
 
     const { minHeight, opacity = 1, pt = 2, simpleView = false } = options;
+
+    const { colorMode } = useColorMode();
 
     return (
         <Box minH={minHeight ? `${minHeight}px` : undefined}>
@@ -126,7 +128,7 @@ const SmallStats = ({
                                     ...smallSensorValue,
                                     color:
                                         getAlertState(sensorType) > 0
-                                            ? ruuviTheme.colors.sensorCardValueAlertState
+                                            ? (colorMode === "light" ? ruuviTheme.colors.sensorCardValueAlertStateLightTheme : ruuviTheme.colors.sensorCardValueAlertState)
                                             : undefined,
                                 }}
                             >

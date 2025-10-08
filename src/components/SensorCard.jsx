@@ -1,5 +1,5 @@
 import React, { Fragment, useCallback, useMemo, useState } from "react";
-import { Box, Flex } from "@chakra-ui/react";
+import { Box, Flex, useColorMode } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import NetworkApi from "../NetworkApi";
 import uploadBackgroundImage from "../BackgroundUploader";
@@ -76,7 +76,8 @@ const SensorCard = ({
             ? 0
             : smallDataRowHeight * smallDataMinRows;
 
-    const alertIcon = useMemo(() => getAlertIcon(sensor), [sensor]);
+    const { colorMode } = useColorMode();
+    const alertIcon = useMemo(() => getAlertIcon(sensor), [sensor], colorMode);
 
     const freeMode = sensor?.subscription?.maxHistoryDays === 0;
     const sensorHasData =
@@ -190,17 +191,19 @@ const SensorCard = ({
         [freeMode, graphHeight, isSharedSensor, sensorHasData, showGraph, simpleView, size],
     );
 
+    let offlineAlertOn = getAlertState("offline") > 0;
+
     const infoRow = (
         <div
             className="dashboardUpdatedAt"
-            style={{ ...lastUpdatedText, width: "100%", marginTop: -4 }}
+            style={{ ...lastUpdatedText, width: "100%", marginTop: -4, opacity: offlineAlertOn ? 1 : 0.5 }}
         >
             <Flex justifyContent="space-between">
                 <span>
                     <DurationText
                         from={latestReading ? latestReading.timestamp : " - "}
                         t={t}
-                        isAlerting={getAlertState("offline") > 0}
+                        isAlerting={offlineAlertOn}
                     />
                 </span>
                 <Flex>

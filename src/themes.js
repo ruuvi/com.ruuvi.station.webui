@@ -297,6 +297,7 @@ export const ruuviTheme = extendTheme({
         pinFieldBgHoverColor: "#b2c2c2aa",
         inputFocus: colors.buttonFocus.dark,
         sensorCardValueAlertState: "#ff8700",
+        sensorCardValueAlertStateLightTheme: "#eb602b",
     },
     components: {
         Button: {

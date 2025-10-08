@@ -1,9 +1,10 @@
 import bell from '../img/icon-bell.svg'
 import bellAlert from '../img/icon-bell-alert.svg'
+import bellAlertLightTheme from '../img/icon-bell-alert-light-theme.svg'
 import { Image } from '@chakra-ui/react'
 import { alertTypes } from '../UnitHelper'
 
-export function getAlertIcon(sensor, type) {
+export function getAlertIcon(sensor, type, colorMode = "dark") {
     function getSensorAlertState() {
         let alerts = sensor.alerts
         if (type) {
@@ -23,7 +24,7 @@ export function getAlertIcon(sensor, type) {
     let alertIcon = <></>
     if (sensorSubscription.emailAlertAllowed) {
         if (sensorAlertState === 0) alertIcon = <Image src={bell} ml={"2px"} height="18px" />
-        if (sensorAlertState === 1) alertIcon = <Image src={bellAlert} height="18px" className="alarmFadeInOut" />
+        if (sensorAlertState === 1) alertIcon = <Image src={colorMode === "light" ? bellAlertLightTheme : bellAlert} height="18px" className="alarmFadeInOut" />
     }
     return alertIcon
 }

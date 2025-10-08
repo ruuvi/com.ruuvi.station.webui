@@ -1,29 +1,29 @@
-import React, { Component } from "react";
+import React, { useEffect, useState } from "react";
 import { durationToText } from '../TimeHelper';
 import { ruuviTheme } from "../themes";
+import { useColorMode } from "@chakra-ui/react";
 
-class DurationText extends Component {
-    constructor(props) {
-        super(props)
-        this.state = { from: this.props.from, to: new Date().getTime / 1000 }
-    }
-    componentDidUpdate(prevProps) {
-        if (this.props.from !== prevProps.from) {
-            this.setState({ ...this.state, from: this.props.from })
-        }
-    }
-    componentDidMount() {
-        this.setState({ ...this.state, from: this.props.from, to: new Date().getTime() / 1000 });
-        this.interval = setInterval(() => this.setState({ ...this.state, from: this.props.from, to: new Date().getTime() / 1000 }), 1000);
-    }
-    componentWillUnmount() {
-        clearInterval(this.interval);
-    }
-    render() {
-        return (
-            <span style={{color: this.props.isAlerting ? ruuviTheme.colors.sensorCardValueAlertState : undefined}}>{durationToText( Math.floor(this.state.to - this.state.from), this.props.t)} {this.props.t("ago")} </span>
-        )
-    }
-}
+const DurationText = ({ from, isAlerting, t }) => {
+    const [to, setTo] = useState(Math.floor(Date.now() / 1000));
+
+    const { colorMode } = useColorMode();
+
+    // Update `to` every second. Also refresh immediately when `from` changes so UI updates without delay.
+    useEffect(() => {
+        setTo(Math.floor(Date.now() / 1000));
+        const id = setInterval(() => setTo(Math.floor(Date.now() / 1000)), 1000);
+        return () => clearInterval(id);
+    }, [from]);
+
+    const seconds = Math.floor((to || 0) - (from || 0));
+
+    let alertColor = colorMode === "light" ? ruuviTheme.colors.sensorCardValueAlertStateLightTheme : ruuviTheme.colors.sensorCardValueAlertState;
+
+    return (
+        <span style={{ color: isAlerting ? alertColor: undefined }}>
+            {durationToText(seconds, t)} {t("ago")} 
+        </span>
+    );
+};
 
 export default DurationText;
