@@ -122,8 +122,8 @@ const SensorCard = ({
                 type === "movement"
                     ? "movementCounter"
                     : type === "signal"
-                    ? "rssi"
-                    : type;
+                        ? "rssi"
+                        : type;
             if (latestReading[dataKey] === undefined) return null;
             return getAlert(type);
         },
@@ -169,8 +169,8 @@ const SensorCard = ({
                                 effectiveSimpleView || !effectiveShowGraph
                                     ? undefined
                                     : size === "medium"
-                                    ? "44%"
-                                    : "50%",
+                                        ? "44%"
+                                        : "50%",
                             transform:
                                 effectiveSimpleView || !effectiveShowGraph
                                     ? undefined
@@ -251,7 +251,7 @@ const SensorCard = ({
                 style={{ display: "none" }}
                 id={uploadInputId}
                 onChange={(event) => {
-                    uploadBackgroundImage(sensor, event, t, () => {});
+                    uploadBackgroundImage(sensor, event, t, () => { });
                     event.target.value = "";
                 }}
             />
@@ -272,9 +272,11 @@ const SensorCard = ({
         />
     );
 
+    const cardShadow = { boxShadow: "0 2px 2px rgba(0,0,0,0.1), 0 1px 5px rgba(0,0,0,0.02)", borderRadius: "8px" };
+
     if (simpleView) {
         return (
-            <Box>
+            <Box style={cardShadow}>
                 <SensorCardSimple
                     sensor={sensor}
                     size={size}
@@ -295,7 +297,7 @@ const SensorCard = ({
     }
 
     return (
-        <Box>
+        <Box style={cardShadow}>
             <SensorCardDetailed
                 sensor={sensor}
                 size={size}
