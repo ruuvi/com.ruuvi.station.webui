@@ -17,7 +17,13 @@ function processData(data, t) {
         if (data.measurements[0].parsed.dataFormat === "e0") {
             sensorHeaders.push("co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "illuminance", "soundLevelAvg", "soundLevelPeak", "aqi")
         } else if (data.measurements[0].parsed.dataFormat === "e1") {
-            sensorHeaders.push("co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "illuminance", "soundLevelAvg", "soundLevelPeak", "soundLevelInstant", "aqi")
+            sensorHeaders.push("co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "aqi")
+            let opts = ["illuminance", "soundLevelAvg", "soundLevelPeak", "soundLevelInstant"]
+            opts.forEach(x => {
+                if (data.measurements[0].parsed[x] !== undefined) {
+                    sensorHeaders.push(x)
+                }
+            })
         }
     }
     var csvHeader = [t('date')];
