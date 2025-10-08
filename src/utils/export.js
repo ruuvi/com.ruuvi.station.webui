@@ -39,10 +39,14 @@ function processData(data, t) {
     data = data.measurements.map(x => {
         let row = [toISOString(new Date(x.timestamp * 1000))]
         sensorHeaders.forEach(s => {
+            let uh = uHelp[s]
             let val = s === "humidity" ?
-                uHelp[s].value(x.parsed[s], x.parsed.temperature) :
-                uHelp[s].value(x.parsed[s]);
+                uh.value(x.parsed[s], x.parsed.temperature) :
+                uh.value(x.parsed[s]);
             if (isNaN(val)) val = "";
+            else {
+                if (s === "aqi") val = Math.round(val, 1)
+            }
             row.push(val)
         });
         return row;
