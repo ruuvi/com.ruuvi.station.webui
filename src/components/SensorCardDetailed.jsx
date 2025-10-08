@@ -44,7 +44,7 @@ const SensorCardDetailed = ({
 }) => {
     const isSmallCard = size === "mobile" && !showGraph;
 
-    let minHeight = showGraph ? size === "medium" ? 370 : 420 : 220;
+    let minHeight = showGraph ? size === "medium" ? 380 : 430 : 230;
 
     return (
         <Box>

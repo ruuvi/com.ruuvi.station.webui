@@ -20,9 +20,7 @@ const smallSensorValueUnit = {
 const smallSensorLabel = {
     fontFamily: "mulish",
     fontSize: 12,
-    opacity: 0.7,
-    marginTop: -1,
-    marginBottom: 4,
+    opacity: 0.7
 };
 
 export const truncateUnit = (text, maxLength = 15) => {
@@ -137,11 +135,15 @@ const SmallStats = ({
                             <span style={smallSensorValueUnit}>
                                 {truncateUnit(unitLabel || "")}
                             </span>
-                            {!simpleView && (
-                                <div style={smallSensorLabel}>
+                            {simpleView ?
+                                <span style={{...smallSensorLabel, marginLeft: 6}}>
                                     {typeof label === "object" ? label : t(label)}
-                                </div>
-                            )}
+                                </span>
+                                :
+                                <Box style={smallSensorLabel} mb={2}>
+                                    {typeof label === "object" ? label : t(label)}
+                                </Box>
+                            }
                         </GridItem>
                     );
                 })}
