@@ -75,8 +75,6 @@ function DataInfo(props) {
         return { min, max, avg };
     }, [filteredData]);
 
-    console.log(type, getDisplayValue(type, min), getDisplayValue(type, max), getDisplayValue(type, avg));
-
     return (
         <>
             <span className="graphLabel" style={{ marginRight: 18 }}>

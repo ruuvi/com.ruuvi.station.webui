@@ -28,12 +28,6 @@ const SCALE_COLORS = {
     MODERATE: { r: 247, g: 225, b: 62 },   // Yellow
     GOOD: { r: 150, g: 204, b: 72 },       // Green
     EXCELLENT: { r: 75, g: 200, b: 185 },  // Turquoise
-    INTERMEDIATE: [
-        { r: 243, g: 121, b: 33 }, // Between UNHEALTHY and POOR
-        { r: 248, g: 194, b: 57 }, // Between POOR and MODERATE
-        { r: 206, g: 221, b: 81 }, // Between MODERATE and GOOD
-        { r: 116, g: 205, b: 135 }, // Between GOOD and EXCELLENT
-    ]
 };
 
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -41,14 +35,10 @@ const rgb = ({ r, g, b }) => `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.rou
 function colorAtValueRounded(val) {
     const v = clamp(val ?? 0, 0, 100);
 
-    if (v <= 9.5) return SCALE_COLORS.UNHEALTHY;
-    if (v <= 10.5) return SCALE_COLORS.INTERMEDIATE[0];
-    if (v <= 49.5) return SCALE_COLORS.POOR;
-    if (v <= 50.5) return SCALE_COLORS.INTERMEDIATE[1];
-    if (v <= 79.5) return SCALE_COLORS.MODERATE;
-    if (v <= 80.5) return SCALE_COLORS.INTERMEDIATE[2];
-    if (v <= 89.5) return SCALE_COLORS.GOOD;
-    if (v <= 90.5) return SCALE_COLORS.INTERMEDIATE[3];
+    if (v < 9.5) return SCALE_COLORS.UNHEALTHY;
+    if (v < 49.5) return SCALE_COLORS.POOR;
+    if (v < 79.5) return SCALE_COLORS.MODERATE;
+    if (v < 89.5) return SCALE_COLORS.GOOD;
     return SCALE_COLORS.EXCELLENT;
 }
 
