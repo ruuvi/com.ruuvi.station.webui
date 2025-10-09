@@ -293,14 +293,16 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
     };
 
     const getSensorDisplayName = (sensorType) => {
+        let unit = null;
         if (sensorType.indexOf("_") !== -1) {
             let webType = visibilityFromCloudToWeb(sensorType)
             if (!webType) return sensorType;
-            const [type, _] = webType;
+            const [type, _unit] = webType;
+            unit = _unit;
             sensorType = type
         }
-        const unitHelper = getUnitHelper(sensorType);
-        return t(unitHelper.label || sensorType);
+        const unitHelper = getUnitHelper(sensorType, true, unit);
+        return t(unitHelper.shortLabel || sensorType);
     };
 
     const getSensorUnit = (sensorType) => {

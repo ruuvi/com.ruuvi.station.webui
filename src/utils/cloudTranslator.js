@@ -27,7 +27,7 @@ export const visibilityCodes = [
     ["ACCELERATION_GY", "accelerationY", "g"],
     ["ACCELERATION_GX", "accelerationX", "g"],
     ["ACCELERATION_GZ", "accelerationZ", "g"],
-    ["MOVEMENT_COUNT", "movementCounter", "count"],
+    ["MOVEMENT_COUNT", "movementCounter", ""],
     ["SIGNAL_DBM", "rssi", "dBm"],
 ];
 
