@@ -41,13 +41,13 @@ const rgb = ({ r, g, b }) => `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.rou
 function colorAtValueRounded(val) {
     const v = clamp(val ?? 0, 0, 100);
 
-    if (v <= 10) return SCALE_COLORS.UNHEALTHY;
+    if (v <= 9.5) return SCALE_COLORS.UNHEALTHY;
     if (v <= 10.5) return SCALE_COLORS.INTERMEDIATE[0];
-    if (v <= 50) return SCALE_COLORS.POOR;
+    if (v <= 49.5) return SCALE_COLORS.POOR;
     if (v <= 50.5) return SCALE_COLORS.INTERMEDIATE[1];
-    if (v <= 80) return SCALE_COLORS.MODERATE;
+    if (v <= 79.5) return SCALE_COLORS.MODERATE;
     if (v <= 80.5) return SCALE_COLORS.INTERMEDIATE[2];
-    if (v <= 90) return SCALE_COLORS.GOOD;
+    if (v <= 89.5) return SCALE_COLORS.GOOD;
     if (v <= 90.5) return SCALE_COLORS.INTERMEDIATE[3];
     return SCALE_COLORS.EXCELLENT;
 }
