@@ -28,7 +28,7 @@ class AlertSlider extends React.Component {
         }
         if (this.props.value.max > range.max) range.max = this.props.value.max
         if (this.props.value.min < range.min) range.min = this.props.value.min
-        if (this.props.type === "pressure") {
+        if (this.props.type === "pressure" || this.props.type === "temperature") {
             var uh = getUnitHelper(this.props.type)
             range.max = uh.value(range.max)
             range.min = uh.value(range.min)
