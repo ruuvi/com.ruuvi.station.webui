@@ -461,14 +461,6 @@ export function getUnitHelper(key, plaintext, unit) {
         return thing;
     }
 
-    if (key.startsWith("pm") && !plaintext) {
-        let thing = { ...unitHelper[key] };
-        const pmValue = parseInt(key.substring(2), 10) / 10;
-        const pmLabel = Number.isInteger(pmValue) ? pmValue.toFixed(1) : pmValue.toString();
-        thing.shortLabel = <span>{"PM"}<sub>{pmLabel}</sub></span>;
-        return thing;
-    }
-
     if (key === "signal") key = "rssi"; // alias
 
     if (unitHelper[key]) return { ...unitHelper[key] };
