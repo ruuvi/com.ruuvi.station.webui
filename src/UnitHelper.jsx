@@ -63,7 +63,7 @@ const unitHelper = {
         graphable: true
     },
     "movementCounter": {
-        label: "movementCounter",
+        label: "movements",
         shortLabel: "movements",
         unit: "",
         value: (value) => value,

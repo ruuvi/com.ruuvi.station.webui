@@ -502,7 +502,6 @@ class Sensor extends Component {
             }
         }
         let unit = uh.unit;
-        if (this.state.graphKey === "movementCounter") return `(${this.props.t(unit)})`;
         if (!unit || unit === "") return "";
         return <>({unit})</>
     }
@@ -599,7 +598,6 @@ class Sensor extends Component {
             if (this.state.graphUnitKey && uh?.units) {
                 const uDef = uh.units.find(u => u.cloudStoreKey === this.state.graphUnitKey);
                 if (uDef) {
-                    const translatedUnit = t(uDef.translationKey);
                     const uhWithUnit = getUnitHelper(this.state.graphKey, false, this.state.graphUnitKey);
                     if (uhWithUnit && uhWithUnit.label) {
                         mainLabel = t(uhWithUnit.label);
