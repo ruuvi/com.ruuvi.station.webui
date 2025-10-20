@@ -403,6 +403,7 @@ export function getUnitHelper(key, plaintext, unit) {
         const setting = unit || settings?.UNIT_TEMPERATURE || "C";
         let thing = { ...unitHelper[key] };
         thing.unit = thing.displayUnits?.[setting] || thing.unit;
+        if (settings.ACCURACY_TEMPERATURE) thing.decimals = parseInt(settings.ACCURACY_TEMPERATURE)
         return thing;
     }
 
@@ -429,6 +430,7 @@ export function getUnitHelper(key, plaintext, unit) {
                 thing.unit = tempSetting === "F" ? C.degreeF : tempSetting === "K" ? C.kelvin : C.degreeC;
             }
         }
+        if (settings.ACCURACY_HUMIDITY) thing.decimals = parseInt(settings.ACCURACY_HUMIDITY)
         return thing;
     }
 
@@ -437,6 +439,7 @@ export function getUnitHelper(key, plaintext, unit) {
         let thing = { ...unitHelper[key] };
         thing.unit = thing.displayUnits?.[pSetting] || thing.unit;
         if (pSetting === "0") thing.decimals = 0; // Pa, no decimals
+        else if (settings.ACCURACY_PRESSURE) thing.decimals = parseInt(settings.ACCURACY_PRESSURE)
         return thing;
     }
 
