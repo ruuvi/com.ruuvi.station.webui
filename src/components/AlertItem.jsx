@@ -192,6 +192,17 @@ class AlertItem extends Component {
             return <span> {uh.unit}</span>;
         }
 
+        function getDialogTitle(type) {
+            if (["temperature", "humidity", "pressure", "signal"].includes(type)) {
+                return t("alert_dialog_title_" + type);
+            }
+            let key = type;
+            if (uh) {
+                key = uh.label || uh.shortLabel;
+            }
+            return t(key)
+        }
+
         return (
             <ListItem key={type}>
                 <div style={{ paddingTop: 30, paddingBottom: 20 }}>
@@ -257,7 +268,7 @@ class AlertItem extends Component {
                     <RangeInputDialog open={this.state.rangeInputDialog} value={this.getMinMaxArr()}
                         onClose={(save, value) => save ? this.setAlert({ ...alert, min: uh.fromUser(value[0]), max: uh.fromUser(value[1]) }, type, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}
                         range={validRange}
-                        title={t("alert_dialog_title_" + type)}
+                        title={getDialogTitle(type)}
                         buttonText={t("update")}
                         allowOutOfRange={type === "temperature"}
                         unit={() => {
