@@ -339,7 +339,7 @@ export function getSetting(key, fallback) {
 
 export function getDisplayValue(key, value, settings) {
     try {
-        if (key === "aqi") value = Math.round(value)
+        if (key === "aqi" && value != null) value = Math.round(value)
         if (!["temperature", "humidity", "pressure"].includes(key)) return value
         if (!settings) settings = localStorage.getItem("settings");
         if (settings) {

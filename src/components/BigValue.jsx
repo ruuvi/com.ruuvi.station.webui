@@ -59,7 +59,7 @@ export default function BigValue(props) {
     let { value, unit, alertActive, label, showExtras } = props;
     const { colorMode } = useColorMode();
     let extras = <></>
-    if (unit === "/100" && value != null) {
+    if (unit === "/100" && value != null && value !== "-") {
         const trackBg = colorMode === "dark" ? "rgb(7, 28, 27)" : "rgb(235, 240, 241)";
         value = clamp(parseFloat(value ?? 0), 0, 100);
         const markerColor = colorAtValueRounded(value);
@@ -109,7 +109,7 @@ export default function BigValue(props) {
     let alertColor = colorMode === "light" ? ruuviTheme.colors.sensorCardValueAlertStateLightTheme : ruuviTheme.colors.sensorCardValueAlertState;
     return (
         <div>
-            <div style={{ position: "relative", }}>
+            <div style={{ position: "relative" }}>
                 <span style={{ ...valueStyle, color: alertActive ? alertColor : undefined }}>
                     {value ?? "-"}
                 </span>
