@@ -1,4 +1,4 @@
-import { getDisplayValue, getUnitHelper } from "../UnitHelper";
+import { getDisplayValue, getUnitHelper, round } from "../UnitHelper";
 import * as XLSX from 'xlsx';
 import { calculateAverage } from "./dataMath";
 import montserratFont from "./fonts/Montserrat";
@@ -45,7 +45,7 @@ function processData(data, t) {
                 uh.value(x.parsed[s]);
             if (isNaN(val)) val = "";
             else {
-                if (s === "aqi") val = Math.round(val, 1)
+                if (s === "aqi") val = round(val, 1)
             }
             row.push(val)
         });
