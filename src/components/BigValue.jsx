@@ -3,7 +3,6 @@ import { useColorMode } from "@chakra-ui/react";
 
 const valueStyle = {
     fontFamily: "oswald",
-    fontSize: 38,
     fontWeight: "bold"
 }
 const unitStyle = {
@@ -106,11 +105,12 @@ export default function BigValue(props) {
             )
         }
     }
+    let isMobile = window.innerWidth <= 768;
     let alertColor = colorMode === "light" ? ruuviTheme.colors.sensorCardValueAlertStateLightTheme : ruuviTheme.colors.sensorCardValueAlertState;
     return (
         <div>
             <div style={{ position: "relative" }}>
-                <span style={{ ...valueStyle, color: alertActive ? alertColor : undefined }}>
+                <span style={{ ...valueStyle, color: alertActive ? alertColor : undefined, fontSize: isMobile ? 34 : 38 }}>
                     {value ?? "-"}
                 </span>
                 <span style={unitStyle}>
