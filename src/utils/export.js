@@ -24,6 +24,11 @@ function processData(data, t) {
                     sensorHeaders.push(x)
                 }
             })
+            sensorHeaders.splice(sensorHeaders.indexOf("accelerationX"), 1);
+            sensorHeaders.splice(sensorHeaders.indexOf("accelerationY"), 1);
+            sensorHeaders.splice(sensorHeaders.indexOf("accelerationZ"), 1);
+            sensorHeaders.splice(sensorHeaders.indexOf("battery"), 1);
+            sensorHeaders.splice(sensorHeaders.indexOf("movementCounter"), 1);
         }
     }
     var csvHeader = [t('date')];
