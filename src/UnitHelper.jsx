@@ -280,11 +280,17 @@ export const alertTypes = ["temperature", "humidity", "pressure", "signal", "mov
 export const DEFAULT_VISIBLE_SENSOR_TYPES = ["aqi", "co2", "pm25", "voc", "nox", "temperature", "humidity", "pressure", "illuminance", "movementCounter", "soundLevelInstant"];
 
 export function getUnitSettingFor(key) {
-    let map = { 'temperature': 'UNIT_TEMPERATURE', 'humidity': 'UNIT_HUMIDITY', 'pressure': 'UNIT_PRESSURE' }
+    let map = {
+        'temperature': 'UNIT_TEMPERATURE',
+        'humidity': 'UNIT_HUMIDITY',
+        'pressure': 'UNIT_PRESSURE',
+        'voc': 'UNIT_VOC'
+    }
     const defaults = {
         UNIT_HUMIDITY: "0",
         UNIT_TEMPERATURE: "C",
         UNIT_PRESSURE: "1",
+        UNIT_VOC: "index",
     }
     let settings = localStorage.getItem("settings");
     if (settings) {
