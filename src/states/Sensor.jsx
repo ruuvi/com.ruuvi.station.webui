@@ -556,6 +556,33 @@ class Sensor extends Component {
     convertToWebSensorType(sensorType) {
         return visibilityFromCloudToWeb(sensorType);
     }
+    getAlertTypesOrdered(baseTypes, visibleFields) {
+        const settings = this.props.sensor?.settings;
+        const defaultDisplayOrder = settings?.defaultDisplayOrder ?? "true";
+        const hasCustomOrder = settings?.displayOrder && defaultDisplayOrder !== "true";
+        if (!hasCustomOrder || !visibleFields?.length) return baseTypes;
+        const measurementOrder = visibleFields.map(field => Array.isArray(field) ? field[0] : field);
+        const baseOrder = new Map();
+        baseTypes.forEach((type, index) => baseOrder.set(type, index));
+        const fallbackIndex = Number.MAX_SAFE_INTEGER;
+        const typeOrder = new Map();
+        baseTypes.forEach(type => {
+            const dataKey = getMappedAlertDataType(type);
+            let orderIndex = measurementOrder.indexOf(dataKey);
+            if (orderIndex === -1 && dataKey === "soundLevelAvg") {
+                orderIndex = measurementOrder.findIndex(key => key.startsWith("soundLevel"));
+            }
+            typeOrder.set(type, orderIndex === -1 ? fallbackIndex : orderIndex);
+        });
+        return [...baseTypes].sort((a, b) => {
+            const aIdx = typeOrder.get(a);
+            const bIdx = typeOrder.get(b);
+            if (aIdx === bIdx) {
+                return baseOrder.get(a) - baseOrder.get(b);
+            }
+            return aIdx - bIdx;
+        });
+    }
     render() {
         var { t } = this.props
         let lastReading = this.getLatestReading()
@@ -618,6 +645,9 @@ class Sensor extends Component {
         }
 
         let mainSensorFields = this.getSensorMainFields();
+        const baseAlertTypes = ["temperature", "humidity", "pressure", "signal", "movement", "offline", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
+        const orderedAlertTypes = this.getAlertTypesOrdered(baseAlertTypes, mainSensorFields);
+        const visibleMeasurementKeys = mainSensorFields.map(field => Array.isArray(field) ? field[0] : field);
         return (
             <Box>
                 <Box minHeight={1500}>
@@ -914,13 +944,13 @@ class Sensor extends Component {
                                                 return <div>{parts[0]}<a style={{ color: "teal" }} target="blank" href={t("cloud_ruuvi_link_url")}>{t("cloud_ruuvi_link")}</a>{parts[1]}</div>
                                             })()}
                                         </Box>}
-                                        {["temperature", "humidity", "pressure", "signal", "movement", "offline", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"].map(x => {
+                                        {orderedAlertTypes.map(x => {
                                             const dataKey = getMappedAlertDataType(x);
                                             let latestValue = this.getLatestReading()[dataKey]
                                             if (latestValue === undefined && x !== "offline") return null;
 
                                             var alert = this.getAlert(x)
-                                            let visibility = this.getSensorMainFields().map(f => Array.isArray(f) ? f[0] : f);
+                                            let visibility = visibleMeasurementKeys;
                                             if (!visibility.length) visibility = DEFAULT_VISIBLE_SENSOR_TYPES;
                                             let ignoreVisibleTypes = ["offline"];
                                             if (!ignoreVisibleTypes.includes(x) && visibility && !visibility.includes(dataKey)) return null;
