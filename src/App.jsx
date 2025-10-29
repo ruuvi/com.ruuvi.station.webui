@@ -111,11 +111,28 @@ function Logo(props) {
 function loadInitalSettings(forceUpdate, browserLang) {
   new NetworkApi().getSettings(settings => {
     if (settings.result === "success") {
-      localStorage.setItem("settings", JSON.stringify(settings.data.settings))
-      let settingsLng = settings.data.settings.PROFILE_LANGUAGE_CODE
-      i18next.changeLanguage(settingsLng || browserLang)
+      const newSettings = settings.data.settings || {};
+      let previousString = null;
+      try {
+        previousString = localStorage.getItem("settings");
+      } catch (error) {
+        console.log("Failed to read cached settings", error);
+      }
+      const newString = JSON.stringify(newSettings);
+      const settingsChanged = previousString !== newString;
+
+      localStorage.setItem("settings", newString);
+
+      const settingsLng = newSettings.PROFILE_LANGUAGE_CODE;
+      const targetLanguage = settingsLng || browserLang;
+      if (targetLanguage && i18next.language !== targetLanguage) {
+        i18next.changeLanguage(targetLanguage);
+      }
       if (!settingsLng) {
-        new NetworkApi().setSetting("PROFILE_LANGUAGE_CODE", browserLang)
+        new NetworkApi().setSetting("PROFILE_LANGUAGE_CODE", browserLang);
+      }
+      if (settingsChanged && typeof forceUpdate === "function") {
+        forceUpdate();
       }
     } else if (settings.result === "error" && settings.code === "ER_UNAUTHORIZED") {
       logout(forceUpdate)
@@ -215,9 +232,19 @@ export default function App() {
   const forceUpdate = React.useCallback(() => updateState({}), []);
 
   useEffect(() => {
-    if (!user) return
-    loadInitalSettings(forceUpdate, browserLanguage)
-  }, []);
+    if (!user) return;
+    let isActive = true;
+    const guardedUpdate = () => {
+      if (isActive) forceUpdate();
+    };
+    const refreshSettings = () => loadInitalSettings(guardedUpdate, browserLanguage);
+    refreshSettings();
+    const intervalId = setInterval(refreshSettings, 60 * 1000);
+    return () => {
+      isActive = false;
+      clearInterval(intervalId);
+    };
+  }, [user?.email, browserLanguage, forceUpdate]);
 
   let store = new Store();
   const [, updateState] = React.useState();

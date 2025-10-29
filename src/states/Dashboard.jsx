@@ -244,8 +244,20 @@ class Dashboard extends Component {
         let id = this.props.params.id;
         return this.state.sensors.find(x => x.sensor === id);
     }
-    componentDidUpdate() {
-        document.title = "Ruuvi Station"
+    componentDidUpdate(prevProps, prevState) {
+        document.title = "Ruuvi Station";
+        
+        const latestOrder = this.getOrder();
+        const currentOrder = this.state.order;
+
+        const latestOrderString = latestOrder ? JSON.stringify(latestOrder) : null;
+        const currentOrderString = currentOrder ? JSON.stringify(currentOrder) : null;
+        const previousOrderString = prevState.order ? JSON.stringify(prevState.order) : null;
+
+        if (latestOrderString !== currentOrderString && latestOrderString !== previousOrderString) {
+            this.setState(prev => ({ ...prev, order: latestOrder ? [...latestOrder] : null }));
+            return;
+        }
     }
     componentWillUnmount() {
         this._isUnmounted = true;
