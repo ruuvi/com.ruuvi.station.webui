@@ -21,15 +21,15 @@ function parse(d) {
     d.latestTimestamp = d.measurements[0].timestamp;
     if (d.offsetTemperature !== 0 || d.offsetHumidity !== 0 || d.offsetPressure !== 0) {
         for (var i = 0; i < d.measurements.length; i++) {
-            if (d.offsetTemperature !== 0) {
+            if (d.offsetTemperature !== 0 && d.measurements[i].parsed.temperature !== undefined) {
                 d.measurements[i].parsed.temperature += d.offsetTemperature
                 d.measurements[i].parsed.temperature = round(d.measurements[i].parsed.temperature, 2)
             }
-            if (d.offsetHumidity !== 0) {
+            if (d.offsetHumidity !== 0 && d.measurements[i].parsed.humidity !== undefined) {
                 d.measurements[i].parsed.humidity += d.offsetHumidity
                 d.measurements[i].parsed.humidity = round(d.measurements[i].parsed.humidity, 2)
             }
-            if (d.offsetPressure !== 0) {
+            if (d.offsetPressure !== 0 && d.measurements[i].parsed.pressure !== undefined) {
                 d.measurements[i].parsed.pressure += d.offsetPressure
                 d.measurements[i].parsed.pressure = round(d.measurements[i].parsed.pressure, 2)
             }
