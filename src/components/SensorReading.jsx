@@ -11,6 +11,7 @@ import notify from "../utils/notify";
 import { useTranslation } from "react-i18next";
 import { addNewlines } from "../TextHelper";
 import { getDisplayValue } from "../UnitHelper";
+import i18next from "i18next";
 
 const height = 120
 
@@ -36,9 +37,8 @@ const infoLabel = {
     bottom: 8,
 }
 
-function info(e, t, sensorType) {
+function info(e, text) {
     e.stopPropagation();
-    let text = t(`${sensorType}_info`)
     text = addNewlines(text)
     notify.info(text)
 }
@@ -48,13 +48,20 @@ export default function SensorReading(props) {
     const { t } = useTranslation();
     let width = 400
 
+    let infoButtonText = null;
+    if (i18next.exists(`${props.sensorType}_info`)) {
+        infoButtonText = t(`${props.sensorType}_info`);
+    }
+
     let val = props.value;
     val = getDisplayValue(props.label, val)
     return (
         <Stat className="sensorValueBox" style={{ width, maxWidth: "100%", height: height, backgroundColor: props.alertTriggered ? ruuviTheme.colors.errorBackground : undefined, border: props.selected ? props.alertTriggered ? "2px solid " + ruuviTheme.colors.error : "2px solid " + ruuviTheme.newColors.sensorValueBoxActiveBorder[mode] : "2px solid rgba(0,0,0,0)", borderRadius: "10px", cursor: "pointer" }} onClick={props.onClick}>
-            <IconButton style={{ position: "absolute", right: 0, margin: -8 }} variant="ghost" onClick={e => info(e, t, props.sensorType)}>
-                <MdInfo className="buttonSideIcon" size="16" />
-            </IconButton>
+            {infoButtonText &&
+                <IconButton style={{ position: "absolute", right: 0, margin: -8 }} variant="ghost" onClick={e => info(e, infoButtonText)}>
+                    <MdInfo className="buttonSideIcon" size="16" />
+                </IconButton>
+            }
             <div style={middle}>
                 <BigValue
                     value={val}
