@@ -36,7 +36,7 @@ function processData(data, t) {
     let uHelp = {};
     sensorHeaders.forEach(x => {
         uHelp[x] = getUnitHelper(x, true)
-        let header = t(uHelp[x].exportLabel || uHelp[x].label)
+        let header = t(uHelp[x].exportLabel || uHelp[x].shortLabel || uHelp[x].label)
         if (x === "rssi") header = "RSSI";
         if (header === "Tx Power") header = "TX Power";
         if (!uHelp[x].noUnitInExport && uHelp[x].unit) header += ` (${t(uHelp[x].unit)})`

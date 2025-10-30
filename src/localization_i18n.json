@@ -1,8 +1,8 @@
 {
   "en": {
     "translation": {
-      "air_quality": "Air Quality",
-      "aqi": "AQI",
+      "air_quality": "Air quality",
+      "aqi": "Air quality",
       "temperature": "Temperature",
       "humidity": "Humidity",
       "relative_humidity": "Relative humidity",
@@ -13,7 +13,7 @@
       "pressure": "Air pressure",
       "air_pressure": "Air pressure",
       "carbon_dioxide": "Carbon dioxide",
-      "co2": "CO2",
+      "co2": "CO₂",
       "voc": "VOC index",
       "volatile_organic_compounds": "Volatile organic compounds index",
       "total_volatile_organic_compounds": "Total volatile organic compounds",
@@ -353,7 +353,7 @@
   "fi": {
     "translation": {
       "air_quality": "Ilmanlaatu",
-      "aqi": "AQI",
+      "aqi": "Ilmanlaatu",
       "temperature": "Lämpötila",
       "humidity": "Kosteus",
       "relative_humidity": "Suhteellinen kosteus",
@@ -364,7 +364,7 @@
       "pressure": "Ilmanpaine",
       "air_pressure": "Ilmanpaine",
       "carbon_dioxide": "Hiilidioksidi",
-      "co2": "CO2",
+      "co2": "CO₂",
       "voc": "VOC-indeksi",
       "volatile_organic_compounds": "Haihtuvien orgaanisten yhdisteiden indeksi",
       "total_volatile_organic_compounds": "Haihtuvat orgaaniset yhdisteet yhteensä",
@@ -704,7 +704,7 @@
   "sv": {
     "translation": {
       "air_quality": "Luftkvalitet",
-      "aqi": "AQI",
+      "aqi": "Luftkvalitet",
       "temperature": "Temperatur",
       "humidity": "Fuktighet",
       "relative_humidity": "Relativ luftfuktighet",
@@ -712,10 +712,10 @@
       "absolute_humidity": "Absolut luftfuktighet",
       "abs_humidity": "Absol. luftfuktighet",
       "dewpoint": "Daggpunkt",
-      "pressure": "Luftfuktighet",
-      "air_pressure": "Luftfuktighet",
+      "pressure": "Lufttryck",
+      "air_pressure": "Lufttryck",
       "carbon_dioxide": "Koldioxid",
-      "co2": "CO2",
+      "co2": "CO₂",
       "voc": "VOC-index",
       "volatile_organic_compounds": "Index för flyktiga organiska föreningar",
       "total_volatile_organic_compounds": "Totalt flyktiga organiska föreningar",
@@ -1055,7 +1055,7 @@
   "fr": {
     "translation": {
       "air_quality": "Qualité de l'air",
-      "aqi": "AQI",
+      "aqi": "Qualité de l'air",
       "temperature": "Température",
       "humidity": "Humidité",
       "relative_humidity": "Humidité relative",
@@ -1066,7 +1066,7 @@
       "pressure": "Pression de l'air",
       "air_pressure": "Pression de l'air",
       "carbon_dioxide": "Dioxyde de carbone",
-      "co2": "CO2",
+      "co2": "CO₂",
       "voc": "Indice COV",
       "volatile_organic_compounds": "Indice des composés organiques volatils",
       "total_volatile_organic_compounds": "Composés organiques volatils totaux",
@@ -1406,7 +1406,7 @@
   "de": {
     "translation": {
       "air_quality": "Luftqualität",
-      "aqi": "AQI",
+      "aqi": "Luftqualität",
       "temperature": "Temperatur",
       "humidity": "Feuchtigkeit",
       "relative_humidity": "Relative Luftfeuchtigkeit",
@@ -1417,7 +1417,7 @@
       "pressure": "Luftdruck",
       "air_pressure": "Luftdruck",
       "carbon_dioxide": "Kohlendioxid",
-      "co2": "CO2",
+      "co2": "CO₂",
       "voc": "VOC-Index",
       "volatile_organic_compounds": "Index flüchtiger organischer Verbindungen",
       "total_volatile_organic_compounds": "Gesamtflüchtige organische Verbindungen",

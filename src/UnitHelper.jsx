@@ -51,6 +51,7 @@ const unitHelper = {
     "pressure": {
         label: "air_pressure",
         shortLabel: "air_pressure",
+        exportLabel: "pressure",
         unit: "hPa",
         units: [{ translationKey: "Pa", cloudStoreKey: "0" }, { translationKey: "hPa", cloudStoreKey: "1" }, { translationKey: "mmHg", cloudStoreKey: "2" }, { translationKey: "inHg", cloudStoreKey: "3" }],
         displayUnits: { "0": "Pa", "1": "hPa", "2": "mmHg", "3": "inHg" },
@@ -144,6 +145,7 @@ const unitHelper = {
     "measurementSequenceNumber": {
         label: "measurement_sequence_number",
         shortLabel: "meas_seq_number",
+        exportLabel: "measurement_sequence_number",
         unit: "",
         value: (value) => value,
         fromUser: (value) => value,
@@ -230,6 +232,7 @@ const unitHelper = {
     "illuminance": {
         label: "illuminance",
         shortLabel: "light",
+        exportLabel: "luminosity",
         unit: "lx",
         value: (value) => value,
         fromUser: (value) => value,
@@ -265,7 +268,7 @@ const unitHelper = {
         shortLabel: "air_quality",
         unit: "/100",
         noUnitInExport: true,
-        exportLabel: "aqi",
+        exportLabel: "air_quality",
         value: (value) => value,
         fromUser: (value) => value,
         decimals: 0,
