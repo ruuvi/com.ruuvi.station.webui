@@ -201,23 +201,10 @@ const unitHelper = {
         label: "volatile_organic_compounds",
         shortLabel: "voc",
         unit: "",
-        units: [{ translationKey: "", cloudStoreKey: "index" }, { translationKey: "ethanol_mgm3", cloudStoreKey: "ethanol_mgm3" }, { translationKey: "isobutylene_mgm3", cloudStoreKey: "isobutylene_mgm3" }, { translationKey: "molhave_mgm3", cloudStoreKey: "molhave_mgm3" }],
-        displayUnits: { index: "", ethanol_mgm3: "mg/m³", isobutylene_mgm3: "mg/m³", molhave_mgm3: "mg/m³" },
+        units: [{ translationKey: "", cloudStoreKey: "index" }],
+        displayUnits: { index: ""},
         value: (value) => value,
         fromUser: (value) => value,
-        valueWithUnit: (value, unitKey) => {
-            let voc_ethanol_ppb = (Math.log(501 - value) - 6.24) * -381.97;
-            switch (unitKey) {
-                case "ethanol_mgm3":
-                    return voc_ethanol_ppb / 1.8843;
-                case "isobutylene_mgm3":
-                    return voc_ethanol_ppb * 2.3;
-                case "molhave_mgm3":
-                    return voc_ethanol_ppb * 4.5;
-                default:
-                    return value; // index
-            }
-        },
         decimals: 0,
         graphable: true
     },
@@ -280,7 +267,7 @@ export const allUnits = unitHelper;
 
 export const alertTypes = ["temperature", "humidity", "pressure", "signal", "movement", "offline", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
 
-export const DEFAULT_VISIBLE_SENSOR_TYPES = ["aqi", "co2", "pm25", "voc", "nox", "temperature", "humidity", "pressure", "illuminance", "movementCounter", "soundLevelInstant"];
+export const DEFAULT_VISIBLE_SENSOR_TYPES = ["aqi", "temperature", "humidity", "illuminance", "soundLevelAvg", "co2", "voc", "nox", "pm25", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"];
 
 export function getUnitSettingFor(key) {
     let map = {

@@ -132,20 +132,15 @@ const SensorCard = ({
 
     const stats = useMemo(() => {
         if (sensorMainFields && sensorMainFields.length) {
-            const mainIdx = sensorMainFields.findIndex(
-                (field) => (Array.isArray(field) ? field[0] : field) === mainStat,
+            const normalizedMain = mainStat;
+            const _sensorFields = [...sensorMainFields];
+            const others = _sensorFields.filter(
+                (field) => (Array.isArray(field) ? field[0] : field) !== normalizedMain,
             );
-            if (mainIdx > 0) {
-                return [
-                    sensorMainFields[mainIdx],
-                    ...sensorMainFields.slice(0, mainIdx),
-                    ...sensorMainFields.slice(mainIdx + 1),
-                ];
-            }
-            return [...sensorMainFields];
+            return [normalizedMain, ...others];
         }
         return [...DEFAULT_VISIBLE_SENSOR_TYPES];
-    }, [mainStat, sensorMainFields]);
+    }, [mainStat, sensorMainFields, simpleView]);
 
     const renderNoData = useCallback(
         (content, { simpleView: simpleOverride, showGraph: showGraphOverride } = {}) => {

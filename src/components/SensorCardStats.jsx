@@ -23,6 +23,12 @@ const smallSensorLabel = {
     opacity: 0.7
 };
 
+const smallSensorLabelSimple = {
+    fontFamily: "mulish",
+    fontSize: 12,
+    opacity: 0.7,
+};
+
 export const truncateUnit = (text, maxLength = 15) => {
     if (typeof text !== "string") return text;
     const translated = i18next.t(text);
@@ -136,7 +142,7 @@ const SmallStats = ({
                                 {truncateUnit(unitLabel || "")}
                             </span>
                             {simpleView ?
-                                <span style={{...smallSensorLabel, marginLeft: 6}}>
+                                <span style={{ ...smallSensorLabel, marginLeft: 6 }}>
                                     {typeof label === "object" ? label : t(label)}
                                 </span>
                                 :
