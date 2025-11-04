@@ -24,10 +24,10 @@ export const parseDisplayOrderToWebTypes = (displayOrder) => {
 
 const useSensorFields = (sensor, latestReading, visibleSensorTypes, graphType) => {
     const sensorMainFields = useMemo(() => {
-        let arr = ["humidity", "pressure", "movementCounter"];
+        let arr = ["temperature", "humidity", "pressure", "movementCounter"];
         if (!latestReading) return arr;
         if (latestReading.dataFormat === 6) arr = ["pm1p0", "co2", "voc"];
-        if (latestReading.dataFormat === "e0" || latestReading.dataFormat === "e1") arr = ["aqi", "co2", "pm25", "voc", "nox", "humidity", "pressure", "illuminance", "soundLevelInstant"];
+        if (latestReading.dataFormat === "e0" || latestReading.dataFormat === "e1") arr = ["aqi", "co2", "pm25", "voc", "nox", "temperature", "humidity", "pressure", "illuminance", "soundLevelInstant"];
         if ((graphType || "temperature") !== "temperature") {
             arr.push("temperature");
         }

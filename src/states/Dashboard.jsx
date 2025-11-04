@@ -213,7 +213,7 @@ class Dashboard extends Component {
             from: 24 * 3,
             cardType: store.getDashboardCardType(),
             showBig: true,
-            graphType: "temperature",
+            graphType: null,
             search: "",
             currSize: '',
             rename: null,

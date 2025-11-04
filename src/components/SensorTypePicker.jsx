@@ -66,6 +66,10 @@ export default function SensorTypePicker(props) {
         }
     }
 
+    if (props.dashboard) {
+        opts = [null, ...opts];
+    }
+
     if (props.value === null && !props.dashboard) {
         if (props.allUnits) {
             props.onChange(opts[0])
