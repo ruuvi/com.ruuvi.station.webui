@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { durationToText } from '../TimeHelper';
+import { durationToText, secondsToUserDateString } from '../TimeHelper';
 import { ruuviTheme } from "../themes";
 import { useColorMode } from "@chakra-ui/react";
 
@@ -19,9 +19,16 @@ const DurationText = ({ from, isAlerting, t }) => {
 
     let alertColor = colorMode === "light" ? ruuviTheme.colors.sensorCardValueAlertStateLightTheme : ruuviTheme.colors.sensorCardValueAlertState;
 
+    const showDateCutoff = 10 * 24 * 60 * 60; // 10 days in seconds
+    let content;
+    if (seconds > showDateCutoff) {
+        content = secondsToUserDateString(from);
+    } else {
+        content = durationToText(seconds, t) + ' ' + t("ago");
+    }
     return (
         <span style={{ color: isAlerting ? alertColor: undefined }}>
-            {durationToText(seconds, t)} {t("ago")} 
+            {content}
         </span>
     );
 };
