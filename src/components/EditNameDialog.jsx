@@ -66,8 +66,14 @@ class EditNameDialog extends Component {
     }
     getDefaultName() {
         if (!this.props.sensor) return ""
+        let device = "RuuviTag"
+        if (this.props.sensor.measurements && this.props.sensor.measurements.length > 0) {
+            if (this.props.sensor.measurements[0].parsed?.dataFormat === "e1") {
+                device = "Ruuvi Air"
+            }
+        }
         let splitMac = this.props.sensor.sensor.split(":")
-        return "Ruuvi " + splitMac[4] + splitMac[5]
+        return device + " " + splitMac[4] + splitMac[5]
     }
     render() {
         if (!this.props.sensor) return <></>
@@ -75,7 +81,7 @@ class EditNameDialog extends Component {
         return (
             <RDialog title={t("sensor_name")} isOpen={this.props.open} onClose={this.props.onClose}>
                 {this.showOrderInfo() &&
-                    <p style={{marginBottom: "8px"}}>
+                    <p style={{ marginBottom: "8px" }}>
                         {t("rename_sensor_message")}
                     </p>
                 }
