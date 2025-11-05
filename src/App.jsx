@@ -282,7 +282,7 @@ export default function App() {
             </span>
           </HStack>
           {banners && banners.map(x => {
-            return <HStack className="banner" style={{ paddingLeft: "18px", paddingRight: "18px" }}>
+            return <HStack key={x.key} className="banner" style={{ paddingLeft: "18px", paddingRight: "18px" }}>
               <Box flex style={{ textAlign: "center", width: "100%" }} dangerouslySetInnerHTML={{ __html: getBannerContent(x) }}></Box>
               <Box flex style={{ width: "16px" }}>
                 <div style={{ cursor: "pointer" }} onClick={() => {

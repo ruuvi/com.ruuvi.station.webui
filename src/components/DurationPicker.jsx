@@ -150,7 +150,7 @@ export default function DurationPicker(props) {
                                         }}>
                                         <MdArrowDropDown {...iconProps} />
                                     </Button>
-                                    <MenuButton height={"40px"} isDisabled={disabled} style={{ cursor: disabled ? 'default' : undefined }}>
+                                    <MenuButton height={"40px"} style={{ cursor: disabled ? 'default' : undefined }}>
                                     </MenuButton>
                                 </Flex>
                             </span>

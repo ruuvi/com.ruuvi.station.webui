@@ -204,7 +204,7 @@ class AlertItem extends Component {
         }
 
         return (
-            <ListItem key={type}>
+            <>
                 <div style={{ paddingTop: 30, paddingBottom: 20 }}>
                     <div style={{ ...this.props.detailedTitle, width: undefined, display: "flex", justifyContent: "space-between" }}>
                         <span>
@@ -292,7 +292,7 @@ class AlertItem extends Component {
                     description={t("alert_delay_dialog_description")}
                     buttonText={t("update")}
                 />
-            </ListItem>
+            </>
         )
     }
 }

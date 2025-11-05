@@ -884,17 +884,17 @@ class Sensor extends Component {
                                             :
                                             <ListItem>
                                                 <table style={accordionContent}>
-                                                <tbody>
-                                                    <tr>
-                                                        <td style={detailedTitle}>
-                                                            {t("owners_plan")}
-                                                        </td>
-                                                        <td style={detailedText}>
-                                                            {sensorSubscription?.subscriptionName || JSON.stringify(sensorSubscription)}
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style={detailedTitle}>
+                                                                {t("owners_plan")}
+                                                            </td>
+                                                            <td style={detailedText}>
+                                                                {sensorSubscription?.subscriptionName || JSON.stringify(sensorSubscription)}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </ListItem>
                                         }
                                         <hr />
@@ -956,14 +956,16 @@ class Sensor extends Component {
                                             if (!ignoreVisibleTypes.includes(x) && visibility && !visibility.includes(dataKey)) return null;
 
                                             let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description + x : x
-                                            return <AlertItem key={key} alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
-                                                latestValue={latestValue}
-                                                noUpgradeButton={this.isSharedSensor() || !this.sensorHasData()}
-                                                showOffline={sensorSubscription.offlineAlertAllowed}
-                                                showDelay={sensorSubscription.delayedAlertAllowed}
-                                                detailedTitle={detailedTitle}
-                                                detailedText={detailedText} detailedSubText={detailedSubText}
-                                                type={x} dataKey={dataKey} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />
+                                            return <ListItem key={key}>
+                                                <AlertItem alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
+                                                    latestValue={latestValue}
+                                                    noUpgradeButton={this.isSharedSensor() || !this.sensorHasData()}
+                                                    showOffline={sensorSubscription.offlineAlertAllowed}
+                                                    showDelay={sensorSubscription.delayedAlertAllowed}
+                                                    detailedTitle={detailedTitle}
+                                                    detailedText={detailedText} detailedSubText={detailedSubText}
+                                                    type={x} dataKey={dataKey} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />
+                                            </ListItem>
                                         })}
                                     </List>
                                 </AccordionPanel>

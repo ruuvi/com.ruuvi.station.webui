@@ -246,7 +246,7 @@ class Dashboard extends Component {
     }
     componentDidUpdate(prevProps, prevState) {
         document.title = "Ruuvi Station";
-        
+
         const latestOrder = this.getOrder();
         const currentOrder = this.state.order;
 
@@ -459,10 +459,14 @@ class Dashboard extends Component {
             </InputGroup>
         }
         const sensorCard = (x, size, sensorsInSearch, columnCount) => {
-            if (!x) return <></>
+            if (!x) return null;
             let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
             return <span className="masonry-item" key={x.sensor} style={{ maxWidth: "100%", display: hide ? "none" : undefined }}>
-                <a href={"/" + x.sensor}>
+                <span
+                    role="link"
+                    onClick={() => this.props.navigate('/' + x.sensor)}
+                    style={{ cursor: 'pointer' }}
+                >
                     <SensorCard sensor={x}
                         size={size}
                         columnCount={columnCount}
@@ -501,7 +505,8 @@ class Dashboard extends Component {
                             this.updateOrder(order);
                         }}
                     />
-                </a></span>
+                </span>
+            </span>
         }
         return (
             <>
