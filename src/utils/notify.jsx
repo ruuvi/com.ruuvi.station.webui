@@ -10,7 +10,7 @@ function toastIt(text, status, duration) {
     const { toast } = createStandaloneToast()
     let colorMode = hackyGetColorMode()
     toast({
-        duration: duration || 4000,
+        duration: duration === undefined ? 4000 : duration,
         render: (props) => (
             <Alert
                 {...props}
@@ -50,7 +50,7 @@ var notify = {
         toastIt(text, "error")
     },
     info: (text) => {
-        toastIt(text, "info", 7 * 1000)
+        toastIt(text, "info", null)
     }
 }
 
