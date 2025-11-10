@@ -184,6 +184,10 @@ let alertDebouncer = {}
 class Sensor extends Component {
     constructor(props) {
         super(props)
+        const queryParams = new URLSearchParams(this.props.router.location.search);
+        const graphKeyFromUrl = queryParams.get('graphKey');
+        const graphUnitKeyFromUrl = queryParams.get('graphUnitKey');
+
         let initialGraphKey = "temperature";
         let initialGraphUnitKey = null;
         let keys = this.getSensorMainFields();
@@ -199,8 +203,8 @@ class Sensor extends Component {
         this.state = {
             data: null,
             loading: true,
-            graphKey: initialGraphKey,
-            graphUnitKey: initialGraphUnitKey,
+            graphKey: graphKeyFromUrl || initialGraphKey,
+            graphUnitKey: graphUnitKeyFromUrl || initialGraphUnitKey,
             from: new Store().getGraphFrom() || 24,
             to: null,
             table: "",
@@ -364,6 +368,18 @@ class Sensor extends Component {
             graphKey = key[0];
             unitKey = key[1];
         }
+        const params = new URLSearchParams(this.props.router.location.search);
+        if (graphKey) {
+            params.set("graphKey", graphKey);
+        } else {
+            params.delete("graphKey");
+        }
+        if (unitKey) {
+            params.set("graphUnitKey", unitKey);
+        } else {
+            params.delete("graphUnitKey");
+        }
+        this.props.router.navigate({ search: params.toString() }, { replace: true });
         this.setState({ ...this.state, graphKey, graphUnitKey: unitKey });
     }
     getAlert(type) {

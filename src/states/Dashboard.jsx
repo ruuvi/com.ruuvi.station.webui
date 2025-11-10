@@ -316,7 +316,7 @@ class Dashboard extends Component {
         if (direction === 1 && indexOfCurrent === sensors.length - 1) setNext = sensors[0]
         else if (direction === -1 && indexOfCurrent === 0) setNext = sensors[sensors.length - 1]
         else setNext = sensors[indexOfCurrent + direction]
-        this.props.navigate('/' + setNext)
+        this.props.navigate('/' + setNext + this.props.location.search)
     }
     removeSensor() {
         var current = this.getCurrentSensor().sensor;

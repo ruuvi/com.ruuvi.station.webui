@@ -5,18 +5,12 @@ import {
 import { MdArrowBack, MdArrowForward } from "react-icons/md";
 
 class NavPrevNext extends Component {
-    componentDidMount() {
-    }
-    componentWillUnmount() {
-    }
-    clicked() {
-        this.props.history.push('/')
-    }
     render() {
+        const { prev, next } = this.props;
         return (
             <>
-                <IconButton isRound={true} className="navButton" variant="nav" onClick={() => this.props.prev()} style={{ marginTop: "2px", marginRight: "5px" }}><MdArrowBack /></IconButton>
-                <IconButton isRound={true} className="navButton" variant="nav" onClick={() => this.props.next()} style={{ marginTop: "1px", marginRight: "5px" }}><MdArrowForward /></IconButton>
+                <IconButton isRound={true} className="navButton" variant="nav" onClick={prev} style={{ marginTop: "2px", marginRight: "5px" }}><MdArrowBack /></IconButton>
+                <IconButton isRound={true} className="navButton" variant="nav" onClick={next} style={{ marginTop: "1px", marginRight: "5px" }}><MdArrowForward /></IconButton>
             </>
         )
     }
