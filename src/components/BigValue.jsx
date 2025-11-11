@@ -70,6 +70,8 @@ export default function BigValue(props) {
         const barStyle = {
             position: "relative",
             width: "40%",
+            marginBottom: -barHeight / 2,
+            marginTop: -barHeight / 2,
             height: barHeight,
             borderRadius: 4,
             backgroundColor: trackBg,
