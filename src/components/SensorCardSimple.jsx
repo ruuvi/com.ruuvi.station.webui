@@ -81,7 +81,7 @@ const SensorCardSimple = ({
             )}
         </Box>
         {latestReading && (
-            <Box pr={4} pl={4} pb={2} mt="auto">
+            <Box pr={4} pl={4} pb={2} mt={"-4px"}>
                 {infoRow}
             </Box>
         )}

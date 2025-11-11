@@ -196,7 +196,7 @@ const SensorCard = ({
     const infoRow = (
         <div
             className="dashboardUpdatedAt"
-            style={{ ...lastUpdatedText, width: "100%", marginTop: -4, opacity: offlineAlertOn ? 1 : 0.5 }}
+            style={{ ...lastUpdatedText, width: "100%", opacity: offlineAlertOn ? 1 : 0.5 }}
         >
             <Flex justifyContent="space-between">
                 <span>
