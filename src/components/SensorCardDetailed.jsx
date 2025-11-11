@@ -83,108 +83,106 @@ const SensorCardDetailed = ({
 
                     <Box flex={1} display="flex" flexDirection="column" minH={minHeight}>
                         <Box flex={1} p={4} display="flex" flexDirection="column">
-                            <Box>
-                                <Flex>
-                                    <Flex grow={1} width="calc(100% - 40px)">
-                                        <Link to={`/${sensor.sensor}`} style={{ width: "100%" }}>
-                                            <Heading
-                                                size="xs"
-                                                style={{
-                                                    fontFamily: "montserrat",
-                                                    fontSize: 16,
-                                                    fontWeight: "bold",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    display: "-webkit-box",
-                                                    WebkitLineClamp: 2,
-                                                    WebkitBoxOrient: "vertical",
-                                                    lineHeight: "1.2em",
-                                                    maxHeight: "2.4em",
-                                                    marginRight: 2,
-                                                    wordBreak: "break-word",
-                                                    overflowWrap: "break-word",
-                                                }}
-                                            >
-                                                {sensor.name}
-                                            </Heading>
-                                        </Link>
-                                    </Flex>
-
-                                    <Flex width="15px" mt={0.5}>
-                                        {alertIcon}
-                                    </Flex>
-                                    <Flex width="24px" height="20px">
-                                        {moreMenu}
-                                    </Flex>
+                            <Flex>
+                                <Flex grow={1} width="calc(100% - 40px)">
+                                    <Link to={`/${sensor.sensor}`} style={{ width: "100%" }}>
+                                        <Heading
+                                            size="xs"
+                                            style={{
+                                                fontFamily: "montserrat",
+                                                fontSize: 16,
+                                                fontWeight: "bold",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                display: "-webkit-box",
+                                                WebkitLineClamp: 1,
+                                                WebkitBoxOrient: "vertical",
+                                                lineHeight: "1.2em",
+                                                maxHeight: "2.4em",
+                                                marginRight: 2,
+                                                wordBreak: "break-word",
+                                                overflowWrap: "break-word",
+                                            }}
+                                        >
+                                            {sensor.name}
+                                        </Heading>
+                                    </Link>
                                 </Flex>
 
-                                {latestReading && (
-                                    <Box>
-                                        {(() => {
-                                            const unitHelper = getUnitHelper(mainStat);
-                                            let showValue;
-                                            let unit = unitHelper.unit;
+                                <Flex width="15px" mt={0.5}>
+                                    {alertIcon}
+                                </Flex>
+                                <Flex width="24px" height="20px">
+                                    {moreMenu}
+                                </Flex>
+                            </Flex>
 
-                                            if (
-                                                Array.isArray(mainFieldConfig) &&
-                                                mainFieldConfig[1] &&
-                                                unitHelper.valueWithUnit
-                                            ) {
-                                                const unitKey = mainFieldConfig[1];
+                            {latestReading && (
+                                <Box>
+                                    {(() => {
+                                        const unitHelper = getUnitHelper(mainStat);
+                                        let showValue;
+                                        let unit = unitHelper.unit;
+
+                                        if (
+                                            Array.isArray(mainFieldConfig) &&
+                                            mainFieldConfig[1] &&
+                                            unitHelper.valueWithUnit
+                                        ) {
+                                            const unitKey = mainFieldConfig[1];
+                                            showValue = localeNumber(
+                                                unitHelper.valueWithUnit(
+                                                    latestReading[mainStat],
+                                                    unitKey,
+                                                    latestReading.temperature,
+                                                ),
+                                                unitHelper.decimals,
+                                            );
+
+                                            const unitDef = unitHelper.units?.find(
+                                                (u) => u.cloudStoreKey === unitKey,
+                                            );
+                                            unit = unitDef?.translationKey || unit;
+
+                                            const helperWithUnit = getUnitHelper(
+                                                mainStat,
+                                                false,
+                                                unitKey,
+                                            );
+                                            if (helperWithUnit) {
                                                 showValue = localeNumber(
-                                                    unitHelper.valueWithUnit(
+                                                    helperWithUnit.valueWithUnit(
                                                         latestReading[mainStat],
                                                         unitKey,
                                                         latestReading.temperature,
                                                     ),
-                                                    unitHelper.decimals,
+                                                    helperWithUnit.decimals,
                                                 );
-
-                                                const unitDef = unitHelper.units?.find(
-                                                    (u) => u.cloudStoreKey === unitKey,
-                                                );
-                                                unit = unitDef?.translationKey || unit;
-
-                                                const helperWithUnit = getUnitHelper(
-                                                    mainStat,
-                                                    false,
-                                                    unitKey,
-                                                );
-                                                if (helperWithUnit) {
-                                                    showValue = localeNumber(
-                                                        helperWithUnit.valueWithUnit(
-                                                            latestReading[mainStat],
-                                                            unitKey,
-                                                            latestReading.temperature,
-                                                        ),
-                                                        helperWithUnit.decimals,
-                                                    );
-                                                    unit = helperWithUnit.unit || unit;
-                                                }
-                                            } else {
-                                                showValue = localeNumber(
-                                                    unitHelper.value(
-                                                        latestReading[mainStat],
-                                                        mainStat === "humidity"
-                                                            ? latestReading.temperature
-                                                            : undefined,
-                                                    ),
-                                                    unitHelper.decimals,
-                                                );
+                                                unit = helperWithUnit.unit || unit;
                                             }
-
-                                            return (
-                                                <BigValue
-                                                    value={getDisplayValue(mainStat, showValue)}
-                                                    unit={t(unit)}
-                                                    alertActive={getAlertState(mainStat) > 0}
-                                                    label={t(getUnitHelper(mainStat).label)}
-                                                />
+                                        } else {
+                                            showValue = localeNumber(
+                                                unitHelper.value(
+                                                    latestReading[mainStat],
+                                                    mainStat === "humidity"
+                                                        ? latestReading.temperature
+                                                        : undefined,
+                                                ),
+                                                unitHelper.decimals,
                                             );
-                                        })()}
-                                    </Box>
-                                )}
-                            </Box>
+                                        }
+
+                                        return (
+                                            <BigValue
+                                                value={getDisplayValue(mainStat, showValue)}
+                                                unit={t(unit)}
+                                                alertActive={getAlertState(mainStat) > 0}
+                                                label={t(getUnitHelper(mainStat).label)}
+                                            />
+                                        );
+                                    })()}
+                                </Box>
+                            )}
 
                             {loading ? (
                                 <center
@@ -324,7 +322,7 @@ const SensorCardDetailed = ({
                                                 </Box>
                                             </Flex>
                                         ) : (
-                                            <Box pt={4} pb={4} mt={height/4}>
+                                            <Box pt={4} pb={4} mt={height / 4}>
                                                 {renderNoData(
                                                     t("no_data").split("\n").map((line) => (
                                                         <div key={line}>{line}</div>
