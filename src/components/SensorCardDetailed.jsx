@@ -123,6 +123,7 @@ const SensorCardDetailed = ({
                                         const unitHelper = getUnitHelper(mainStat);
                                         let showValue;
                                         let unit = unitHelper.unit;
+                                        let label = unitHelper.shortLabel || unitHelper.label;
 
                                         if (
                                             Array.isArray(mainFieldConfig) &&
@@ -142,7 +143,7 @@ const SensorCardDetailed = ({
                                             const unitDef = unitHelper.units?.find(
                                                 (u) => u.cloudStoreKey === unitKey,
                                             );
-                                            unit = unitDef?.translationKey || unit;
+                                            if (unitDef) unit = unitDef.translationKey || unit;
 
                                             const helperWithUnit = getUnitHelper(
                                                 mainStat,
@@ -159,6 +160,7 @@ const SensorCardDetailed = ({
                                                     helperWithUnit.decimals,
                                                 );
                                                 unit = helperWithUnit.unit || unit;
+                                                label = helperWithUnit.shortLabel || helperWithUnit.label || label;
                                             }
                                         } else {
                                             showValue = localeNumber(
@@ -177,7 +179,7 @@ const SensorCardDetailed = ({
                                                 value={getDisplayValue(mainStat, showValue)}
                                                 unit={t(unit)}
                                                 alertActive={getAlertState(mainStat) > 0}
-                                                label={t(getUnitHelper(mainStat).label)}
+                                                label={t(label)}
                                             />
                                         );
                                     })()}
