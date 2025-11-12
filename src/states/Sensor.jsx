@@ -897,33 +897,35 @@ class Sensor extends Component {
                                                 </table>
                                             </ListItem>
                                         }
-                                        <hr />
-                                        <ListItem style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, sensorVisibilityDialog: true })}>
-                                            <table style={accordionContent}>
-                                                <tbody>
-                                                    <tr>
-                                                        <td style={detailedTitle}>
-                                                            {t("visible_measurements")}
-                                                        </td>
-                                                        <td style={detailedText}>
-                                                            {(() => {
-                                                                const useDefault = this.props.sensor.settings?.defaultDisplayOrder || "true"
-                                                                if (useDefault === "true") return t("use_default")
-                                                                const visibleFields = this.props.sensor.settings?.displayOrder ? JSON.parse(this.props.sensor.settings.displayOrder) : [];
-                                                                let maxAvailable = 0;
-                                                                const parsed0 = this.props.sensor?.measurements?.[0]?.parsed;
-                                                                if (parsed0) {
-                                                                    const presentKeys = Object.keys(parsed0);
-                                                                    maxAvailable = visibilityCodes.filter(vc => presentKeys.includes(vc[1])).length;
-                                                                }
-                                                                return visibleFields.length > 0 ? `${visibleFields.length}/${maxAvailable || visibleFields.length}` : t("no_visible_measurements");
-                                                            })()}
-                                                            <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </ListItem>
+                                        {!this.isSharedSensor() && <>
+                                            <hr />
+                                            <ListItem style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, sensorVisibilityDialog: true })}>
+                                                <table style={accordionContent}>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style={detailedTitle}>
+                                                                {t("visible_measurements")}
+                                                            </td>
+                                                            <td style={detailedText}>
+                                                                {(() => {
+                                                                    const useDefault = this.props.sensor.settings?.defaultDisplayOrder || "true"
+                                                                    if (useDefault === "true") return t("use_default")
+                                                                    const visibleFields = this.props.sensor.settings?.displayOrder ? JSON.parse(this.props.sensor.settings.displayOrder) : [];
+                                                                    let maxAvailable = 0;
+                                                                    const parsed0 = this.props.sensor?.measurements?.[0]?.parsed;
+                                                                    if (parsed0) {
+                                                                        const presentKeys = Object.keys(parsed0);
+                                                                        maxAvailable = visibilityCodes.filter(vc => presentKeys.includes(vc[1])).length;
+                                                                    }
+                                                                    return visibleFields.length > 0 ? `${visibleFields.length}/${maxAvailable || visibleFields.length}` : t("no_visible_measurements");
+                                                                })()}
+                                                                <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </ListItem>
+                                        </>}
                                     </List>
                                 </AccordionPanel>
                             </AccordionItem>
