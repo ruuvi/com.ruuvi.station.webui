@@ -14,12 +14,12 @@ import {
 } from "@chakra-ui/react";
 import { withTranslation } from 'react-i18next';
 import RDialog from "./RDialog";
-import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper } from "../UnitHelper";
+import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, getUnitSettingFor } from "../UnitHelper";
 import SensorCard from "./SensorCard";
 import { MdAdd, MdClose, MdUnfoldMore } from "react-icons/md";
 import ConfirmationDialog from "./ConfirmationDialog";
 import NetworkApi from "../NetworkApi";
-import { visibilityCodes, visibilityFromCloudToWeb } from "../utils/cloudTranslator";
+import { visibilityCodes, visibilityFromCloudToWeb, visibilityFromWebToCloud } from "../utils/cloudTranslator";
 import notify from "../utils/notify";
 
 const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updateSensor }) => {
@@ -35,16 +35,52 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
         return visibilityCodes.filter(code => availableTypes.includes(code[1])).map(code => code[0]);
     };
 
-    const getInitialVisibleTypes = () => {
-        let defaultTypes = [...DEFAULT_VISIBLE_SENSOR_TYPES];
+    const getPreferredUnitKeyForType = (type) => {
+        switch (type) {
+            case "temperature":
+            case "humidity":
+            case "pressure":
+            case "voc":
+                return getUnitSettingFor(type);
+            default:
+                return null;
+        }
+    };
 
-        // Filter default types to only include those available on this sensor
-        const availableTypes = getAvailableSensorTypes(true);
-        if (availableTypes.length > 0) {
-            defaultTypes = defaultTypes.filter(type => availableTypes.includes(type));
+    const getInitialVisibleTypes = () => {
+        const availableCodes = getAvailableSensorTypes();
+        if (!availableCodes || availableCodes.length === 0) return [];
+
+        const availableCodeSet = new Set(availableCodes);
+        const availableWebTypes = getAvailableSensorTypes(true);
+
+        const defaultTypeCandidates = availableWebTypes.length > 0
+            ? DEFAULT_VISIBLE_SENSOR_TYPES.filter(type => availableWebTypes.includes(type))
+            : [];
+
+        const resolvedDefaults = [];
+
+        for (const type of defaultTypeCandidates) {
+            const preferredUnit = getPreferredUnitKeyForType(type);
+            if (preferredUnit) {
+                const preferredCloudCode = visibilityFromWebToCloud(preferredUnit, type);
+                if (preferredCloudCode && availableCodeSet.has(preferredCloudCode)) {
+                    resolvedDefaults.push(preferredCloudCode);
+                    continue;
+                }
+            }
+
+            const fallbackCloudCode = availableCodes.find(code => {
+                const mapping = visibilityFromCloudToWeb(code);
+                return mapping && mapping[0] === type;
+            });
+
+            if (fallbackCloudCode) {
+                resolvedDefaults.push(fallbackCloudCode);
+            }
         }
 
-        return defaultTypes;
+        return resolvedDefaults;
     };
 
     const [visibleTypes, setVisibleTypes] = useState([]);
@@ -70,21 +106,26 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
         if (open && sensor?.sensor) {
             const savedCustomTypes = sensor.settings?.displayOrder ? JSON.parse(sensor.settings.displayOrder) : [];
             const savedUseDefault = (sensor.settings?.defaultDisplayOrder || "true") === "true";
-            let initialTypes = [];
+            const availableCodes = getAvailableSensorTypes();
+            const hasAvailableCodes = availableCodes.length > 0;
+            const availableCodeSet = new Set(availableCodes);
 
-            if (savedCustomTypes && savedCustomTypes.length > 0) {
-                initialTypes = savedCustomTypes;
-                setCustomVisibleTypes(initialTypes);
-            } else {
-                setCustomVisibleTypes(initialTypes);
-            }
+            const sanitizedCustomTypes = savedCustomTypes && savedCustomTypes.length > 0
+                ? (hasAvailableCodes ? savedCustomTypes.filter(type => availableCodeSet.has(type)) : savedCustomTypes)
+                : [];
 
+            const defaultTypes = getInitialVisibleTypes();
+            const initialCustomTypes = sanitizedCustomTypes.length > 0
+                ? sanitizedCustomTypes
+                : defaultTypes;
+
+            setCustomVisibleTypes(initialCustomTypes);
             setUseDefault(savedUseDefault);
 
             if (savedUseDefault) {
-                setVisibleTypes(getInitialVisibleTypes());
+                setVisibleTypes(defaultTypes);
             } else {
-                setVisibleTypes(initialTypes);
+                setVisibleTypes(initialCustomTypes);
             }
         } else if (open && !sensor?.sensor) {
             // Fallback when no sensor data available yet, should not happen in normal use
@@ -249,6 +290,15 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
         dragCounter.current = 0;
     };
 
+    const handleUseDefaultChange = (checked) => {
+        if (!checked && customVisibleTypes.length === 0) {
+            const defaults = getInitialVisibleTypes();
+            setCustomVisibleTypes(defaults);
+            setVisibleTypes(defaults);
+        }
+        setUseDefault(checked);
+    };
+
     const handleSave = async () => {
         if (!sensor?.sensor) {
             console.warn("No sensor ID available for saving visibility settings");
@@ -355,7 +405,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                         size="md"
                         isChecked={useDefault}
                         colorScheme="buttonIconScheme"
-                        onChange={(e) => setUseDefault(e.target.checked)}
+                        onChange={(e) => handleUseDefaultChange(e.target.checked)}
                     />
                 </Flex>
             </Box>
