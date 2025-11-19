@@ -175,6 +175,26 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
         );
     };
 
+    const getOrphanedAlerts = (targetVisibleTypes) => {
+        if (!sensor?.alerts) return [];
+
+        const orphanedAlerts = [];
+        const enabledAlerts = sensor.alerts.filter(a => a.enabled);
+
+        for (const alert of enabledAlerts) {
+            const isSupported = targetVisibleTypes.some(vt => {
+                let webType = getWebTypeFromSensorType(vt);
+                const alertType = getAlertTypeFromSensorType(webType);
+                return alertType === alert.type;
+            });
+
+            if (!isSupported) {
+                orphanedAlerts.push(alert);
+            }
+        }
+        return orphanedAlerts;
+    };
+
     const disableAlertsForSensorType = async (sensorType) => {
         const enabledAlerts = hasEnabledAlerts(sensorType);
 
@@ -228,16 +248,27 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
     };
 
     const handleConfirmHideSensorType = async (confirmed) => {
-        const { sensorType } = confirmationDialog;
+        const { sensorType, alertsToDisable } = confirmationDialog;
 
-        setConfirmationDialog({ open: false, sensorType: null, affectedAlerts: [] });
+        setConfirmationDialog({ open: false, sensorType: null, affectedAlerts: [], alertsToDisable: null });
 
-        if (confirmed && sensorType) {
-            // Disable alerts for this sensor type
-            await disableAlertsForSensorType(sensorType);
-
-            // Now proceed with hiding the sensor type
-            performToggleSensorType(sensorType);
+        if (confirmed) {
+            if (sensorType) {
+                await disableAlertsForSensorType(sensorType);
+                performToggleSensorType(sensorType);
+            } else if (alertsToDisable) {
+                for (const alert of alertsToDisable) {
+                    try {
+                        const disabledAlert = { ...alert, enabled: false, sensor: sensor.sensor };
+                        await new Promise((resolve) => {
+                            new NetworkApi().setAlert(disabledAlert, resolve);
+                        });
+                    } catch (error) {
+                        console.error('Failed to disable alert:', error);
+                    }
+                }
+                setUseDefault(true);
+            }
         }
     };
 
@@ -291,6 +322,21 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
     };
 
     const handleUseDefaultChange = (checked) => {
+        if (checked) {
+            const defaultTypes = getInitialVisibleTypes();
+            const orphanedAlerts = getOrphanedAlerts(defaultTypes);
+
+            if (orphanedAlerts.length > 0) {
+                setConfirmationDialog({
+                    open: true,
+                    sensorType: null,
+                    affectedAlerts: orphanedAlerts,
+                    alertsToDisable: orphanedAlerts
+                });
+                return;
+            }
+        }
+
         if (!checked && customVisibleTypes.length === 0) {
             const defaults = getInitialVisibleTypes();
             setCustomVisibleTypes(defaults);
@@ -525,7 +571,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             <ConfirmationDialog
                 open={confirmationDialog.open}
                 title="dialog_are_you_sure"
-                description={confirmationDialog.sensorType ?
+                description={confirmationDialog.sensorType || confirmationDialog.alertsToDisable ?
                     t("hide_sensor_type_alert_warning") :
                     ""
                 }
