@@ -23,7 +23,7 @@ import SensorReading from "../components/SensorReading";
 import parse from "../decoder/parser";
 import { MdChevronRight } from "react-icons/md"
 import { withTranslation } from 'react-i18next';
-import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, localeNumber } from "../UnitHelper";
+import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, localeNumber, getUnitSettingFor } from "../UnitHelper";
 import { exportCSV, exportPDF, exportXLSX } from "../utils/export";
 import withRouter from "../utils/withRouter"
 import DurationText from "../components/DurationText";
@@ -185,8 +185,8 @@ class Sensor extends Component {
     constructor(props) {
         super(props)
         const queryParams = new URLSearchParams(this.props.router.location.search);
-        const graphKeyFromUrl = queryParams.get('graphKey');
-        const graphUnitKeyFromUrl = queryParams.get('graphUnitKey');
+        const graphKeyFromUrl = queryParams.get('key');
+        const graphUnitKeyFromUrl = queryParams.get('unit');
 
         let initialGraphKey = "temperature";
         let initialGraphUnitKey = null;
@@ -200,11 +200,17 @@ class Sensor extends Component {
                 initialGraphKey = first;
             }
         }
+
+        let graphUnitKey = graphUnitKeyFromUrl || initialGraphUnitKey;
+        if (!graphUnitKey) {
+            graphUnitKey = getUnitSettingFor(graphKeyFromUrl || initialGraphKey);
+        }
+
         this.state = {
             data: null,
             loading: true,
             graphKey: graphKeyFromUrl || initialGraphKey,
-            graphUnitKey: graphUnitKeyFromUrl || initialGraphUnitKey,
+            graphUnitKey: graphUnitKeyFromUrl || graphUnitKey,
             from: new Store().getGraphFrom() || 24,
             to: null,
             table: "",
@@ -370,14 +376,17 @@ class Sensor extends Component {
         }
         const params = new URLSearchParams(this.props.router.location.search);
         if (graphKey) {
-            params.set("graphKey", graphKey);
+            params.set("key", graphKey);
         } else {
-            params.delete("graphKey");
+            params.delete("key");
+        }
+        if (!unitKey) {
+            unitKey = getUnitSettingFor(graphKey);
         }
         if (unitKey) {
-            params.set("graphUnitKey", unitKey);
+            params.set("unit", unitKey);
         } else {
-            params.delete("graphUnitKey");
+            params.delete("unit");
         }
         this.props.router.navigate({ search: params.toString() }, { replace: true });
         this.setState({ ...this.state, graphKey, graphUnitKey: unitKey });
@@ -729,7 +738,11 @@ class Sensor extends Component {
                                             unitHelper.decimals
                                         );
                                     }
-                                    const selected = this.state.graphKey === sensorType && (this.state.graphUnitKey || null) === (unitKey || null);
+                                    const selected = this.state.graphKey === sensorType && (
+                                        (this.state.graphUnitKey || null) === (unitKey || null) ||
+                                        (!unitKey && this.state.graphUnitKey === getUnitSettingFor(sensorType))
+                                    );
+                                    
                                     return (
                                         <SensorReading
                                             key={sensorType + (unitKey || "")}
@@ -841,7 +854,7 @@ class Sensor extends Component {
                     <Box id="settings">
                         <div style={{ height: "20px" }} />
                         <Accordion allowMultiple defaultIndex={this.openAccodrions} onChange={v => this.setOpenAccordion(v)}>
-                            <AccordionItem onChange={v => console.log(v)}>
+                            <AccordionItem>
                                 <AccordionButton style={accordionButton} _hover={{}}>
                                     <AccordionText>
                                         {t("general")}
