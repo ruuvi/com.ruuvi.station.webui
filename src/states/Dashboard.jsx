@@ -313,10 +313,30 @@ class Dashboard extends Component {
         }
         var indexOfCurrent = sensors.findIndex(x => x === current)
         if (indexOfCurrent === -1) return;
-        if (direction === 1 && indexOfCurrent === sensors.length - 1) setNext = sensors[0]
-        else if (direction === -1 && indexOfCurrent === 0) setNext = sensors[sensors.length - 1]
-        else setNext = sensors[indexOfCurrent + direction]
-        this.props.navigate('/' + setNext + this.props.location.search)
+
+        const existingSensorIds = new Set(this.state.sensors.map(x => x.sensor));
+        const sensorExists = (sensorId) => existingSensorIds.has(sensorId);
+
+        const sensorsCount = sensors.length;
+        for (let i = 1; i <= sensorsCount; i++) {
+            let nextIdx;
+            if (direction === 1) {
+                nextIdx = (indexOfCurrent + i) % sensorsCount;
+            } else {
+                nextIdx = (indexOfCurrent - i + sensorsCount) % sensorsCount;
+            }
+            const candidateSensor = sensors[nextIdx];
+            if (sensorExists(candidateSensor)) {
+                setNext = candidateSensor;
+                break;
+            } else {
+                console.log(`Sensor ${candidateSensor} does not exist in state, skipping.`);
+            }
+        }
+
+        if (setNext !== current) {
+            this.props.navigate('/' + setNext + this.props.location.search)
+        }
     }
     removeSensor() {
         var current = this.getCurrentSensor().sensor;
