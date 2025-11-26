@@ -11,6 +11,7 @@ import NetworkApi from "../NetworkApi";
 import notify from "../utils/notify";
 import { addNewlines } from "../TextHelper";
 import ConfirmModal from "./ConfirmModal";
+import { getSetting } from "../UnitHelper";
 
 function RemoveSensorDialog(props) {
     const [deleteData, setdeleteData] = useState(false)
@@ -25,6 +26,16 @@ function RemoveSensorDialog(props) {
         setLoading(true)
         new NetworkApi().unclaim(mac, deleteData, resp => {
             if (resp.result === "success") {
+                let order = getSetting("SENSOR_ORDER", null)
+                if (order) {
+                    order = JSON.parse(order)
+                    if (order && order.length) {
+                        const newOrder = order.filter(id => id !== mac)
+                        if (newOrder.length !== order.length) {
+                            new NetworkApi().setSetting("SENSOR_ORDER", JSON.stringify(newOrder), () => {}, () => {})
+                        }
+                    }
+                }
                 props.remove()
                 props.onClose()
             } else {
