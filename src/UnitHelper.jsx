@@ -21,7 +21,12 @@ const unitHelper = {
         label: "temperature",
         shortLabel: "temperature",
         unit: "°C",
-        units: [{ translationKey: "°C", cloudStoreKey: "C" }, { translationKey: "°F", cloudStoreKey: "F" }, { translationKey: "K", cloudStoreKey: "K" }],
+        infoLabel: "description_text_temperature_celsius",
+        units: [
+            { translationKey: "°C", cloudStoreKey: "C", infoLabel: "description_text_temperature_celsius" },
+            { translationKey: "°F", cloudStoreKey: "F", infoLabel: "description_text_temperature_fahrenheit" },
+            { translationKey: "K", cloudStoreKey: "K", infoLabel: "description_text_temperature_kelvin" }
+        ],
         displayUnits: { C: "°C", F: "°F", K: "K" },
         value: (value, offset, settings) => temperatureToUserFormat(value, offset, settings),
         valueWithUnit: (value, unitKey) => {
@@ -34,7 +39,12 @@ const unitHelper = {
     "humidity": {
         label: "humidity",
         unit: "%",
-        units: [{ translationKey: "%", cloudStoreKey: "0" }, { translationKey: "g/m³", cloudStoreKey: "1" }, { translationKey: "dewpoint", cloudStoreKey: "2" }],
+        infoLabel: "description_text_humidity_relative",
+        units: [
+            { translationKey: "%", cloudStoreKey: "0", infoLabel: "description_text_humidity_relative" }, 
+            { translationKey: "g/m³", cloudStoreKey: "1", infoLabel: "description_text_humidity_absolute" }, 
+            { translationKey: "dewpoint", cloudStoreKey: "2", infoLabel: "description_text_humidity_dewpoint" }
+        ],
         displayVariants: {
             "0": { unitKey: "%", label: "relative_humidity" },
             "1": { unitKey: "g/m³", label: "absolute_humidity" },
@@ -52,8 +62,14 @@ const unitHelper = {
         label: "air_pressure",
         shortLabel: "air_pressure",
         exportLabel: "pressure",
+        infoLabel: "description_text_pressure",
         unit: "hPa",
-        units: [{ translationKey: "Pa", cloudStoreKey: "0" }, { translationKey: "hPa", cloudStoreKey: "1" }, { translationKey: "mmHg", cloudStoreKey: "2" }, { translationKey: "inHg", cloudStoreKey: "3" }],
+        units: [
+            { translationKey: "Pa", cloudStoreKey: "0" }, 
+            { translationKey: "hPa", cloudStoreKey: "1" }, 
+            { translationKey: "mmHg", cloudStoreKey: "2" }, 
+            { translationKey: "inHg", cloudStoreKey: "3" }
+        ],
         displayUnits: { "0": "Pa", "1": "hPa", "2": "mmHg", "3": "inHg" },
         value: (value, settings) => pressureToUserFormat(value, settings),
         valueWithUnit: (value, unitKey) => {
@@ -66,6 +82,7 @@ const unitHelper = {
     "movementCounter": {
         label: "movements",
         shortLabel: "movements",
+        infoLabel: "description_text_movement",
         unit: "",
         value: (value) => value,
         fromUser: (value) => value,
@@ -76,6 +93,7 @@ const unitHelper = {
         label: "battery_voltage",
         shortLabel: "battery",
         exportLabel: "voltage",
+        infoLabel: "description_text_battery_voltage",
         unit: "V",
         value: (value) => value / 1000,
         fromUser: (value) => value,
@@ -85,6 +103,7 @@ const unitHelper = {
     "accelerationX": {
         label: "acceleration_x",
         shortLabel: "acc_x",
+        infoLabel: "description_text_acceleration",
         unit: "g",
         value: (value) => value / 1000,
         fromUser: (value) => value,
@@ -94,6 +113,7 @@ const unitHelper = {
     "accelerationY": {
         label: "acceleration_y",
         shortLabel: "acc_y",
+        infoLabel: "description_text_acceleration",
         unit: "g",
         value: (value) => value / 1000,
         fromUser: (value) => value,
@@ -103,6 +123,7 @@ const unitHelper = {
     "accelerationZ": {
         label: "acceleration_z",
         shortLabel: "acc_z",
+        infoLabel: "description_text_acceleration",
         unit: "g",
         value: (value) => value / 1000,
         fromUser: (value) => value,
@@ -112,6 +133,7 @@ const unitHelper = {
     "rssi": {
         label: "signal_strength",
         shortLabel: "signal_strength",
+        infoLabel: "description_text_signal_strength",
         unit: "dBm",
         value: (value) => value,
         fromUser: (value) => value,
@@ -146,6 +168,7 @@ const unitHelper = {
         label: "measurement_sequence_number",
         shortLabel: "meas_seq_number",
         exportLabel: "measurement_sequence_number",
+        infoLabel: "description_text_measurement_sequence_number",
         unit: "",
         value: (value) => value,
         fromUser: (value) => value,
@@ -155,6 +178,7 @@ const unitHelper = {
     "pm10": {
         label: "particulate_matter_10",
         shortLabel: "pm10",
+        infoLabel: "description_text_pm",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
@@ -164,6 +188,7 @@ const unitHelper = {
     "pm25": {
         label: "particulate_matter_25",
         shortLabel: "pm25",
+        infoLabel: "description_text_pm",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
@@ -173,6 +198,7 @@ const unitHelper = {
     "pm40": {
         label: "particulate_matter_40",
         shortLabel: "pm40",
+        infoLabel: "description_text_pm",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
@@ -182,6 +208,7 @@ const unitHelper = {
     "pm100": {
         label: "particulate_matter_100",
         shortLabel: "pm100",
+        infoLabel: "description_text_pm",
         unit: "µg/m³",
         value: (value) => value,
         fromUser: (value) => value,
@@ -191,6 +218,7 @@ const unitHelper = {
     "co2": {
         label: "carbon_dioxide",
         shortLabel: "co2",
+        infoLabel: "description_text_co2",
         unit: "ppm",
         value: (value) => value,
         fromUser: (value) => value,
@@ -200,6 +228,7 @@ const unitHelper = {
     "voc": {
         label: "volatile_organic_compounds",
         shortLabel: "voc",
+        infoLabel: "description_text_voc",
         unit: "",
         units: [{ translationKey: "", cloudStoreKey: "index" }, { translationKey: "ethanol_mgm3", cloudStoreKey: "ethanol_mgm3" }, { translationKey: "isobutylene_mgm3", cloudStoreKey: "isobutylene_mgm3" }, { translationKey: "molhave_mgm3", cloudStoreKey: "molhave_mgm3" }],
         displayUnits: { index: "", ethanol_mgm3: "mg/m³", isobutylene_mgm3: "mg/m³", molhave_mgm3: "mg/m³" },
@@ -224,6 +253,7 @@ const unitHelper = {
     "nox": {
         label: "nitrogen_oxides",
         shortLabel: "nox",
+        infoLabel: "description_text_nox",
         value: (value) => value,
         fromUser: (value) => value,
         decimals: 0,
@@ -266,6 +296,7 @@ const unitHelper = {
     "aqi": {
         label: "air_quality",
         shortLabel: "air_quality",
+        infoLabel: "description_text_air_quality",
         unit: "/100",
         noUnitInExport: true,
         exportLabel: "air_quality",
@@ -412,6 +443,8 @@ export function getUnitHelper(key, plaintext, unit) {
         const setting = unit || settings?.UNIT_TEMPERATURE || "C";
         let thing = { ...unitHelper[key] };
         thing.unit = thing.displayUnits?.[setting] || thing.unit;
+        let currUnit = thing.units.find(u => u.cloudStoreKey === setting);
+        if (currUnit && currUnit.infoLabel) thing.infoLabel = currUnit.infoLabel;
         if (settings.ACCURACY_TEMPERATURE) thing.decimals = parseInt(settings.ACCURACY_TEMPERATURE)
         return thing;
     }
@@ -430,11 +463,13 @@ export function getUnitHelper(key, plaintext, unit) {
                 // absolute humidity
                 thing.label = variant.label;
                 thing.shortLabel = "abs_humidity";
+                thing.infoLabel = "description_text_humidity_absolute";
                 thing.unit = plaintext ? C.gm3Plain : C.gm3JSX;
             } else if (humSetting === "2") {
                 // dew point
                 thing.label = variant.label;
                 thing.shortLabel = "dewpoint";
+                thing.infoLabel = "description_text_humidity_dewpoint";
                 const tempSetting = settings?.UNIT_TEMPERATURE || "C";
                 thing.unit = tempSetting === "F" ? C.degreeF : tempSetting === "K" ? C.kelvin : C.degreeC;
             }

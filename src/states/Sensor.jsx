@@ -704,6 +704,7 @@ class Sensor extends Component {
                                     if (rawValue === undefined) return null;
                                     let unitDisplay = unitHelper.unit;
                                     let label = unitHelper.shortLabel || unitHelper.label;
+                                    let infoLabel = unitHelper.infoLabel;
                                     let showValue;
                                     if (unitKey && unitHelper.valueWithUnit) {
                                         showValue = localeNumber(
@@ -716,6 +717,7 @@ class Sensor extends Component {
                                         );
                                         const uDef = unitHelper.units?.find(u => u.cloudStoreKey === unitKey);
                                         if (uDef?.translationKey) unitDisplay = uDef.translationKey;
+                                        if (uDef?.infoLabel) infoLabel = uDef.infoLabel;
                                         let uhWithUnit = getUnitHelper(sensorType, false, unitKey);
                                         if (uhWithUnit) {
                                             showValue = localeNumber(
@@ -753,6 +755,7 @@ class Sensor extends Component {
                                             }
                                             alertTriggered={this.isAlertTriggerd(sensorType)}
                                             label={label}
+                                            infoLabel={infoLabel}
                                             sensorType={sensorType}
                                             unit={unitDisplay}
                                             selected={selected}
