@@ -33,11 +33,11 @@ let colors = {
     graphStrokeAlert: { dark: "#ce5325", light: "#f47546" },
     graphGrid: { dark: "rgba(68, 201, 185, 0.1)", light: "#083c3d1a" },
     sensorCardBackground: { light: undefined, dark: "#003434 !important" },
-    modalBackground: { light: "#ffffff !important", dark: "#00343480 !important" },
+    modalBackground: { light: "#ffffff !important", dark: "#002727 !important" },
     signinInputBg: { light: "white", dark: undefined },
     dashboardUpdatedAtColor: { light: "#1b4847", dark: "#ffffff" },
     toastErrorBackground: { light: "#f15a24", dark: "#f15a24" },
-    toastInfoBackground: { light: "#ffffffff", dark: "#003434" },
+    toastInfoBackground: { light: "#ffffffff", dark: "#002727" },
     toastSuccessBackground: { light: "#44c9b9", dark: "#44c9b9" },
     colorMenuActive: { light: "rgba(68, 201, 185, 0.6)", dark: "#0B2626" },
     colorMenuHover: { light: "rgba(68, 201, 185, 0.3)", dark: "#0B2626" },
@@ -236,11 +236,11 @@ export const ruuviTheme = extendTheme({
             },
             '.visibilitySettingsTitle': {
                 backgroundColor: colors.accordionPanel[props.colorMode],
-                padding: "10px",
+                padding: "10px 24px 10px 24px",
             },
             '.visibilitySettingsItem': {
                 backgroundColor: colors.accordionButton[props.colorMode],
-                padding: "10px"
+                padding: "10px 24px 10px 24px",
             },
             '.visibilityListIcons': {
                 color: colors.buttonBackground[props.colorMode],

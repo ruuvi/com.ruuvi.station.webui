@@ -492,6 +492,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                 opacity={useDefault ? 0.4 : 1}
                 pointerEvents={useDefault ? "none" : "auto"}
                 transition="opacity 0.2s ease-in-out"
+                mx={-6}
             >
                 <Box className="visibilitySettingsTitle">
                     <Text fontWeight="bold" fontSize="md">
