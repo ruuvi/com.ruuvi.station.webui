@@ -16,7 +16,7 @@ let colors = {
     accordionIcon: { light: undefined, dark: "#ffffff4d !important" },
     accordionButton: { light: "#ffffff", dark: "#003434" },
     accordionPanel: { light: "#f0faf900", dark: "#00343480" },
-    sensorValueBoxBg: { light: "#ffffff", dark: "#083c3d" },
+    sensorValueBoxBg: { light: "#ffffff", dark: "#003434" },
     sensorValueBoxIcon: { light: "rgba(68, 201, 185, 0.3)", dark: "#00ae9480" },
     sensorValueBoxActiveBorder: { light: "#1f9385", dark: "#1f9385" },
     menuButtonBg: { light: "white", dark: "#003434 !important" },
@@ -32,12 +32,12 @@ let colors = {
     graphFillAlertCard: { dark: "#836845", light: "#ffcaa6" },
     graphStrokeAlert: { dark: "#ce5325", light: "#f47546" },
     graphGrid: { dark: "rgba(68, 201, 185, 0.1)", light: "#083c3d1a" },
-    sensorCardBackground: { light: undefined, dark: "#083c3d !important" },
-    modalBackground: { light: undefined, dark: "#294d4d !important" },
+    sensorCardBackground: { light: undefined, dark: "#003434 !important" },
+    modalBackground: { light: "#ffffff !important", dark: "#00343480 !important" },
     signinInputBg: { light: "white", dark: undefined },
     dashboardUpdatedAtColor: { light: "#1b4847", dark: "#ffffff" },
     toastErrorBackground: { light: "#f15a24", dark: "#f15a24" },
-    toastInfoBackground: { light: "#e6f6f2", dark: "#003434" },
+    toastInfoBackground: { light: "#ffffffff", dark: "#003434" },
     toastSuccessBackground: { light: "#44c9b9", dark: "#44c9b9" },
     colorMenuActive: { light: "rgba(68, 201, 185, 0.6)", dark: "#0B2626" },
     colorMenuHover: { light: "rgba(68, 201, 185, 0.3)", dark: "#0B2626" },
@@ -241,8 +241,7 @@ export const ruuviTheme = extendTheme({
             '.visibilitySettingsItem': {
                 backgroundColor: colors.accordionButton[props.colorMode],
                 padding: "10px"
-            }
-            ,
+            },
             '.visibilityListIcons': {
                 color: colors.buttonBackground[props.colorMode],
             },
