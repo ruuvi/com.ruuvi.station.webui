@@ -112,8 +112,9 @@ const SensorCardMenu = ({
                     zIndex: 2,
                     backgroundColor: "transparent",
                     transition: "color 0.2s ease-in-out",
+                    cursor: disabled ? "default" : undefined,
                 }}
-                _hover={{ color: "primary" }}
+                _hover={{ color: disabled ? undefined : "primary"}}
                 disabled={disabled}
                 top={-4}
                 right={0}

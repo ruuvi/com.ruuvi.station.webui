@@ -467,7 +467,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                     {sensor && <SensorCard sensor={sensor}
                         visibleSensorTypes={useDefault ? "default" : visibleTypes}
                         graphType={null}
-                        disableMoreMenu={true}
+                        isPreview={true}
                     />}
                 </div>
             </Box>

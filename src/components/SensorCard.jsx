@@ -36,7 +36,7 @@ const SensorCard = ({
     share,
     rename,
     remove,
-    disableMoreMenu = false,
+    isPreview = false,
 }) => {
     const { t } = useTranslation();
     const [showRemoveDialog, setShowRemoveDialog] = useState(false);
@@ -234,7 +234,7 @@ const SensorCard = ({
 
     const moreMenu = (
         <SensorCardMenu
-            disabled={disableMoreMenu}
+            disabled={isPreview}
             move={move}
             simpleView={simpleView}
             sensor={sensor}
@@ -274,7 +274,12 @@ const SensorCard = ({
         />
     );
 
-    const cardShadow = { boxShadow: "0 2px 2px rgba(0,0,0,0.1), 0 1px 5px rgba(0,0,0,0.02)", borderRadius: "8px" };
+    const cardShadow = { borderRadius: "8px" };
+    if (isPreview) {
+        cardShadow.boxShadow = "0px 0px 10px #00000030";
+    } else {
+        cardShadow.boxShadow = "0 2px 2px rgba(0,0,0,0.1), 0 1px 5px rgba(0,0,0,0.02)";
+    }
 
     if (simpleView) {
         return (
