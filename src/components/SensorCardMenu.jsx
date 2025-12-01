@@ -23,6 +23,7 @@ const SensorCardMenu = ({
     move,
     remove,
     mt,
+    disabled = false,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -113,6 +114,7 @@ const SensorCardMenu = ({
                     transition: "color 0.2s ease-in-out",
                 }}
                 _hover={{ color: "primary" }}
+                disabled={disabled}
                 top={-4}
                 right={0}
                 height={55}

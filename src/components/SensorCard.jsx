@@ -36,6 +36,7 @@ const SensorCard = ({
     share,
     rename,
     remove,
+    disableMoreMenu = false,
 }) => {
     const { t } = useTranslation();
     const [showRemoveDialog, setShowRemoveDialog] = useState(false);
@@ -233,6 +234,7 @@ const SensorCard = ({
 
     const moreMenu = (
         <SensorCardMenu
+            disabled={disableMoreMenu}
             move={move}
             simpleView={simpleView}
             sensor={sensor}
