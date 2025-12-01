@@ -46,6 +46,8 @@ const infoLabel = {
     bottom: 8,
 }
 
+const borderRadius = 10
+
 export default function SensorReading(props) {
     const { isOpen, onOpen, onClose } = useDisclosure()
     let mode = useColorMode().colorMode;
@@ -62,7 +64,7 @@ export default function SensorReading(props) {
     val = getDisplayValue(props.label, val)
     return (
         <>
-            <Stat className="sensorValueBox" style={{ width, maxWidth: "100%", height: height, backgroundColor: props.alertTriggered ? ruuviTheme.colors.errorBackground : undefined, border: props.selected ? props.alertTriggered ? "2px solid " + ruuviTheme.colors.error : "2px solid " + ruuviTheme.newColors.sensorValueBoxActiveBorder[mode] : "2px solid rgba(0,0,0,0)", borderRadius: "10px", cursor: "pointer" }} onClick={props.onClick}>
+            <Stat className="sensorValueBox" style={{ width, maxWidth: "100%", height: height, backgroundColor: props.alertTriggered ? ruuviTheme.colors.errorBackground : undefined, border: props.selected ? props.alertTriggered ? "2px solid " + ruuviTheme.colors.error : "2px solid " + ruuviTheme.newColors.sensorValueBoxActiveBorder[mode] : "2px solid rgba(0,0,0,0)", borderRadius: borderRadius, cursor: "pointer" }} onClick={props.onClick}>
                 {infoButtonText &&
                     <IconButton style={{ position: "absolute", right: 0, margin: -8 }} variant="ghost" onClick={e => { e.stopPropagation(); onOpen() }}>
                         <MdInfo className="buttonSideIcon" size="16" />
@@ -77,10 +79,11 @@ export default function SensorReading(props) {
                     {props.info && <span style={{ ...labelStyle, ...infoLabel }}>({t(props.info)})</span>}
                 </div>
             </Stat >
-            <Modal isOpen={isOpen} onClose={onClose} motionPreset="slideInBottom" scrollBehavior="inside" size="xl">
+            <Modal isOpen={isOpen} onClose={onClose} isCentered={true} size="xl">
                 <ModalOverlay />
-                <ModalContent marginTop="auto" marginBottom={10}
-                bg={ruuviTheme.colors.toast.info[colorMode]}
+                <ModalContent marginTop="auto" 
+                    borderRadius={borderRadius}
+                    bg={ruuviTheme.colors.toast.info[colorMode]}
                 >
                     <ModalHeader>{typeof props.label === "object" ? props.label : t(props.label)}</ModalHeader>
                     <ModalCloseButton />
