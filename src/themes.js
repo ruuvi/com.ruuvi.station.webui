@@ -235,15 +235,19 @@ export const ruuviTheme = extendTheme({
                 fontFamily: "mulish",
             },
             '.visibilitySettingsTitle': {
-                backgroundColor: colors.accordionPanel[props.colorMode],
+                backgroundColor: colors.accordionButton[props.colorMode],
+                lineHeight: "2",
                 padding: "10px 24px 10px 24px",
             },
             '.visibilitySettingsItem': {
-                backgroundColor: colors.accordionButton[props.colorMode],
+                backgroundColor: colors.accordionPanel[props.colorMode],
                 padding: "10px 24px 10px 24px",
             },
             '.visibilityListIcons': {
                 color: colors.buttonBackground[props.colorMode],
+            },
+            '.visibilitSettingList': {
+                backgroundColor: colors.bodyBg[props.colorMode],
             },
         })
     },

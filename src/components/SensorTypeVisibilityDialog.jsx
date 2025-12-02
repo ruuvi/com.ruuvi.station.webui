@@ -10,7 +10,8 @@ import {
     IconButton,
     useColorModeValue,
     VStack,
-    HStack
+    HStack,
+    Divider
 } from "@chakra-ui/react";
 import { withTranslation } from 'react-i18next';
 import RDialog from "./RDialog";
@@ -487,6 +488,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             <VStack
                 align="stretch"
                 overflowY="auto"
+                className="visibilitSettingList"
                 gap={0}
                 borderRadius={8}
                 opacity={useDefault ? 0.4 : 1}
@@ -503,33 +505,35 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                     <Box>
                         <List spacing={0}>
                             {visibleTypes.map((sensorType, index) => (
-                                <ListItem
-                                    key={`selected-${sensorType}`}
-                                    className="visibilitySettingsItem"
-                                    bg={dragOverIndex === index ? dragOverBg : undefined}
-                                    draggable
-                                    onDragStart={(e) => handleDragStart(e, index)}
-                                    onDragOver={(e) => handleDragOver(e, index)}
-                                    onDragEnter={handleDragEnter}
-                                    onDragLeave={handleDragLeave}
-                                    onDrop={(e) => handleDrop(e, index)}
-                                    onDragEnd={handleDragEnd}
-                                    cursor="move"
-                                >
-                                    <Flex justify="space-between" align="center">
-                                        <HStack spacing={3}>
-                                            <MdUnfoldMore opacity={0.6} className="visibilityListIcons" />
-                                            {sensorTypeLeftSide(sensorType)}
-                                        </HStack>
-                                        <HStack spacing={2}>
-                                            <IconButton
-                                                icon={<MdClose className="visibilityListIcons" />}
-                                                variant="ghost"
-                                                onClick={() => toggleSensorType(sensorType)}
-                                            />
-                                        </HStack>
-                                    </Flex>
-                                </ListItem>
+                                <React.Fragment key={`selected-frag-${sensorType}`}>
+                                    <ListItem
+                                        className="visibilitySettingsItem"
+                                        bg={dragOverIndex === index ? dragOverBg : undefined}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, index)}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDragEnter={handleDragEnter}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, index)}
+                                        onDragEnd={handleDragEnd}
+                                        cursor="move"
+                                    >
+                                        <Flex justify="space-between" align="center">
+                                            <HStack spacing={3}>
+                                                <MdUnfoldMore opacity={0.6} className="visibilityListIcons" />
+                                                {sensorTypeLeftSide(sensorType)}
+                                            </HStack>
+                                            <HStack spacing={2}>
+                                                <IconButton
+                                                    icon={<MdClose className="visibilityListIcons" />}
+                                                    variant="ghost"
+                                                    onClick={() => toggleSensorType(sensorType)}
+                                                />
+                                            </HStack>
+                                        </Flex>
+                                    </ListItem>
+                                    {index < visibleTypes.length - 1 && <Divider />}
+                                </React.Fragment>
                             ))}
                         </List>
                     </Box>
@@ -543,17 +547,22 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                             </Text>
                         </Box>
                         <List spacing={0}>
-                            {unselectedSensors.map(sensorType => {
-                                return <ListItem key={`unselected-${sensorType}`} className="visibilitySettingsItem">
-                                    <Flex justify="space-between" align="center">
-                                        {sensorTypeLeftSide(sensorType)}
-                                        <IconButton
-                                            icon={<MdAdd className="visibilityListIcons" />}
-                                            variant="ghost"
-                                            onClick={() => toggleSensorType(sensorType)}
-                                        />
-                                    </Flex>
-                                </ListItem>
+                            {unselectedSensors.map((sensorType, idx) => {
+                                return (
+                                    <React.Fragment key={`unselected-frag-${sensorType}`}>
+                                        <ListItem className="visibilitySettingsItem">
+                                            <Flex justify="space-between" align="center">
+                                                {sensorTypeLeftSide(sensorType)}
+                                                <IconButton
+                                                    icon={<MdAdd className="visibilityListIcons" />}
+                                                    variant="ghost"
+                                                    onClick={() => toggleSensorType(sensorType)}
+                                                />
+                                            </Flex>
+                                        </ListItem>
+                                        {idx < unselectedSensors.length - 1 && <Divider />}
+                                    </React.Fragment>
+                                )
                             })}
                         </List>
                     </Box>
