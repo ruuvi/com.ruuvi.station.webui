@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, Box, Heading, ListItem, UnorderedList } from '@chakra-ui/react';
+import { Text, Box, Heading, ListItem, UnorderedList, Link } from '@chakra-ui/react';
 
 const FormattedText = ({ text, ...props }) => {
     if (!text) return null;
@@ -8,45 +8,77 @@ const FormattedText = ({ text, ...props }) => {
 
     const parseInlineFormatting = (content, keyPrefix = '') => {
         content = unescapePercent(content);
-        // [b]...[/b] tags
+        // Parse [b]...[/b] and [link url=...]...[/link] tags
         const parts = [];
         let remaining = content;
         let partIndex = 0;
 
+        // Regex patterns for inline tags
+        const boldRegex = /\[b\](.*?)\[\/b\]/;
+        const linkRegex = /\[link url=([^\]]+)\](.*?)\[\/link\]/;
+
         while (remaining.length > 0) {
-            const boldStart = remaining.indexOf('[b]');
-            
-            if (boldStart === -1) {
-                // no more bold tags, add remaining text
+            const boldMatch = remaining.match(boldRegex);
+            const linkMatch = remaining.match(linkRegex);
+
+            // Find the earliest match
+            let earliestMatch = null;
+            let matchType = null;
+
+            if (boldMatch && linkMatch) {
+                if (boldMatch.index <= linkMatch.index) {
+                    earliestMatch = boldMatch;
+                    matchType = 'bold';
+                } else {
+                    earliestMatch = linkMatch;
+                    matchType = 'link';
+                }
+            } else if (boldMatch) {
+                earliestMatch = boldMatch;
+                matchType = 'bold';
+            } else if (linkMatch) {
+                earliestMatch = linkMatch;
+                matchType = 'link';
+            }
+
+            if (!earliestMatch) {
+                // No more tags, add remaining text
                 if (remaining) {
                     parts.push(remaining);
                 }
                 break;
             }
 
-            // add text before bold tag
-            if (boldStart > 0) {
-                parts.push(remaining.substring(0, boldStart));
+            // Add text before the tag
+            if (earliestMatch.index > 0) {
+                parts.push(remaining.substring(0, earliestMatch.index));
             }
 
-            // find closing tag
-            const boldEnd = remaining.indexOf('[/b]', boldStart);
-            if (boldEnd === -1) {
-                // no closing tag, treat as regular text
-                parts.push(remaining);
-                break;
+            if (matchType === 'bold') {
+                parts.push(
+                    <Text as="span" fontWeight="bold" key={`${keyPrefix}-bold-${partIndex}`}>
+                        {earliestMatch[1]}
+                    </Text>
+                );
+                remaining = remaining.substring(earliestMatch.index + earliestMatch[0].length);
+            } else if (matchType === 'link') {
+                const url = earliestMatch[1];
+                const linkText = earliestMatch[2];
+                parts.push(
+                    <Link 
+                        href={url} 
+                        isExternal 
+                        color="primary" 
+                        textDecoration="underline"
+                        key={`${keyPrefix}-link-${partIndex}`}
+                    >
+                        {linkText}
+                    </Link>
+                );
+                remaining = remaining.substring(earliestMatch.index + earliestMatch[0].length);
             }
 
-            // extract bold content
-            const boldContent = remaining.substring(boldStart + 3, boldEnd);
-            parts.push(
-                <Text as="span" fontWeight="bold" key={`${keyPrefix}-bold-${partIndex}`}>
-                    {boldContent}
-                </Text>
-            );
             partIndex++;
-
-            remaining = remaining.substring(boldEnd + 4);
         }
 
         return parts;
