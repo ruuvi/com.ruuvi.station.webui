@@ -2,6 +2,8 @@ import { useMemo } from "react";
 import {
     DEFAULT_VISIBLE_SENSOR_TYPES,
     getUnitHelper,
+    getSensorTypeOnly,
+    getUnitOnly,
 } from "../../UnitHelper";
 import { visibilityFromCloudToWeb } from "../../utils/cloudTranslator";
 
@@ -53,6 +55,16 @@ const useSensorFields = (sensor, latestReading, visibleSensorTypes, graphType) =
         });
     }, [latestReading, sensor.settings, visibleSensorTypes]);
 
+    // Parse graphType to extract sensor type and unit key for humidity variants
+    const parsedGraphType = useMemo(() => {
+        if (graphType === null) return { sensorType: null, unitKey: null };
+        const sensorType = getSensorTypeOnly(graphType);
+        // Only extract unitKey if there's actually an underscore in the graphType
+        const hasUnitSuffix = graphType.includes("_");
+        const unitKey = hasUnitSuffix ? getUnitOnly(graphType) : null;
+        return { sensorType, unitKey };
+    }, [graphType]);
+
     const mainStat = useMemo(() => {
         if (graphType === null) {
             if (sensorMainFields && sensorMainFields.length > 0) {
@@ -61,8 +73,9 @@ const useSensorFields = (sensor, latestReading, visibleSensorTypes, graphType) =
             }
             return "temperature";
         }
-        return graphType || "temperature";
-    }, [graphType, sensorMainFields]);
+        // Use the sensor type only (e.g., "humidity" from "humidity_0")
+        return parsedGraphType.sensorType || "temperature";
+    }, [graphType, sensorMainFields, parsedGraphType.sensorType]);
 
     const mainFieldConfig = useMemo(
         () =>
@@ -72,10 +85,14 @@ const useSensorFields = (sensor, latestReading, visibleSensorTypes, graphType) =
         [mainStat, sensorMainFields],
     );
 
-    const mainStatUnitKey = useMemo(
-        () => (Array.isArray(mainFieldConfig) ? mainFieldConfig[1] : null),
-        [mainFieldConfig],
-    );
+    const mainStatUnitKey = useMemo(() => {
+        // If graphType specifies a unit key (e.g., humidity_0 -> "0"), use it
+        if (parsedGraphType.unitKey !== null) {
+            return parsedGraphType.unitKey;
+        }
+        // Otherwise, use the unit key from the field config
+        return Array.isArray(mainFieldConfig) ? mainFieldConfig[1] : null;
+    }, [mainFieldConfig, parsedGraphType.unitKey]);
 
     const smallDataFields = useMemo(() => {
         if (!sensorMainFields.length || !mainFieldConfig) return sensorMainFields;

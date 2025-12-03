@@ -66,7 +66,18 @@ export default function SensorTypePicker(props) {
         }
     }
 
+    // Expand humidity options to show relative, absolute, and dewpoint separately on dashboard
     if (props.dashboard) {
+        const humidityIndex = opts.findIndex(x => getSensorTypeOnly(x) === "humidity");
+        if (humidityIndex !== -1) {
+            const humidityUnits = allUnits["humidity"]?.units;
+            if (humidityUnits) {
+                // Replace the single humidity option with expanded variants
+                opts.splice(humidityIndex, 1, 
+                    ...humidityUnits.map(u => `humidity_${u.cloudStoreKey}`)
+                );
+            }
+        }
         opts = [null, ...opts];
     }
 
@@ -88,8 +99,18 @@ export default function SensorTypePicker(props) {
 
         let sensorType = getSensorTypeOnly(value)
         let uh = getUnitHelper(sensorType, true)
-        if (props.allUnits) {
-            let unit = getUnitOnly(value)
+        let unit = getUnitOnly(value)
+
+        // Handle humidity variants on dashboard (humidity_0, humidity_1, humidity_2)
+        if (props.dashboard && sensorType === "humidity" && unit) {
+            const displayVariant = uh.displayVariants?.[unit];
+            if (displayVariant) {
+                label = t(displayVariant.label);
+            } else {
+                let unitTranslationKey = uh.units?.find(x => x.cloudStoreKey === unit)?.translationKey || ""
+                label = t("humidity") + (unitTranslationKey ? ` (${t(unitTranslationKey)})` : "")
+            }
+        } else if (props.allUnits) {
             if (sensorType === "humidity" && unit === "2") {
                 let unitTranslationKey = uh.units.find(x => x.cloudStoreKey === unit)?.translationKey
                 label = t(unitTranslationKey) + " (" + t(getUnitHelper("temperature").unit) + ")"
@@ -133,6 +154,9 @@ export default function SensorTypePicker(props) {
                         if (op === null) {
                             props.onChange(null);
                         } else if (props.allUnits) {
+                            props.onChange(op);
+                        } else if (props.dashboard && getSensorTypeOnly(op) === "humidity") {
+                            // For humidity on dashboard, pass the full value with unit suffix
                             props.onChange(op);
                         } else {
                             props.onChange(getSensorTypeOnly(op));

@@ -120,17 +120,16 @@ const SensorCardDetailed = ({
                             {latestReading && (
                                 <Box>
                                     {(() => {
-                                        const unitHelper = getUnitHelper(mainStat);
+                                        const unitHelper = getUnitHelper(mainStat, true);
                                         let showValue;
                                         let unit = unitHelper.unit;
                                         let label = unitHelper.shortLabel || unitHelper.label;
 
                                         if (
-                                            Array.isArray(mainFieldConfig) &&
-                                            mainFieldConfig[1] &&
+                                            mainStatUnitKey &&
                                             unitHelper.valueWithUnit
                                         ) {
-                                            const unitKey = mainFieldConfig[1];
+                                            const unitKey = mainStatUnitKey;
                                             showValue = localeNumber(
                                                 unitHelper.valueWithUnit(
                                                     latestReading[mainStat],
@@ -147,7 +146,7 @@ const SensorCardDetailed = ({
 
                                             const helperWithUnit = getUnitHelper(
                                                 mainStat,
-                                                false,
+                                                true,
                                                 unitKey,
                                             );
                                             if (helperWithUnit) {
