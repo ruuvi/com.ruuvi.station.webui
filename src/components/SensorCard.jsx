@@ -26,6 +26,7 @@ const lastUpdatedText = {
 
 const SensorCard = ({
     sensor,
+    settingsVersion,
     cardType,
     size,
     columnCount = 1,
@@ -62,7 +63,7 @@ const SensorCard = ({
         mainFieldConfig,
         mainStatUnitKey,
         smallDataFields,
-    } = useSensorFields(sensor, latestReading, visibleSensorTypes, graphType);
+    } = useSensorFields(sensor, latestReading, visibleSensorTypes, graphType, settingsVersion);
 
     const userEmail = useMemo(() => new NetworkApi().getUser().email, []);
     const isSharedSensor = userEmail !== sensor.owner;
@@ -307,6 +308,7 @@ const SensorCard = ({
         <Box style={cardShadow}>
             <SensorCardDetailed
                 sensor={sensor}
+                settingsVersion={settingsVersion}
                 size={size}
                 showImage={showImage}
                 showGraph={showGraph}

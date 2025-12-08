@@ -24,7 +24,7 @@ export const parseDisplayOrderToWebTypes = (displayOrder) => {
     }
 };
 
-const useSensorFields = (sensor, latestReading, visibleSensorTypes, graphType) => {
+const useSensorFields = (sensor, latestReading, visibleSensorTypes, graphType, settingsVersion) => {
     const sensorMainFields = useMemo(() => {
         if (visibleSensorTypes && visibleSensorTypes !== "default") {
             return parseDisplayOrderToWebTypes(
@@ -53,7 +53,7 @@ const useSensorFields = (sensor, latestReading, visibleSensorTypes, graphType) =
             const typeName = Array.isArray(type) ? type[0] : type;
             return allReadingKeys.includes(typeName) && getUnitHelper(typeName).graphable;
         });
-    }, [latestReading, sensor.settings, visibleSensorTypes]);
+    }, [latestReading, sensor.settings, visibleSensorTypes, settingsVersion]);
 
     // Parse graphType to extract sensor type and unit key for humidity variants
     const parsedGraphType = useMemo(() => {

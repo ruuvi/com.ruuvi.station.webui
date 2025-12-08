@@ -229,7 +229,10 @@ export default function App() {
     })()
   }, [subscription])
 
-  const forceUpdate = React.useCallback(() => updateState({}), []);
+  const forceUpdate = React.useCallback(() => {
+    updateState({});
+    setSettingsVersion(v => v + 1);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -248,6 +251,7 @@ export default function App() {
 
   let store = new Store();
   const [, updateState] = React.useState();
+  const [settingsVersion, setSettingsVersion] = React.useState(0);
   if (!user) {
     //goToLoginPage()
     return <ChakraProvider theme={ruuviTheme} style={{ minHeight: "100%" }}>
@@ -299,8 +303,8 @@ export default function App() {
         <div>
           <Routes>
             <Route path="/shares" element={<ShareCenter showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
-            <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
-            <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
+            <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} settingsVersion={settingsVersion} />} />
+            <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} settingsVersion={settingsVersion} />} />
             <Route path="/compare" element={<SensorCompare />} />
           </Routes>
           <div style={bottomText}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi" : "https://ruuvi.com/"} target="_blank" rel="noreferrer">ruuvi.com</a></div>

@@ -14,6 +14,7 @@ import bglayer from "../img/bg-layer.png";
 
 const SensorCardDetailed = ({
     sensor,
+    settingsVersion,
     size,
     showImage,
     showGraph,
@@ -318,6 +319,7 @@ const SensorCardDetailed = ({
                                                             getAlertState={getAlertState}
                                                             options={{ pt: 2 }}
                                                             t={t}
+                                                            settingsVersion={settingsVersion}
                                                         />
                                                     </div>
                                                 </Box>

@@ -38,6 +38,7 @@ const SmallStats = ({
     options = {},
     getAlertState,
     t,
+    settingsVersion,
 }) => {
     if (!latestReading || !fields || !fields.length) return null;
 

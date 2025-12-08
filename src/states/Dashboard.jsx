@@ -488,6 +488,7 @@ class Dashboard extends Component {
                     style={{ cursor: 'pointer' }}
                 >
                     <SensorCard sensor={x}
+                        settingsVersion={this.props.settingsVersion}
                         size={size}
                         columnCount={columnCount}
                         dataFrom={this.state.from}
