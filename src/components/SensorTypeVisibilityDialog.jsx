@@ -464,12 +464,28 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             </Box>
 
             <Box mb={4}>
-                <div style={{ width: "75%", margin: "0 auto" }}>
-                    {sensor && <SensorCard sensor={sensor}
-                        visibleSensorTypes={useDefault ? "default" : visibleTypes}
-                        graphType={null}
-                        isPreview={true}
-                    />}
+                <div style={{ width: "75%", margin: "0 auto", position: "relative" }}>
+                    <div
+                        style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            zIndex: 2,
+                            background: "transparent",
+                            pointerEvents: "auto",
+                        }}
+                        tabIndex={0}
+                        aria-hidden={true}
+                    />
+                    <div style={{ position: "relative", zIndex: 1 }}>
+                        {sensor && <SensorCard sensor={sensor}
+                            visibleSensorTypes={useDefault ? "default" : visibleTypes}
+                            graphType={null}
+                            isPreview={true}
+                        />}
+                    </div>
                 </div>
             </Box>
 
