@@ -541,6 +541,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                                             </HStack>
                                             <HStack spacing={2}>
                                                 <IconButton
+                                                    isRound={true}
                                                     icon={<MdClose className="visibilityListIcons" />}
                                                     variant="ghost"
                                                     onClick={() => toggleSensorType(sensorType)}

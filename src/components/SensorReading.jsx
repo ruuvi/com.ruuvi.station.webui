@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react"
 import { ruuviTheme } from "../themes";
 import BigValue from "./BigValue";
-import { MdInfo } from "react-icons/md";
+import { MdInfo, MdClose } from "react-icons/md";
 import { useTranslation } from "react-i18next";
 import { addNewlines } from "../TextHelper";
 import { getDisplayValue } from "../UnitHelper";
@@ -86,7 +86,9 @@ export default function SensorReading(props) {
                     bg={ruuviTheme.colors.toast.info[colorMode]}
                 >
                     <ModalHeader>{typeof props.label === "object" ? props.label : t(props.label)}</ModalHeader>
-                    <ModalCloseButton />
+                    <ModalCloseButton style={{ margin: 15 }}>
+                        <IconButton isRound={true} style={{background: "transparent"}} className="navButton" variant="nav"><MdClose /></IconButton>
+                    </ModalCloseButton>
                     <ModalBody>
                         <FormattedText text={infoButtonText} />
                     </ModalBody>
