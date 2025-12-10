@@ -89,7 +89,7 @@ export default function SensorReading(props) {
                     <ModalCloseButton style={{ margin: 15 }}>
                         <IconButton isRound={true} style={{background: "transparent"}} className="navButton" variant="nav"><MdClose /></IconButton>
                     </ModalCloseButton>
-                    <ModalBody>
+                    <ModalBody pb={6}>
                         <FormattedText text={infoButtonText} />
                     </ModalBody>
                 </ModalContent>
