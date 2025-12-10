@@ -36,10 +36,15 @@ code {
 }
 
 *:focus {
-  box-shadow: none !important;
+  outline: none !important;
 }
 
 *[data-focus] {
+  outline: none !important;
+}
+
+/* Use focus-visible for keyboard focus indication */
+*:focus-visible {
   box-shadow: none !important;
 }
 
@@ -49,7 +54,6 @@ code {
 
 :focus {
   outline: none;
-  box-shadow: none !important;
 }
 
 

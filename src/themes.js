@@ -384,7 +384,8 @@ export const ruuviTheme = extendTheme({
                 },
                 dialog: {
                     fontFamily: "Mulish",
-                    bg: colors.modalBackground[props.colorMode]
+                    bg: colors.modalBackground[props.colorMode],
+                    boxShadow: props.colorMode === "dark" ? "0px 0px 10px #00000050 !important" : "0px 0px 10px #00000030 !important",
                 }
             }),
         },
