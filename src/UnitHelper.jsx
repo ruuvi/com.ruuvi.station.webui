@@ -52,7 +52,21 @@ const unitHelper = {
         },
         value: (value, temperature, settings) => humidityToUserFormat(value, temperature, settings),
         valueWithUnit: (value, unitKey, temperature) => {
-            return humidityToUserFormat(value, temperature, { UNIT_HUMIDITY: unitKey });
+            let settings = { UNIT_HUMIDITY: unitKey };
+
+            try {
+                const stored = localStorage.getItem("settings");
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (parsed.UNIT_TEMPERATURE) {
+                        settings.UNIT_TEMPERATURE = parsed.UNIT_TEMPERATURE;
+                    }
+                }
+            } catch (e) {
+                // will default to Celsius
+            }
+
+            return humidityToUserFormat(value, temperature, settings);
         },
         fromUser: (value) => value,
         decimals: 2,
