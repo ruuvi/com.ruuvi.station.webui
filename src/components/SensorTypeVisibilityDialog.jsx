@@ -224,13 +224,21 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
         const isRemoving = visibleTypes.includes(sensorType);
 
         if (isRemoving) {
+            // Prevent removing the last visible measurement
+            if (visibleTypes.length <= 1) {
+                notify.error(t("visible_measurements_last_element_message"));
+                return;
+            }
+
             const enabledAlerts = hasEnabledAlerts(sensorType);
 
             if (enabledAlerts.length > 0) {
+                const measurementName = getSensorDisplayName(sensorType);
                 setConfirmationDialog({
                     open: true,
                     sensorType: sensorType,
-                    affectedAlerts: enabledAlerts
+                    affectedAlerts: enabledAlerts,
+                    measurementName: measurementName
                 });
                 return;
             }
@@ -348,11 +356,25 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             const orphanedAlerts = getOrphanedAlerts(defaultTypes);
 
             if (orphanedAlerts.length > 0) {
+                const measurementNames = [...new Set(orphanedAlerts.map(alert => {
+                    const correspondingType = visibleTypes.find(vt => {
+                        const webType = getWebTypeFromSensorType(vt);
+                        const alertType = getAlertTypeFromSensorType(webType);
+                        return alertType === alert.type;
+                    });
+                    return correspondingType ? getSensorDisplayName(correspondingType) : null;
+                }).filter(Boolean))];
+
+                const message = measurementNames.length === 1
+                    ? t("visible_measurements_change_use_default_confirmation").replace("{%@^%1$s}", measurementNames[0])
+                    : t("visible_measurements_change_use_default_multiple_alerts_confirmation").replace("{%@^%1$s}", measurementNames.join(", "));
+
                 setConfirmationDialog({
                     open: true,
                     sensorType: null,
                     affectedAlerts: orphanedAlerts,
-                    alertsToDisable: orphanedAlerts
+                    alertsToDisable: orphanedAlerts,
+                    customMessage: message
                 });
                 return;
             }
@@ -622,9 +644,12 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             <ConfirmationDialog
                 open={confirmationDialog.open}
                 title="dialog_are_you_sure"
-                description={confirmationDialog.sensorType || confirmationDialog.alertsToDisable ?
-                    t("hide_sensor_type_alert_warning") :
-                    ""
+                description={
+                    confirmationDialog.customMessage
+                        ? confirmationDialog.customMessage
+                        : confirmationDialog.sensorType
+                            ? t("visible_measurements_active_alert_confirmation").replace("{%@^%1$s}", confirmationDialog.measurementName || "")
+                            : ""
                 }
                 onClose={handleConfirmHideSensorType}
             />
