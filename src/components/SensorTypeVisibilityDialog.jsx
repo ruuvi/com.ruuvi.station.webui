@@ -209,6 +209,15 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                 console.error('Failed to disable alert:', error);
             }
         }
+
+        const updatedSensor = { ...sensor };
+        updatedSensor.alerts = updatedSensor.alerts.map(alert => {
+            if (enabledAlerts.some(ea => ea.type === alert.type && ea.sensor === alert.sensor)) {
+                return { ...alert, enabled: false };
+            }
+            return alert;
+        });
+        updateSensor(updatedSensor);
     };
 
     const toggleSensorType = (sensorType) => {
@@ -268,6 +277,17 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                         console.error('Failed to disable alert:', error);
                     }
                 }
+
+                // Update local sensor state to reflect disabled alerts
+                const updatedSensor = { ...sensor };
+                updatedSensor.alerts = updatedSensor.alerts.map(alert => {
+                    if (alertsToDisable.some(ad => ad.type === alert.type && ad.sensor === alert.sensor)) {
+                        return { ...alert, enabled: false };
+                    }
+                    return alert;
+                });
+                updateSensor(updatedSensor);
+
                 setUseDefault(true);
             }
         }
