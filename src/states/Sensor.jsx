@@ -1055,23 +1055,9 @@ class Sensor extends Component {
                                             let readings = this.getLatestReadingFromProps();
                                             if (!readings) return null;
 
-                                            const allReadingKeys = Object.keys(readings);
-                                            const visibleTypes = this.getSensorMainFields().map(f => Array.isArray(f) ? f[0] : f)
-                                            const DONTT_SHOW_TYPES = ["txPower", "mac", "flags", "timestamp"];
+                                            const moreInfoFields = ["mac", "dataFormat", "rssi", "measurementSequenceNumber"];
 
-                                            const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0
-                                                ? visibleTypes
-                                                : DEFAULT_VISIBLE_SENSOR_TYPES;
-
-                                            const originalSensorInfoOther = ["mac", "dataFormat", "txPower"];
-                                            const dynamicSensorInfoOther = allReadingKeys.filter(key =>
-                                                !effectiveVisibleTypes.includes(key) &&
-                                                !DONTT_SHOW_TYPES.includes(key)
-                                            ).concat(originalSensorInfoOther.filter(key => !DONTT_SHOW_TYPES.includes(key)));
-
-                                            const uniqueSensorInfoOther = [...new Set(dynamicSensorInfoOther)];
-
-                                            return uniqueSensorInfoOther.map((order, i) => {
+                                            return moreInfoFields.map((order, i) => {
                                                 var x = this.getLatestReading(true).find(x => x.key === order);
                                                 if (order === "mac") {
                                                     x = { key: "mac", value: this.props.sensor.sensor }
@@ -1090,26 +1076,11 @@ class Sensor extends Component {
                                                                 </tr>
                                                             </tbody>
                                                         </table>
-                                                        {i !== uniqueSensorInfoOther.length - 1 && <hr />}
+                                                        {i !== moreInfoFields.length - 1 && <hr />}
                                                     </ListItem>
                                                 )
                                             });
                                         })()}
-                                        {this.getLatestReading(true).find(x => x.key === "flags") && <ListItem>
-                                            <hr />
-                                            <table style={accordionContent}>
-                                                <tbody>
-                                                    <tr>
-                                                        <td style={detailedTitle}> {t("flags")}</td>
-                                                        <td style={detailedText}>
-                                                            <pre>
-                                                                {JSON.stringify(this.getLatestReading(true).find(x => x.key === "flags").value, null, 2)}
-                                                            </pre>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </ListItem>}
 
                                     </List>
                                 </AccordionPanel>
