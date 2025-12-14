@@ -132,11 +132,70 @@ const FormattedText = ({ text, ...props }) => {
                 return;
             }
 
-            // check if paragraph contains bullet points
-            const lines = trimmedParagraph.split('\n');
-            const hasBullets = lines.some(line => getBulletType(line) !== null);
+            const hasListTags = /\[li2?\]/.test(trimmedParagraph);
 
-            if (hasBullets) {
+            if (hasListTags) {
+                const liRegex = /\[li\](.*?)\[\/li\]|\[li2\](.*?)\[\/li2\]/g;
+                let match;
+                let currentPrimaryList = [];
+                let currentSecondaryList = [];
+
+                while ((match = liRegex.exec(trimmedParagraph)) !== null) {
+                    if (match[1] !== undefined) {
+                        // [li] tag - primary item
+                        if (currentSecondaryList.length > 0) {
+                            // Attach secondary list to last primary item
+                            if (currentPrimaryList.length > 0) {
+                                const lastItem = currentPrimaryList[currentPrimaryList.length - 1];
+                                currentPrimaryList[currentPrimaryList.length - 1] = {
+                                    ...lastItem,
+                                    nested: [...currentSecondaryList]
+                                };
+                            }
+                            currentSecondaryList = [];
+                        }
+                        currentPrimaryList.push({ content: match[1], nested: [] });
+                    } else if (match[2] !== undefined) {
+                        // [li2] tag - secondary item
+                        currentSecondaryList.push(match[2]);
+                    }
+                }
+
+                if (currentSecondaryList.length > 0 && currentPrimaryList.length > 0) {
+                    const lastItem = currentPrimaryList[currentPrimaryList.length - 1];
+                    currentPrimaryList[currentPrimaryList.length - 1] = {
+                        ...lastItem,
+                        nested: [...currentSecondaryList]
+                    };
+                }
+
+                if (currentPrimaryList.length > 0) {
+                    elements.push(
+                        <UnorderedList key={`element-${elementIndex}`} mb={2} ml={4}>
+                            {currentPrimaryList.map((item, i) => (
+                                <ListItem key={i}>
+                                    {parseInlineFormatting(item.content, `${elementIndex}-li-${i}`)}
+                                    {item.nested && item.nested.length > 0 && (
+                                        <UnorderedList mt={1} ml={4} styleType="circle">
+                                            {item.nested.map((nestedItem, j) => (
+                                                <ListItem key={j}>
+                                                    {parseInlineFormatting(nestedItem, `${elementIndex}-li-${i}-nested-${j}`)}
+                                                </ListItem>
+                                            ))}
+                                        </UnorderedList>
+                                    )}
+                                </ListItem>
+                            ))}
+                        </UnorderedList>
+                    );
+                    elementIndex++;
+                }
+            } else {
+                // check if paragraph contains bullet points
+                const lines = trimmedParagraph.split('\n');
+                const hasBullets = lines.some(line => getBulletType(line) !== null);
+
+                if (hasBullets) {
                 let currentPrimaryList = [];
                 let currentSecondaryList = [];
                 let nonBulletLines = [];
@@ -215,21 +274,22 @@ const FormattedText = ({ text, ...props }) => {
                     }
                 });
 
-                flushNonBulletLines();
-                flushPrimaryList();
-            } else {
-                // regular paragraph
-                elements.push(
-                    <Text key={`element-${elementIndex}`} mb={2}>
-                        {lines.map((line, i) => (
-                            <React.Fragment key={i}>
-                                {parseInlineFormatting(line.trim(), `${elementIndex}-${i}`)}
-                                {i < lines.length - 1 && <br />}
-                            </React.Fragment>
-                        ))}
-                    </Text>
-                );
-                elementIndex++;
+                    flushNonBulletLines();
+                    flushPrimaryList();
+                } else {
+                    // regular paragraph
+                    elements.push(
+                        <Text key={`element-${elementIndex}`} mb={2}>
+                            {lines.map((line, i) => (
+                                <React.Fragment key={i}>
+                                    {parseInlineFormatting(line.trim(), `${elementIndex}-${i}`)}
+                                    {i < lines.length - 1 && <br />}
+                                </React.Fragment>
+                            ))}
+                        </Text>
+                    );
+                    elementIndex++;
+                }
             }
         });
 
