@@ -111,25 +111,28 @@ const FormattedText = ({ text, ...props }) => {
         };
 
         paragraphs.forEach((paragraph, pIndex) => {
-            const trimmedParagraph = paragraph.trim();
+            let trimmedParagraph = paragraph.trim();
             if (!trimmedParagraph) return;
 
-            // check if this is a title
-            const titleMatch = trimmedParagraph.match(/^\[title\](.*?)\[\/title\]$/);
+            // check if paragraph starts with a title tag
+            const titleMatch = trimmedParagraph.match(/^\[title\](.*?)\[\/title\]/);
             if (titleMatch) {
                 elements.push(
-                    <Heading 
-                        as="h3" 
-                        size="sm" 
-                        mt={elementIndex > 0 ? 4 : 0} 
-                        mb={2} 
+                    <Heading
+                        as="h3"
+                        size="sm"
+                        mt={elementIndex > 0 ? 4 : 0}
+                        mb={2}
                         key={`element-${elementIndex}`}
                     >
                         {unescapePercent(titleMatch[1])}
                     </Heading>
                 );
                 elementIndex++;
-                return;
+
+                // Process remaining content after the title
+                trimmedParagraph = trimmedParagraph.substring(titleMatch[0].length).trim();
+                if (!trimmedParagraph) return;
             }
 
             const hasListTags = /\[li2?\]/.test(trimmedParagraph);
