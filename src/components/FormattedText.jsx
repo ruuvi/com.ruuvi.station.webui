@@ -142,6 +142,7 @@ const FormattedText = ({ text, ...props }) => {
                 let match;
                 let currentPrimaryList = [];
                 let currentSecondaryList = [];
+                let lastMatchEnd = 0;
 
                 while ((match = liRegex.exec(trimmedParagraph)) !== null) {
                     if (match[1] !== undefined) {
@@ -162,6 +163,7 @@ const FormattedText = ({ text, ...props }) => {
                         // [li2] tag - secondary item
                         currentSecondaryList.push(match[2]);
                     }
+                    lastMatchEnd = liRegex.lastIndex;
                 }
 
                 if (currentSecondaryList.length > 0 && currentPrimaryList.length > 0) {
@@ -190,6 +192,23 @@ const FormattedText = ({ text, ...props }) => {
                                 </ListItem>
                             ))}
                         </UnorderedList>
+                    );
+                    elementIndex++;
+                }
+
+                // Process any remaining content after the list tags
+                const remainingContent = trimmedParagraph.substring(lastMatchEnd).trim();
+                if (remainingContent) {
+                    const lines = remainingContent.split('\n');
+                    elements.push(
+                        <Text key={`element-${elementIndex}`} mb={2}>
+                            {lines.map((line, i) => (
+                                <React.Fragment key={i}>
+                                    {parseInlineFormatting(line.trim(), `${elementIndex}-${i}`)}
+                                    {i < lines.length - 1 && <br />}
+                                </React.Fragment>
+                            ))}
+                        </Text>
                     );
                     elementIndex++;
                 }
