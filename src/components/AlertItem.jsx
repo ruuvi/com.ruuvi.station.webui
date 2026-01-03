@@ -182,14 +182,18 @@ class AlertItem extends Component {
         const showUnitInTitle = !["movement", "signal", "offline"].includes(type);
         let titleUnitNode = null;
         if (showUnitInTitle) {
-            if (uh.unit) {
-                titleUnitNode = <> ({uh.unit})</>;
+            // For humidity alerts, always show % (relative humidity), not converted units
+            const displayUnit = type === "humidity" ? "%" : uh.unit;
+            if (displayUnit) {
+                titleUnitNode = <> ({displayUnit})</>;
             }
         }
         const latestUnitNode = () => {
             if (!showUnitInTitle) return null;
-            if (!uh.unit) return null;
-            return <span> {uh.unit}</span>;
+            // For humidity alerts, always show % (relative humidity), not converted units
+            const displayUnit = type === "humidity" ? "%" : uh.unit;
+            if (!displayUnit) return null;
+            return <span> {displayUnit}</span>;
         }
 
         function getDialogTitle(type) {
@@ -240,7 +244,7 @@ class AlertItem extends Component {
                                 {this.props.latestValue !== undefined &&
                                     <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
                                         <span style={{ ...this.props.detailedSubText, opacity: 0.5 }}>
-                                            {t("latest_measured_value").replace(/{(.*?)}/, type === "humidity" ? this.props.latestValue : getDisplayValue(this.props.type.toLowerCase(), uh.value(this.props.latestValue)))}{latestUnitNode()}
+                                            {t("latest_measured_value").replace(/{(.*?)}/, type === "humidity" ? localeNumber(this.props.latestValue, uh.decimals) : getDisplayValue(this.props.type.toLowerCase(), uh.value(this.props.latestValue)))}{latestUnitNode()}
                                         </span>
                                     </div>
                                 }
