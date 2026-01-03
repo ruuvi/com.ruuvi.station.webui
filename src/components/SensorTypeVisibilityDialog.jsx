@@ -233,7 +233,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             const enabledAlerts = hasEnabledAlerts(sensorType);
 
             if (enabledAlerts.length > 0) {
-                const measurementName = getSensorDisplayName(sensorType);
+                const measurementName = getSensorDisplayNameWithUnit(sensorType);
                 setConfirmationDialog({
                     open: true,
                     sensorType: sensorType,
@@ -362,7 +362,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                         const alertType = getAlertTypeFromSensorType(webType);
                         return alertType === alert.type;
                     });
-                    return correspondingType ? getSensorDisplayName(correspondingType) : null;
+                    return correspondingType ? getSensorDisplayNameWithUnit(correspondingType) : null;
                 }).filter(Boolean))];
 
                 const message = measurementNames.length === 1
@@ -449,18 +449,20 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             let webType = visibilityFromCloudToWeb(sensorType)
             if (!webType) return sensorType;
             const [type, unit] = webType;
-            let uh = getUnitHelper(type);
-            if (uh && uh.units) {
-                for (const u of uh.units) {
-                    if (u.cloudStoreKey === unit) {
-                        return u.translationKey;
-                    }
-                }
-            }
-            return unit;
+            const unitHelper = getUnitHelper(type, true, unit);
+            return unitHelper.unit || "";
         }
         const unitHelper = getUnitHelper(sensorType);
         return unitHelper.unit || "";
+    };
+
+    const getSensorDisplayNameWithUnit = (sensorType) => {
+        const displayName = getSensorDisplayName(sensorType);
+        const unit = getSensorUnit(sensorType);
+        if (unit) {
+            return `${displayName} (${unit})`;
+        }
+        return displayName;
     };
 
     const unselectedSensors = avaiableSensorTypes.filter(type => !visibleTypes.includes(type));
