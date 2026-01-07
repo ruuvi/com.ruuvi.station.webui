@@ -85,8 +85,9 @@ const FormattedText = ({ text, ...props }) => {
     };
 
     const parseContent = () => {
-        const normalizedText = text.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
-        
+        let normalizedText = text.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+        normalizedText = normalizedText.replace(/\[title\](.*?)\[\/title\]/g, '\n\n$&\n\n');
+
         // split by paragraphs (double newlines)
         const paragraphs = normalizedText.split(/\n\n+/);
         
