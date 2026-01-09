@@ -61,15 +61,29 @@ function DataInfo(props) {
         if (filteredData.length === 0) {
             return { min: null, max: null, avg: null };
         }
-        const { min, max, sum } = filteredData.reduce((acc, { value }) => {
-            acc.min = Math.min(acc.min, value);
-            acc.max = Math.max(acc.max, value);
-            acc.sum += value;
-            return acc;
-        }, { min: Number.POSITIVE_INFINITY, max: Number.NEGATIVE_INFINITY, sum: 0 });
+        let min = Number.POSITIVE_INFINITY;
+        let max = Number.NEGATIVE_INFINITY;
+        let sum = 0;
+        let weightedSum = 0;
+        let totalTime = 0;
+
+        for (let i = 0; i < filteredData.length; i++) {
+            const { value, timestamp } = filteredData[i];
+            min = Math.min(min, value);
+            max = Math.max(max, value);
+            sum += value;
+
+            if (i > 0) {
+                const prev = filteredData[i - 1];
+                const timeDiff = timestamp - prev.timestamp;
+                const avgVal = (value + prev.value) / 2;
+                weightedSum += avgVal * timeDiff;
+                totalTime += timeDiff;
+            }
+        }
 
         let decimalPlaces = uh.decimals;
-        let avg = sum / filteredData.length;
+        let avg = totalTime > 0 ? weightedSum / totalTime : sum / filteredData.length;
         avg = Math.round(avg * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
 
         return { min, max, avg };
