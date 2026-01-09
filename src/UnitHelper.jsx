@@ -362,8 +362,8 @@ export function getUnitFor(key, setting) {
                 case "1": return "g/m³"
                 case "2":
                     let settings = localStorage.getItem("settings");
-                    settings = JSON.parse(settings)
-                    return getUnitFor("temperature", settings.UNIT_TEMPERATURE)
+                    if (settings) settings = JSON.parse(settings)
+                    return getUnitFor("temperature", settings?.UNIT_TEMPERATURE)
                 default: return "%"
             }
         case "pressure":
@@ -401,18 +401,18 @@ export function getDisplayValue(key, value, settings) {
             let resolution = 2;
             if (value != null) {
                 if (key === "temperature") {
-                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE)
+                    if (settings?.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE)
                     else resolution = unitHelper.temperature.decimals
                 }
                 if (key === "humidity") {
-                    if (settings.ACCURACY_HUMIDITY) resolution = parseInt(settings.ACCURACY_HUMIDITY)
+                    if (settings?.ACCURACY_HUMIDITY) resolution = parseInt(settings.ACCURACY_HUMIDITY)
                     else resolution = unitHelper.humidity.decimals
                 }
                 if (key === "pressure") {
-                    if (settings.ACCURACY_PRESSURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
+                    if (settings?.ACCURACY_PRESSURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
                     else resolution = unitHelper.pressure.decimals
                     // don't show decimals for Pa
-                    if (settings.UNIT_PRESSURE === "0") resolution = 0
+                    if (settings?.UNIT_PRESSURE === "0") resolution = 0
                 }
                 if (typeof value === "string") {
                     value = value.replace(" ", "").replace("−", "-");
@@ -459,7 +459,7 @@ export function getUnitHelper(key, plaintext, unit) {
         thing.unit = thing.displayUnits?.[setting] || thing.unit;
         let currUnit = thing.units.find(u => u.cloudStoreKey === setting);
         if (currUnit && currUnit.infoLabel) thing.infoLabel = currUnit.infoLabel;
-        if (settings.ACCURACY_TEMPERATURE) thing.decimals = parseInt(settings.ACCURACY_TEMPERATURE)
+        if (settings?.ACCURACY_TEMPERATURE) thing.decimals = parseInt(settings.ACCURACY_TEMPERATURE)
         return thing;
     }
 
@@ -488,7 +488,7 @@ export function getUnitHelper(key, plaintext, unit) {
                 thing.unit = tempSetting === "F" ? C.degreeF : tempSetting === "K" ? C.kelvin : C.degreeC;
             }
         }
-        if (settings.ACCURACY_HUMIDITY) thing.decimals = parseInt(settings.ACCURACY_HUMIDITY)
+        if (settings?.ACCURACY_HUMIDITY) thing.decimals = parseInt(settings.ACCURACY_HUMIDITY)
         return thing;
     }
 
@@ -497,7 +497,7 @@ export function getUnitHelper(key, plaintext, unit) {
         let thing = { ...unitHelper[key] };
         thing.unit = thing.displayUnits?.[pSetting] || thing.unit;
         if (pSetting === "0") thing.decimals = 0; // Pa, no decimals
-        else if (settings.ACCURACY_PRESSURE) thing.decimals = parseInt(settings.ACCURACY_PRESSURE)
+        else if (settings?.ACCURACY_PRESSURE) thing.decimals = parseInt(settings.ACCURACY_PRESSURE)
         return thing;
     }
 
