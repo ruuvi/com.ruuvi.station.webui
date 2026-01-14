@@ -16,7 +16,7 @@ const detailedSubText = {
     fontSize: "14px",
 }
 
-export default function DashboardViewType(props) {
+export default function DashboardViewType({ value, onChange, showResetOrder, resetOrder, adaptiveLayout, setAdaptiveLayout }) {
     const { t } = useTranslation();
     let opts = [
         { label: "image_cards", value: "image_view" },
@@ -24,7 +24,6 @@ export default function DashboardViewType(props) {
         { label: "history_cards", value: "graph_view" },
         { label: "simple_cards", value: "simple_view" }
     ]
-    let current = props.value || "";
 
     return (
         <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
@@ -44,17 +43,20 @@ export default function DashboardViewType(props) {
                         if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
                         if (i === opts.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
                         return <div key={x.value + "p"}>
-                            <MenuItem key={x.value} className={current === x.value ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => props.onChange(x.value)}>{t(x.label)}</MenuItem>
+                            <MenuItem key={x.value} className={value === x.value ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => onChange(x.value)}>{t(x.label)}</MenuItem>
                             {divider}
                         </div>
                     })}
                 </MenuGroup>
-                {props.showResetOrder && <>
-                    <MenuDivider />
+                <MenuDivider />
+                {showResetOrder && <>
                     <MenuGroup title={t('ordering')}>
-                        <MenuItem style={{ ...detailedSubText, borderRadius: 6 }} onClick={() => props.resetOrder()}>{t("reset_order")}</MenuItem>
+                        <MenuItem style={{ ...detailedSubText }} onClick={() => resetOrder()}>{t("reset_order")}</MenuItem>
                     </MenuGroup>
                 </>}
+                <MenuGroup>
+                    <MenuItem style={{ ...detailedSubText, borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => setAdaptiveLayout()}>{t(adaptiveLayout ? "disable_adaptive_layout" : "enable_adaptive_layout")}</MenuItem>
+                </MenuGroup>
             </MenuList>
         </Menu>
     )

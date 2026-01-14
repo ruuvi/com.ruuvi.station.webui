@@ -219,6 +219,7 @@ class Dashboard extends Component {
             rename: null,
             showResetOrderConfirmation: false,
             order: this.getOrder(),
+            disableAdaptiveLayout: true,
         }
         this._isUnmounted = false;
         this._fetchInProgress = false;
@@ -447,7 +448,15 @@ class Dashboard extends Component {
         if (this.props.params.id) SessionStore.setBackRoute(`/${this.props.params.id}`)
         else SessionStore.setBackRoute("/")
         const dropdowns = <>
-            <DashboardViewType value={this.state.cardType} onChange={this.setDashboardViewType.bind(this)} showResetOrder={this.getOrder() !== null} resetOrder={() => this.setState({ ...this.state, showResetOrderConfirmation: true })} />
+            <DashboardViewType value={this.state.cardType}
+                onChange={this.setDashboardViewType.bind(this)}
+                showResetOrder={this.getOrder() !== null}
+                resetOrder={() => this.setState({ ...this.state, showResetOrderConfirmation: true })}
+                adaptiveLayout={!this.state.disableAdaptiveLayout}
+                setAdaptiveLayout={() => {
+                    this.setState({ disableAdaptiveLayout: !this.state.disableAdaptiveLayout })
+                }}
+            />
             <SensorTypePicker dashboard value={this.state.graphType} onChange={type => this.setGraphType(type)} sensors={this.state.sensors} />
             <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard disabled={this.shouldDurationBeDisabled()} />
         </>
@@ -490,6 +499,7 @@ class Dashboard extends Component {
                     <SensorCard sensor={x}
                         settingsVersion={this.props.settingsVersion}
                         size={size}
+                        adaptiveLayout={!this.state.disableAdaptiveLayout}
                         columnCount={columnCount}
                         dataFrom={this.state.from}
                         cardType={this.state.cardType}

@@ -15,11 +15,13 @@ const SensorCardSimple = ({
     smallDataMinHeight,
     getAlertState,
     t,
+    adaptiveLayout = true
 }) => (
     <Box
         className="content sensorCard"
         borderRadius="lg"
         marginBottom={size === "mobile" ? "10px" : "20px"}
+        height={ adaptiveLayout ? undefined : "100%"}
         minH={130}
         display="flex"
         flexDirection="column"

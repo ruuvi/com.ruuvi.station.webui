@@ -38,6 +38,7 @@ const SensorCard = ({
     rename,
     remove,
     isPreview = false,
+    adaptiveLayout = true
 }) => {
     const { t } = useTranslation();
     const [showRemoveDialog, setShowRemoveDialog] = useState(false);
@@ -275,7 +276,7 @@ const SensorCard = ({
         />
     );
 
-    const cardShadow = { borderRadius: "8px" };
+    const cardShadow = { borderRadius: "8px", height: adaptiveLayout ? undefined : "100%" };
     if (isPreview) {
         cardShadow.boxShadow = "0px 0px 10px #00000030";
     } else {
@@ -288,6 +289,7 @@ const SensorCard = ({
                 <SensorCardSimple
                     sensor={sensor}
                     size={size}
+                    adaptiveLayout={adaptiveLayout}
                     latestReading={latestReading}
                     stats={stats}
                     alertIcon={alertIcon}
@@ -310,6 +312,7 @@ const SensorCard = ({
                 sensor={sensor}
                 settingsVersion={settingsVersion}
                 size={size}
+                adaptiveLayout={adaptiveLayout}
                 showImage={showImage}
                 showGraph={showGraph}
                 alertIcon={alertIcon}

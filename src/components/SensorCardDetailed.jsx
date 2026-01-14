@@ -42,21 +42,27 @@ const SensorCardDetailed = ({
     getAlertForGraph,
     dataFrom,
     t,
+    adaptiveLayout = true
 }) => {
     const isSmallCard = size === "mobile" && !showGraph;
 
     let minHeight = showGraph ? size === "medium" ? 380 : 430 : 230;
-
+    let nonAdaptiveProps = adaptiveLayout ? {} : { height: "100%" };
+    let boxProps = {};
+    if (adaptiveLayout) {
+        boxProps.marginBottom = size === "mobile" ? "10px" : "20px";
+    }
     return (
-        <Box>
+        <Box {...nonAdaptiveProps}>
             {altFileUpload}
             <Box
                 className="content sensorCard"
                 borderRadius="lg"
                 overflow="hidden"
-                marginBottom={size === "mobile" ? "10px" : "20px"}
+                {...boxProps}
+                {...nonAdaptiveProps}
             >
-                <Flex>
+                <Flex {...nonAdaptiveProps}>
                     {showImage && (
                         <Box
                             key={`image-${sensor.sensor}-${showImage}`}
