@@ -38,6 +38,9 @@ function DashboardGrid(props) {
     const [containerWidth, setContainerWidth] = useState(0);
     const debouncedOnSizeChange = useRef(debounce(props.onSizeChange, 150)).current;
 
+    const debouncedWindowResizeHandlerRef = useRef(null);
+    const debouncedResizeObserverHandlerRef = useRef(null);
+
     let size = "";
     if (isLargeDisplay) size = "large";
     else if (isMediumDisplay) size = "medium";
@@ -54,10 +57,9 @@ function DashboardGrid(props) {
         : 1;
 
     // Effect for setting up observers and listeners that update containerWidth
-    const debouncedWindowResizeHandlerRef = useRef(null);
-    const debouncedResizeObserverHandlerRef = useRef(null);
-
     useEffect(() => {
+        if (props.disableAdaptiveLayout) return;
+
         if (!debouncedWindowResizeHandlerRef.current) {
             debouncedWindowResizeHandlerRef.current = debounce(() => {
                 if (gridRef.current) {
@@ -97,9 +99,11 @@ function DashboardGrid(props) {
                 debouncedResizeObserverHandlerRef.current.cancel();
             }
         };
-    }, []);
+    }, [props.disableAdaptiveLayout]);
 
     useEffect(() => {
+        if (props.disableAdaptiveLayout) return;
+
         if (!gridRef.current || containerWidth === 0) {
             if (gridRef.current) gridRef.current.style.height = '0px';
             return;
@@ -171,10 +175,28 @@ function DashboardGrid(props) {
             cardResizeObserver.disconnect();
         };
 
-    }, [containerWidth, size, props.order, props.sensors, gap, minCardWidth]); // Dependencies for re-calculating layout
+    }, [containerWidth, size, props.order, props.sensors, gap, minCardWidth, props.disableAdaptiveLayout]); // Dependencies for re-calculating layout
+
+    // Non-adaptive layout: simple CSS grid with equal height rows
+    if (props.disableAdaptiveLayout) {
+        const simpleMinCardWidth = isLargeDisplay ? 500 : isMediumDisplay ? 400 : props.showGraph ? 300 : 360;
+        return (
+            <Box
+                key="non-adaptive"
+                style={{ marginBottom: 30, marginTop: 10 }}
+                justifyItems="start"
+                display="grid"
+                gap={gap + "px"}
+                gridTemplateColumns={`repeat(auto-fit, minmax(${simpleMinCardWidth}px, max-content))`}
+            >
+                {props.children(size, null)}
+            </Box>
+        );
+    }
 
     return (
         <Box
+            key="adaptive"
             ref={gridRef}
             className="masonry-grid"
             sx={{
@@ -219,7 +241,7 @@ class Dashboard extends Component {
             rename: null,
             showResetOrderConfirmation: false,
             order: this.getOrder(),
-            disableAdaptiveLayout: true,
+            disableAdaptiveLayout: false,
         }
         this._isUnmounted = false;
         this._fetchInProgress = false;
@@ -490,11 +512,15 @@ class Dashboard extends Component {
         const sensorCard = (x, size, sensorsInSearch, columnCount) => {
             if (!x) return null;
             let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
-            return <span className="masonry-item" key={x.sensor} style={{ maxWidth: "100%", display: hide ? "none" : undefined }}>
+            const isAdaptive = !this.state.disableAdaptiveLayout;
+            const wrapperStyle = isAdaptive
+                ? { maxWidth: "100%", display: hide ? "none" : undefined }
+                : { width: 640, maxWidth: "100%", display: hide ? "none" : "flex", flexDirection: "column" };
+            return <span className={isAdaptive ? "masonry-item" : undefined} key={x.sensor} style={wrapperStyle}>
                 <span
                     role="link"
                     onClick={() => this.props.navigate('/' + x.sensor)}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: 'pointer', display: isAdaptive ? undefined : "block", height: isAdaptive ? undefined : "100%", flex: isAdaptive ? undefined : 1 }}
                 >
                     <SensorCard sensor={x}
                         settingsVersion={this.props.settingsVersion}
@@ -567,7 +593,7 @@ class Dashboard extends Component {
                                             </Flex>
                                         </div>
                                     }
-                                    <DashboardGrid showGraph={this.state.showGraph} order={this.getOrder()} sensors={this.state.sensors} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })}>
+                                    <DashboardGrid showGraph={this.state.showGraph} order={this.getOrder()} sensors={this.state.sensors} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })} disableAdaptiveLayout={this.state.disableAdaptiveLayout}>
                                         {(size, columnCount) => {
                                             let sensorsInSearch = this.getSensors()
                                             if (order && order.length > 0) {
