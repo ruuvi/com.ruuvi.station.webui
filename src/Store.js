@@ -5,6 +5,7 @@ const DASHBOARD_CARD_TYPE_KEY = "dashboard_card_type";
 const BANNER = "banner_seen_";
 const GRAPH_DRAW_DOTS = "graph_draw_dots";
 const PER_SENSOR_VISIBLE_TYPES = "per_sensor_visible_types";
+const DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY = "dashboard_disable_adaptive_layout";
 
 class Store {
     setGraphFrom(v) {
@@ -45,6 +46,14 @@ class Store {
     }
     getGraphDrawDots() {
         return localStorage.getItem(GRAPH_DRAW_DOTS) === "true"
+    }
+    setDashboardDisableAdaptiveLayout(v) {
+        localStorage.setItem(DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY, JSON.stringify(v))
+    }
+    getDashboardDisableAdaptiveLayout() {
+        let res = localStorage.getItem(DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY);
+        if (res === null) return false;
+        return JSON.parse(res);
     }
 }
 

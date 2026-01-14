@@ -241,7 +241,7 @@ class Dashboard extends Component {
             rename: null,
             showResetOrderConfirmation: false,
             order: this.getOrder(),
-            disableAdaptiveLayout: false,
+            disableAdaptiveLayout: store.getDashboardDisableAdaptiveLayout(),
         }
         this._isUnmounted = false;
         this._fetchInProgress = false;
@@ -476,7 +476,11 @@ class Dashboard extends Component {
                 resetOrder={() => this.setState({ ...this.state, showResetOrderConfirmation: true })}
                 adaptiveLayout={!this.state.disableAdaptiveLayout}
                 setAdaptiveLayout={() => {
-                    this.setState({ disableAdaptiveLayout: !this.state.disableAdaptiveLayout })
+                    this.setState(prev => {
+                        const nextVal = !prev.disableAdaptiveLayout
+                        new Store().setDashboardDisableAdaptiveLayout(nextVal)
+                        return { disableAdaptiveLayout: nextVal }
+                    })
                 }}
             />
             <SensorTypePicker dashboard value={this.state.graphType} onChange={type => this.setGraphType(type)} sensors={this.state.sensors} />
