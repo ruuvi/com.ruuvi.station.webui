@@ -23,7 +23,7 @@ import NetworkApi from "../NetworkApi";
 import { visibilityCodes, visibilityFromCloudToWeb, visibilityFromWebToCloud } from "../utils/cloudTranslator";
 import notify from "../utils/notify";
 
-const ENABLE_TVOC_VISIBILITY = false;
+const ENABLE_TVOC_VISIBILITY = true;
 const isTvocVisibilityCode = (code) => code?.startsWith("TVOC_");
 
 const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updateSensor }) => {
