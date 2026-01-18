@@ -23,6 +23,9 @@ import NetworkApi from "../NetworkApi";
 import { visibilityCodes, visibilityFromCloudToWeb, visibilityFromWebToCloud } from "../utils/cloudTranslator";
 import notify from "../utils/notify";
 
+const ENABLE_TVOC_VISIBILITY = false;
+const isTvocVisibilityCode = (code) => code?.startsWith("TVOC_");
+
 const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updateSensor }) => {
     const [isSaving, setIsSaving] = useState(false);
     const getAvailableSensorTypes = (dataObj) => {
@@ -33,7 +36,10 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             }
         }
         if (dataObj) return availableTypes;
-        return visibilityCodes.filter(code => availableTypes.includes(code[1])).map(code => code[0]);
+        return visibilityCodes
+            .filter(code => availableTypes.includes(code[1]))
+            .filter(code => ENABLE_TVOC_VISIBILITY || !isTvocVisibilityCode(code[0]))
+            .map(code => code[0]);
     };
 
     const getPreferredUnitKeyForType = (type) => {
