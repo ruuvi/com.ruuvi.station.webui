@@ -244,7 +244,7 @@ const unitHelper = {
         shortLabel: "voc",
         infoLabel: "description_text_voc",
         unit: "",
-        units: [{ translationKey: "", cloudStoreKey: "index" }, { translationKey: "ethanol_mgm3", cloudStoreKey: "ethanol_mgm3" }, { translationKey: "isobutylene_mgm3", cloudStoreKey: "isobutylene_mgm3" }, { translationKey: "molhave_mgm3", cloudStoreKey: "molhave_mgm3" }],
+        units: [{ translationKey: "", cloudStoreKey: "index" }, { translationKey: "mgm3", cloudStoreKey: "ethanol_mgm3" }, { translationKey: "mgm3", cloudStoreKey: "isobutylene_mgm3" }, { translationKey: "mgm3", cloudStoreKey: "molhave_mgm3" }],
         displayUnits: { index: "", ethanol_mgm3: "mg/m³", isobutylene_mgm3: "mg/m³", molhave_mgm3: "mg/m³" },
         value: (value) => value,
         fromUser: (value) => value,
