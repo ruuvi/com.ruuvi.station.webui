@@ -523,7 +523,8 @@ class Sensor extends Component {
         if (this.state.graphUnitKey && uh?.units) {
             const uDef = uh.units.find(u => u.cloudStoreKey === this.state.graphUnitKey);
             if (uDef) {
-                return `(${this.props.t(uDef.translationKey)})`;
+                const translatedUnit = this.props.t(uDef.translationKey);
+                return translatedUnit ? `(${translatedUnit})` : "";
             }
         }
         let unit = uh.unit;
@@ -836,7 +837,8 @@ class Sensor extends Component {
                                                             const uDef = uh.units.find(u => u.cloudStoreKey === this.state.graphUnitKey);
                                                             if (uDef) {
                                                                 const translatedUnit = t(uDef.translationKey);
-                                                                return `${t(uh.label)} (${translatedUnit || uDef.translationKey})`;
+                                                                const unit = translatedUnit || uDef.translationKey;
+                                                                return unit ? `${t(uh.label)} (${unit})` : t(uh.label);
                                                             }
                                                         }
                                                         return t(uh.label);
