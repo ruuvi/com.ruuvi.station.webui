@@ -161,18 +161,27 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
         return sensorTypeToAlertType[sensorType] || sensorType || null;
     };
 
+    const getAlertTypeFromCloudCode = (cloudCode) => {
+        // Handle humidity variants
+        if (cloudCode === "HUMIDITY_0") return "humidity";
+        if (cloudCode === "HUMIDITY_1") return "humidityAbsolute";
+        if (cloudCode === "HUMIDITY_2") return "dewPoint";
+
+        // For other types, convert to web type and use the standard mapping
+        const webType = getWebTypeFromSensorType(cloudCode);
+        return getAlertTypeFromSensorType(webType);
+    };
+
     const hasEnabledAlerts = (sensorType) => {
         if (!sensor?.alerts) return [];
 
 
-        let webTypeSensorType = getWebTypeFromSensorType(sensorType);
-        const alertType = getAlertTypeFromSensorType(webTypeSensorType);
+        const alertType = getAlertTypeFromCloudCode(sensorType);
         if (!alertType) return [];
 
         const otherVisibleSameAlertType = visibleTypes.some(vt => {
             if (vt === sensorType) return false;
-            const vtWeb = getWebTypeFromSensorType(vt);
-            return getAlertTypeFromSensorType(vtWeb) === alertType;
+            return getAlertTypeFromCloudCode(vt) === alertType;
         });
         if (otherVisibleSameAlertType) return [];
 
@@ -190,8 +199,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
 
         for (const alert of enabledAlerts) {
             const isSupported = targetVisibleTypes.some(vt => {
-                let webType = getWebTypeFromSensorType(vt);
-                const alertType = getAlertTypeFromSensorType(webType);
+                const alertType = getAlertTypeFromCloudCode(vt);
                 return alertType === alert.type;
             });
 
@@ -364,8 +372,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             if (orphanedAlerts.length > 0) {
                 const measurementNames = [...new Set(orphanedAlerts.map(alert => {
                     const correspondingType = visibleTypes.find(vt => {
-                        const webType = getWebTypeFromSensorType(vt);
-                        const alertType = getAlertTypeFromSensorType(webType);
+                        const alertType = getAlertTypeFromCloudCode(vt);
                         return alertType === alert.type;
                     });
                     return correspondingType ? getSensorDisplayNameWithUnit(correspondingType) : null;

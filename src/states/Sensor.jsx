@@ -403,7 +403,7 @@ class Sensor extends Component {
     isAlertTriggerd(type) {
         if (type === "movementCounter") type = "movement";
         if (type === "rssi") type = "signal";
-        var alert = this.getAlert(type.toLocaleLowerCase())
+        var alert = this.getAlert(type)
         if (!alert) return false
         return isAlerting(this.props.sensor, type)
     }
@@ -671,7 +671,7 @@ class Sensor extends Component {
         }
 
         let mainSensorFields = this.getSensorMainFields();
-        const baseAlertTypes = ["temperature", "humidity", "pressure", "signal", "movement", "offline", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
+        const baseAlertTypes = ["temperature", "humidity", "humidityAbsolute", "dewPoint", "pressure", "signal", "movement", "offline", "battery", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
         const orderedAlertTypes = this.getAlertTypesOrdered(baseAlertTypes, mainSensorFields);
         const visibleMeasurementKeys = mainSensorFields.map(field => Array.isArray(field) ? field[0] : field);
         return (
@@ -989,7 +989,35 @@ class Sensor extends Component {
                                             let visibility = visibleMeasurementKeys;
                                             if (!visibility.length) visibility = DEFAULT_VISIBLE_SENSOR_TYPES;
                                             let ignoreVisibleTypes = ["offline"];
-                                            if (!ignoreVisibleTypes.includes(x) && visibility && !visibility.includes(dataKey)) return null;
+
+                                            // Handle variant-specific visibility checks for humidity and other multi-unit types
+                                            if (!ignoreVisibleTypes.includes(x)) {
+                                                let isVisible = false;
+
+                                                // Special handling for humidity variants
+                                                if (x === "humidity") {
+                                                    // Show humidity alert when relative humidity (variant "0") is visible
+                                                    isVisible = mainSensorFields.some(field =>
+                                                        (Array.isArray(field) && field[0] === "humidity" && field[1] === "0") ||
+                                                        (!Array.isArray(field) && field === "humidity")
+                                                    );
+                                                } else if (x === "humidityAbsolute") {
+                                                    // Show humidityAbsolute alert when absolute humidity (variant "1") is visible
+                                                    isVisible = mainSensorFields.some(field =>
+                                                        Array.isArray(field) && field[0] === "humidity" && field[1] === "1"
+                                                    );
+                                                } else if (x === "dewPoint") {
+                                                    // Show dewPoint alert when dew point (variant "2") is visible
+                                                    isVisible = mainSensorFields.some(field =>
+                                                        Array.isArray(field) && field[0] === "humidity" && field[1] === "2"
+                                                    );
+                                                } else {
+                                                    // Default visibility check for other alert types
+                                                    isVisible = visibility && visibility.includes(dataKey);
+                                                }
+
+                                                if (!isVisible) return null;
+                                            }
 
                                             let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description + x : x
                                             return <ListItem key={key}>

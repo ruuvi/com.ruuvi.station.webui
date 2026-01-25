@@ -28,18 +28,21 @@ class AlertSlider extends React.Component {
         }
         if (this.props.value.max > range.max) range.max = this.props.value.max
         if (this.props.value.min < range.min) range.min = this.props.value.min
-        if (this.props.type === "pressure" || this.props.type === "temperature") {
-            var uh = getUnitHelper(this.props.type)
+        if (this.props.type === "pressure" || this.props.type === "temperature" || this.props.type === "dewPoint" || this.props.type === "battery") {
+            // For dewPoint, use temperature unit helper
+            var uh = this.props.type === "dewPoint" ? getUnitHelper("temperature") : getUnitHelper(this.props.type)
             range.max = uh.value(range.max)
             range.min = uh.value(range.min)
         }
         return range
     }
     onChange(values, final) {
-        if (this.props.type === "temperature") {
+        if (this.props.type === "temperature" || this.props.type === "dewPoint") {
             values = [temperatureFromUserFormat(values[0]), temperatureFromUserFormat(values[1])]
         } else if (this.props.type === "pressure") {
             values = [pressureFromUserFormat(values[0]), pressureFromUserFormat(values[1])]
+        } else if (this.props.type === "battery") {
+            values = [values[0] * 1000, values[1] * 1000]
         }
         // always keep min and max different
         if (values[0] === values[1]) {
@@ -59,8 +62,9 @@ class AlertSlider extends React.Component {
         if (max == null) max = range.max;
         var min = this.props.value.min
         if (min == null) min = range.min;
-        var uh = getUnitHelper(this.props.type)
-        if (this.props.type === "temperature" || this.props.type === "pressure") {
+        // For dewPoint, use temperature unit helper
+        var uh = this.props.type === "dewPoint" ? getUnitHelper("temperature") : getUnitHelper(this.props.type)
+        if (this.props.type === "temperature" || this.props.type === "pressure" || this.props.type === "dewPoint" || this.props.type === "battery") {
             min = uh.value(min)
             max = uh.value(max)
         }
@@ -73,7 +77,7 @@ class AlertSlider extends React.Component {
 
         return <div style={{ display: 'flex', alignItems: 'center', marginLeft: 4, marginRight: 4 }}>
             <Range {...this.getRange()} values={sliderValues}
-                step={this.props.type === "pressure" && uh.unit === "Pa" ? 100 : 1}
+                step={this.props.type === "pressure" && uh.unit === "Pa" ? 100 : this.props.type === "battery" ? 0.1 : 1}
                 disabled={this.props.disabled}
                 onChange={values => this.onChange(values, false)}
                 onFinalChange={values => this.onChange(values, true)}

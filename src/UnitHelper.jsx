@@ -110,8 +110,8 @@ const unitHelper = {
         infoLabel: "description_text_battery_voltage",
         unit: "V",
         value: (value) => value / 1000,
-        fromUser: (value) => value,
-        decimals: 3,
+        fromUser: (value) => Math.round(value * 100) * 10,
+        decimals: 2,
         graphable: true
     },
     "accelerationX": {
@@ -323,7 +323,7 @@ const unitHelper = {
 
 export const allUnits = unitHelper;
 
-export const alertTypes = ["temperature", "humidity", "pressure", "signal", "movement", "offline", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
+export const alertTypes = ["temperature", "humidity", "humidityAbsolute", "dewPoint", "pressure", "signal", "movement", "offline", "battery", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
 
 export const DEFAULT_VISIBLE_SENSOR_TYPES = ["aqi", "co2", "pm25", "voc", "nox", "temperature", "humidity", "pressure", "illuminance", "movementCounter", "soundLevelInstant"];
 
@@ -583,12 +583,18 @@ export function getAlertRange(type) {
             return { max: 85, min: -40, extended: { max: 150, min: -55 } }
         case "humidity":
             return { max: 100, min: 0 }
+        case "humidityAbsolute":
+            return { max: 50, min: 0 }
+        case "dewPoint":
+            return { max: 85, min: -40 }
         case "pressure":
             return { max: 115500, min: 50000 }
         case "signal":
             return { max: 0, min: -105 }
         case "offline":
             return { max: +Infinity, min: 120 }
+        case "battery":
+            return { max: 3600, min: 1800 }
         case "aqi":
             return { max: 100, min: 0 }
         case "co2":

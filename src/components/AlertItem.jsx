@@ -11,6 +11,7 @@ import ScreenSizeWrapper from "./ScreenSizeWrapper";
 import { getAlertIcon } from "../utils/alertHelper";
 import { addVariablesInString } from "../TextHelper";
 import UpgradePlanButton from "./UpgradePlanButton";
+import { relativeToAbsolute, relativeToDewpoint } from "../utils/humidity";
 const AlertSlider = React.lazy(() => import("./AlertSlider"));
 
 class AlertItem extends Component {
@@ -42,11 +43,13 @@ class AlertItem extends Component {
             return addVariablesInString(this.props.t("alert_offline_description"), [max / 60]);
         }
         var uh = getUnitHelper(this.props.dataKey)
-        if (type !== "humidity") {
-            min = uh.value(min)
-            max = uh.value(max)
+        if (type !== "humidity" && type !== "humidityAbsolute") {
+            // For dewPoint, use temperature conversion instead of humidity
+            let conversionHelper = type === "dewPoint" ? getUnitHelper("temperature") : uh;
+            min = conversionHelper.value(min)
+            max = conversionHelper.value(max)
             // workaround for F -> C -> F rounding error
-            if (type === "temperature" && uh.unit.indexOf("F") !== -1) {
+            if ((type === "temperature" || type === "dewPoint") && conversionHelper.unit.indexOf("F") !== -1) {
                 min = round(min, 1)
                 max = round(max, 1)
             }
@@ -69,7 +72,7 @@ class AlertItem extends Component {
     }
     checkAlertLimits(alert) {
         try {
-            let type = this.props.type.toLowerCase();
+            let type = this.props.type;
             var { min, max, extended } = getAlertRange(type)
             if (extended) {
                 min = extended.min
@@ -116,11 +119,14 @@ class AlertItem extends Component {
         var alert = this.state.alert;
         if (!alert) return null;
         var uh = getUnitHelper(this.props.dataKey)
-        if (this.props.type.toLowerCase() === "humidity")
+        var type = this.props.type;
+        if (type === "humidity" || type === "humidityAbsolute")
             return [alert.min, alert.max]
-        let val = [uh.value(alert.min), uh.value(alert.max)]
+        // For dewPoint, use temperature conversion instead of humidity
+        let conversionHelper = type === "dewPoint" ? getUnitHelper("temperature") : uh;
+        let val = [conversionHelper.value(alert.min), conversionHelper.value(alert.max)]
         // workaround for F -> C -> F rounding error
-        if (this.props.type.toLowerCase() === "temperature" && uh.unit.indexOf("F") !== -1) {
+        if ((type === "temperature" || type === "dewPoint") && conversionHelper.unit.indexOf("F") !== -1) {
             val[0] = round(val[0], 1)
             val[1] = round(val[1], 1)
         }
@@ -128,23 +134,27 @@ class AlertItem extends Component {
     }
     render() {
         var alert = this.state.alert;
-        var type = this.props.type.toLowerCase();
+        var type = this.props.type;
         var t = this.props.t
         var uh = getUnitHelper(this.props.dataKey)
         var enabled = alert && alert.enabled;
         var validRange = getAlertRange(type)
-        if (type === "temperature" || type === "pressure") {
+        if (type === "temperature" || type === "pressure" || type === "dewPoint" || type === "battery") {
             let min = validRange.min
             let max = validRange.max
             if (validRange.extended) {
                 min = validRange.extended.min
                 max = validRange.extended.max
             }
-            validRange.min = uh.value(min)
-            validRange.max = uh.value(max)
+            // For dewPoint, use temperature conversion instead of humidity
+            let conversionHelper = type === "dewPoint" ? getUnitHelper("temperature") : uh;
+            validRange.min = conversionHelper.value(min)
+            validRange.max = conversionHelper.value(max)
         }
         let label = type === "signal" ? "signal_strength" : type
         if (type === "offline") label = "alert_offline_title"
+        if (type === "dewPoint") label = "dewpoint"
+        if (type === "humidityAbsolute") label = "absolute_humidity"
         var editItemMargins = { marginRight: 0, marginTop: 12, marginBottom: 12 }
         const asText = (mobile) => <>
             <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
@@ -183,7 +193,9 @@ class AlertItem extends Component {
         let titleUnitNode = null;
         if (showUnitInTitle) {
             // For humidity alerts, always show % (relative humidity), not converted units
-            const displayUnit = type === "humidity" ? "%" : uh.unit;
+            let displayUnit = type === "humidity" ? "%" : uh.unit;
+            if (type === "humidityAbsolute") displayUnit = "g/m³";
+            if (type === "dewPoint") displayUnit = getUnitHelper("temperature").unit;
             if (displayUnit) {
                 titleUnitNode = <> ({displayUnit})</>;
             }
@@ -191,7 +203,9 @@ class AlertItem extends Component {
         const latestUnitNode = () => {
             if (!showUnitInTitle) return null;
             // For humidity alerts, always show % (relative humidity), not converted units
-            const displayUnit = type === "humidity" ? "%" : uh.unit;
+            let displayUnit = type === "humidity" ? "%" : uh.unit;
+            if (type === "humidityAbsolute") displayUnit = "g/m³";
+            if (type === "dewPoint") displayUnit = getUnitHelper("temperature").unit;
             if (!displayUnit) return null;
             return <span> {displayUnit}</span>;
         }
@@ -244,7 +258,29 @@ class AlertItem extends Component {
                                 {this.props.latestValue !== undefined &&
                                     <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
                                         <span style={{ ...this.props.detailedSubText, opacity: 0.5 }}>
-                                            {t("latest_measured_value").replace(/{(.*?)}/, type === "humidity" ? localeNumber(this.props.latestValue, uh.decimals) : getDisplayValue(this.props.type.toLowerCase(), uh.value(this.props.latestValue)))}{latestUnitNode()}
+                                            {t("latest_measured_value").replace(/{(.*?)}/, (() => {
+                                                if (type === "humidity") {
+                                                    return localeNumber(this.props.latestValue, uh.decimals);
+                                                } else if (type === "humidityAbsolute") {
+                                                    // Convert relative humidity to absolute humidity
+                                                    let latestReading = this.props.sensor.measurements?.[0]?.parsed;
+                                                    if (latestReading && latestReading.temperature !== undefined) {
+                                                        let absHum = relativeToAbsolute(this.props.latestValue, latestReading.temperature);
+                                                        return localeNumber(absHum, 2);
+                                                    }
+                                                    return "-";
+                                                } else if (type === "dewPoint") {
+                                                    // Convert relative humidity to dew point
+                                                    let latestReading = this.props.sensor.measurements?.[0]?.parsed;
+                                                    if (latestReading && latestReading.temperature !== undefined) {
+                                                        let dewPt = relativeToDewpoint(this.props.latestValue, latestReading.temperature);
+                                                        return getDisplayValue("temperature", uh.value(dewPt));
+                                                    }
+                                                    return "-";
+                                                } else {
+                                                    return getDisplayValue(this.props.type, uh.value(this.props.latestValue));
+                                                }
+                                            })())}{latestUnitNode()}
                                         </span>
                                     </div>
                                 }
@@ -270,13 +306,23 @@ class AlertItem extends Component {
                 />
                 {this.state.rangeInputDialog &&
                     <RangeInputDialog open={this.state.rangeInputDialog} value={this.getMinMaxArr()}
-                        onClose={(save, value) => save ? this.setAlert({ ...alert, min: uh.fromUser(value[0]), max: uh.fromUser(value[1]) }, type, null, false) : this.setState({ ...this.state, rangeInputDialog: false })}
+                        onClose={(save, value) => {
+                            if (save) {
+                                // For dewPoint, use temperature conversion
+                                let conversionHelper = type === "dewPoint" ? getUnitHelper("temperature") : uh;
+                                this.setAlert({ ...alert, min: conversionHelper.fromUser(value[0]), max: conversionHelper.fromUser(value[1]) }, type, null, false);
+                            } else {
+                                this.setState({ ...this.state, rangeInputDialog: false });
+                            }
+                        }}
                         range={validRange}
                         title={getDialogTitle(type)}
                         buttonText={t("update")}
-                        allowOutOfRange={type === "temperature"}
+                        allowOutOfRange={type === "temperature" || type === "dewPoint"}
                         unit={() => {
                             if (type === "humidity") return "%";
+                            if (type === "humidityAbsolute") return "g/m³";
+                            if (type === "dewPoint") return getUnitHelper("temperature").unit;
                             return uh.unit;
                         }}
                     />

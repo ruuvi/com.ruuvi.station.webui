@@ -3,6 +3,7 @@ import bellAlert from '../img/icon-bell-alert.svg'
 import bellAlertLightTheme from '../img/icon-bell-alert-light-theme.svg'
 import { Image } from '@chakra-ui/react'
 import { alertTypes } from '../UnitHelper'
+import { relativeToAbsolute, relativeToDewpoint } from './humidity'
 
 export function getAlertIcon(sensor, type, colorMode = "dark") {
     function getSensorAlertState() {
@@ -35,10 +36,22 @@ export function getMappedAlertDataType(type) {
         "movement": "movementCounter",
         "signal": "rssi",
         "luminosity": "illuminance",
-        "sound": "soundLevelAvg"
+        "sound": "soundLevelAvg",
+        "humidityAbsolute": "humidity",
+        "dewPoint": "humidity"
     };
 
     return dataKeyMapping[type] || type;
+}
+
+function convertValueForAlertType(type, value, parsedData) {
+    // Convert the raw sensor value to the appropriate format for the alert type
+    if (type === "humidityAbsolute" && parsedData.humidity !== undefined && parsedData.temperature !== undefined) {
+        return relativeToAbsolute(parsedData.humidity, parsedData.temperature);
+    } else if (type === "dewPoint" && parsedData.humidity !== undefined && parsedData.temperature !== undefined) {
+        return relativeToDewpoint(parsedData.humidity, parsedData.temperature);
+    }
+    return value;
 }
 
 export function isAlerting(sensor, type) {
@@ -48,6 +61,7 @@ export function isAlerting(sensor, type) {
     let data = sensor.measurements.length === 1 ? sensor.measurements[0] : null
     if (data && data.parsed) {
         let dp = type === "offline" ? data.timestamp : type === "signal" ? data.rssi : data.parsed[getMappedAlertDataType(type)]
+        dp = convertValueForAlertType(type, dp, data.parsed);
         if (alerts.find(x => checkIfShouldBeAlerting(x, dp))) return true
     } else {
         if (alerts.find(x => x.enabled && x.triggered)) return true
@@ -62,6 +76,7 @@ export function hasAlertBeenHit(alerts, measurements, type) {
         let data = measurements[i]
         if (data && data.parsed) {
             let dp = type === "offline" ? data.timestamp : type === "signal" ? data.rssi : data.parsed[getMappedAlertDataType(type)]
+            dp = convertValueForAlertType(type, dp, data.parsed);
             if (alerts.find(x => checkIfShouldBeAlerting(x, dp))) return true
         } else {
             if (alerts.find(x => x.enabled && x.triggered)) return true
