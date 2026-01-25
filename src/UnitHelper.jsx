@@ -594,7 +594,7 @@ export function getAlertRange(type) {
         case "offline":
             return { max: +Infinity, min: 120 }
         case "battery":
-            return { max: 3600, min: 1800 }
+            return { max: 3.6, min: 1.8 }
         case "aqi":
             return { max: 100, min: 0 }
         case "co2":

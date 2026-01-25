@@ -43,7 +43,7 @@ class AlertItem extends Component {
             return addVariablesInString(this.props.t("alert_offline_description"), [max / 60]);
         }
         var uh = getUnitHelper(this.props.dataKey)
-        if (type !== "humidity" && type !== "humidityAbsolute") {
+        if (type !== "humidity" && type !== "humidityAbsolute" && type !== "battery") {
             // For dewPoint, use temperature conversion instead of humidity
             let conversionHelper = type === "dewPoint" ? getUnitHelper("temperature") : uh;
             min = conversionHelper.value(min)
@@ -120,7 +120,7 @@ class AlertItem extends Component {
         if (!alert) return null;
         var uh = getUnitHelper(this.props.dataKey)
         var type = this.props.type;
-        if (type === "humidity" || type === "humidityAbsolute")
+        if (type === "humidity" || type === "humidityAbsolute" || type === "battery")
             return [alert.min, alert.max]
         // For dewPoint, use temperature conversion instead of humidity
         let conversionHelper = type === "dewPoint" ? getUnitHelper("temperature") : uh;
@@ -139,7 +139,7 @@ class AlertItem extends Component {
         var uh = getUnitHelper(this.props.dataKey)
         var enabled = alert && alert.enabled;
         var validRange = getAlertRange(type)
-        if (type === "temperature" || type === "pressure" || type === "dewPoint" || type === "battery") {
+        if (type === "temperature" || type === "pressure" || type === "dewPoint") {
             let min = validRange.min
             let max = validRange.max
             if (validRange.extended) {
@@ -308,9 +308,13 @@ class AlertItem extends Component {
                     <RangeInputDialog open={this.state.rangeInputDialog} value={this.getMinMaxArr()}
                         onClose={(save, value) => {
                             if (save) {
-                                // For dewPoint, use temperature conversion
-                                let conversionHelper = type === "dewPoint" ? getUnitHelper("temperature") : uh;
-                                this.setAlert({ ...alert, min: conversionHelper.fromUser(value[0]), max: conversionHelper.fromUser(value[1]) }, type, null, false);
+                                // For dewPoint, use temperature conversion; for battery, no conversion needed
+                                if (type === "battery") {
+                                    this.setAlert({ ...alert, min: value[0], max: value[1] }, type, null, false);
+                                } else {
+                                    let conversionHelper = type === "dewPoint" ? getUnitHelper("temperature") : uh;
+                                    this.setAlert({ ...alert, min: conversionHelper.fromUser(value[0]), max: conversionHelper.fromUser(value[1]) }, type, null, false);
+                                }
                             } else {
                                 this.setState({ ...this.state, rangeInputDialog: false });
                             }

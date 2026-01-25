@@ -50,6 +50,9 @@ function convertValueForAlertType(type, value, parsedData) {
         return relativeToAbsolute(parsedData.humidity, parsedData.temperature);
     } else if (type === "dewPoint" && parsedData.humidity !== undefined && parsedData.temperature !== undefined) {
         return relativeToDewpoint(parsedData.humidity, parsedData.temperature);
+    } else if (type === "battery" && value !== undefined) {
+        // Battery value is stored in mV internally, but alerts use V
+        return value / 1000;
     }
     return value;
 }
