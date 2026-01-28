@@ -389,7 +389,17 @@ class Sensor extends Component {
             params.delete("unit");
         }
         this.props.router.navigate({ search: params.toString() }, { replace: true });
-        this.setState({ ...this.state, graphKey, graphUnitKey: unitKey });
+        
+        const currentKeyHasNoData = !this.state.data?.measurements?.some(
+            m => m.parsed && m.parsed[this.state.graphKey] !== undefined
+        );
+        
+        this.setState({ 
+            ...this.state, 
+            graphKey, 
+            graphUnitKey: unitKey,
+            ...(currentKeyHasNoData ? { updateGraphKey: this.state.updateGraphKey + 1 } : {})
+        });
     }
     getAlert(type) {
         if (!this.props.sensor) return null
