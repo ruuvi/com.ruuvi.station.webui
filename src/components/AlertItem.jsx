@@ -322,7 +322,7 @@ class AlertItem extends Component {
                         range={validRange}
                         title={getDialogTitle(type)}
                         buttonText={t("update")}
-                        allowOutOfRange={type === "temperature" || type === "dewPoint"}
+                        allowOutOfRange={type === "temperature"}
                         unit={() => {
                             if (type === "humidity") return "%";
                             if (type === "humidityAbsolute") return "g/m³";
