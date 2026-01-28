@@ -151,16 +151,20 @@ function SensorCompare(props) {
         </div>
     }
     const graphCtrl = (isMobile) => {
-        let key = getSensorTypeOnly(dataKey)
+        const sensorType = getSensorTypeOnly(dataKey);
+        const unitHelper = getUnitHelper(sensorType);
+        const unit = unitHelper.units?.find(x => x.cloudStoreKey === getUnitOnly(dataKey));
+        const exportParam = unit ? { sensorType, unit } : sensorType;
+
         return <>
             <ZoomInfo />
             <ExportMenu buttonText={uppercaseFirst(t("export"))} noPdf onClick={val => {
                 switch (val) {
                     case "XLSX":
-                        exportMuliSensorXLSX(data, i18next.t, key)
+                        exportMuliSensorXLSX(data, i18next.t, exportParam)
                         break
                     default:
-                        exportMuliSensorCSV(data, i18next.t, key)
+                        exportMuliSensorCSV(data, i18next.t, exportParam)
                 }
             }} />
         </>
