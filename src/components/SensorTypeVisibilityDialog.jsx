@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { withTranslation } from 'react-i18next';
 import RDialog from "./RDialog";
-import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, getUnitSettingFor } from "../UnitHelper";
+import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, getUnitSettingFor, allUnits } from "../UnitHelper";
 import SensorCard from "./SensorCard";
 import { MdAdd, MdClose, MdUnfoldMore } from "react-icons/md";
 import ConfirmationDialog from "./ConfirmationDialog";
@@ -478,7 +478,16 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
         return displayName;
     };
 
-    const unselectedSensors = avaiableSensorTypes.filter(type => !visibleTypes.includes(type));
+    const getSensorTypeOrder = (sensorType) => {
+        const baseType = getWebTypeFromSensorType(sensorType);
+        const orderedTypes = Object.keys(allUnits).filter(key => key !== '_common');
+        const index = orderedTypes.indexOf(baseType);
+        return index === -1 ? 999 : index;
+    };
+
+    const unselectedSensors = avaiableSensorTypes
+        .filter(type => !visibleTypes.includes(type))
+        .sort((a, b) => getSensorTypeOrder(a) - getSensorTypeOrder(b));
 
     const sensorTypeLeftSide = sensorType => {
         return <Box>
