@@ -1,4 +1,4 @@
-import { getDisplayValue, getUnitHelper, round } from "../UnitHelper";
+import { getDisplayValue, getUnitHelper, round, DEFAULT_VISIBLE_SENSOR_TYPES } from "../UnitHelper";
 import * as XLSX from 'xlsx';
 import { calculateAverage } from "./dataMath";
 import montserratFont from "./fonts/Montserrat";
@@ -12,50 +12,124 @@ import { hasAlertBeenHit } from "./alertHelper";
 import { getTimestamp } from "../TimeHelper";
 
 function processData(data, t) {
-    const sensorHeaders = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber", "txPower"]
+    // Determine available sensor types based on data format
+    const availableSensorTypes = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber", "txPower"]
+
     if (data.measurements.length > 0 && data.measurements[0].parsed !== null) {
         if (data.measurements[0].parsed.dataFormat === "e0") {
-            sensorHeaders.push("co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "illuminance", "soundLevelAvg", "soundLevelPeak", "aqi")
+            availableSensorTypes.push("co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "illuminance", "soundLevelAvg", "soundLevelPeak", "aqi")
         } else if (data.measurements[0].parsed.dataFormat === "e1") {
-            sensorHeaders.push("co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "aqi")
+            availableSensorTypes.push("co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "aqi")
             let opts = ["illuminance", "soundLevelAvg", "soundLevelPeak", "soundLevelInstant"]
             opts.forEach(x => {
                 if (data.measurements[0].parsed[x] !== undefined) {
-                    sensorHeaders.push(x)
+                    availableSensorTypes.push(x)
                 }
             })
-            sensorHeaders.splice(sensorHeaders.indexOf("accelerationX"), 1);
-            sensorHeaders.splice(sensorHeaders.indexOf("accelerationY"), 1);
-            sensorHeaders.splice(sensorHeaders.indexOf("accelerationZ"), 1);
-            sensorHeaders.splice(sensorHeaders.indexOf("battery"), 1);
-            sensorHeaders.splice(sensorHeaders.indexOf("movementCounter"), 1);
-            sensorHeaders.splice(sensorHeaders.indexOf("txPower"), 1);
+            // Remove types not available in e1 format
+            const toRemove = ["accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "txPower"]
+            toRemove.forEach(type => {
+                const idx = availableSensorTypes.indexOf(type)
+                if (idx !== -1) availableSensorTypes.splice(idx, 1)
+            })
         }
     }
-    var csvHeader = [t('date')];
-    let uHelp = {};
-    sensorHeaders.forEach(x => {
-        uHelp[x] = getUnitHelper(x, true)
-        let header = t(uHelp[x].exportLabel || uHelp[x].shortLabel || uHelp[x].label)
-        if (x === "rssi") header = "RSSI";
-        if (header === "Tx Power") header = "TX Power";
-        if (!uHelp[x].noUnitInExport && uHelp[x].unit) header += ` (${t(uHelp[x].unit)})`
+
+    // Build column definitions with all unit variants
+    const columnDefs = []
+
+    // First, process types from DEFAULT_VISIBLE_SENSOR_TYPES in order
+    DEFAULT_VISIBLE_SENSOR_TYPES.forEach(sensorType => {
+        if (!availableSensorTypes.includes(sensorType)) return
+
+        const baseHelper = getUnitHelper(sensorType, true)
+        if (baseHelper.units && baseHelper.units.length > 0) {
+            // Add column for each unit variant
+            baseHelper.units.forEach(unitDef => {
+                const helper = getUnitHelper(sensorType, true, unitDef.cloudStoreKey)
+                columnDefs.push({
+                    sensorType,
+                    unitKey: unitDef.cloudStoreKey,
+                    helper
+                })
+            })
+        } else {
+            // Single unit type
+            columnDefs.push({
+                sensorType,
+                unitKey: null,
+                helper: baseHelper
+            })
+        }
+    })
+
+    // Then add remaining types not in DEFAULT_VISIBLE_SENSOR_TYPES
+    availableSensorTypes.forEach(sensorType => {
+        if (DEFAULT_VISIBLE_SENSOR_TYPES.includes(sensorType)) return
+
+        const baseHelper = getUnitHelper(sensorType, true)
+        if (baseHelper.units && baseHelper.units.length > 0) {
+            baseHelper.units.forEach(unitDef => {
+                const helper = getUnitHelper(sensorType, true, unitDef.cloudStoreKey)
+                columnDefs.push({
+                    sensorType,
+                    unitKey: unitDef.cloudStoreKey,
+                    helper
+                })
+            })
+        } else {
+            columnDefs.push({
+                sensorType,
+                unitKey: null,
+                helper: baseHelper
+            })
+        }
+    })
+
+    // Create CSV header
+    var csvHeader = [t('date')]
+    columnDefs.forEach(colDef => {
+        let header = t(colDef.helper.exportLabel || colDef.helper.shortLabel || colDef.helper.label)
+        if (colDef.sensorType === "rssi") header = "RSSI"
+        if (header === "Tx Power") header = "TX Power"
+        if (!colDef.helper.noUnitInExport && colDef.helper.unit) {
+            header += ` (${t(colDef.helper.unit)})`
+        }
         csvHeader.push(header)
     })
+
+    // Map data rows
     data = data.measurements.map(x => {
         let row = [toISOString(new Date(x.timestamp * 1000))]
-        sensorHeaders.forEach(s => {
-            let uh = uHelp[s]
-            let val = s === "humidity" ?
-                uh.value(x.parsed[s], x.parsed.temperature) :
-                uh.value(x.parsed[s]);
-            if (isNaN(val)) val = "";
-            else {
-                if (s === "aqi") val = round(val, 1)
+        columnDefs.forEach(colDef => {
+            const sensorType = colDef.sensorType
+            const helper = colDef.helper
+            const rawValue = x.parsed[sensorType]
+            let val
+
+            // Calculate value based on type
+            if (colDef.unitKey !== null && helper.valueWithUnit) {
+                // Use valueWithUnit for types with multiple units
+                if (sensorType === "humidity") {
+                    val = helper.valueWithUnit(rawValue, colDef.unitKey, x.parsed.temperature)
+                } else {
+                    val = helper.valueWithUnit(rawValue, colDef.unitKey)
+                }
+            } else {
+                // Use regular value function
+                if (sensorType === "humidity") {
+                    val = helper.value(rawValue, x.parsed.temperature)
+                } else {
+                    val = helper.value(rawValue)
+                }
             }
+
+            if (isNaN(val)) val = ""
+            else if (sensorType === "aqi") val = round(val, 1)
+
             row.push(val)
-        });
-        return row;
+        })
+        return row
     })
 
     // filter duplicates
