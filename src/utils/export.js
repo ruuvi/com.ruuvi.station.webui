@@ -255,26 +255,34 @@ function processMultiSensorReportData(data, t, sensorType) {
         }
     }
 
+    const measurementMaps = data.map(sensorData => {
+        const map = new Map()
+        for (const measurement of sensorData.measurements) {
+            map.set(measurement.timestamp, measurement)
+        }
+        return map
+    })
+
     let rows = []
     for (let i = 0; i < timestampsWithData.length; i++) {
         let row = [toISOString(new Date(timestampsWithData[i] * 1000))]
+        const timestamp = timestampsWithData[i]
+
         for (let j = 0; j < data.length; j++) {
-            let d = data[j].measurements
             let val = ""
-            for (let k = 0; k < d.length; k++) {
-                if (d[k].timestamp === timestampsWithData[i]) {
-                    switch (sensorType) {
-                        case "temperature":
-                            val = unitHelper.value(d[k].parsed[sensorType], undefined, settings)
-                            break
-                        case "humidity":
-                            val = unitHelper.value(d[k].parsed[sensorType], d[k].parsed.temperature, settings)
-                            break
-                        default:
-                            val = unitHelper.value(d[k].parsed[sensorType], settings)
-                            break
-                    }
-                    break
+            const measurement = measurementMaps[j].get(timestamp)
+
+            if (measurement) {
+                switch (sensorType) {
+                    case "temperature":
+                        val = unitHelper.value(measurement.parsed[sensorType], undefined, settings)
+                        break
+                    case "humidity":
+                        val = unitHelper.value(measurement.parsed[sensorType], measurement.parsed.temperature, settings)
+                        break
+                    default:
+                        val = unitHelper.value(measurement.parsed[sensorType], settings)
+                        break
                 }
             }
             row.push(val)
