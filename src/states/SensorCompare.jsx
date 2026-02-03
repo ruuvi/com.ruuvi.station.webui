@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import NetworkApi from "../NetworkApi";
 import { Button, Flex, Box, useBreakpointValue } from "@chakra-ui/react";
 import CompairView, { EmptyGraph } from "../components/CompareView";
@@ -27,6 +27,7 @@ function SensorCompare(props) {
     const [loading, setLoading] = useState(false)
     const [viewData, setViewData] = useState(null)
     const isWideVersion = useBreakpointValue({ base: false, md: true })
+    const cancelRef = useRef(false)
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -208,9 +209,16 @@ function SensorCompare(props) {
     </>
 
     const loadButton = <Button
-        isDisabled={!selectedSensors.length || loading}
-        onClick={() => load()}>
-        {i18next.t("load")}
+        isDisabled={!selectedSensors.length && !loading}
+        onClick={() => {
+            if (loading) {
+                cancelRef.current = true;
+            } else {
+                cancelRef.current = false;
+                load();
+            }
+        }}>
+        {loading ? i18next.t("cancel") : i18next.t("load")}
     </Button>
 
     const load = (newFrom, newTo) => {
@@ -357,7 +365,7 @@ function SensorCompare(props) {
                 </div>
             </ScreenSizeWrapper>
             <br />
-            {viewData && <CompairView key={123} {...viewData} isLoading={s => setLoading(s)} setData={d => data = d} />}
+            {viewData && <CompairView key={123} {...viewData} isLoading={s => setLoading(s)} setData={d => data = d} cancelRef={cancelRef} />}
             {!viewData && <Box height={450}><EmptyGraph /></Box>}
             <Box height={90} />
         </Box >

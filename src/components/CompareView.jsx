@@ -150,11 +150,22 @@ function CompareView(props) {
             setSensorData([])
 
             for (const sensor of sensors) {
+                // Check if cancelled
+                if (props.cancelRef?.current) {
+                    break;
+                }
+
                 let until = props.to
                 let since = props.from;
                 let allData = null;
                 let stop = false
                 for (; ;) {
+                    // Check if cancelled
+                    if (props.cancelRef?.current) {
+                        stop = true;
+                        break;
+                    }
+
                     if (since >= until || stop) {
                         break;
                     }
