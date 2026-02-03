@@ -20,7 +20,7 @@ import SensorCard from "./SensorCard";
 import { MdAdd, MdClose, MdUnfoldMore } from "react-icons/md";
 import ConfirmationDialog from "./ConfirmationDialog";
 import NetworkApi from "../NetworkApi";
-import { visibilityCodes, visibilityFromCloudToWeb, visibilityFromWebToCloud } from "../utils/cloudTranslator";
+import { visibilityCodes, visibilityFromCloudToWeb, visibilityFromWebToCloud, ORDERED_VISIBILITY_CODES } from "../utils/cloudTranslator";
 import notify from "../utils/notify";
 
 const ENABLE_TVOC_VISIBILITY = true;
@@ -479,9 +479,8 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
     };
 
     const getSensorTypeOrder = (sensorType) => {
-        const baseType = getWebTypeFromSensorType(sensorType);
-        const orderedTypes = Object.keys(allUnits).filter(key => key !== '_common');
-        const index = orderedTypes.indexOf(baseType);
+        // Find the index in ORDERED_VISIBILITY_CODES
+        const index = ORDERED_VISIBILITY_CODES.indexOf(sensorType);
         return index === -1 ? 999 : index;
     };
 

@@ -10,6 +10,7 @@ import checkOK from '../img/pdf/check-02.png'
 import checkNOK from '../img/pdf/check-01.png'
 import { hasAlertBeenHit } from "./alertHelper";
 import { getTimestamp } from "../TimeHelper";
+import { ORDERED_VISIBILITY_CODES, visibilityFromCloudToWeb } from "./cloudTranslator";
 
 function processData(data, t) {
     // Determine available sensor types based on data format
@@ -35,54 +36,75 @@ function processData(data, t) {
         }
     }
 
-    // Build column definitions with all unit variants
+    // Build column definitions using the ordered visibility codes
     const columnDefs = []
+    const addedColumns = new Set()
+    const addedSensorTypes = new Set()
 
-    // First, process types from DEFAULT_VISIBLE_SENSOR_TYPES in order
-    DEFAULT_VISIBLE_SENSOR_TYPES.forEach(sensorType => {
+    // Process visibility codes in order
+    ORDERED_VISIBILITY_CODES.forEach(cloudCode => {
+        const mapping = visibilityFromCloudToWeb(cloudCode)
+        if (!mapping) return
+
+        const [sensorType, unitKey] = mapping
+
+        // Skip if sensor doesn't have this type
         if (!availableSensorTypes.includes(sensorType)) return
 
+        // Create unique key for this column
+        const columnKey = `${sensorType}_${unitKey}`
+        if (addedColumns.has(columnKey)) return
+        addedColumns.add(columnKey)
+
+        // Track that we've seen this sensor type
         const baseHelper = getUnitHelper(sensorType, true)
+        if (!baseHelper.units || baseHelper.units.length === 0) {
+            // For single-unit types, mark the sensor type as fully processed
+            addedSensorTypes.add(sensorType)
+        }
+
+        // Get the helper for this specific unit variant
+        const helper = getUnitHelper(sensorType, true, unitKey)
+        columnDefs.push({
+            sensorType,
+            unitKey: unitKey || null,
+            helper
+        })
+    })
+
+    // Add any remaining sensor types not covered by visibility codes
+    availableSensorTypes.forEach(sensorType => {
+        // Skip if this sensor type was already fully processed
+        if (addedSensorTypes.has(sensorType)) return
+
+        const baseHelper = getUnitHelper(sensorType, true)
+
+        // Check if we need to add this type
         if (baseHelper.units && baseHelper.units.length > 0) {
-            // Add column for each unit variant
+            // For types with multiple units, check each variant
             baseHelper.units.forEach(unitDef => {
-                const helper = getUnitHelper(sensorType, true, unitDef.cloudStoreKey)
-                columnDefs.push({
-                    sensorType,
-                    unitKey: unitDef.cloudStoreKey,
-                    helper
-                })
+                const columnKey = `${sensorType}_${unitDef.cloudStoreKey}`
+                if (!addedColumns.has(columnKey)) {
+                    addedColumns.add(columnKey)
+                    const helper = getUnitHelper(sensorType, true, unitDef.cloudStoreKey)
+                    columnDefs.push({
+                        sensorType,
+                        unitKey: unitDef.cloudStoreKey,
+                        helper
+                    })
+                }
             })
         } else {
             // Single unit type
-            columnDefs.push({
-                sensorType,
-                unitKey: null,
-                helper: baseHelper
-            })
-        }
-    })
-
-    // Then add remaining types not in DEFAULT_VISIBLE_SENSOR_TYPES
-    availableSensorTypes.forEach(sensorType => {
-        if (DEFAULT_VISIBLE_SENSOR_TYPES.includes(sensorType)) return
-
-        const baseHelper = getUnitHelper(sensorType, true)
-        if (baseHelper.units && baseHelper.units.length > 0) {
-            baseHelper.units.forEach(unitDef => {
-                const helper = getUnitHelper(sensorType, true, unitDef.cloudStoreKey)
+            const columnKey = `${sensorType}_null`
+            if (!addedColumns.has(columnKey)) {
+                addedColumns.add(columnKey)
                 columnDefs.push({
                     sensorType,
-                    unitKey: unitDef.cloudStoreKey,
-                    helper
+                    unitKey: null,
+                    helper: baseHelper
                 })
-            })
-        } else {
-            columnDefs.push({
-                sensorType,
-                unitKey: null,
-                helper: baseHelper
-            })
+            }
         }
     })
 
