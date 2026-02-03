@@ -204,13 +204,26 @@ function processMultiSensorReportData(data, t, sensorType) {
         }
         sensorType = sensorType.sensorType
     }
-    
+
     let uHelpV = getUnitHelper(sensorType)
-    if (!unit) unit = uHelpV.unit
+    if (unitObj && unitObj.cloudStoreKey) {
+        uHelpV = getUnitHelper(sensorType, true, unitObj.cloudStoreKey)
+        unit = t(uHelpV.label || uHelpV.shortLabel) + " (" + uHelpV.unit + ")"
+    } else if (!unit) {
+        unit = uHelpV.unit
+    }
 
     var csvHeader = [t('date')];
     for (let i = 0; i < data.length; i++) {
-        csvHeader.push(data[i].name + " (" + unit + ")");
+        let unitDisplay;
+        if (unitObj && unitObj.cloudStoreKey) {
+            unitDisplay = unit;
+        } else if (!unit || unit === "") {
+            unitDisplay = t(uHelpV.exportLabel || uHelpV.label);
+        } else {
+            unitDisplay = t(unit);
+        }
+        csvHeader.push(data[i].name + " (" + unitDisplay + ")");
     }
 
     let timestampsWithData = []
