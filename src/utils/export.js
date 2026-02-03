@@ -14,7 +14,7 @@ import { ORDERED_VISIBILITY_CODES, visibilityFromCloudToWeb } from "./cloudTrans
 
 function processData(data, t) {
     // Determine available sensor types based on data format
-    const availableSensorTypes = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber", "txPower"]
+    const availableSensorTypes = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber"]
 
     if (data.measurements.length > 0 && data.measurements[0].parsed !== null) {
         if (data.measurements[0].parsed.dataFormat === "e0") {
@@ -28,7 +28,7 @@ function processData(data, t) {
                 }
             })
             // Remove types not available in e1 format
-            const toRemove = ["accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "txPower"]
+            const toRemove = ["accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter"]
             toRemove.forEach(type => {
                 const idx = availableSensorTypes.indexOf(type)
                 if (idx !== -1) availableSensorTypes.splice(idx, 1)
