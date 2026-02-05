@@ -119,8 +119,8 @@ export default function SensorTypePicker(props) {
         if (value == null) return ""
 
         let sensorType = getSensorTypeOnly(value)
-        let uh = getUnitHelper(sensorType, true)
         let unit = getUnitOnly(value)
+        let uh = getUnitHelper(sensorType, true, unit)
 
         // Handle humidity variants on dashboard (humidity_0, humidity_1, humidity_2)
         if (props.dashboard && sensorType === "humidity" && unit) {
