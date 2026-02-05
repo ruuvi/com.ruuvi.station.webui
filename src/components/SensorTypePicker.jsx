@@ -10,6 +10,7 @@ import {
 import { MdArrowDropDown } from "react-icons/md"
 import { useTranslation } from 'react-i18next';
 import { allUnits, getSensorTypeOnly, getUnitHelper, getUnitOnly, getUnitSettingFor } from "../UnitHelper";
+import { ORDERED_VISIBILITY_CODES, visibilityFromWebToCloud, visibilityFromCloudToWeb } from "../utils/cloudTranslator";
 
 const types = ["temperature", "humidity", "pressure", "movementCounter", "battery", "accelerationX", "accelerationY", "accelerationZ", "rssi", "measurementSequenceNumber"]
 
@@ -80,6 +81,26 @@ export default function SensorTypePicker(props) {
         }
         opts = [null, ...opts];
     }
+
+    // Sort opts according to ORDERED_VISIBILITY_CODES
+    opts.sort((a, b) => {
+        if (a === null) return -1;
+        if (b === null) return 1;
+        const getOrder = (opt) => {
+            const sensorType = getSensorTypeOnly(opt);
+            const unit = getUnitOnly(opt);
+            const cloudCode = unit ? visibilityFromWebToCloud(unit, sensorType) : null;
+            if (cloudCode) {
+                const idx = ORDERED_VISIBILITY_CODES.indexOf(cloudCode);
+                return idx === -1 ? 999 : idx;
+            }
+            const idx = ORDERED_VISIBILITY_CODES.findIndex(code => {
+                return visibilityFromCloudToWeb(code)?.[0] === sensorType;
+            });
+            return idx === -1 ? 999 : idx;
+        };
+        return getOrder(a) - getOrder(b);
+    });
 
     if (props.value === null && !props.dashboard) {
         if (props.allUnits) {
