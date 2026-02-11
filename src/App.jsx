@@ -190,14 +190,14 @@ export default function App() {
 
   var user = new NetworkApi().getUser()
   const [reloadSub, setReloadSub] = React.useState(0);
-  const [subscription, setSubscription] = useState("")
+  const [subscription, setSubscription] = useState(null)
   useEffect(() => {
     async function getSubs() {
       if (user) {
         let resp = await new NetworkApi().getSubscription()
         if (resp.result === "success") {
-          if (resp.data.subscriptions.length === 0) return setSubscription("none")
-          return setSubscription(resp.data.subscriptions[0].subscriptionName)
+          if (resp.data.subscriptions.length === 0) return setSubscription({ subscriptionName: "none" })
+          return setSubscription(resp.data.subscriptions[0])
         }
       }
       setTimeout(() => {
@@ -214,7 +214,7 @@ export default function App() {
         let store = new Store();
         let notifications = await new NetworkApi().getBanners();
         if (notifications) {
-          let notification = notifications.filter(x => x.plan === subscription || x.plan === "")
+          let notification = notifications.filter(x => x.plan === subscription?.subscriptionName || x.plan === "")
           notification = notification.filter(x => x.key && !store.getHasSeenBanner(x.key))
           notification = notification.filter(x => {
             if (x.version && x.version !== pjson.version) return false
@@ -277,7 +277,7 @@ export default function App() {
       <BrowserRouter basename={"/"}>
         {hideTopBar ? null : <>
           <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
-            <Logo subscription={subscription} />
+            <Logo subscription={subscription?.subscriptionName || ""} />
             <Text>
               {new NetworkApi().isStaging() ? "(staging) " : ""}
             </Text>
@@ -302,7 +302,7 @@ export default function App() {
         </>}
         <div>
           <Routes>
-            <Route path="/shares" element={<ShareCenter showDialog={showDialog} closeDialog={() => setShowDialog("")} />} />
+            <Route path="/shares" element={<ShareCenter showDialog={showDialog} closeDialog={() => setShowDialog("")} subscription={subscription} />} />
             <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} settingsVersion={settingsVersion} />} />
             <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} settingsVersion={settingsVersion} />} />
             <Route path="/compare" element={<SensorCompare />} />

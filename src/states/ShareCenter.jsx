@@ -86,7 +86,7 @@ const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 4
 const subTitleStyle = { fontFamily: "montserrat", fontSize: "24px", fontWeight: 800 }
 const subTitleDescriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, paddingBottom: 25, paddingTop: 5, maxWidth: "800px" }
 
-const ShareCenter = () => {
+const ShareCenter = ({ subscription }) => {
     const [sensors, setSensors] = React.useState([]);
     const [selectedSensors, setSelectedSensors] = React.useState([]);
     const [shareToEmails, setShareToEmails] = React.useState([]);
@@ -290,6 +290,15 @@ const ShareCenter = () => {
                     <Heading size="lg" style={subTitleStyle}>{i18next.t("shared_by_me")}</Heading>
                     <Box style={subTitleDescriptionStyle}>
                         {i18next.t("sensor_shared_by_me_description")}
+                        <br />
+                        <br />
+                        {(() => {
+                            const text = addVariablesInString(i18next.t("total_sensor_shares_info"), [sensors.filter(x => x.userIsOwner).reduce((a, b) => a + b.sharedTo.length, 0), subscription?.maxShares || ".."]);
+                            const email = "support@ruuvi.com";
+                            const idx = text.indexOf(email);
+                            if (idx === -1) return text;
+                            return <>{text.slice(0, idx)}<a href={`mailto:${email}`} style={{ textDecoration: "underline" }}>{email}</a>{text.slice(idx + email.length)}</>;
+                        })()}
                     </Box>
                     <hr />
                     <br />
