@@ -12,7 +12,7 @@ import { hasAlertBeenHit } from "./alertHelper";
 import { getTimestamp } from "../TimeHelper";
 import { ORDERED_VISIBILITY_CODES, visibilityFromCloudToWeb } from "./cloudTranslator";
 
-function processData(data, t) {
+function processData(data, t, visibleFields) {
     // Determine available sensor types based on data format
     const availableSensorTypes = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber"]
 
@@ -107,6 +107,20 @@ function processData(data, t) {
             }
         }
     })
+
+    // Filter columns by visible fields if provided (e.g. for shared sensors)
+    if (visibleFields && visibleFields.length > 0) {
+        const filtered = columnDefs.filter(colDef => {
+            return visibleFields.some(field => {
+                if (Array.isArray(field)) {
+                    return colDef.sensorType === field[0] && colDef.unitKey === field[1];
+                }
+                return colDef.sensorType === field;
+            });
+        });
+        columnDefs.length = 0;
+        filtered.forEach(c => columnDefs.push(c));
+    }
 
     // Create CSV header
     var csvHeader = [t('date')]
@@ -319,8 +333,8 @@ export function exportMuliSensorCSV(datain, t, sensorType) {
     }
 }
 
-export function exportCSV(dataIn, sensorName, t) {
-    let { csvHeader, data } = processData(dataIn, t)
+export function exportCSV(dataIn, sensorName, t, visibleFields) {
+    let { csvHeader, data } = processData(dataIn, t, visibleFields)
     var csv = csvHeader.toString() + "\n"
     for (var i = data.length - 1; i >= 0; i--) {
         csv += data[i].toString() + "\n"
@@ -364,8 +378,8 @@ export function exportMuliSensorXLSX(datain, t, sensorType) {
     XLSX.writeFile(wb, exportedFilename);
 }
 
-export function exportXLSX(dataIn, sensorName, t) {
-    let { csvHeader, data } = processData(dataIn, t)
+export function exportXLSX(dataIn, sensorName, t, visibleFields) {
+    let { csvHeader, data } = processData(dataIn, t, visibleFields)
 
     data.reverse()
 
