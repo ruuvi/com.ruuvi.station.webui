@@ -50,12 +50,29 @@ export default function SensorTypePicker(props) {
         opts = opts.filter(x => types.includes(getSensorTypeOnly(x)))
     }
     if (props.allUnits) {
+        const tempUnits = ["C", "F", "K"];
+        const tempSetting = getUnitSettingFor("temperature") || "C";
         for (let i = 0; i < opts.length; i++) {
             let unitOpts = allUnits[getSensorTypeOnly(opts[i])]?.units
             let setting = getUnitSettingFor(getSensorTypeOnly(opts[i]))
             if (unitOpts) {
                 let mainUnit = i
                 for (let j = 0; j < unitOpts.length; j++) {
+                    // Expand dew point (humidity cloudStoreKey "2") into C/F/K variants
+                    if (getSensorTypeOnly(opts[mainUnit]) === "humidity" && unitOpts[j].cloudStoreKey === "2") {
+                        const dewKeys = tempUnits.filter(t => t !== tempSetting);
+                        if (setting === "2") {
+                            opts[mainUnit] = `humidity_2${tempSetting}`;
+                        } else {
+                            opts.splice(i + 1, 0, `humidity_2${tempSetting}`);
+                            i++;
+                        }
+                        dewKeys.forEach(t => {
+                            opts.splice(i + 1, 0, `humidity_2${t}`);
+                            i++;
+                        });
+                        continue;
+                    }
                     if (setting === unitOpts[j].cloudStoreKey) {
                         opts[mainUnit] = `${getSensorTypeOnly(opts[mainUnit])}_${unitOpts[j].cloudStoreKey}`
                         continue;
@@ -88,7 +105,11 @@ export default function SensorTypePicker(props) {
         if (b === null) return 1;
         const getOrder = (opt) => {
             const sensorType = getSensorTypeOnly(opt);
-            const unit = getUnitOnly(opt);
+            let unit = getUnitOnly(opt);
+            // Normalize dew point temperature variants (e.g. "2C" -> "2") for sorting
+            if (sensorType === "humidity" && unit && unit.startsWith("2") && unit.length > 1) {
+                unit = "2";
+            }
             const cloudCode = unit ? visibilityFromWebToCloud(unit, sensorType) : null;
             if (cloudCode) {
                 const idx = ORDERED_VISIBILITY_CODES.indexOf(cloudCode);
@@ -132,7 +153,12 @@ export default function SensorTypePicker(props) {
                 label = t("humidity") + (unitTranslationKey ? ` (${t(unitTranslationKey)})` : "")
             }
         } else if (props.allUnits) {
-            if (sensorType === "humidity" && unit === "2") {
+            if (sensorType === "humidity" && unit && unit.startsWith("2") && unit.length > 1) {
+                // Dew point with specific temperature unit (e.g. "2C", "2F", "2K")
+                let tempUnit = unit.substring(1);
+                let tempUnitLabel = allUnits["temperature"]?.units?.find(x => x.cloudStoreKey === tempUnit)?.translationKey || tempUnit;
+                label = t("dewpoint") + " (" + t(tempUnitLabel) + ")"
+            } else if (sensorType === "humidity" && unit === "2") {
                 let unitTranslationKey = uh.units.find(x => x.cloudStoreKey === unit)?.translationKey
                 label = t(unitTranslationKey) + " (" + t(getUnitHelper("temperature").unit) + ")"
             }

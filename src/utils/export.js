@@ -210,19 +210,27 @@ function getFilename(sensorName, extension) {
 function processMultiSensorReportData(data, t, sensorType) {
     let unit = undefined
     let unitObj = undefined
+    let tempUnit = undefined
 
     if (typeof sensorType === "object") {
         if (sensorType.unit) {
             unit = sensorType.unit.translationKey
             unitObj = sensorType.unit
         }
+        tempUnit = sensorType.tempUnit
         sensorType = sensorType.sensorType
     }
 
     let uHelpV = getUnitHelper(sensorType)
     if (unitObj && unitObj.cloudStoreKey) {
         uHelpV = getUnitHelper(sensorType, true, unitObj.cloudStoreKey)
-        unit = t(uHelpV.label || uHelpV.shortLabel) + " (" + uHelpV.unit + ")"
+        if (sensorType === "humidity" && unitObj.cloudStoreKey === "2" && tempUnit) {
+            // Override the dew point unit display with the specific temperature unit
+            let tempUnitHelper = getUnitHelper("temperature", true, tempUnit);
+            unit = t(uHelpV.label || uHelpV.shortLabel) + " (" + tempUnitHelper.unit + ")"
+        } else {
+            unit = t(uHelpV.label || uHelpV.shortLabel) + " (" + uHelpV.unit + ")"
+        }
     } else if (!unit) {
         unit = uHelpV.unit
     }
@@ -263,6 +271,9 @@ function processMultiSensorReportData(data, t, sensorType) {
         }
         if (sensorType === "humidity") {
             settings = { UNIT_HUMIDITY: unitObj.cloudStoreKey }
+            if (tempUnit) {
+                settings.UNIT_TEMPERATURE = tempUnit
+            }
         }
         if (sensorType === "pressure") {
             settings = { UNIT_PRESSURE: unitObj.cloudStoreKey }

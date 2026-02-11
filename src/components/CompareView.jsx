@@ -84,7 +84,12 @@ function CompareView(props) {
                 settings = { UNIT_TEMPERATURE: unit }
             }
             if (dataKey === "humidity") {
-                settings = { UNIT_HUMIDITY: unit }
+                // Handle dew point temperature variants (e.g. unit "2C", "2F", "2K")
+                if (unit && unit.startsWith("2") && unit.length > 1) {
+                    settings = { UNIT_HUMIDITY: "2", UNIT_TEMPERATURE: unit.substring(1) }
+                } else {
+                    settings = { UNIT_HUMIDITY: unit }
+                }
             }
             if (dataKey === "pressure") {
                 settings = { UNIT_PRESSURE: unit }

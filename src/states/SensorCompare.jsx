@@ -138,8 +138,17 @@ function SensorCompare(props) {
 
     const graphTitle = (mobile) => {
         let uh = getUnitHelper(getSensorTypeOnly(dataKey))
-        let unit = uh.units?.find(x => x.cloudStoreKey === getUnitOnly(dataKey))?.translationKey || uh.unit
+        let unitKey = getUnitOnly(dataKey)
+        let unit;
         let label = uh.label;
+        // Handle dew point temperature variants (e.g. "2C", "2F", "2K")
+        if (getSensorTypeOnly(dataKey) === "humidity" && unitKey && unitKey.startsWith("2") && unitKey.length > 1) {
+            let tempUnit = unitKey.substring(1);
+            unit = getUnitHelper("temperature").units?.find(x => x.cloudStoreKey === tempUnit)?.translationKey || tempUnit;
+            label = "dewpoint";
+        } else {
+            unit = uh.units?.find(x => x.cloudStoreKey === unitKey)?.translationKey || uh.unit
+        }
 
         return <div style={{ marginLeft: 30 }}>
             <span className="graphLengthText" style={{ fontSize: mobile ? "20px" : "24px" }}>
@@ -154,8 +163,16 @@ function SensorCompare(props) {
     const graphCtrl = (isMobile) => {
         const sensorType = getSensorTypeOnly(dataKey);
         const unitHelper = getUnitHelper(sensorType);
-        const unit = unitHelper.units?.find(x => x.cloudStoreKey === getUnitOnly(dataKey));
-        const exportParam = unit ? { sensorType, unit } : sensorType;
+        const unitKey = getUnitOnly(dataKey);
+        let exportParam;
+        // Handle dew point temperature variants (e.g. "2C", "2F", "2K")
+        if (sensorType === "humidity" && unitKey && unitKey.startsWith("2") && unitKey.length > 1) {
+            const tempUnit = unitKey.substring(1);
+            exportParam = { sensorType, unit: { cloudStoreKey: "2", translationKey: "dewpoint" }, tempUnit };
+        } else {
+            const unit = unitHelper.units?.find(x => x.cloudStoreKey === unitKey);
+            exportParam = unit ? { sensorType, unit } : sensorType;
+        }
 
         return <>
             <ZoomInfo />
