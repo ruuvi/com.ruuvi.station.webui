@@ -147,10 +147,10 @@ const ShareCenter = () => {
 
     const selectEmailTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("email")}</div>
     const selectEmail = <>
-        <Input className='shareEmail' autoCorrect="off" autoCapitalize="none" autoComplete="off" placeholder={i18next.t("email")} w={"250px"} mr={2} value={email} onChange={e =>
-            setEmail(e.target.value.toLowerCase())
-        } />
-        <Box display={"inline-block"}>
+        <Flex gap={2} wrap="wrap" align="center">
+            <Input className='shareEmail' autoCorrect="off" autoCapitalize="none" autoComplete="off" placeholder={i18next.t("email")} w={"250px"} value={email} onChange={e =>
+                setEmail(e.target.value.toLowerCase())
+            } />
             <Button onClick={() => {
                 if (!shareToEmails.includes(email)) {
                     setShareToEmails([...shareToEmails, email])
@@ -159,7 +159,7 @@ const ShareCenter = () => {
             }} isDisabled={email.length === 0 || !isEmail(email)}>
                 {i18next.t("add")}
             </Button>
-        </Box>
+        </Flex>
         <Flex gap='2' wrap="wrap" mt={2.5} >
             {shareToEmails.map((email, index) => (
                 <EmailBox email={email.toLowerCase()} onRemove={() => {
