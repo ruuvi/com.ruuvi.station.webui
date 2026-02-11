@@ -98,6 +98,7 @@ const ShareCenter = () => {
     const [shareProgress, setShareProgress] = React.useState([0, 0])
 
     const isWideVersion = useBreakpointValue({ base: false, md: true })
+    const minimalMode = window.location.search.includes("minimalMode=true")
 
     useEffect(() => {
         (async () => {
@@ -308,15 +309,21 @@ const ShareCenter = () => {
                     <hr />
                     <br />
                     <Flex gap='2' wrap="wrap">
-                        {sensors.filter(x => !x.userIsOwner).map((sensor, index) => (
-                            <a key={index} href={"/" + sensor.sensor}>
+                        {sensors.filter(x => !x.userIsOwner).map((sensor, index) => {
+                            const sensorBox = (
                                 <Box key={index} width="300px">
                                     <SensorSharedWithMeBox sensor={sensor} onRemove={() => {
                                         setSensors(sensors.filter(x => x.sensor !== sensor.sensor))
                                     }} />
                                 </Box>
-                            </a>
-                        ))}
+                            );
+                            if (minimalMode) return sensorBox;
+                            return (
+                                <a key={index} href={"/" + sensor.sensor}>
+                                    {sensorBox}
+                                </a>
+                            );
+                        })}
                     </Flex>
                 </>}
             <ShareResultDialog isOpen={showShareResult} onClose={() => setShowShareResult(false)} result={shareResult} progress={shareProgress} />
