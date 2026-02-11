@@ -75,20 +75,12 @@ code {
 }
 
 .alarmFadeInOut {
-  opacity: 1;
-  animation: fade 1s cubic-bezier(1,1,0,1) infinite;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
 }
 
-@keyframes fade {
-
-  0%,
-  100% {
-    opacity: 0
-  }
-
-  50% {
-    opacity: 1
-  }
+.bell-on .alarmFadeInOut {
+  opacity: 1;
 }
 
 .u-select {

@@ -12,6 +12,11 @@ import { createStandaloneToast } from '@chakra-ui/toast'
 import { t } from 'i18next';
 const { ToastContainer } = createStandaloneToast()
 
+// Timer to make all alert bells pulse in sync
+setInterval(() => {
+  document.body.classList.toggle('bell-on');
+}, 500);
+
 class ErrorView extends React.Component {
   constructor(props) {
     super(props);
