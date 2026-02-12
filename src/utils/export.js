@@ -34,6 +34,12 @@ function processData(data, t, visibleFields) {
                 if (idx !== -1) availableSensorTypes.splice(idx, 1)
             })
         }
+
+        // Filter to only types actually present in the measurement data
+        const presentKeys = Object.keys(data.measurements[0].parsed)
+        const filtered = availableSensorTypes.filter(type => presentKeys.includes(type))
+        availableSensorTypes.length = 0
+        filtered.forEach(type => availableSensorTypes.push(type))
     }
 
     // Build column definitions using the ordered visibility codes
