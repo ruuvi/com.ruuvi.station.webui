@@ -421,6 +421,11 @@ class Dashboard extends Component {
     }
     updateOrder(order) {
         this.setState({ ...this.state, order: [...order] })
+        try {
+            let settings = JSON.parse(localStorage.getItem("settings") || "{}")
+            settings["SENSOR_ORDER"] = JSON.stringify(order)
+            localStorage.setItem("settings", JSON.stringify(settings))
+        } catch (e) { /* ignore */ }
         new NetworkApi().setSetting("SENSOR_ORDER", JSON.stringify(order), b => {
             if (b.result === "success") {
                 //notify.success(this.props.t("successfully_saved"))
