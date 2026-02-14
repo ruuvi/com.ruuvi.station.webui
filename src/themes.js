@@ -375,6 +375,11 @@ export const ruuviTheme = extendTheme({
                 focusBorderColor: colors.buttonFocus.dark,
             },
         },
+        Textarea: {
+            defaultProps: {
+                focusBorderColor: colors.buttonFocus.dark,
+            },
+        },
         Modal: {
             parts: ['header'],
             baseStyle: (props) => ({

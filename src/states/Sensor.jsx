@@ -47,6 +47,7 @@ import ExportMenu from "../components/ExportMenu";
 import UpgradePlanButton from "../components/UpgradePlanButton";
 import ZoomInfo from "../components/ZoomInfo";
 import SensorTypeVisibilityDialog from "../components/SensorTypeVisibilityDialog";
+import NotesDialog from "../components/NotesDialog";
 import { visibilityFromCloudToWeb, visibilityCodes } from "../utils/cloudTranslator";
 
 const collapseText = {
@@ -220,7 +221,8 @@ class Sensor extends Component {
             loadingImage: false,
             updateGraphKey: 0,
             graphPDFMode: false,
-            sensorVisibilityDialog: false
+            sensorVisibilityDialog: false,
+            notesDialog: false
         }
         this.isLoading = false;
         this.applyAccordionSetting()
@@ -978,6 +980,24 @@ class Sensor extends Component {
                                                 </table>
                                             </ListItem>
                                         </>}
+                                        <hr />
+                                        <ListItem style={!this.isSharedSensor() ? { cursor: "pointer" } : {}} onClick={!this.isSharedSensor() ? () => this.setState({ ...this.state, notesDialog: true }) : undefined}>
+                                            <table style={accordionContent}>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style={detailedTitle}>
+                                                            {t("notes")}
+                                                        </td>
+                                                        <td style={detailedText}>
+                                                            {!this.isSharedSensor() && <EditableText text="" onClick={() => this.setState({ ...this.state, notesDialog: true })} />}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            {this.props.sensor.settings?.description && <div style={{ ...accordionContent, paddingTop: 4, paddingBottom: 8 }}>
+                                                <span style={{ ...detailedSubText, whiteSpace: "pre-line" }}>{this.props.sensor.settings.description}</span>
+                                            </div>}
+                                        </ListItem>
                                     </List>
                                 </AccordionPanel>
                             </AccordionItem>
@@ -1170,6 +1190,12 @@ class Sensor extends Component {
                         sensor={this.props.sensor}
                         open={this.state.sensorVisibilityDialog}
                         onClose={() => this.setState({ ...this.state, sensorVisibilityDialog: false })}
+                        updateSensor={this.props.updateSensor}
+                    />
+                    <NotesDialog
+                        open={this.state.notesDialog}
+                        onClose={() => this.setState({ ...this.state, notesDialog: false })}
+                        sensor={this.props.sensor}
                         updateSensor={this.props.updateSensor}
                     />
                 </Box>
