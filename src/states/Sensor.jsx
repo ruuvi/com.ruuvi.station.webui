@@ -504,16 +504,8 @@ class Sensor extends Component {
             })
         }, executeAfter)
     }
-    getExportVisibleFields() {
-        if (!this.isSharedSensor()) return undefined;
-        return this.getSensorMainFields().map(field => {
-            if (Array.isArray(field)) return field;
-            const unitKey = getUnitSettingFor(field);
-            return unitKey ? [field, unitKey] : field;
-        });
-    }
     export() {
-        exportCSV(this.state.data, this.props.sensor.name, this.props.t, this.getExportVisibleFields())
+        exportCSV(this.state.data, this.props.sensor.name, this.props.t)
     }
     export_PDF() {
         this.setState({ ...this.state, graphPDFMode: true });
@@ -524,7 +516,7 @@ class Sensor extends Component {
         })
     }
     export_XLSX() {
-        exportXLSX(this.state.data, this.props.sensor.name, this.props.t, this.getExportVisibleFields())
+        exportXLSX(this.state.data, this.props.sensor.name, this.props.t)
     }
     setOpenAccordion(open) {
         new Store().setOpenAccordions(open)
