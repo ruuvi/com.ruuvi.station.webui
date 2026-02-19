@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import NetworkApi from "../../NetworkApi";
 import parse from "../../decoder/parser";
 
-const REFRESH_INTERVAL_MS = (dataFrom) => 60 * 1000 * (dataFrom > 1 ? 5 : 1);
+const STALE_THRESHOLD_MS = 5 * 60 * 1000;
 
 const useSensorData = (sensor, dataFrom, options = {}) => {
     const { fetchHistory = true } = options;
@@ -12,21 +12,34 @@ const useSensorData = (sensor, dataFrom, options = {}) => {
     const [loadingHistory, setLoadingHistory] = useState(fetchHistory);
     const [errorFetchingData, setErrorFetchingData] = useState(false);
     const [hasDataForTypes, setHasDataForTypes] = useState([]);
+    const [fetchKey, setFetchKey] = useState(0);
 
-    const timerRef = useRef(null);
     const abortControllerRef = useRef(null);
     const sensorRef = useRef(sensor);
+    const lastFetchTimeRef = useRef(Date.now());
 
     useEffect(() => {
         sensorRef.current = sensor;
     }, [sensor]);
 
+    // Track whether sensor has data so history re-fetches when data first appears
+    const sensorHasData = sensor.measurements.length === 1 && sensor.measurements[0] !== null;
+
+    // Re-fetch history when tab becomes visible after being hidden (sleep, tab switch)
+    useEffect(() => {
+        if (!fetchHistory) return;
+        const onVisible = () => {
+            if (document.visibilityState === "visible" &&
+                Date.now() - lastFetchTimeRef.current > STALE_THRESHOLD_MS) {
+                setFetchKey((k) => k + 1);
+            }
+        };
+        document.addEventListener("visibilitychange", onVisible);
+        return () => document.removeEventListener("visibilitychange", onVisible);
+    }, [fetchHistory]);
+
     useEffect(() => {
         abortControllerRef.current?.abort();
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
-        }
 
         if (!fetchHistory) {
             abortControllerRef.current = null;
@@ -37,10 +50,6 @@ const useSensorData = (sensor, dataFrom, options = {}) => {
             setErrorFetchingData(false);
             return () => {
                 abortControllerRef.current?.abort();
-                if (timerRef.current) {
-                    clearTimeout(timerRef.current);
-                    timerRef.current = null;
-                }
             };
         }
 
@@ -53,12 +62,6 @@ const useSensorData = (sensor, dataFrom, options = {}) => {
 
         const runFetch = async () => {
             if (controller.signal.aborted) return;
-
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-            }
-
-            timerRef.current = setTimeout(runFetch, REFRESH_INTERVAL_MS(dataFrom));
 
             const currentSensor = sensorRef.current;
             const maxHistoryDays = currentSensor?.subscription?.maxHistoryDays ?? 0;
@@ -97,6 +100,7 @@ const useSensorData = (sensor, dataFrom, options = {}) => {
                     setData(parsedData);
                     setHasDataForTypes(dataTypes);
                     setErrorFetchingData(false);
+                    lastFetchTimeRef.current = Date.now();
                 } else if (graphData.result === "error") {
                     console.log(graphData.error);
                     setErrorFetchingData(true);
@@ -117,15 +121,11 @@ const useSensorData = (sensor, dataFrom, options = {}) => {
 
         return () => {
             abortControllerRef.current?.abort();
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-                timerRef.current = null;
-            }
         };
-    }, [dataFrom, fetchHistory, sensor.sensor, sensor.subscription?.maxHistoryDays]);
+    }, [dataFrom, fetchHistory, sensor.sensor, sensor.subscription?.maxHistoryDays, sensorHasData, fetchKey]);
 
     const latestReading = useMemo(() => {
-        if (sensor.measurements.length === 1) {
+        if (sensor.measurements.length === 1 && sensor.measurements[0] !== null) {
             const [latest] = sensor.measurements;
             return { ...latest.parsed, timestamp: latest.timestamp };
         }
