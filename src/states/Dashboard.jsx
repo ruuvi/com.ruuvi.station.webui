@@ -118,7 +118,7 @@ function DashboardGrid(props) {
         const calculateGridDimensions = () => {
             if (!gridRef.current || !containerWidth) return { columnWidth: minCardWidth, columnCount: 1 };
             let columnCount = Math.max(1, Math.floor((containerWidth + gap) / (minCardWidth + gap)));
-            const columnWidthVal = (containerWidth - (gap * (columnCount - 1))) / columnCount;
+            const columnWidthVal = Math.floor((containerWidth - (gap * (columnCount - 1))) / columnCount);
             return { columnWidth: columnWidthVal, columnCount };
         };
 
