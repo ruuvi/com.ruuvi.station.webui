@@ -193,8 +193,12 @@ class NetworkApi {
             return null;
         };
     
-        // Attempt to retrieve the closest cached data
-        let closestCache = await getClosestCacheData();
+        // Attempt to retrieve the closest cached data (with timeout to avoid
+        // Safari IndexedDB hangs that would prevent the fetch from ever starting)
+        let closestCache = await Promise.race([
+            getClosestCacheData(),
+            new Promise(resolve => setTimeout(resolve, 3000, null))
+        ]);
     
         // If cache is found and fully covers the request, return it
         if (closestCache && closestCache.until === until) {
@@ -238,9 +242,10 @@ class NetworkApi {
             return { result: "error", message: "Failed to fetch data", error };
         }
     
-        // Cache data if the response is successful
+        // Cache data in the background (don't await — avoids Safari IndexedDB
+        // hangs blocking the return of already-fetched data)
         if (respData.result === "success") {
-            await saveCacheData(respData.data);
+            saveCacheData(respData.data).catch(() => {});
         }
     
         // If fetched data is smaller than the pagination size, indicate that fetching should stop
