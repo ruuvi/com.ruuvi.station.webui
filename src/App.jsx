@@ -192,19 +192,27 @@ export default function App() {
   const [reloadSub, setReloadSub] = React.useState(0);
   const [subscription, setSubscription] = useState(null)
   useEffect(() => {
+    let cancelled = false;
+    let timeoutId;
     async function getSubs() {
+      if (cancelled) return;
       if (user) {
         let resp = await new NetworkApi().getSubscription()
+        if (cancelled) return;
         if (resp.result === "success") {
           if (resp.data.subscriptions.length === 0) return setSubscription({ subscriptionName: "none" })
           return setSubscription(resp.data.subscriptions[0])
         }
       }
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         getSubs()
       }, 5000)
     }
     getSubs()
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [reloadSub]);
   const [banners, setBanners] = React.useState(null);
   useEffect(() => {
