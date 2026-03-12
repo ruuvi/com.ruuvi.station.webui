@@ -570,10 +570,8 @@ export function temperatureFromUserFormat(temperature) {
     return round(temperature, 2)
 }
 
-export function round(number, deciamals) {
-    var f = 1;
-    for (var i = 0; i < deciamals; i++) f += "0"
-    f = +f
+export function round(number, decimals) {
+    var f = Math.pow(10, decimals);
     return Math.round(number * f) / f
 }
 
