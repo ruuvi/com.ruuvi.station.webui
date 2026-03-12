@@ -336,7 +336,7 @@ class Graph extends Component {
         let dataMin = Number.POSITIVE_INFINITY;
 
         for (let i = 0; i < graphData[1].length; i++) {
-            if (graphData[1][i] < dataMin) {
+            if (graphData[1][i] !== null && graphData[1][i] < dataMin) {
                 dataMin = graphData[1][i];
             }
         }
