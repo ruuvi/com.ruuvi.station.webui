@@ -80,7 +80,7 @@ const SensorCard = ({
             : smallDataRowHeight * smallDataMinRows;
 
     const { colorMode } = useColorMode();
-    const alertIcon = useMemo(() => getAlertIcon(sensor), [sensor], colorMode);
+    const alertIcon = useMemo(() => getAlertIcon(sensor), [sensor, colorMode]);
 
     const freeMode = sensor?.subscription?.maxHistoryDays === 0;
     const sensorHasData =
