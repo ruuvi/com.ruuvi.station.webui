@@ -177,9 +177,7 @@ class Graph extends Component {
     }
     setStateVar(k, v) {
         if (k === "zoom") zoomData.a = v
-        let state = this.state;
-        state[k] = v;
-        this.setState(state);
+        this.setState({ [k]: v });
     }
     shouldComponentUpdate(nextProps, nextState) {
         this.fromComponentUpdate = true;
