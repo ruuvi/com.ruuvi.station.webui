@@ -117,7 +117,7 @@ class NetworkApi {
     sensors(success, fail) {
         if (!this.options) return fail("Not signed in")
         fetch(this.url + "/sensors", this.options).then(function (response) {
-            checkStatusCode(response)
+            if (!checkStatusCode(response)) return
             return response.json();
         })
             .then(response => {
