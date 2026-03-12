@@ -164,13 +164,18 @@ class Graph extends Component {
         }
 
         // Insert null values for time gaps
-        for (let i = 1; i < timestamps.length; i++) {
-            const timeDifference = timestamps[i] - timestamps[i - 1];
-            if (timeDifference >= 3600) {
-                const insertTime = timestamps[i - 1] + 3600;
-                timestamps.splice(i, 0, insertTime);
-                values.splice(i, 0, null);
+        if (timestamps.length > 1) {
+            const outTs = [timestamps[0]];
+            const outVals = [values[0]];
+            for (let i = 1; i < timestamps.length; i++) {
+                if (timestamps[i] - timestamps[i - 1] >= 3600) {
+                    outTs.push(timestamps[i - 1] + 3600);
+                    outVals.push(null);
+                }
+                outTs.push(timestamps[i]);
+                outVals.push(values[i]);
             }
+            return [outTs, outVals];
         }
 
         return [timestamps, values];
