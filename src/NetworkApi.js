@@ -35,7 +35,8 @@ function checkStatusCode(response) {
 
 class NetworkApi {
     constructor() {
-        this.url = "https://network.ruuvi.com"
+        //this.url = "https://network.ruuvi.com"
+        this.url = "http://localhost:3210"
         if (this.isStaging()) {
             this.url = "https://testnet.ruuvi.com"
         }
@@ -143,9 +144,12 @@ class NetworkApi {
         }
         return data;
     }
-    async fetchWithTimeout(resource, options = {}, timeout = 30000) {
+    async fetchWithTimeout(resource, options = {}, timeout = 30000, signal) {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
+        if (signal) {
+            signal.addEventListener('abort', () => controller.abort(), { once: true });
+        }
         const response = await fetch(resource, {
             ...options,
             signal: controller.signal
@@ -153,7 +157,7 @@ class NetworkApi {
         clearTimeout(id);
         return response;
     }
-    async getAsync(mac, since, until, settings) {
+    async getAsync(mac, since, until, settings, signal) {
         const mode = settings?.mode || "mixed";
         const limit = settings?.limit || 100000;
         const paginationSize = pjson.settings.dataFetchPaginationSize;
@@ -234,8 +238,8 @@ class NetworkApi {
         // Make API call and handle potential errors
         let respData;
         try {
-            const response = await this.fetchWithTimeout(`${this.url}/get${query}`, this.options);
-            checkStatusCode(response);  // Assuming this is a custom function to check status code
+            const response = await this.fetchWithTimeout(`${this.url}/get${query}`, this.options, 30000, signal);
+            checkStatusCode(response);
             respData = await response.json();
         } catch (error) {
             console.error("Error fetching data from API", error);
