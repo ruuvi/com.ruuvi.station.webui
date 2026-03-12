@@ -35,8 +35,7 @@ function checkStatusCode(response) {
 
 class NetworkApi {
     constructor() {
-        //this.url = "https://network.ruuvi.com"
-        this.url = "http://localhost:3210"
+        this.url = "https://network.ruuvi.com"
         if (this.isStaging()) {
             this.url = "https://testnet.ruuvi.com"
         }
