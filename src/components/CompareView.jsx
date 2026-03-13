@@ -3,11 +3,11 @@ import UplotReact from 'uplot-react';
 import 'uplot/dist/uPlot.min.css';
 import pjson from '../../package.json';
 import NetworkApi from "../NetworkApi";
-import parse from "../decoder/parser";
+import decoder from "../decoder/decode";
 import { ruuviTheme } from "../themes";
 import { Box, Spinner, useColorMode } from "@chakra-ui/react";
 import { t } from "i18next";
-import { getSensorTypeOnly, getUnitHelper, getUnitOnly } from "../UnitHelper";
+import { getSensorTypeOnly, getUnitHelper, getUnitOnly, round } from "../UnitHelper";
 import UplotTouchZoomPlugin from "./uplotPlugins/UplotTouchZoomPlugin";
 import { date2digits, secondsToUserDateString, time2digits } from "../TimeHelper";
 import Store from "../Store";
@@ -37,12 +37,6 @@ const graphLoadingOverlay = {
     zIndex: 1,
 }
 
-var gdata = []
-var touchZoomState = undefined
-var wasTouchZooming = false
-var fromComponentUpdate = false
-var isTouchZooming = false
-
 function CompareView(props) {
     const getDataKey = () => {
         const params = new URLSearchParams(location.search);
@@ -54,6 +48,11 @@ function CompareView(props) {
     const [loading, setLoading] = useState(false)
     const [zoom, setZoom] = useState(undefined)
     const ref = useRef(null);
+
+    const touchZoomStateRef = useRef(undefined);
+    const wasTouchZoomingRef = useRef(false);
+    const fromComponentUpdateRef = useRef(false);
+    const isTouchZoomingRef = useRef(false);
 
     const dataKey = getDataKey();
     const prevDataKeyRef = useRef(dataKey);
@@ -101,30 +100,26 @@ function CompareView(props) {
         sensorData.forEach(data => {
             let thisSensorsData = [[], []];
             if (data.measurements.length) {
-                let d = data
-
-                d.measurements.sort((a, b) => a.timestamp - b.timestamp);
-
-                for (let j = 0; j < d.measurements.length; j++) {
-                    if (!d.measurements[j].parsed) continue;
-                    const timestamp = d.measurements[j].timestamp;
-
+                // Measurements are already sorted ascending from the fetch loop
+                for (let j = 0; j < data.measurements.length; j++) {
+                    if (!data.measurements[j].parsed) continue;
+                    const timestamp = data.measurements[j].timestamp;
 
                     let value;
                     switch (dataKey) {
                         case "temperature":
-                            value = unitHelper.value(d.measurements[j].parsed[dataKey], undefined, settings)
+                            value = unitHelper.value(data.measurements[j].parsed[dataKey], undefined, settings)
                             break
                         case "humidity":
-                            value = unitHelper.value(d.measurements[j].parsed[dataKey], d.measurements[j].parsed.temperature, settings)
+                            value = unitHelper.value(data.measurements[j].parsed[dataKey], data.measurements[j].parsed.temperature, settings)
                             break
                         default:
-                            value = unitHelper.value(d.measurements[j].parsed[dataKey], settings)
+                            value = unitHelper.value(data.measurements[j].parsed[dataKey], settings)
                             break
                     }
 
                     if (j > 0) {
-                        const prevTimestamp = d.measurements[j - 1].timestamp;
+                        const prevTimestamp = data.measurements[j - 1].timestamp;
                         const timeDifference = timestamp - prevTimestamp;
 
                         if (timeDifference >= oneHourInSeconds) {
@@ -162,7 +157,8 @@ function CompareView(props) {
 
                 let until = props.to
                 let since = props.from;
-                let allData = null;
+                let allMeasurements = [];
+                let sensorMeta = null;
                 let stop = false
                 for (; ;) {
                     // Check if cancelled
@@ -176,19 +172,59 @@ function CompareView(props) {
                     }
                     let data = await new NetworkApi().getAsync(sensor, since, until, { limit: pjson.settings.dataFetchPaginationSize });
                     if (data.result === "success") {
-                        data.data.measurements = data.data.measurements.filter((item) => {
+                        let newMeasurements = data.data.measurements.filter((item) => {
                             return item.timestamp >= since && item.timestamp <= until;
                         });
-                        if (!allData) allData = data;
-                        else allData.data.measurements = allData.data.measurements.concat(data.data.measurements);
 
+                        // Decode only the new chunk (not all accumulated data)
+                        newMeasurements.forEach(x => {
+                            x.parsed = decoder(x.data);
+                            if (x.parsed) x.parsed.rssi = x.rssi;
+                        });
+                        newMeasurements = newMeasurements.filter(x => x.parsed !== null);
+
+                        // Apply offsets to new chunk only
+                        const { offsetTemperature = 0, offsetHumidity = 0, offsetPressure = 0 } = data.data;
+                        if (offsetTemperature !== 0 || offsetHumidity !== 0 || offsetPressure !== 0) {
+                            for (const m of newMeasurements) {
+                                if (offsetTemperature !== 0 && m.parsed.temperature !== undefined) {
+                                    m.parsed.temperature = round(m.parsed.temperature + offsetTemperature, 2);
+                                }
+                                if (offsetHumidity !== 0 && m.parsed.humidity !== undefined) {
+                                    m.parsed.humidity = round(m.parsed.humidity + offsetHumidity, 2);
+                                }
+                                if (offsetPressure !== 0 && m.parsed.pressure !== undefined) {
+                                    m.parsed.pressure = round(m.parsed.pressure + offsetPressure, 2);
+                                }
+                            }
+                        }
+
+                        // Accumulate with push instead of concat (avoids quadratic copying)
+                        allMeasurements.push(...newMeasurements);
+
+                        // Store metadata from first response
+                        if (!sensorMeta) {
+                            let { measurements, ...meta } = data.data;
+                            sensorMeta = meta;
+                        }
+
+                        // Update pagination cursor
                         let returndDataLength = data.data.measurements.length;
                         if (data.data.nextUp) until = data.data.nextUp;
                         else if (data.data.fromCache) until = data.data.measurements[data.data.measurements.length - 1].timestamp;
                         else if (returndDataLength >= pjson.settings.dataFetchPaginationSize) until = data.data.measurements[data.data.measurements.length - 1].timestamp;
                         else stop = true
 
-                        let d = parse(allData.data);
+                        // Sort ascending and build sensor data object
+                        allMeasurements.sort((a, b) => a.timestamp - b.timestamp);
+
+                        let d = {
+                            ...sensorMeta,
+                            measurements: allMeasurements.slice(),
+                            sensor: sensorMeta.sensor || sensor,
+                            latestTimestamp: allMeasurements.length ? allMeasurements[allMeasurements.length - 1].timestamp : undefined,
+                        };
+
                         setSensorData((s) => {
                             if (!s) s = [];
                             let updated = false;
@@ -220,7 +256,7 @@ function CompareView(props) {
     }, [sensorData]);
 
     useEffect(() => {
-        fromComponentUpdate = true;
+        fromComponentUpdateRef.current = true;
     }, [zoom]);
 
     function getXRange() {
@@ -249,8 +285,8 @@ function CompareView(props) {
                     <UplotReact
                         options={{
                             plugins: [UplotTouchZoomPlugin(getXRange(), (isZooming) => {
-                                isTouchZooming = isZooming
-                                wasTouchZooming = true;
+                                isTouchZoomingRef.current = isZooming
+                                wasTouchZoomingRef.current = true;
                             })],
                             padding: [10, 10, 0, -10],
                             width: width,
@@ -287,40 +323,40 @@ function CompareView(props) {
                                             return getXRange()
                                         }
 
-                                        if (isTouchZooming) {
+                                        if (isTouchZoomingRef.current) {
                                             // if zoom is close enought to full x range, assume fully zoomed out
                                             if (Math.abs(fromX - propFrom / 1000) < 1 && Math.abs(toX - propTo / 1000) < 1) {
-                                                touchZoomState = "reset"
+                                                touchZoomStateRef.current = "reset"
                                             } else {
-                                                touchZoomState = [fromX, toX]
+                                                touchZoomStateRef.current = [fromX, toX]
                                             }
                                             return [fromX, toX]
                                         }
 
-                                        if (wasTouchZooming) {
-                                            if (touchZoomState) {
-                                                if (touchZoomState === "reset") {
+                                        if (wasTouchZoomingRef.current) {
+                                            if (touchZoomStateRef.current) {
+                                                if (touchZoomStateRef.current === "reset") {
                                                     setZoom(undefined);
-                                                    touchZoomState = undefined
+                                                    touchZoomStateRef.current = undefined
                                                     return getXRange()
                                                 }
-                                                setZoom(touchZoomState)
-                                                touchZoomState = undefined
+                                                setZoom(touchZoomStateRef.current)
+                                                touchZoomStateRef.current = undefined
                                             }
-                                            wasTouchZooming = false;
-                                            if (zoom && fromComponentUpdate) {
-                                                fromComponentUpdate = false;
+                                            wasTouchZoomingRef.current = false;
+                                            if (zoom && fromComponentUpdateRef.current) {
+                                                fromComponentUpdateRef.current = false;
                                                 return zoom;
                                             }
-                                            if (!fromComponentUpdate && Number.isInteger(fromX) && Number.isInteger(toX)) {
+                                            if (!fromComponentUpdateRef.current && Number.isInteger(fromX) && Number.isInteger(toX)) {
                                                 setZoom(undefined)
                                                 return getXRange()
                                             }
                                             return [fromX, toX]
                                         }
 
-                                        if (zoom && fromComponentUpdate) {
-                                            fromComponentUpdate = false;
+                                        if (zoom && fromComponentUpdateRef.current) {
+                                            fromComponentUpdateRef.current = false;
                                             return zoom;
                                         }
                                         if (Number.isInteger(fromX) && Number.isInteger(toX)) {
