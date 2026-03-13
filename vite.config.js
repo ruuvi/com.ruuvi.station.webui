@@ -5,7 +5,7 @@ export default defineConfig(() => {
   return {
     build: {
       outDir: 'build',
-      rollupOptions: {
+      rolldownOptions: {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
@@ -23,8 +23,8 @@ export default defineConfig(() => {
     },
     optimizeDeps: {
       force: true,
-      esbuildOptions: {
-        loader: {
+      rolldownOptions: {
+        moduleTypes: {
           '.js': 'jsx',
         },
       },
