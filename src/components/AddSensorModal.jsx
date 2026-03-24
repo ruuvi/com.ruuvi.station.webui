@@ -82,9 +82,11 @@ function AddSensorModal(props) {
                 }
             }}
             onKeyDown={e => {
+                const idx = Number(e.target.dataset.index)
                 if (e.key === "Backspace") {
-                    const idx = Number(e.target.dataset.index)
                     focusField(idx - 1)
+                } else if (/^[0-9A-Fa-f]$/.test(e.key) && macAddess[idx]) {
+                    focusField(idx + 1)
                 }
             }}
             bg={ruuviTheme.colors.pinFieldBgColor}
