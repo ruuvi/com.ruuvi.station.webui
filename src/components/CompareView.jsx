@@ -128,6 +128,7 @@ function CompareView(props) {
                             thisSensorsData[1].push(null);
                         }
                     }
+                    if (Number.isNaN(value)) value = null;
                     thisSensorsData[0].push(timestamp);
                     thisSensorsData[1].push(value);
 
