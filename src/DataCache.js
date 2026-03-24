@@ -11,7 +11,7 @@ var cache = {
     init: async () => {
         let version = await localForage.getItem("cacheVersion")
         // eslint-disable-next-line eqeqeq
-        if (version != DB_VERSION) localForage.clear();
+        if (version != DB_VERSION) await localForage.clear();
         await localForage.setItem("cacheVersion", DB_VERSION)
     },
     clear: () => {
@@ -30,19 +30,19 @@ var cache = {
     },
     removeData: async (sensor) => {
         let toRemove = [getKey(sensor, "sparse"), getKey(sensor, "mixed"), getKey(sensor, "dense")]
-        toRemove.forEach(x => {
+        for (const x of toRemove) {
             try {
-                localForage.removeItem(x)
+                await localForage.removeItem(x)
             } catch {
                 console.log("failed to remove cache for key", x)
             }
-        })
+        }
     },
     setData: async (sensor, mode, data) => {
         try {
             // limit the data cache
             //data = data.filter(x => x.timestamp > (new Date().getTime() / 1000) - 60 * 60 * 24 * pjson.settings.dataCacheLengthInDays);
-            localForage.setItem(getKey(sensor, mode), data);
+            await localForage.setItem(getKey(sensor, mode), data);
         } catch (e) {
             console.log(e);
         }

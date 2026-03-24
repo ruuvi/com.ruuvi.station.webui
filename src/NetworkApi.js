@@ -250,12 +250,12 @@ class NetworkApi {
         if (respData.result === "success") {
             saveCacheData(respData.data).catch(() => {});
         }
-    
+
         // If fetched data is smaller than the pagination size, indicate that fetching should stop
         if (closestCache && respData.data.measurements.length < paginationSize) {
             respData.data.nextUp = since;
         }
-    
+
         return respData;
     }
     async getAllSensorsAsync(noCache) {

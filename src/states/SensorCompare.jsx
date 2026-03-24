@@ -15,9 +15,7 @@ import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
 import { getSensorTypeOnly, getUnitHelper, getUnitOnly } from "../UnitHelper";
 import { useLocation, useNavigate } from "react-router-dom";
 
-let data = {};
 const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, maxWidth: "800px" }
-let reloadIndex = 0;
 
 function SensorCompare(props) {
     const [sensors, setSensors] = useState([])
@@ -28,6 +26,8 @@ function SensorCompare(props) {
     const [viewData, setViewData] = useState(null)
     const isWideVersion = useBreakpointValue({ base: false, md: true })
     const cancelRef = useRef(false)
+    const dataRef = useRef({})
+    const reloadIndexRef = useRef(0)
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -179,10 +179,10 @@ function SensorCompare(props) {
             <ExportMenu buttonText={uppercaseFirst(t("export"))} noPdf onClick={val => {
                 switch (val) {
                     case "XLSX":
-                        exportMuliSensorXLSX(data, i18next.t, exportParam)
+                        exportMuliSensorXLSX(dataRef.current, i18next.t, exportParam)
                         break
                     default:
-                        exportMuliSensorCSV(data, i18next.t, exportParam)
+                        exportMuliSensorCSV(dataRef.current, i18next.t, exportParam)
                 }
             }} />
         </>
@@ -239,8 +239,8 @@ function SensorCompare(props) {
     </Button>
 
     const load = (newFrom, newTo) => {
-        reloadIndex++
-        setViewData({ sensors: selectedSensors, from: newFrom || from, to: newTo || to, reloadIndex })
+        reloadIndexRef.current++
+        setViewData({ sensors: selectedSensors, from: newFrom || from, to: newTo || to, reloadIndex: reloadIndexRef.current })
         if (newFrom && newTo) {
             setFrom(newFrom)
             setTo(newTo)
@@ -382,7 +382,7 @@ function SensorCompare(props) {
                 </div>
             </ScreenSizeWrapper>
             <br />
-            {viewData && <CompairView key={123} {...viewData} isLoading={s => setLoading(s)} setData={d => data = d} cancelRef={cancelRef} />}
+            {viewData && <CompairView key={123} {...viewData} isLoading={s => setLoading(s)} setData={d => dataRef.current = d} cancelRef={cancelRef} />}
             {!viewData && <Box height={450}><EmptyGraph /></Box>}
             <Box height={90} />
         </Box >
