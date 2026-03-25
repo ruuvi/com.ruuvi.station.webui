@@ -2,6 +2,7 @@ import { Box, Button, Link, PinInput, PinInputField, Progress } from "@chakra-ui
 import React, { useEffect, useRef, useState } from "react";
 import { withTranslation } from 'react-i18next';
 import NetworkApi from "../NetworkApi";
+import logger from "../utils/logger";
 import notify from "../utils/notify";
 import RDialog from "./RDialog";
 import { ruuviTheme } from "../themes";
@@ -66,7 +67,7 @@ function AddSensorModal(props) {
                 notify.error(t(`UserApiError.${res.code}`))
             }
         } catch (e) {
-            console.log(e)
+            logger.error("add sensor failed", e)
             notify.error(t("something_went_wrong"))
         }
         setIsLoading(false)

@@ -1,4 +1,5 @@
 import React, { Component, useEffect, useRef, useState } from "react";
+import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
@@ -308,7 +309,7 @@ class Dashboard extends Component {
                 }
             }
         } catch (e) {
-            console.log("failed to load sensors", e);
+            logger.error("failed to load sensors", e);
         } finally {
             this._fetchInProgress = false;
         }
@@ -355,7 +356,7 @@ class Dashboard extends Component {
                 setNext = candidateSensor;
                 break;
             } else {
-                console.log(`Sensor ${candidateSensor} does not exist in state, skipping.`);
+                logger.log(`Sensor ${candidateSensor} does not exist in state, skipping.`);
             }
         }
 
@@ -441,7 +442,7 @@ class Dashboard extends Component {
                 notify.error(`UserApiError.${this.props.t(b.code)}`)
             }
         }, error => {
-            console.log(error);
+            logger.error(error);
             notify.error(this.props.t("something_went_wrong"))
         })
     }

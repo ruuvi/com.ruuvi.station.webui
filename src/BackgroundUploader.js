@@ -1,5 +1,6 @@
 import NetworkApi from "./NetworkApi";
 import notify from "./utils/notify";
+import logger from "./utils/logger";
 import pjson from '../package.json';
 
 let uploadBackgroundImage = (sensor, f, t, doneCB) => {
@@ -44,13 +45,13 @@ let uploadBackgroundImage = (sensor, f, t, doneCB) => {
                             sensor.picture = dataUrl.split("?")[0]
                             doneCB(sensor.picture)
                         }, err => {
-                            console.log("err", err)
+                            logger.error("upload image failed", err)
                             notify.error(t("something_went_wrong"))
                             doneCB(null)
                         })
                     }
                 }, err => {
-                    console.log("err", err)
+                    logger.error("prepare upload failed", err)
                     notify.error(t("something_went_wrong"))
                     doneCB(null)
                 })

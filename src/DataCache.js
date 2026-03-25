@@ -1,4 +1,5 @@
 import * as localForage from "localforage";
+import logger from "./utils/logger";
 //import pjson from "./../package.json"
 
 const DB_VERSION = 2;
@@ -10,8 +11,7 @@ function getKey(sensor, mode) {
 var cache = {
     init: async () => {
         let version = await localForage.getItem("cacheVersion")
-        // eslint-disable-next-line eqeqeq
-        if (version != DB_VERSION) await localForage.clear();
+        if (version != DB_VERSION) await localForage.clear(); // eslint-disable-line eqeqeq -- intentional loose comparison (string vs number)
         await localForage.setItem("cacheVersion", DB_VERSION)
     },
     clear: () => {
@@ -24,7 +24,7 @@ var cache = {
             if (from) data = data.filter(x => x.timestamp >= from)
             return data
         } catch (e) {
-            console.log(e);
+            logger.error(e);
         }
         return null;
     },
@@ -34,7 +34,7 @@ var cache = {
             try {
                 await localForage.removeItem(x)
             } catch {
-                console.log("failed to remove cache for key", x)
+                logger.warn("failed to remove cache for key", x)
             }
         }
     },
@@ -44,7 +44,7 @@ var cache = {
             //data = data.filter(x => x.timestamp > (new Date().getTime() / 1000) - 60 * 60 * 24 * pjson.settings.dataCacheLengthInDays);
             await localForage.setItem(getKey(sensor, mode), data);
         } catch (e) {
-            console.log(e);
+            logger.error(e);
         }
     }
 }

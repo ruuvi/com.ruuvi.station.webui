@@ -5,6 +5,7 @@ import dfC5 from './c5';
 import dfE0 from './e0';
 import dfE1 from './e1';
 import df2and4 from './2and4';
+import logger from '../utils/logger';
 
 const ruu_vi = "ruu.vi/#"
 function decoder(data) {
@@ -41,11 +42,11 @@ function decoder(data) {
             case "E1":
                 return dfE1.parse(hexToBytes(data))
             default:
-                console.log("Unknown data format", rData.substring(4, 6))
+                logger.warn("Unknown data format", rData.substring(4, 6))
                 return null;
         }
     } catch (error) {
-        console.log("parse error", error)
+        logger.error("parse error", error)
         return null;
     }
 }

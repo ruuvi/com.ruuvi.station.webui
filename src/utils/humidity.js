@@ -20,7 +20,6 @@ export function relativeToDewpoint(humidity, temperature, cFormat) {
         }
         return out;
     } else {
-        console.log("err");
         return -1;
     }
 }

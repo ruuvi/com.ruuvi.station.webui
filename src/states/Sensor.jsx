@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import logger from "../utils/logger";
 import NetworkApi from '../NetworkApi'
 import {
     IconButton,
@@ -335,7 +336,7 @@ class Sensor extends Component {
             load(null, this.state.data === null || showLoading, true)
         } catch (e) {
             notify.error(this.props.t("internet_connection_problem"))
-            console.log("err", e)
+            logger.error("err", e)
             this.setState({ ...this.state, loading: false })
         }
     }
@@ -477,7 +478,7 @@ class Sensor extends Component {
         }
         setTimeout(() => {
             if (alertDebouncer[alert.sensor + alert.type].timestamp !== ts) {
-                console.log("newer alert debouncer, skipping")
+                logger.log("newer alert debouncer, skipping")
                 return
             }
             var offToOn = alert.enabled;
@@ -571,7 +572,7 @@ class Sensor extends Component {
                     }
                     visibleTypes = webTypes;
                 } catch (e) {
-                    console.warn("Failed to parse displayOrder, using default", e);
+                    logger.warn("Failed to parse displayOrder, using default", e);
                     visibleTypes = DEFAULT_VISIBLE_SENSOR_TYPES;
                 }
             }
@@ -1126,7 +1127,7 @@ class Sensor extends Component {
                                                 let uh = getUnitHelper(x.key)
                                                 return (
                                                     <ListItem key={x.key}>
-                                                        <table style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : console.log("Not graphable")}>
+                                                        <table style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : undefined}>
                                                             <tbody>
                                                                 <tr>
                                                                     <td style={detailedTitle}> {t(uh.label || x.key)}</td>

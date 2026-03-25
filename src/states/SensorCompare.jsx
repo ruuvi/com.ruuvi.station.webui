@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
 import { Button, Flex, Box, useBreakpointValue } from "@chakra-ui/react";
 import CompairView, { EmptyGraph } from "../components/CompareView";
@@ -40,7 +41,7 @@ function SensorCompare(props) {
                 if (!sensors) throw new Error("No sensors")
                 setSensors(sensors)
             } catch (e) {
-                console.log("sensor menu error", e)
+                logger.error("sensor menu error", e)
             }
         })()
     }, [])

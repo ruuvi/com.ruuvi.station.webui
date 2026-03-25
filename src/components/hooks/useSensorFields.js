@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import logger from "../../utils/logger";
 import {
     DEFAULT_VISIBLE_SENSOR_TYPES,
     getUnitHelper,
@@ -19,7 +20,7 @@ export const parseDisplayOrderToWebTypes = (displayOrder) => {
         }
         return webTypes.length ? webTypes : DEFAULT_VISIBLE_SENSOR_TYPES;
     } catch (error) {
-        console.warn("Failed to parse displayOrder, using default", error);
+        logger.warn("Failed to parse displayOrder, using default", error);
         return DEFAULT_VISIBLE_SENSOR_TYPES;
     }
 };

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import logger from "./utils/logger";
 import {
   Routes,
   Route,
@@ -116,7 +117,7 @@ function loadInitalSettings(forceUpdate, browserLang) {
       try {
         previousString = localStorage.getItem("settings");
       } catch (error) {
-        console.log("Failed to read cached settings", error);
+        logger.error("Failed to read cached settings", error);
       }
       const newString = JSON.stringify(newSettings);
       const settingsChanged = previousString !== newString;
@@ -160,7 +161,7 @@ export default function App() {
       });
     }
   } catch (e) {
-    console.log("could not parse cookie", e)
+    logger.error("could not parse cookie", e)
   }
   const urlSearchParams = new URLSearchParams(window.location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
@@ -232,7 +233,7 @@ export default function App() {
           else if (banners !== null) setBanners(null)
         }
       } catch (e) {
-        console.log("Could not get notifications", e)
+        logger.error("Could not get notifications", e)
       }
     })()
   }, [subscription])

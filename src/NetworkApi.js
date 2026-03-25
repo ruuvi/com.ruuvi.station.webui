@@ -2,6 +2,7 @@ import pjson from '../package.json';
 import cache from './DataCache';
 import parse from './decoder/parser';
 import { logout } from './utils/loginUtils';
+import logger from './utils/logger';
 
 let GET_ALL_SENSORS_CACHE;
 
@@ -103,7 +104,7 @@ class NetworkApi {
                     let email = response.data.email
                     let userObj = this.getUser()
                     if (userObj && userObj.email !== email) {
-                        console.log("email changed")
+                        logger.log("email changed")
                         userObj.email = email
                         this.setUser(userObj)
                     }
@@ -170,7 +171,7 @@ class NetworkApi {
                 cacheData[until] = data;
                 await cache.setData(mac, mode, cacheData);
             } catch (error) {
-                console.error("Error saving data to cache", error);
+                logger.error("Error saving data to cache", error);
             }
         };
     
@@ -191,7 +192,7 @@ class NetworkApi {
                     }
                 }
             } catch (error) {
-                console.error("Error getting cache data", error);
+                logger.error("Error getting cache data", error);
             }
             return null;
         };
@@ -241,7 +242,7 @@ class NetworkApi {
             checkStatusCode(response);
             respData = await response.json();
         } catch (error) {
-            console.error("Error fetching data from API", error);
+            logger.error("Error fetching data from API", error);
             return { result: "error", message: "Failed to fetch data", error };
         }
     
@@ -441,7 +442,7 @@ class NetworkApi {
             }
             throw response;
         } catch (e) {
-            console.error("Error updating sensor setting:", e);
+            logger.error("Error updating sensor setting:", e);
             throw e;
         }
     }

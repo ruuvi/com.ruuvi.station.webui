@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import logger from "../utils/logger";
 import {
     Button,
     Switch,
@@ -220,7 +221,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                     new NetworkApi().setAlert(disabledAlert, resolve);
                 });
             } catch (error) {
-                console.error('Failed to disable alert:', error);
+                logger.error('Failed to disable alert:', error);
             }
         }
 
@@ -296,7 +297,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
                             new NetworkApi().setAlert(disabledAlert, resolve);
                         });
                     } catch (error) {
-                        console.error('Failed to disable alert:', error);
+                        logger.error('Failed to disable alert:', error);
                     }
                 }
 
@@ -403,7 +404,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
 
     const handleSave = async () => {
         if (!sensor?.sensor) {
-            console.warn("No sensor ID available for saving visibility settings");
+            logger.warn("No sensor ID available for saving visibility settings");
             return;
         }
         setIsSaving(true);
@@ -429,7 +430,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             }
             onClose();
         } catch (error) {
-            console.error("Failed to save visibility settings:", error);
+            logger.error("Failed to save visibility settings:", error);
         } finally {
             setIsSaving(false);
         }

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import logger from "../utils/logger";
 import {
     Button,
     Box,
@@ -44,7 +45,7 @@ function RemoveSensorDialog(props) {
             setLoading(false)
         }, fail => {
             notify.error(this.props.t("something_went_wrong"))
-            console.log(fail)
+            logger.error("remove sensor failed", fail)
             setLoading(false)
         })
     }

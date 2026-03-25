@@ -1,4 +1,5 @@
 import { relativeToAbsolute, relativeToDewpoint } from "./utils/humidity";
+import logger from "./utils/logger";
 
 const unitHelper = {
     _common: {
@@ -386,7 +387,7 @@ export function getSetting(key, fallback) {
             if (settings[key]) return settings[key]
         }
     } catch (error) {
-        console.log("setSettings err", error)
+        logger.error("getSetting error", error)
     }
     return fallback
 }
@@ -428,7 +429,7 @@ export function getDisplayValue(key, value, settings) {
             }
         }
     } catch (error) {
-        console.log("getDisplayValue", error)
+        logger.error("getDisplayValue", error)
     }
     return value
 }

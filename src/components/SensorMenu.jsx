@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import logger from "../utils/logger";
 import {
     Menu,
     MenuButton,
@@ -27,7 +28,7 @@ class SensorMenu extends Component {
                 var d = resp.data.sensors;
                 this.setState({ ...this.state, sensors: d })
             } else if (resp.result === "error") {
-                console.log("sensor menu error", resp.error)
+                logger.error("sensor menu error", resp.error)
             }
         });
     }

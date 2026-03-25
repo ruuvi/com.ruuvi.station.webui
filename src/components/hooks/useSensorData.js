@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import logger from "../../utils/logger";
 import NetworkApi from "../../NetworkApi";
 import parse from "../../decoder/parser";
 
@@ -102,12 +103,12 @@ const useSensorData = (sensor, dataFrom, options = {}) => {
                     setErrorFetchingData(false);
                     lastFetchTimeRef.current = Date.now();
                 } else if (graphData.result === "error") {
-                    console.log(graphData.error);
+                    logger.error(graphData.error);
                     setErrorFetchingData(true);
                 }
             } catch (error) {
                 if (error.name === "AbortError") return;
-                console.log("Error fetching graph data:", error);
+                logger.error("Error fetching graph data:", error);
                 setErrorFetchingData(true);
             } finally {
                 if (!controller.signal.aborted) {

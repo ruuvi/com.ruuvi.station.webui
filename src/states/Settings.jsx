@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
 import RadioInput from "../components/RadioInput";
 import { Box, Progress, HStack } from "@chakra-ui/react"
@@ -125,7 +126,7 @@ class Settings extends Component {
                 clearSaving();
             }
         }, error => {
-            console.log(error);
+            logger.error(error);
             notify.error(this.props.t("something_went_wrong"));
             revert();
             clearSaving();
