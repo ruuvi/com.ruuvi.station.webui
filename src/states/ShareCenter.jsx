@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useBreakpointValue, Box, Button, Flex, Grid, Heading, IconButton, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Progress, Spinner } from '@chakra-ui/react';
 import NetworkApi from '../NetworkApi';
-import pjson from '../../package.json';
 import { MdClear } from 'react-icons/md';
 import notify from '../utils/notify';
 import i18next from 'i18next';
@@ -11,7 +10,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { SensorPicker } from '../components/SensorPicker';
 import { EmailBox } from '../components/EmailBox';
 
-const SensorSharedWithMeBox = ({ email, sensor, onRemove }) => {
+const SensorSharedWithMeBox = ({ sensor, onRemove }) => {
     const [remove, setRemove] = React.useState(false);
     return (
         <Box className='box'>
@@ -48,7 +47,7 @@ const SensorsSharedByMeBox = (props) => {
                 {i18next.t("active_shares")} ({props.sensor.sharedTo.length}/{props.sensor.subscription.maxSharesPerSensor})
             </div>
             <Flex gap='2' wrap="wrap" >
-                {props.sensor.sharedTo.map((sharedWith, index) => (
+                {props.sensor.sharedTo.map((sharedWith) => (
                     <EmailBox email={sharedWith.toLowerCase()} onRemove={() => {
                         setRemoveShare(sharedWith)
                     }} />
@@ -138,7 +137,7 @@ const ShareCenter = ({ subscription }) => {
         <Flex gap='2' wrap="wrap" mt={3} mb={3}>
             {selectedSensors.map((sensor, index) => (
                 <Box key={index}>
-                    <EmailBox email={sensors.find(x => x.sensor === sensor).name || sensor} onRemove={s => {
+                    <EmailBox email={sensors.find(x => x.sensor === sensor).name || sensor} onRemove={_s => {
                         setSelectedSensors(selectedSensors.filter(x => x !== sensor))
                     }} />
                 </Box>

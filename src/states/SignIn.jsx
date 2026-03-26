@@ -1,12 +1,7 @@
 import React, { Component } from "react";
 import logo from '../img/ruuvi-vector-logo.svg'
 import NetworkApi from '../NetworkApi'
-import { Center, Heading, HStack } from "@chakra-ui/react"
-import { Stack, Image } from "@chakra-ui/react"
-import { Input, Text } from "@chakra-ui/react"
-import { Button } from "@chakra-ui/react"
-import { CircularProgress, SlideFade } from "@chakra-ui/react"
-import { PinInput, PinInputField } from "@chakra-ui/react"
+import { Center, Heading, HStack, Stack, Image, Input, Text, Button, CircularProgress, SlideFade, PinInput, PinInputField } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import LanguageMenu from "../components/LanguageMenu";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";

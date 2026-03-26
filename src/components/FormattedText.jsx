@@ -111,7 +111,7 @@ const FormattedText = ({ text, ...props }) => {
             return trimmed;
         };
 
-        paragraphs.forEach((paragraph, pIndex) => {
+        paragraphs.forEach((paragraph, _pIndex) => {
             let trimmedParagraph = paragraph.trim();
             if (!trimmedParagraph) return;
 

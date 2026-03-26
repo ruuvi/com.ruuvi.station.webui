@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { withTranslation } from 'react-i18next';
 import RDialog from "./RDialog";
-import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, getUnitSettingFor, allUnits } from "../UnitHelper";
+import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, getUnitSettingFor } from "../UnitHelper";
 import SensorCard from "./SensorCard";
 import { MdAdd, MdClose, MdUnfoldMore } from "react-icons/md";
 import ConfirmationDialog from "./ConfirmationDialog";
@@ -27,7 +27,7 @@ import notify from "../utils/notify";
 const ENABLE_TVOC_VISIBILITY = true;
 const isTvocVisibilityCode = (code) => code?.startsWith("TVOC_");
 
-const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updateSensor }) => {
+const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType: _graphType, updateSensor }) => {
     const [isSaving, setIsSaving] = useState(false);
     const getAvailableSensorTypes = (dataObj) => {
         let availableTypes = [];
@@ -141,7 +141,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
             setVisibleTypes(fallbackTypes);
             setCustomVisibleTypes(fallbackTypes);
         }
-    }, [open, sensor?.sensor]);
+    }, [open, sensor?.sensor]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (useDefault) {
@@ -149,7 +149,7 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType, updat
         } else {
             setVisibleTypes(customVisibleTypes);
         }
-    }, [useDefault, customVisibleTypes]);
+    }, [useDefault, customVisibleTypes]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const getAlertTypeFromSensorType = (sensorType) => {
         const sensorTypeToAlertType = {

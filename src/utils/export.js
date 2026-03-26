@@ -1,4 +1,4 @@
-import { getDisplayValue, getUnitHelper, round, DEFAULT_VISIBLE_SENSOR_TYPES } from "../UnitHelper";
+import { getDisplayValue, getUnitHelper, round } from "../UnitHelper";
 import * as XLSX from 'xlsx';
 import { calculateAverage } from "./dataMath";
 import montserratFont from "./fonts/Montserrat";

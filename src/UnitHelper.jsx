@@ -63,7 +63,7 @@ const unitHelper = {
                         settings.UNIT_TEMPERATURE = parsed.UNIT_TEMPERATURE;
                     }
                 }
-            } catch (e) {
+            } catch {
                 // will default to Celsius
             }
 
@@ -361,10 +361,11 @@ export function getUnitFor(key, setting) {
         case "humidity":
             switch (setting) {
                 case "1": return "g/m³"
-                case "2":
+                case "2": {
                     let settings = localStorage.getItem("settings");
                     if (settings) settings = JSON.parse(settings)
                     return getUnitFor("temperature", settings?.UNIT_TEMPERATURE)
+                }
                 default: return "%"
             }
         case "pressure":
@@ -435,12 +436,11 @@ export function getDisplayValue(key, value, settings) {
 }
 
 export function getUnitHelper(key, plaintext, unit) {
-    let originalKey = key;
     let settings = null;
     try {
         let raw = localStorage.getItem("settings");
         if (raw) settings = JSON.parse(raw);
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
 
     if (key && key.startsWith("tvoc_")) {
         const suffix = key.substring("tvoc_".length); // ethanol, isobutylene, molhave
@@ -648,8 +648,8 @@ export function pressureToUserFormat(pressure, settings) {
     }
     if (settings) {
         if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "0") {
-        }
-        else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
+            // Pa — no conversion needed
+        } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
             pressure /= mmMercuryMultiplier
         } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "3") {
             pressure /= inchMercuryMultiplier
@@ -669,8 +669,8 @@ export function pressureFromUserFormat(pressure, settings) {
     }
     if (settings) {
         if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "0") {
-        }
-        else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
+            // Pa — no conversion needed
+        } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
             pressure *= mmMercuryMultiplier
         } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "3") {
             pressure *= inchMercuryMultiplier

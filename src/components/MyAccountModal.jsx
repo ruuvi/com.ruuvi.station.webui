@@ -10,7 +10,7 @@ import { addLink } from "../TextHelper";
 
 function MyAccountModal(props) {
     var { t, i18n } = props;
-    const lng = i18n.language || "en";
+    const _lng = i18n.language || "en";
     const [subscriptions, setSubscriptions] = useState([])
     const [activationCode, setActivationCode] = useState("")
     const [isProcessingCode, setIsProcessingCode] = useState(false)
@@ -73,7 +73,7 @@ function MyAccountModal(props) {
                 return `${date.getDate()} ${month} ${date.getFullYear()}`
         }
     }
-    const cloudLink = () => {
+    const _cloudLink = () => {
         return <a href="https://cloud.ruuvi.com" target={"_blank"} style={{ textDecoration: "underline" }} rel="noreferrer">cloud.ruuvi.com ⇗</a>
     }
     const handleCodePaste = e => {

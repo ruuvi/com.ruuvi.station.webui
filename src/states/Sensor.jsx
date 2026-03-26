@@ -16,7 +16,6 @@ import {
     CircularProgress,
     Spinner,
     Flex,
-    Button,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
@@ -366,7 +365,7 @@ class Sensor extends Component {
         this.setState(this.state)
     }
     update() {
-        new NetworkApi().update(this.props.sensor.sensor, this.state.editName, success => {
+        new NetworkApi().update(this.props.sensor.sensor, this.state.editName, _success => {
             window.location.reload()
         })
     }
@@ -632,7 +631,7 @@ class Sensor extends Component {
         let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
 
         let tnpGetAlert = (x) => {
-            let dataKey = x === "movement" ? "movementCounter" : "signal" ? "rssi" : x;
+            let dataKey = x === "movement" ? "movementCounter" : x === "signal" ? "rssi" : x;
             if (this.getLatestReading()[dataKey] === undefined) return null;
             return this.getAlert(x)
         }
@@ -696,7 +695,7 @@ class Sensor extends Component {
                             loadingImage={this.state.loadingImage}
                             fileUploadChange={f => {
                                 this.setState({ ...this.state, loadingImage: true })
-                                uploadBackgroundImage(this.props.sensor, f, t, res => {
+                                uploadBackgroundImage(this.props.sensor, f, t, _res => {
                                     this.setState({ ...this.state, loadingImage: false })
                                 })
                             }}

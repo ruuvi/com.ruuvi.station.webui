@@ -18,7 +18,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, maxWidth: "800px" }
 
-function SensorCompare(props) {
+function SensorCompare(_props) {
     const [sensors, setSensors] = useState([])
     const [durationPickerValue, setDurationPickerValue] = useState(24 * 7)
     const [from, setFrom] = useState((new Date().getTime() / 1000) - 60 * 60 * 24 * 7)
@@ -69,7 +69,7 @@ function SensorCompare(props) {
         } else if (urlTo) {
             setTo(Number(urlTo));
         }
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const getDataKey = () => {
         const params = new URLSearchParams(location.search);
@@ -161,7 +161,7 @@ function SensorCompare(props) {
             </span>
         </div>
     }
-    const graphCtrl = (isMobile) => {
+    const graphCtrl = (_isMobile) => {
         const sensorType = getSensorTypeOnly(dataKey);
         const unitHelper = getUnitHelper(sensorType);
         const unitKey = getUnitOnly(dataKey);
@@ -261,7 +261,7 @@ function SensorCompare(props) {
             params.delete("fromHours");
             setParams(params);
         }
-    }, [from, to, durationPickerValue]);
+    }, [from, to, durationPickerValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const updateDuration = (v) => {
         if (loading) return

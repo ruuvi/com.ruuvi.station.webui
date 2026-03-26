@@ -10,7 +10,7 @@ function addHighlight(str, highlightedText) {
 }
 
 export function addNewlines(str, newlineChar, highlightedText) {
-    return str.split(newlineChar || "\n").map((x, i, all) => {
+    return str.split(newlineChar || "\n").map((x, i) => {
         x = addHighlight(x, highlightedText)
         return <p style={{ marginTop: i > 0 ? 10 : undefined }} key={Math.random()}>{x}</p>
     })

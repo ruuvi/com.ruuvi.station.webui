@@ -1,7 +1,7 @@
 export default function (hideClass = "u-legend") {
     return {
         hooks: {
-            init(u, opts) {
+            init(u, _opts) {
                 const legend = document.getElementsByClassName(hideClass)[0];
                 legend.style.visibility = 'hidden';
 

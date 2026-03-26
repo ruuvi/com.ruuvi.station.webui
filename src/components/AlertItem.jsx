@@ -1,4 +1,4 @@
-import { Box, ListItem } from "@chakra-ui/layout";
+import { Box } from "@chakra-ui/layout";
 import { Switch } from "@chakra-ui/switch";
 import React, { Component, Suspense } from "react";
 import { withTranslation } from 'react-i18next';
@@ -178,10 +178,6 @@ class AlertItem extends Component {
                 </span>
             </div>
         </>
-        const getUnit = () => {
-            return type !== "movement" && type !== "signal" && type !== "offline" ? ` ${type === "humidity" ? "%" : uh.unit}` : ""
-        }
-
         const gayedOutOffline = () => {
             if (type === "offline" && !this.props.showOffline) {
                 return { opacity: 0.5, pointerEvents: "none" }

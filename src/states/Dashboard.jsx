@@ -3,7 +3,7 @@ import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box, Link, useMediaQuery, Flex, Input, InputGroup, InputRightElement, Show, Button } from "@chakra-ui/react"
+import { Spinner, Box, Link, useMediaQuery, Flex, Input, InputGroup, InputRightElement, Show } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import DurationPicker from "../components/DurationPicker";
 import Store from "../Store";
@@ -428,7 +428,7 @@ class Dashboard extends Component {
             let settings = JSON.parse(localStorage.getItem("settings") || "{}")
             settings["SENSOR_ORDER"] = JSON.stringify(order)
             localStorage.setItem("settings", JSON.stringify(settings))
-        } catch (e) { /* ignore */ }
+        } catch { /* ignore */ }
         new NetworkApi().setSetting("SENSOR_ORDER", JSON.stringify(order), b => {
             if (b.result === "success") {
                 //notify.success(this.props.t("successfully_saved"))

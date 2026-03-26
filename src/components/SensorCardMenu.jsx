@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 const SensorCardMenu = ({
     sensor,
-    simpleView,
+    simpleView: _simpleView,
     uploadBg,
     rename,
     share,

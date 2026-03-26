@@ -14,7 +14,7 @@ import Store from "../Store";
 import drawDataGapLines from "./uplotHooks/drawDataGapLines";
 import uPlot from "uplot";
 
-function getGraphColor(idx, fill) {
+function getGraphColor(idx, _fill) {
     const colors = [
         "#01b9a8",
         "#f77a61",
@@ -64,14 +64,6 @@ function CompareView(props) {
         prevDataKeyRef.current = dataKey;
     }, [dataKey]);
 
-    const getUniqueKeys = () => {
-        let uniqueKeysSet = new Set();
-        for (let i = 0; i < sensorData.length; i++) {
-            let key = sensorData[i].name || sensorData[i].mac;
-            uniqueKeysSet.add(key);
-        }
-        return Array.from(uniqueKeysSet);
-    }
 
     const getGraphData = () => {
         if (!sensorData) return [];
@@ -139,7 +131,7 @@ function CompareView(props) {
         });
 
         if (tableData.length) {
-            return uPlot.join(tableData, tableData.map(t => t.map(s => 2)))
+            return uPlot.join(tableData, tableData.map(t => t.map(_s => 2)))
         }
         return [];
     };
@@ -205,7 +197,7 @@ function CompareView(props) {
 
                         // Store metadata from first response
                         if (!sensorMeta) {
-                            let { measurements, ...meta } = data.data;
+                            let { measurements: _measurements, ...meta } = data.data;
                             sensorMeta = meta;
                         }
 
@@ -250,11 +242,11 @@ function CompareView(props) {
             setLoading(false);
             props.isLoading(false);
         })();
-    }, [sensors, props.to, props.from, props.reloadIndex]);
+    }, [sensors, props.to, props.from, props.reloadIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         props.setData(sensorData);
-    }, [sensorData]);
+    }, [sensorData]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         fromComponentUpdateRef.current = true;
@@ -406,8 +398,8 @@ function CompareView(props) {
                             ],
                         }}
                         data={graphData}
-                        onCreate={(chart) => { }}
-                        onDelete={(chart) => { }}
+                        onCreate={(_chart) => { }}
+                        onDelete={(_chart) => { }}
                     />
                 )}
         </div>

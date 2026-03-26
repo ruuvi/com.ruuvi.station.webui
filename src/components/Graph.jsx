@@ -1,7 +1,7 @@
 import React, { Component, Suspense, useEffect, useState, useMemo } from "react";
 import 'uplot/dist/uPlot.min.css';
 import { withTranslation } from 'react-i18next';
-import { getDisplayValue, getUnitHelper, localeNumber, round } from "../UnitHelper";
+import { getDisplayValue, getUnitHelper, localeNumber } from "../UnitHelper";
 import UplotTouchZoomPlugin from "./uplotPlugins/UplotTouchZoomPlugin";
 import UplotLegendHider from "./uplotPlugins/UplotLegendHider";
 import { ruuviTheme } from "../themes";
@@ -16,7 +16,7 @@ const UplotReact = React.lazy(() => import('uplot-react'));
 
 let zoomData = {
     value: undefined,
-    aListener: function (val) { },
+    aListener: function (_val) { },
     set a(val) {
         this.value = val;
         this.aListener(val);
@@ -27,8 +27,8 @@ let zoomData = {
     registerListener: function (listener) {
         this.aListener = listener;
     },
-    unregisterListener: function (listener) {
-        this.aListener = function (val) { };
+    unregisterListener: function (_listener) {
+        this.aListener = function (_val) { };
     }
 }
 
@@ -87,7 +87,7 @@ function DataInfo(props) {
         avg = Math.round(avg * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
 
         return { min, max, avg };
-    }, [filteredData]);
+    }, [filteredData]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <>
@@ -209,7 +209,7 @@ class Graph extends Component {
     getXRange() {
         return [this.props.from / 1000, this.props.to ? this.props.to / 1000 : new Date().getTime() / 1000]
     }
-    resize = (e) => {
+    resize = (_e) => {
         if (window.innerWidth === screenW) return;
         //if (!this.props.showLoadingOnResize) return this.forceUpdate()
         if (!this.resizeTimeout) {
@@ -331,7 +331,7 @@ class Graph extends Component {
                 alertMin = uh.value(alertMin)
                 alertMax = uh.value(alertMax)
             }
-        } catch { }
+        } catch { /* alert range parse error */ }
 
         let dataMin = Number.POSITIVE_INFINITY;
 
@@ -358,10 +358,10 @@ class Graph extends Component {
         const alertColor = () => {
             if (alert && alert.enabled) {
                 return {
-                    fill: (u, seriesIdx) => {
+                    fill: (u, _seriesIdx) => {
                         return scaleGradient(u, 'y', 1, fillGrad, true);
                     },
-                    stroke: (u, seriesIdx) => {
+                    stroke: (u, _seriesIdx) => {
                         return scaleGradient(u, 'y', 1, strokeGrad, true);
                     }
                 }
@@ -416,6 +416,7 @@ class Graph extends Component {
                                                     if (!s.show) return;
 
                                                     let ctx = u.ctx;
+                                                    // eslint-disable-next-line no-unused-vars
                                                     const offset = (s.width % 2) / 2;
 
                                                     ctx.save();
@@ -453,13 +454,10 @@ class Graph extends Component {
                                                         let y = u.valToPos(yd[i], 'y', true);
 
                                                         if (u.scales.x.min > xd[i] || u.scales.x.max < xd[i]) continue;
-                                                        let datapointIsInGraph = true;
                                                         if (u.scales.y.min > yd[i]) {
-                                                            datapointIsInGraph = false;
                                                             y = u.valToPos(u.scales.y.min, 'y', true);
                                                         }
                                                         if (u.scales.y.max < yd[i]) {
-                                                            datapointIsInGraph = false;
                                                             y = u.valToPos(u.scales.y.max, 'y', true);
                                                         }
 

@@ -38,13 +38,13 @@ const SmallStats = ({
     options = {},
     getAlertState,
     t,
-    settingsVersion,
+    settingsVersion: _settingsVersion,
 }) => {
+    const { colorMode } = useColorMode();
+
     if (!latestReading || !fields || !fields.length) return null;
 
     const { minHeight, opacity = 1, pt = 2, simpleView = false } = options;
-
-    const { colorMode } = useColorMode();
 
     return (
         <Box minH={minHeight ? `${minHeight}px` : undefined}>

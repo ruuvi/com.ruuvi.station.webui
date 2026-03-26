@@ -14,8 +14,6 @@ import NetworkApi from "../NetworkApi";
 import notify from "../utils/notify";
 import RDialog from "./RDialog";
 import { addNewlines, addVariablesInString } from "../TextHelper";
-import pjson from '../../package.json';
-
 class ShareDialog extends Component {
     constructor(props) {
         super(props)

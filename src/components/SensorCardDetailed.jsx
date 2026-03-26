@@ -23,7 +23,7 @@ const SensorCardDetailed = ({
     altFileUpload,
     latestReading,
     mainStat,
-    mainFieldConfig,
+    mainFieldConfig: _mainFieldConfig,
     mainStatUnitKey,
     height,
     graphHeight,

@@ -152,7 +152,7 @@ export default function UplotTouchZoomPlugin(xRange, inZoomingCallback) {
             document.addEventListener("touchmove", touchmove, { passive: true });
         });
 
-        over.addEventListener("touchend", function (e) {
+        over.addEventListener("touchend", function (_e) {
             inZoomingCallback(false);
             document.removeEventListener("touchmove", touchmove, { passive: true });
             document.removeEventListener("touchmove", touchmovepan, { passive: true });

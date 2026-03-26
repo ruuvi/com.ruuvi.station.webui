@@ -73,6 +73,7 @@ const subscriptionText = {
 
 
 let currColorMode;
+// eslint-disable-next-line no-unused-vars
 function ColorModeSwitch() {
   const { t } = useTranslation();
   const { colorMode, toggleColorMode } = useColorMode()
@@ -82,8 +83,7 @@ function ColorModeSwitch() {
     currColorMode = colorMode;
     try {
       document.querySelector('meta[name="theme-color"]').setAttribute("content", ruuviTheme.newColors.bodyBg[currColorMode].replace(" !important", ""));
-    } catch (error) {
-    }
+    } catch { /* theme-color meta tag may not exist */ }
   }
   return (
     <>
@@ -214,7 +214,7 @@ export default function App() {
       cancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [reloadSub]);
+  }, [reloadSub]); // eslint-disable-line react-hooks/exhaustive-deps
   const [banners, setBanners] = React.useState(null);
   useEffect(() => {
     if (!subscription) return
@@ -236,7 +236,7 @@ export default function App() {
         logger.error("Could not get notifications", e)
       }
     })()
-  }, [subscription])
+  }, [subscription]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const forceUpdate = React.useCallback(() => {
     updateState({});
@@ -256,7 +256,7 @@ export default function App() {
       isActive = false;
       clearInterval(intervalId);
     };
-  }, [user?.email, browserLanguage, forceUpdate]);
+  }, [user?.email, browserLanguage, forceUpdate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   let store = new Store();
   const [, updateState] = React.useState();
@@ -265,7 +265,7 @@ export default function App() {
     //goToLoginPage()
     return <ChakraProvider theme={ruuviTheme} style={{ minHeight: "100%" }}>
       <BrowserRouter>
-        <SignIn loginSuccessful={data => {
+        <SignIn loginSuccessful={_data => {
           forceUpdate()
           loadInitalSettings(forceUpdate, browserLanguage)
         }} />
@@ -332,7 +332,7 @@ export default function App() {
   );
 }
 
-function TopBar({ reloadSub, setShowDialog, user }) {
+function TopBar({ reloadSub, setShowDialog }) {
   const isWideVersion = useBreakpointValue({ base: false, md: true })
   let sensorMenu = <SensorMenu key={reloadSub} small={!isWideVersion}
     addSensor={() => {

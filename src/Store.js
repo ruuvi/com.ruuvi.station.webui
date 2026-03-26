@@ -4,7 +4,6 @@ const SENSOR_OPEN_ACCORDIONS = "sensor_open_accordions";
 const DASHBOARD_CARD_TYPE_KEY = "dashboard_card_type";
 const BANNER = "banner_seen_";
 const GRAPH_DRAW_DOTS = "graph_draw_dots";
-const PER_SENSOR_VISIBLE_TYPES = "per_sensor_visible_types";
 const DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY = "dashboard_disable_adaptive_layout";
 
 class Store {

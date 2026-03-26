@@ -21,7 +21,7 @@ export default function NotesDialog({ open, onClose, sensor, updateSensor }) {
         if (open && sensor) {
             setDescription(sensor.settings?.description || "");
         }
-    }, [open, sensor?.sensor]);
+    }, [open, sensor?.sensor]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const save = async () => {
         setLoading(true);
@@ -47,7 +47,7 @@ export default function NotesDialog({ open, onClose, sensor, updateSensor }) {
             }
             notify.success(t("successfully_saved"));
             onClose();
-        } catch (e) {
+        } catch {
             notify.error(t("internet_connection_problem"));
         } finally {
             setLoading(false);

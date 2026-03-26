@@ -55,7 +55,7 @@ function rgbaString(color, alpha) {
 }
 
 export default function BigValue(props) {
-    let { value, unit, alertActive, label, showExtras } = props;
+    let { value, unit, alertActive, label, showExtras: _showExtras } = props;
     const { colorMode } = useColorMode();
     let extras = <></>
     if (unit === "/100" && value != null && value !== "-") {

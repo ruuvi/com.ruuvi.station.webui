@@ -8,7 +8,6 @@ import {
     Popover,
     PopoverContent,
     PopoverAnchor,
-    PopoverBody,
     Box,
     Divider,
     Flex,
@@ -111,7 +110,7 @@ export default function DurationPicker(props) {
                                     {!props.dashboard &&
                                         <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px', cursor: disabled ? 'default' : undefined }}
                                             isDisabled={disabled}
-                                            onClick={e => {
+                                            onClick={_e => {
                                                 if (disabled) return
                                                 setDropdownFromClick(false)
                                                 setShowPicker(!showPicker)
@@ -139,7 +138,7 @@ export default function DurationPicker(props) {
                                     <Divider orientation="vertical" height={"38px"} mt={"1px"} className="bodybg" width={"2px"} borderStyle="none" />
                                     <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px', cursor: disabled ? 'default' : undefined }}
                                         isDisabled={disabled}
-                                        onClick={e => {
+                                        onClick={_e => {
                                             if (disabled) return
                                             if (wasInClose) {
                                                 wasInClose = false

@@ -1,4 +1,4 @@
-import { background, extendTheme } from "@chakra-ui/react";
+import { extendTheme } from "@chakra-ui/react";
 
 const config = {
     initialColorMode: localStorage.getItem("chakra-ui-color-mode") || "system",
@@ -361,7 +361,7 @@ export const ruuviTheme = extendTheme({
                     bg: colors.menuButtonBg[props.colorMode],
                     color: colors.buttonBackground[props.colorMode],
                 }),
-                link: (props) => ({
+                link: (_props) => ({
                     bg: "transparent",
                     color: "#1f9385",
                     textDecoration: "underline",

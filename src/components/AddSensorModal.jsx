@@ -114,7 +114,7 @@ function AddSensorModal(props) {
             previousLengthRef.current = 0
             setMacAddressValidated("")
         }
-    }, [props.open])
+    }, [props.open]) // eslint-disable-line react-hooks/exhaustive-deps
     function addRuuviLink(text) {
         let link = "ruuvi.com/support"
         if (text.indexOf("ruuvi.com/fi/tuki") !== -1) link = "ruuvi.com/fi/tuki"

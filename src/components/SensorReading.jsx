@@ -7,17 +7,14 @@ import {
     ModalOverlay,
     ModalContent,
     ModalHeader,
-    ModalFooter,
     ModalBody,
     ModalCloseButton,
     useDisclosure,
-    Button
 } from "@chakra-ui/react"
 import { ruuviTheme } from "../themes";
 import BigValue from "./BigValue";
 import { MdInfo, MdClose } from "react-icons/md";
 import { useTranslation } from "react-i18next";
-import { addNewlines } from "../TextHelper";
 import { getDisplayValue } from "../UnitHelper";
 import i18next from "i18next";
 import FormattedText from "./FormattedText";
