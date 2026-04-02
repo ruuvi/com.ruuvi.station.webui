@@ -595,10 +595,7 @@ class Sensor extends Component {
         return visibilityFromCloudToWeb(sensorType);
     }
     getAlertTypesOrdered(baseTypes, visibleFields) {
-        const settings = this.props.sensor?.settings;
-        const defaultDisplayOrder = settings?.defaultDisplayOrder ?? "true";
-        const hasCustomOrder = settings?.displayOrder && defaultDisplayOrder !== "true";
-        if (!hasCustomOrder || !visibleFields?.length) return baseTypes;
+        if (!visibleFields?.length) return baseTypes;
         const measurementOrder = visibleFields.map(field => Array.isArray(field) ? field[0] : field);
         const baseOrder = new Map();
         baseTypes.forEach((type, index) => baseOrder.set(type, index));
