@@ -273,6 +273,15 @@ class NetworkApi {
     async claimSubscription(code) {
         return this.request("/subscription", { method: 'POST', body: { code } });
     }
+    async getSessions() {
+        return this.request("/sessions", { strict: true });
+    }
+    async deleteSession(id) {
+        return this.request("/sessions/" + id, { method: 'DELETE', strict: true });
+    }
+    async deleteAllSessions() {
+        return this.request("/sessions", { method: 'DELETE', strict: true });
+    }
     async requestDelete(email) {
         return this.request("/request-delete", { method: 'POST', body: { email } });
     }
