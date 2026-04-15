@@ -1,4 +1,4 @@
-import { Box, Button, PinInput, PinInputField, Progress } from "@chakra-ui/react";
+import { Box, Button, PinInput, PinInputField, Progress, useColorModeValue } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { withTranslation } from 'react-i18next';
 import NetworkApi from "../NetworkApi";
@@ -7,15 +7,25 @@ import RDialog from "./RDialog";
 import { ruuviTheme } from "../themes";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { addLink } from "../TextHelper";
+import { logout } from "../utils/loginUtils";
 
 function MyAccountModal(props) {
     var { t, i18n } = props;
     const _lng = i18n.language || "en";
+    const sessionCardBg = useColorModeValue("rgba(198, 227, 224, 0.5)", "rgba(53, 173, 159, 0.15)");
+    const sessionTextColor = useColorModeValue("#1b484780", "#ffffff80");
+    const sessionCurrentColor = useColorModeValue("#1f9385", "#44c9b9");
     const [subscriptions, setSubscriptions] = useState([])
     const [activationCode, setActivationCode] = useState("")
     const [isProcessingCode, setIsProcessingCode] = useState(false)
     const [showDeleteAccount, setShowDeleteAccount] = useState(false)
     const [showActivationConfirmation, setShowActivationConfirmation] = useState(false)
+    const [sessionsExpanded, setSessionsExpanded] = useState(false)
+    const [sessions, setSessions] = useState(null)
+    const [sessionsLoading, setSessionsLoading] = useState(false)
+    const [showSignOutAll, setShowSignOutAll] = useState(false)
+    const [deletingSessionId, setDeletingSessionId] = useState(null)
+    const [signingOutAll, setSigningOutAll] = useState(false)
 
     useEffect(() => {
         async function getSubs() {
@@ -100,6 +110,65 @@ function MyAccountModal(props) {
         }
         notify.error(t("something_went_wrong"))
     }
+    const loadSessions = async () => {
+        setSessionsLoading(true)
+        try {
+            let resp = await new NetworkApi().getSessions()
+            if (resp.result === "success") {
+                setSessions(resp.data.sessions)
+            } else if (resp.result === "error") {
+                notify.error(t(`UserApiError.${resp.code}`))
+            } else {
+                notify.error(t("something_went_wrong"))
+            }
+        } catch (e) {
+            notify.error(t("something_went_wrong"))
+        } finally {
+            setSessionsLoading(false)
+        }
+    }
+    const toggleSessions = () => {
+        if (!sessionsExpanded && sessions === null) {
+            loadSessions()
+        }
+        setSessionsExpanded(x => !x)
+    }
+    const deleteSession = async (id) => {
+        setDeletingSessionId(id)
+        try {
+            let resp = await new NetworkApi().deleteSession(id)
+            if (resp.result === "success") {
+                setSessions(s => s.filter(x => x.id !== id))
+            } else if (resp.result === "error") {
+                notify.error(t(`UserApiError.${resp.code}`))
+            } else {
+                notify.error(t("something_went_wrong"))
+            }
+        } catch (e) {
+            notify.error(t("something_went_wrong"))
+        } finally {
+            setDeletingSessionId(null)
+        }
+    }
+    const signOutAll = async () => {
+        setShowSignOutAll(false)
+        setSigningOutAll(true)
+        try {
+            let resp = await new NetworkApi().deleteAllSessions()
+            if (resp.result === "success") {
+                logout()
+            } else if (resp.result === "error") {
+                notify.error(t(`UserApiError.${resp.code}`))
+                setSigningOutAll(false)
+            } else {
+                notify.error(t("something_went_wrong"))
+                setSigningOutAll(false)
+            }
+        } catch (e) {
+            notify.error(t("something_went_wrong"))
+            setSigningOutAll(false)
+        }
+    }
     return (
         <RDialog title={t("my_ruuvi_account")} isOpen={props.open} onClose={props.onClose}>
             <Title>{t("signed_in_user")}</Title>
@@ -150,13 +219,57 @@ function MyAccountModal(props) {
                     </>
                 )}
             </Box>
-            <Box mt={16}></Box>
+            <Box mt={4} />
+            <Box>
+                <Button variant='link' onClick={toggleSessions} style={{ fontFamily: "mulish", fontSize: "16px", fontWeight: 800 }}>
+                    {t("sessions")} {sessionsExpanded ? "▲" : "▼"}
+                </Button>
+                {sessionsExpanded && (
+                    <Box mt={2}>
+                        {sessionsLoading ? (
+                            <Progress isIndeterminate />
+                        ) : sessions && sessions.length > 0 ? (
+                            <>
+                                {sessions.map(session => (
+                                    <Box key={session.id} mb={3} p={3} borderRadius={4} bg={sessionCardBg}>
+                                        <Box style={{ fontFamily: "mulish", fontSize: "13px", color: sessionTextColor }}>
+                                            {t("sessions_created")}: {dateToText(new Date(session.createdAt * 1000))}
+                                        </Box>
+                                        <Box style={{ fontFamily: "mulish", fontSize: "13px", color: sessionTextColor }}>
+                                            {t("sessions_last_accessed")}: {dateToText(new Date(session.lastAccessed * 1000))}
+                                        </Box>
+                                        <Box mt={1}>
+                                            {session.current && (
+                                                <Box style={{ fontFamily: "mulish", fontSize: "13px", fontWeight: 700, color: sessionCurrentColor }}>
+                                                    {t("sessions_current")}
+                                                </Box>
+                                            )}
+                                            {!session.current && (
+                                                <Button size="xs" variant="link" color={sessionCurrentColor} isLoading={deletingSessionId === session.id} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => deleteSession(session.id)}>
+                                                    {t("sessions_delete")}
+                                                </Button>
+                                            )}
+                                        </Box>
+                                    </Box>
+                                ))}
+                                <Box mt={2}>
+                                    <Button size="sm" variant="link" color={sessionCurrentColor} isLoading={signingOutAll} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => setShowSignOutAll(true)}>
+                                        {t("sessions_sign_out_all")}
+                                    </Button>
+                                </Box>
+                            </>
+                        ) : null}
+                    </Box>
+                )}
+            </Box>
+            <Box mt={8}></Box>
             <Button variant='link' onClick={async () => {
                 setShowDeleteAccount(true)
             }}>{t("delete_account")}</Button>
 
             <ConfirmationDialog open={showDeleteAccount} title="delete_account" loading={true} description='account_delete_description' onClose={(yes) => yes ? deleteAccount() : setShowDeleteAccount(false)} />
             <ConfirmationDialog open={showActivationConfirmation} description="plan_activation_confirmation" onClose={(yes) => yes ? activate() : setShowActivationConfirmation(false)} />
+            <ConfirmationDialog open={showSignOutAll} description="sessions_sign_out_all_confirmation" onClose={(yes) => yes ? signOutAll() : setShowSignOutAll(false)} />
         </RDialog>
     )
 }

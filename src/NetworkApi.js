@@ -529,6 +529,27 @@ class NetworkApi {
         const respData = await resp.json()
         return respData;
     }
+    async getSessions() {
+        const resp = await fetch(this.url + "/sessions", this.options)
+        checkStatusCode(resp)
+        return await resp.json()
+    }
+    async deleteSession(id) {
+        const resp = await fetch(this.url + "/sessions/" + id, {
+            ...this.options,
+            method: 'DELETE',
+        })
+        checkStatusCode(resp)
+        return await resp.json()
+    }
+    async deleteAllSessions() {
+        const resp = await fetch(this.url + "/sessions", {
+            ...this.options,
+            method: 'DELETE',
+        })
+        checkStatusCode(resp)
+        return await resp.json()
+    }
     async requestDelete(email) {
         const resp = await fetch(this.url + "/request-delete", {
             ...this.options,
