@@ -596,16 +596,22 @@ class Sensor extends Component {
     }
     getAlertTypesOrdered(baseTypes, visibleFields) {
         if (!visibleFields?.length) return baseTypes;
-        const measurementOrder = visibleFields.map(field => Array.isArray(field) ? field[0] : field);
+        const humidityVariantForAlert = { humidity: "0", humidityAbsolute: "1", dewPoint: "2" };
         const baseOrder = new Map();
         baseTypes.forEach((type, index) => baseOrder.set(type, index));
         const fallbackIndex = Number.MAX_SAFE_INTEGER;
         const typeOrder = new Map();
         baseTypes.forEach(type => {
             const dataKey = getMappedAlertDataType(type);
-            let orderIndex = measurementOrder.indexOf(dataKey);
-            if (orderIndex === -1 && dataKey === "soundLevelAvg") {
-                orderIndex = measurementOrder.findIndex(key => key.startsWith("soundLevel"));
+            let orderIndex = -1;
+            if (humidityVariantForAlert[type] !== undefined) {
+                const variant = humidityVariantForAlert[type];
+                orderIndex = visibleFields.findIndex(f => Array.isArray(f) && f[0] === "humidity" && f[1] === variant);
+            } else {
+                orderIndex = visibleFields.findIndex(f => (Array.isArray(f) ? f[0] : f) === dataKey);
+                if (orderIndex === -1 && dataKey === "soundLevelAvg") {
+                    orderIndex = visibleFields.findIndex(f => (Array.isArray(f) ? f[0] : f).startsWith("soundLevel"));
+                }
             }
             typeOrder.set(type, orderIndex === -1 ? fallbackIndex : orderIndex);
         });
