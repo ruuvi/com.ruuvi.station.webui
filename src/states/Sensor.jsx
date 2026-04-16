@@ -606,7 +606,10 @@ class Sensor extends Component {
             let orderIndex = -1;
             if (humidityVariantForAlert[type] !== undefined) {
                 const variant = humidityVariantForAlert[type];
-                orderIndex = visibleFields.findIndex(f => Array.isArray(f) && f[0] === "humidity" && f[1] === variant);
+                orderIndex = visibleFields.findIndex(f => {
+                    if (Array.isArray(f)) return f[0] === "humidity" && f[1] === variant;
+                    return f === "humidity" && variant === "0";
+                });
             } else {
                 orderIndex = visibleFields.findIndex(f => (Array.isArray(f) ? f[0] : f) === dataKey);
                 if (orderIndex === -1 && dataKey === "soundLevelAvg") {

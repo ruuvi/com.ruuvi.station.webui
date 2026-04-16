@@ -155,6 +155,7 @@ class AlertItem extends Component {
         if (type === "offline") label = "alert_offline_title"
         if (type === "dewPoint") label = "dewpoint"
         if (type === "humidityAbsolute") label = "absolute_humidity"
+        if (type === "humidity") label = "relative_humidity"
         var editItemMargins = { marginRight: 0, marginTop: 12, marginBottom: 12 }
         const asText = (mobile) => <>
             <div style={{ ...editItemMargins, display: "flex", justifyContent: "flex-end" }}>
