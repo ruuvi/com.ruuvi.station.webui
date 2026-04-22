@@ -594,28 +594,78 @@ class Sensor extends Component {
     convertToWebSensorType(sensorType) {
         return visibilityFromCloudToWeb(sensorType);
     }
+    getVisibleFieldType(field) {
+        return Array.isArray(field) ? field[0] : field;
+    }
+    getVisibleFieldUnit(field) {
+        if (Array.isArray(field)) return field[1] ?? null;
+        if (["temperature", "humidity", "pressure", "voc"].includes(field)) {
+            return getUnitSettingFor(field);
+        }
+        return null;
+    }
+    getAlertVisibleFieldIndex(type, visibleFields) {
+        if (!visibleFields?.length) return -1;
+
+        const dataKey = getMappedAlertDataType(type);
+        let preferredUnit = null;
+        let strictUnitMatch = false;
+        let fallbackMatcher = null;
+
+        switch (type) {
+            case "humidity":
+                preferredUnit = "0";
+                strictUnitMatch = true;
+                break;
+            case "humidityAbsolute":
+                preferredUnit = "1";
+                strictUnitMatch = true;
+                break;
+            case "dewPoint":
+                preferredUnit = "2";
+                strictUnitMatch = true;
+                break;
+            case "temperature":
+                preferredUnit = getUnitSettingFor("temperature");
+                break;
+            case "pressure":
+                preferredUnit = getUnitSettingFor("pressure");
+                break;
+            case "voc":
+                preferredUnit = getUnitSettingFor("voc");
+                break;
+            case "sound":
+                fallbackMatcher = (fieldType) => fieldType.startsWith("soundLevel");
+                break;
+            default:
+        }
+
+        let orderIndex = visibleFields.findIndex(field => {
+            if (this.getVisibleFieldType(field) !== dataKey) return false;
+            if (preferredUnit === null) return true;
+            return this.getVisibleFieldUnit(field) === preferredUnit;
+        });
+
+        if (orderIndex !== -1) return orderIndex;
+        if (strictUnitMatch) return -1;
+
+        orderIndex = visibleFields.findIndex(field => this.getVisibleFieldType(field) === dataKey);
+        if (orderIndex !== -1) return orderIndex;
+
+        if (fallbackMatcher) {
+            return visibleFields.findIndex(field => fallbackMatcher(this.getVisibleFieldType(field)));
+        }
+
+        return -1;
+    }
     getAlertTypesOrdered(baseTypes, visibleFields) {
         if (!visibleFields?.length) return baseTypes;
-        const humidityVariantForAlert = { humidity: "0", humidityAbsolute: "1", dewPoint: "2" };
         const baseOrder = new Map();
         baseTypes.forEach((type, index) => baseOrder.set(type, index));
         const fallbackIndex = Number.MAX_SAFE_INTEGER;
         const typeOrder = new Map();
         baseTypes.forEach(type => {
-            const dataKey = getMappedAlertDataType(type);
-            let orderIndex = -1;
-            if (humidityVariantForAlert[type] !== undefined) {
-                const variant = humidityVariantForAlert[type];
-                orderIndex = visibleFields.findIndex(f => {
-                    if (Array.isArray(f)) return f[0] === "humidity" && f[1] === variant;
-                    return f === "humidity" && variant === "0";
-                });
-            } else {
-                orderIndex = visibleFields.findIndex(f => (Array.isArray(f) ? f[0] : f) === dataKey);
-                if (orderIndex === -1 && dataKey === "soundLevelAvg") {
-                    orderIndex = visibleFields.findIndex(f => (Array.isArray(f) ? f[0] : f).startsWith("soundLevel"));
-                }
-            }
+            const orderIndex = this.getAlertVisibleFieldIndex(type, visibleFields);
             typeOrder.set(type, orderIndex === -1 ? fallbackIndex : orderIndex);
         });
         return [...baseTypes].sort((a, b) => {
@@ -691,7 +741,6 @@ class Sensor extends Component {
         let mainSensorFields = this.getSensorMainFields();
         const baseAlertTypes = ["temperature", "humidity", "humidityAbsolute", "dewPoint", "pressure", "signal", "movement", "offline", "battery", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
         const orderedAlertTypes = this.getAlertTypesOrdered(baseAlertTypes, mainSensorFields);
-        const visibleMeasurementKeys = mainSensorFields.map(field => Array.isArray(field) ? field[0] : field);
         return (
             <Box>
                 <Box minHeight={1500}>
@@ -1022,37 +1071,10 @@ class Sensor extends Component {
                                             if (latestValue === undefined && x !== "offline") return null;
 
                                             var alert = this.getAlert(x)
-                                            let visibility = visibleMeasurementKeys;
-                                            if (!visibility.length) visibility = DEFAULT_VISIBLE_SENSOR_TYPES;
                                             let ignoreVisibleTypes = ["offline"];
 
-                                            // Handle variant-specific visibility checks for humidity and other multi-unit types
                                             if (!ignoreVisibleTypes.includes(x)) {
-                                                let isVisible = false;
-
-                                                // Special handling for humidity variants
-                                                if (x === "humidity") {
-                                                    // Show humidity alert when relative humidity (variant "0") is visible
-                                                    isVisible = mainSensorFields.some(field =>
-                                                        (Array.isArray(field) && field[0] === "humidity" && field[1] === "0") ||
-                                                        (!Array.isArray(field) && field === "humidity")
-                                                    );
-                                                } else if (x === "humidityAbsolute") {
-                                                    // Show humidityAbsolute alert when absolute humidity (variant "1") is visible
-                                                    isVisible = mainSensorFields.some(field =>
-                                                        Array.isArray(field) && field[0] === "humidity" && field[1] === "1"
-                                                    );
-                                                } else if (x === "dewPoint") {
-                                                    // Show dewPoint alert when dew point (variant "2") is visible
-                                                    isVisible = mainSensorFields.some(field =>
-                                                        Array.isArray(field) && field[0] === "humidity" && field[1] === "2"
-                                                    );
-                                                } else {
-                                                    // Default visibility check for other alert types
-                                                    isVisible = visibility && visibility.includes(dataKey);
-                                                }
-
-                                                if (!isVisible) return null;
+                                                if (this.getAlertVisibleFieldIndex(x, mainSensorFields) === -1) return null;
                                             }
 
                                             let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description + x : x

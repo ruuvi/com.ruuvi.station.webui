@@ -93,11 +93,12 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType: _grap
 
     const [visibleTypes, setVisibleTypes] = useState([]);
     const [customVisibleTypes, setCustomVisibleTypes] = useState([]);
-    const [draggedItem, setDraggedItem] = useState(null);
     const [dragOverIndex, setDragOverIndex] = useState(null);
     const [useDefault, setUseDefault] = useState(false);
     const [confirmationDialog, setConfirmationDialog] = useState({ open: false, sensorType: null, affectedAlerts: [] });
     const dragCounter = useRef(0);
+    const draggedItemRef = useRef(null);
+    const visibleTypesRef = useRef([]);
 
     const dragOverBg = useColorModeValue("blue.50", "blue.900");
 
@@ -150,6 +151,22 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType: _grap
             setVisibleTypes(customVisibleTypes);
         }
     }, [useDefault, customVisibleTypes]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        visibleTypesRef.current = visibleTypes;
+    }, [visibleTypes]);
+
+    const reorderVisibleTypes = (types, fromIndex, toIndex) => {
+        if (!Number.isInteger(fromIndex) || !Number.isInteger(toIndex)) return types;
+        if (fromIndex === toIndex) return types;
+        if (fromIndex < 0 || toIndex < 0 || fromIndex >= types.length || toIndex >= types.length) return types;
+
+        const newTypes = [...types];
+        const [draggedSensor] = newTypes.splice(fromIndex, 1);
+        if (draggedSensor === undefined) return types;
+        newTypes.splice(toIndex, 0, draggedSensor);
+        return newTypes;
+    };
 
     const getAlertTypeFromSensorType = (sensorType) => {
         const sensorTypeToAlertType = {
@@ -317,7 +334,12 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType: _grap
     };
 
     const handleDragStart = (e, index) => {
-        setDraggedItem(index);
+        draggedItemRef.current = index;
+        try {
+            e.dataTransfer.setData('text/plain', String(index));
+        } catch {
+            // Safari sometimes requires explicit drag data for reliable DnD state.
+        }
         e.dataTransfer.effectAllowed = 'move';
     };
 
@@ -345,22 +367,27 @@ const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType: _grap
         dragCounter.current = 0;
         setDragOverIndex(null);
 
-        if (draggedItem !== null && draggedItem !== dropIndex) {
-            const newTypes = [...visibleTypes];
-            const draggedSensor = newTypes[draggedItem];
-            newTypes.splice(draggedItem, 1);
-            newTypes.splice(dropIndex, 0, draggedSensor);
+        let draggedIndex = draggedItemRef.current;
+        if (!Number.isInteger(draggedIndex)) {
+            const dragPayload = e.dataTransfer?.getData('text/plain');
+            if (dragPayload !== undefined && dragPayload !== null && dragPayload !== '') {
+                draggedIndex = Number(dragPayload);
+            }
+        }
+
+        if (Number.isInteger(draggedIndex) && draggedIndex !== dropIndex) {
+            const newTypes = reorderVisibleTypes(visibleTypesRef.current, draggedIndex, dropIndex);
             setVisibleTypes(newTypes);
 
             if (!useDefault) {
                 setCustomVisibleTypes(newTypes);
             }
         }
-        setDraggedItem(null);
+        draggedItemRef.current = null;
     };
 
     const handleDragEnd = () => {
-        setDraggedItem(null);
+        draggedItemRef.current = null;
         setDragOverIndex(null);
         dragCounter.current = 0;
     };
