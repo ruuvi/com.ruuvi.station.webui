@@ -911,6 +911,7 @@ class Sensor extends Component {
                                                         return t(uh.label);
                                                     })()}
                                                     data={this.getGraphData()}
+                                                    loading={this.isLoading}
                                                     height={450} cursor={true}
                                                     from={this.getFrom()}
                                                     to={this.getTo()}
