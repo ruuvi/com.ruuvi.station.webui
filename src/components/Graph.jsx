@@ -212,7 +212,7 @@ class Graph extends Component {
     resize = (_e) => {
         if (window.innerWidth === screenW) return;
         //if (!this.props.showLoadingOnResize) return this.forceUpdate()
-        if (!this.resizeTimeout) {
+        if (!this.resizeTimeout && !this.props.loading) {
             this.setState({ ...this.state, resizing: true })
             this.forceUpdate()
         }
