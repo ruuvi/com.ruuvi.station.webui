@@ -180,6 +180,74 @@ function SensorValueGrid(props) {
     </Box>
 }
 
+function SensorNotesPreview(props) {
+    const [expanded, setExpanded] = React.useState(false)
+    const [showMore, setShowMore] = React.useState(false)
+    const notesRef = React.useRef(null)
+    const toggleButtonStyle = {
+        marginTop: 8,
+        padding: 0,
+        border: 0,
+        background: "none",
+        color: "#319795",
+        cursor: "pointer",
+        fontFamily: detailedSubText.fontFamily,
+        fontSize: detailedSubText.fontSize,
+        fontWeight: 700,
+    }
+
+    React.useEffect(() => {
+        setExpanded(false)
+        setShowMore(false)
+    }, [props.text])
+
+    React.useEffect(() => {
+        if (expanded) return
+        const element = notesRef.current
+        if (!element) return
+
+        const updateOverflow = () => {
+            setShowMore(element.scrollHeight > element.clientHeight + 1)
+        }
+
+        updateOverflow()
+
+        if (typeof ResizeObserver === "undefined") {
+            window.addEventListener("resize", updateOverflow)
+            return () => window.removeEventListener("resize", updateOverflow)
+        }
+
+        const observer = new ResizeObserver(updateOverflow)
+        observer.observe(element)
+        return () => observer.disconnect()
+    }, [expanded, props.text])
+
+    if (!props.text) return null
+
+    return <div style={{ ...accordionContent, paddingTop: 4, paddingBottom: 8 }}>
+        <div
+            ref={notesRef}
+            style={{
+                ...(expanded ? {} : {
+                    display: "-webkit-box",
+                    WebkitBoxOrient: "vertical",
+                    WebkitLineClamp: 3,
+                    overflow: "hidden",
+                })
+            }}
+        >
+            <span style={{ ...detailedSubText, whiteSpace: "pre-line" }}>{props.text}</span>
+        </div>
+        {(expanded || showMore) && <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            style={toggleButtonStyle}
+        >
+            {props.t(expanded ? "show_less" : "show_more")}
+        </button>}
+    </div>
+}
+
 let alertDebouncer = {}
 
 class Sensor extends Component {
@@ -391,14 +459,14 @@ class Sensor extends Component {
             params.delete("unit");
         }
         this.props.router.navigate({ search: params.toString() }, { replace: true });
-        
+
         const currentKeyHasNoData = !this.state.data?.measurements?.some(
             m => m.parsed && m.parsed[this.state.graphKey] !== undefined
         );
-        
-        this.setState({ 
-            ...this.state, 
-            graphKey, 
+
+        this.setState({
+            ...this.state,
+            graphKey,
             graphUnitKey: unitKey,
             ...(currentKeyHasNoData ? { updateGraphKey: this.state.updateGraphKey + 1 } : {})
         });
@@ -812,7 +880,7 @@ class Sensor extends Component {
                                         (this.state.graphUnitKey || null) === (unitKey || null) ||
                                         (!unitKey && this.state.graphUnitKey === getUnitSettingFor(sensorType))
                                     );
-                                    
+
                                     return (
                                         <SensorReading
                                             key={sensorType + (unitKey || "")}
@@ -1029,7 +1097,7 @@ class Sensor extends Component {
                                             </ListItem>
                                         </>}
                                         <hr />
-                                        <ListItem style={!this.isSharedSensor() ? { cursor: "pointer" } : {}} onClick={!this.isSharedSensor() ? () => this.setState({ ...this.state, notesDialog: true }) : undefined}>
+                                        <ListItem>
                                             <table style={accordionContent}>
                                                 <tbody>
                                                     <tr>
@@ -1042,11 +1110,9 @@ class Sensor extends Component {
                                                     </tr>
                                                 </tbody>
                                             </table>
-                                            {this.props.sensor.settings?.description && <div style={{ ...accordionContent, paddingTop: 4, paddingBottom: 8 }}>
-                                                <span style={{ ...detailedSubText, whiteSpace: "pre-line" }}>{this.props.sensor.settings.description}</span>
-                                            </div>}
                                         </ListItem>
                                     </List>
+                                    <SensorNotesPreview text={this.props.sensor.settings?.description} t={t} />
                                 </AccordionPanel>
                             </AccordionItem>
                             <AccordionItem>
