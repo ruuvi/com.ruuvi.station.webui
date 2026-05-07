@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
 import RadioInput from "../components/RadioInput";
-import { Box, Progress, HStack } from "@chakra-ui/react"
+import { Box, Progress, HStack, Input, Button, FormControl, FormLabel } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import NavClose from "../components/NavClose";
 import notify from "../utils/notify";
@@ -65,6 +65,8 @@ class Settings extends Component {
                 ACCURACY_TEMPERATURE: "2"
             },
             CHART_DRAW_DOTS: Store.getGraphDrawDots(),
+            MISTRAL_API_KEY: Store.getMistralApiKey(),
+            showMistralApiKey: false,
             savingSettings: [],
             savingSettingsStarted: {},
         }
@@ -139,6 +141,14 @@ class Settings extends Component {
         }
         if (this.props.updateUI) this.props.updateUI()
     }
+    updateMistralApiKey(value) {
+        const apiKey = (value || "").trim();
+        Store.setMistralApiKey(apiKey)
+        this.setState({ ...this.state, MISTRAL_API_KEY: apiKey })
+        notify.success(this.props.t("successfully_saved"));
+        if (this.props.updateApp) this.props.updateApp()
+        if (this.props.updateUI) this.props.updateUI()
+    }
     cloudBoolValue(value) {
         if (value === undefined) return false
         return JSON.parse(value) ? true : false
@@ -173,6 +183,30 @@ class Settings extends Component {
                     <RadioInput label={"settings_email_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_EMAIL_NOTIFICATIONS)} options={boolOpt} onChange={v => this.updateSetting("DISABLE_EMAIL_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} loading={this.state.savingSettings.indexOf("DISABLE_EMAIL_NOTIFICATIONS") !== -1} />
                     <br />
                     <RadioInput label={"settings_mobile_push_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_PUSH_NOTIFICATIONS)} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} loading={this.state.savingSettings.indexOf("DISABLE_PUSH_NOTIFICATIONS") !== -1} />
+                    <br />
+                    <FormControl>
+                        <FormLabel fontFamily="mulish" fontWeight="bold">{this.props.t("settings_mistral_api_key")}</FormLabel>
+                        <Box fontFamily="mulish" fontSize="13px" opacity={0.75} mb="2">
+                            {this.props.t("settings_mistral_api_key_description")}
+                        </Box>
+                        <HStack alignItems="start">
+                            <Input
+                                value={this.state.MISTRAL_API_KEY}
+                                type={this.state.showMistralApiKey ? "text" : "password"}
+                                placeholder={this.props.t("settings_mistral_api_key_placeholder")}
+                                onChange={e => this.setState({ ...this.state, MISTRAL_API_KEY: e.target.value })}
+                            />
+                            <Button onClick={() => this.setState({ ...this.state, showMistralApiKey: !this.state.showMistralApiKey })}>
+                                {this.props.t(this.state.showMistralApiKey ? "hide" : "show")}
+                            </Button>
+                            <Button onClick={() => this.updateMistralApiKey(this.state.MISTRAL_API_KEY)}>
+                                {this.props.t("set")}
+                            </Button>
+                            <Button variant="outline" onClick={() => this.updateMistralApiKey("")}>
+                                {this.props.t("clear")}
+                            </Button>
+                        </HStack>
+                    </FormControl>
                 </>
             )}
         </>

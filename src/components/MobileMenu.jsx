@@ -5,7 +5,7 @@ import i18next from 'i18next';
 import { logout } from '../utils/loginUtils';
 import { useNavigate } from 'react-router-dom';
 
-const MobileMenu = ({ openSettings, myAccount }) => {
+const MobileMenu = ({ openSettings, myAccount, aiEnabled, openAi }) => {
     const [show, setShow] = React.useState(false);
     const [showMyProfile, setShowMyProfile] = React.useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -39,6 +39,10 @@ const MobileMenu = ({ openSettings, myAccount }) => {
                 <MenuDivider />
                 <MenuItem className={(window.location.href.endsWith("/compare") ? "menuActive" : "") + " ddlItem"} onClick={() => navigateTo("/compare")}>{t("compare")}</MenuItem>
                 <MenuDivider />
+                {aiEnabled && <>
+                    <MenuItem className="ddlItem" onClick={() => { onClose(); openAi(); }}>{t("ai")}</MenuItem>
+                    <MenuDivider />
+                </>}
                 <MenuItem className="ddlItem" onClick={handleToggle} display={"flex"} justifyContent={"space-between"}>
                     <span>
                         {t('app_settings')}

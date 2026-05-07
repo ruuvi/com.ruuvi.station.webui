@@ -5,6 +5,7 @@ const DASHBOARD_CARD_TYPE_KEY = "dashboard_card_type";
 const BANNER = "banner_seen_";
 const GRAPH_DRAW_DOTS = "graph_draw_dots";
 const DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY = "dashboard_disable_adaptive_layout";
+const MISTRAL_API_KEY = "mistral_api_key";
 
 const Store = {
     setGraphFrom(v) {
@@ -53,6 +54,17 @@ const Store = {
         let res = localStorage.getItem(DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY);
         if (res === null) return false;
         return JSON.parse(res);
+    },
+    setMistralApiKey(v) {
+        const value = (v || "").trim();
+        if (value) {
+            localStorage.setItem(MISTRAL_API_KEY, value)
+        } else {
+            localStorage.removeItem(MISTRAL_API_KEY)
+        }
+    },
+    getMistralApiKey() {
+        return localStorage.getItem(MISTRAL_API_KEY) || ""
     },
 }
 

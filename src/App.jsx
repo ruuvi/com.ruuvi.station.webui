@@ -28,6 +28,7 @@ import SettingsMenu from "./components/SettingsMenu";
 import MobileMenu from "./components/MobileMenu";
 import SensorCompare from "./states/SensorCompare";
 import detectForceRefresh from "./utils/detectForceRefresh";
+import AiChatModal from "./components/AiChatModal";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/UserMenu"));
@@ -257,6 +258,7 @@ export default function App() {
     };
   }, [user?.email, browserLanguage, forceUpdate]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const aiEnabled = !!Store.getMistralApiKey();
   const [, updateState] = React.useState();
   const [settingsVersion, setSettingsVersion] = React.useState(0);
   if (!user) {
@@ -289,7 +291,7 @@ export default function App() {
               {new NetworkApi().isStaging() ? "(staging) " : ""}
             </Text>
             <span style={{ width: "100%", textAlign: "right", marginLeft: "-25px", marginRight: "-4px" }}>
-              <TopBar user={user} reloadSub={reloadSub} setShowDialog={setShowDialog} />
+              <TopBar user={user} reloadSub={reloadSub} setShowDialog={setShowDialog} aiEnabled={aiEnabled} />
             </span>
           </HStack>
           {banners && banners.map(x => {
@@ -323,6 +325,9 @@ export default function App() {
       </BrowserRouter>
       <AddSensorModal open={showDialog === "addsensor"} onClose={() => setShowDialog("")} updateApp={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />
       <SettingsModal open={showDialog === "settings"} onClose={() => setShowDialog("")} updateApp={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />
+      {aiEnabled &&
+        <AiChatModal open={showDialog === "ai"} onClose={() => setShowDialog("")} />
+      }
       {showDialog === "myaccount" &&
         <MyAccountModal open={true} onClose={() => setShowDialog("")} updateApp={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />
       }
@@ -330,7 +335,7 @@ export default function App() {
   );
 }
 
-function TopBar({ reloadSub, setShowDialog }) {
+function TopBar({ reloadSub, setShowDialog, aiEnabled }) {
   const isWideVersion = useBreakpointValue({ base: false, md: true })
   let sensorMenu = <SensorMenu key={reloadSub} small={!isWideVersion}
     addSensor={() => {
@@ -350,6 +355,9 @@ function TopBar({ reloadSub, setShowDialog }) {
         <Button variant="topbar" onClick={() => nav("/shares")} className={window.location.href.indexOf("/shares") !== -1 ? "activeNav" : ""}>
           {i18next.t("share_center")}
         </Button>
+        {aiEnabled && <Button variant="topbar" onClick={() => setShowDialog("ai")}>
+          {i18next.t("ai")}
+        </Button>}
         {sensorMenu}
         <SettingsMenu openSettings={() => setShowDialog("settings")} />
         <UserMenu settings={() => setShowDialog("settings")} myAccount={() => setShowDialog("myaccount")} />
@@ -357,7 +365,7 @@ function TopBar({ reloadSub, setShowDialog }) {
       :
       <>
         {sensorMenu}
-        <MobileMenu openSettings={() => setShowDialog("settings")} myAccount={() => setShowDialog("myaccount")} />
+        <MobileMenu openSettings={() => setShowDialog("settings")} myAccount={() => setShowDialog("myaccount")} aiEnabled={aiEnabled} openAi={() => setShowDialog("ai")} />
       </>
     }
 

@@ -286,6 +286,9 @@ class NetworkApi {
         GET_ALL_SENSORS_CACHE = { ts: now, data: respData };
         return respData;
     }
+    clearAllSensorsCache() {
+        GET_ALL_SENSORS_CACHE = null;
+    }
     share(mac, email, success) {
         fetch(this.url + "/share", {
             ...this.options,
@@ -417,15 +420,16 @@ class NetworkApi {
             .then(response => success(response))
     }
     setAlert(data, success) {
-        fetch(this.url + "/alerts", {
+        this.setAlertAsync(data).then(response => success(response))
+    }
+    async setAlertAsync(data) {
+        const response = await fetch(this.url + "/alerts", {
             ...this.options,
             method: 'POST',
             body: JSON.stringify(data)
-        }).then(function (response) {
-            checkStatusCode(response)
-            return response.json();
-        })
-            .then(response => success(response))
+        });
+        checkStatusCode(response)
+        return await response.json();
     }
     async updateSensorSetting(sensorId, type, value) {
         try {
