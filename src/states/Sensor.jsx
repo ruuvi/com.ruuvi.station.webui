@@ -16,6 +16,7 @@ import {
     CircularProgress,
     Spinner,
     Flex,
+    Button,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
 import Graph from "../components/Graph";
@@ -184,17 +185,6 @@ function SensorNotesPreview(props) {
     const [expanded, setExpanded] = React.useState(false)
     const [showMore, setShowMore] = React.useState(false)
     const notesRef = React.useRef(null)
-    const toggleButtonStyle = {
-        marginTop: 8,
-        padding: 0,
-        border: 0,
-        background: "none",
-        color: "#319795",
-        cursor: "pointer",
-        fontFamily: detailedSubText.fontFamily,
-        fontSize: detailedSubText.fontSize,
-        fontWeight: 700,
-    }
 
     React.useEffect(() => {
         setExpanded(false)
@@ -238,13 +228,18 @@ function SensorNotesPreview(props) {
         >
             <span style={{ ...detailedSubText, whiteSpace: "pre-line" }}>{props.text}</span>
         </div>
-        {(expanded || showMore) && <button
-            type="button"
+        {(expanded || showMore) && <Button
+            size="sm"
+            variant="shareSensorSelect"
+            mt={2}
+            mb={1}
+            borderRadius="full"
+            paddingLeft={5} paddingRight={5}
+            style={{ fontFamily: detailedSubText.fontFamily, fontSize: "13px", fontWeight: 700 }}
             onClick={() => setExpanded(!expanded)}
-            style={toggleButtonStyle}
         >
             {props.t(expanded ? "show_less" : "show_more")}
-        </button>}
+        </Button>}
     </div>
 }
 
