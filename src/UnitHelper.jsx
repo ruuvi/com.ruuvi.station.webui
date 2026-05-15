@@ -1,6 +1,10 @@
 import { relativeToAbsolute, relativeToDewpoint } from "./utils/humidity";
 import logger from "./utils/logger";
 
+function readSettings() {
+    try { return JSON.parse(localStorage.getItem("settings")) ?? {}; } catch { return {}; }
+}
+
 const unitHelper = {
     _common: {
         degreeC: "°C",
@@ -53,20 +57,9 @@ const unitHelper = {
         },
         value: (value, temperature, settings) => humidityToUserFormat(value, temperature, settings),
         valueWithUnit: (value, unitKey, temperature) => {
-            let settings = { UNIT_HUMIDITY: unitKey };
-
-            try {
-                const stored = localStorage.getItem("settings");
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    if (parsed.UNIT_TEMPERATURE) {
-                        settings.UNIT_TEMPERATURE = parsed.UNIT_TEMPERATURE;
-                    }
-                }
-            } catch {
-                // will default to Celsius
-            }
-
+            const stored = readSettings();
+            const settings = { UNIT_HUMIDITY: unitKey };
+            if (stored.UNIT_TEMPERATURE) settings.UNIT_TEMPERATURE = stored.UNIT_TEMPERATURE;
             return humidityToUserFormat(value, temperature, settings);
         },
         fromUser: (value) => value,
@@ -341,13 +334,10 @@ export function getUnitSettingFor(key) {
         UNIT_PRESSURE: "1",
         UNIT_VOC: "index",
     }
-    let settings = localStorage.getItem("settings");
-    if (settings) {
-        settings = JSON.parse(settings)
-        if (settings[map[key]]) return settings[map[key]]
-    }
-    if (defaults[map[key]]) return defaults[map[key]]
-    return null
+    const settings = readSettings();
+    if (settings[map[key]]) return settings[map[key]];
+    if (defaults[map[key]]) return defaults[map[key]];
+    return null;
 }
 
 export function getUnitFor(key, setting) {
@@ -362,9 +352,8 @@ export function getUnitFor(key, setting) {
             switch (setting) {
                 case "1": return "g/m³"
                 case "2": {
-                    let settings = localStorage.getItem("settings");
-                    if (settings) settings = JSON.parse(settings)
-                    return getUnitFor("temperature", settings?.UNIT_TEMPERATURE)
+                    const settings = readSettings();
+                    return getUnitFor("temperature", settings.UNIT_TEMPERATURE)
                 }
                 default: return "%"
             }
@@ -381,40 +370,32 @@ export function getUnitFor(key, setting) {
 }
 
 export function getSetting(key, fallback) {
-    try {
-        let settings = localStorage.getItem("settings");
-        if (settings) {
-            settings = JSON.parse(settings)
-            if (settings[key]) return settings[key]
-        }
-    } catch (error) {
-        logger.error("getSetting error", error)
-    }
-    return fallback
+    const settings = readSettings();
+    if (settings[key]) return settings[key];
+    return fallback;
 }
 
 export function getDisplayValue(key, value, settings) {
     try {
         if (key === "aqi" && value != null) value = Math.round(value)
         if (!["temperature", "humidity", "pressure"].includes(key)) return value
-        if (!settings) settings = localStorage.getItem("settings");
-        if (settings) {
-            settings = JSON.parse(settings)
-            let resolution = 2;
-            if (value != null) {
+        if (!settings) settings = readSettings();
+        else if (typeof settings === "string") settings = JSON.parse(settings);
+        let resolution = 2;
+        if (value != null) {
                 if (key === "temperature") {
-                    if (settings?.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE)
+                    if (settings.ACCURACY_TEMPERATURE) resolution = parseInt(settings.ACCURACY_TEMPERATURE)
                     else resolution = unitHelper.temperature.decimals
                 }
                 if (key === "humidity") {
-                    if (settings?.ACCURACY_HUMIDITY) resolution = parseInt(settings.ACCURACY_HUMIDITY)
+                    if (settings.ACCURACY_HUMIDITY) resolution = parseInt(settings.ACCURACY_HUMIDITY)
                     else resolution = unitHelper.humidity.decimals
                 }
                 if (key === "pressure") {
-                    if (settings?.ACCURACY_PRESSURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
+                    if (settings.ACCURACY_PRESSURE) resolution = parseInt(settings.ACCURACY_PRESSURE)
                     else resolution = unitHelper.pressure.decimals
                     // don't show decimals for Pa
-                    if (settings?.UNIT_PRESSURE === "0") resolution = 0
+                    if (settings.UNIT_PRESSURE === "0") resolution = 0
                 }
                 if (typeof value === "string") {
                     value = value.replace(" ", "").replace("−", "-");
@@ -428,7 +409,6 @@ export function getDisplayValue(key, value, settings) {
                 value = parseFloat(value).toFixed(resolution)
                 value = localeNumber(+value, resolution)
             }
-        }
     } catch (error) {
         logger.error("getDisplayValue", error)
     }
@@ -436,11 +416,7 @@ export function getDisplayValue(key, value, settings) {
 }
 
 export function getUnitHelper(key, plaintext, unit) {
-    let settings = null;
-    try {
-        let raw = localStorage.getItem("settings");
-        if (raw) settings = JSON.parse(raw);
-    } catch { /* ignore */ }
+    const settings = readSettings();
 
     if (key && key.startsWith("tvoc_")) {
         const suffix = key.substring("tvoc_".length); // ethanol, isobutylene, molhave
@@ -455,17 +431,17 @@ export function getUnitHelper(key, plaintext, unit) {
     const C = unitHelper._common;
 
     if (key === "temperature") {
-        const setting = unit || settings?.UNIT_TEMPERATURE || "C";
+        const setting = unit || settings.UNIT_TEMPERATURE || "C";
         let thing = { ...unitHelper[key] };
         thing.unit = thing.displayUnits?.[setting] || thing.unit;
         let currUnit = thing.units.find(u => u.cloudStoreKey === setting);
         if (currUnit && currUnit.infoLabel) thing.infoLabel = currUnit.infoLabel;
-        if (settings?.ACCURACY_TEMPERATURE) thing.decimals = parseInt(settings.ACCURACY_TEMPERATURE)
+        if (settings.ACCURACY_TEMPERATURE) thing.decimals = parseInt(settings.ACCURACY_TEMPERATURE)
         return thing;
     }
 
     if (key === "humidity") {
-        const humSetting = unit ?? settings?.UNIT_HUMIDITY ?? "0";
+        const humSetting = unit ?? settings.UNIT_HUMIDITY ?? "0";
         let thing = { ...unitHelper[key] };
         const variant = thing.displayVariants?.[humSetting];
         if (variant) {
@@ -485,26 +461,26 @@ export function getUnitHelper(key, plaintext, unit) {
                 thing.label = variant.label;
                 thing.shortLabel = "dewpoint";
                 thing.infoLabel = "description_text_humidity_dewpoint";
-                const tempSetting = settings?.UNIT_TEMPERATURE || "C";
+                const tempSetting = settings.UNIT_TEMPERATURE || "C";
                 thing.unit = tempSetting === "F" ? C.degreeF : tempSetting === "K" ? C.kelvin : C.degreeC;
             }
         }
-        if (settings?.ACCURACY_HUMIDITY) thing.decimals = parseInt(settings.ACCURACY_HUMIDITY)
+        if (settings.ACCURACY_HUMIDITY) thing.decimals = parseInt(settings.ACCURACY_HUMIDITY)
         return thing;
     }
 
     if (key === "pressure") {
-        const pSetting = unit ?? settings?.UNIT_PRESSURE ?? "1"; // default hPa
+        const pSetting = unit ?? settings.UNIT_PRESSURE ?? "1"; // default hPa
         let thing = { ...unitHelper[key] };
         thing.unit = thing.displayUnits?.[pSetting] || thing.unit;
         if (pSetting === "0") thing.decimals = 0; // Pa, no decimals
-        else if (settings?.ACCURACY_PRESSURE) thing.decimals = parseInt(settings.ACCURACY_PRESSURE)
+        else if (settings.ACCURACY_PRESSURE) thing.decimals = parseInt(settings.ACCURACY_PRESSURE)
         return thing;
     }
 
     if (key === "voc") {
         let thing = { ...unitHelper[key] };
-        const vocUnit = unit ?? settings?.UNIT_VOC ?? "index";
+        const vocUnit = unit ?? settings.UNIT_VOC ?? "index";
         if (["ethanol_mgm3", "isobutylene_mgm3", "molhave_mgm3"].includes(vocUnit)) {
             thing.unit = plaintext ? C.mgm3Plain : C.mgm3JSX;
             const suffix = vocUnit.substring(0, vocUnit.indexOf("_"));
@@ -541,32 +517,22 @@ export function localeNumber(value, decimals) {
 
 export function temperatureToUserFormat(temperature, offset, settings) {
     offset = offset === true;
-    if (!settings) {
-        settings = localStorage.getItem("settings");
-        if (settings) settings = JSON.parse(settings)
-    }
+    if (!settings) settings = readSettings();
     let roundTo = 2;
-    if (settings) {
-        if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
-            temperature = (temperature * 1.8) + (offset ? 0 : 32);
-        }
-        else if (!offset && settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
-            temperature = temperature + 273.15;
-        }
+    if (settings.UNIT_TEMPERATURE === "F") {
+        temperature = (temperature * 1.8) + (offset ? 0 : 32);
+    } else if (!offset && settings.UNIT_TEMPERATURE === "K") {
+        temperature = temperature + 273.15;
     }
     return round(temperature, roundTo)
 }
 
 export function temperatureFromUserFormat(temperature) {
-    var settings = localStorage.getItem("settings");
-    if (settings) {
-        settings = JSON.parse(settings)
-        if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "F") {
-            temperature = (temperature - 32) / 1.8;
-        }
-        else if (settings.UNIT_TEMPERATURE && settings.UNIT_TEMPERATURE === "K") {
-            temperature = temperature - 273.15;
-        }
+    const settings = readSettings();
+    if (settings.UNIT_TEMPERATURE === "F") {
+        temperature = (temperature - 32) / 1.8;
+    } else if (settings.UNIT_TEMPERATURE === "K") {
+        temperature = temperature - 273.15;
     }
     return round(temperature, 2)
 }
@@ -623,16 +589,11 @@ export function getAlertRange(type) {
 // 1 = Absolute (g/m^3)
 // 2 = Dew point (°)
 export function humidityToUserFormat(humidity, temperature, settings) {
-    if (!settings) {
-        settings = localStorage.getItem("settings");
-        if (settings) settings = JSON.parse(settings)
-    }
-    if (settings) {
-        if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "1") {
-            humidity = relativeToAbsolute(humidity, temperature)
-        } else if (settings.UNIT_HUMIDITY && settings.UNIT_HUMIDITY === "2") {
-            humidity = relativeToDewpoint(humidity, temperature, settings.UNIT_TEMPERATURE)
-        }
+    if (!settings) settings = readSettings();
+    if (settings.UNIT_HUMIDITY === "1") {
+        humidity = relativeToAbsolute(humidity, temperature)
+    } else if (settings.UNIT_HUMIDITY === "2") {
+        humidity = relativeToDewpoint(humidity, temperature, settings.UNIT_TEMPERATURE)
     }
     return round(humidity, 2)
 }
@@ -642,20 +603,13 @@ export function humidityToUserFormat(humidity, temperature, settings) {
 // 2 = Millimeter of mercury (mmHg)
 // 3 = Inch of mercury (inHg)
 export function pressureToUserFormat(pressure, settings) {
-    if (!settings) {
-        settings = localStorage.getItem("settings");
-        if (settings) settings = JSON.parse(settings)
-    }
-    if (settings) {
-        if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "0") {
-            // Pa — no conversion needed
-        } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
-            pressure /= mmMercuryMultiplier
-        } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "3") {
-            pressure /= inchMercuryMultiplier
-        } else {
-            pressure /= 100;
-        }
+    if (!settings) settings = readSettings();
+    if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "0") {
+        // Pa — no conversion needed
+    } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
+        pressure /= mmMercuryMultiplier
+    } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "3") {
+        pressure /= inchMercuryMultiplier
     } else {
         pressure /= 100;
     }
@@ -663,20 +617,13 @@ export function pressureToUserFormat(pressure, settings) {
 }
 
 export function pressureFromUserFormat(pressure, settings) {
-    if (!settings) {
-        settings = localStorage.getItem("settings");
-        if (settings) settings = JSON.parse(settings)
-    }
-    if (settings) {
-        if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "0") {
-            // Pa — no conversion needed
-        } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
-            pressure *= mmMercuryMultiplier
-        } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "3") {
-            pressure *= inchMercuryMultiplier
-        } else {
-            pressure *= 100;
-        }
+    if (!settings) settings = readSettings();
+    if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "0") {
+        // Pa — no conversion needed
+    } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "2") {
+        pressure *= mmMercuryMultiplier
+    } else if (settings.UNIT_PRESSURE && settings.UNIT_PRESSURE === "3") {
+        pressure *= inchMercuryMultiplier
     } else {
         pressure *= 100;
     }
