@@ -121,7 +121,7 @@ function MyAccountModal(props) {
             } else {
                 notify.error(t("something_went_wrong"))
             }
-        } catch (e) {
+        } catch {
             notify.error(t("something_went_wrong"))
         } finally {
             setSessionsLoading(false)
@@ -144,7 +144,7 @@ function MyAccountModal(props) {
             } else {
                 notify.error(t("something_went_wrong"))
             }
-        } catch (e) {
+        } catch {
             notify.error(t("something_went_wrong"))
         } finally {
             setDeletingSessionId(null)
@@ -164,7 +164,7 @@ function MyAccountModal(props) {
                 notify.error(t("something_went_wrong"))
                 setSigningOutAll(false)
             }
-        } catch (e) {
+        } catch {
             notify.error(t("something_went_wrong"))
             setSigningOutAll(false)
         }
