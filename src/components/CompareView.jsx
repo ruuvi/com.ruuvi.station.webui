@@ -258,7 +258,7 @@ function CompareView(props) {
 
     const { width } = useContainerDimensions(ref)
     const colorMode = useColorMode().colorMode;
-    let showDots = new Store().getGraphDrawDots()
+    let showDots = Store.getGraphDrawDots()
     //if (loading) return <Box height={450}><Progress isIndeterminate /></Box>
     let graphData = getGraphData();
     return (

@@ -232,7 +232,7 @@ class Graph extends Component {
         window.removeEventListener('resize', this.resize)
     }
     render() {
-        let showDots = new Store().getGraphDrawDots()
+        let showDots = Store.getGraphDrawDots()
         let alert = this.props.alert
         let width = this.props.width || this.pRef?.current?.offsetWidth
         setTimeout(() => {

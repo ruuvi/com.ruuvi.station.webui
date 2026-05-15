@@ -6,54 +6,54 @@ const BANNER = "banner_seen_";
 const GRAPH_DRAW_DOTS = "graph_draw_dots";
 const DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY = "dashboard_disable_adaptive_layout";
 
-class Store {
+const Store = {
     setGraphFrom(v) {
         localStorage.setItem(GRAPH_FROM_KEY, v)
-    }
+    },
     getGraphFrom() {
         return parseInt(localStorage.getItem(GRAPH_FROM_KEY))
-    }
+    },
     setDashboardFrom(v) {
         localStorage.setItem(DASHBOARD_FROM_KEY, v)
-    }
+    },
     getDashboardFrom() {
         return parseInt(localStorage.getItem(DASHBOARD_FROM_KEY))
-    }
+    },
     setOpenAccordions(v) {
         localStorage.setItem(SENSOR_OPEN_ACCORDIONS, JSON.stringify(v))
-    }
+    },
     getOpenAccordions() {
         var cache = localStorage.getItem(SENSOR_OPEN_ACCORDIONS);
         return cache ? JSON.parse(cache) : cache;
-    }
+    },
     setDashboardCardType(v) {
         localStorage.setItem(DASHBOARD_CARD_TYPE_KEY, v)
-    }
+    },
     getDashboardCardType() {
         return localStorage.getItem(DASHBOARD_CARD_TYPE_KEY) || "image_view"
-    }
+    },
     setHasSeenBanner(key, v) {
         localStorage.setItem(BANNER + key, v)
-    }
+    },
     getHasSeenBanner(key) {
         let res = localStorage.getItem(BANNER + key);
         if (res === null) return false;
         return JSON.parse(res);
-    }
+    },
     setGraphDrawDots(v) {
         localStorage.setItem(GRAPH_DRAW_DOTS, v)
-    }
+    },
     getGraphDrawDots() {
         return localStorage.getItem(GRAPH_DRAW_DOTS) === "true"
-    }
+    },
     setDashboardDisableAdaptiveLayout(v) {
         localStorage.setItem(DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY, JSON.stringify(v))
-    }
+    },
     getDashboardDisableAdaptiveLayout() {
         let res = localStorage.getItem(DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY);
         if (res === null) return false;
         return JSON.parse(res);
-    }
+    },
 }
 
 export default Store
