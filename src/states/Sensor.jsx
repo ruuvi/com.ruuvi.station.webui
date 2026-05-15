@@ -213,7 +213,7 @@ class Sensor extends Component {
             loading: true,
             graphKey: graphKeyFromUrl || initialGraphKey,
             graphUnitKey: graphUnitKeyFromUrl || graphUnitKey,
-            from: new Store().getGraphFrom() || 24,
+            from: Store.getGraphFrom() || 24,
             to: null,
             table: "",
             resolvedMode: "",
@@ -230,7 +230,7 @@ class Sensor extends Component {
         this.chartRef = React.createRef();
     }
     applyAccordionSetting() {
-        this.openAccodrions = new Store().getOpenAccordions() || [0];
+        this.openAccodrions = Store.getOpenAccordions() || [0];
     }
     componentDidMount() {
         const queryParams = new URLSearchParams(this.props.router.location.search);
@@ -440,7 +440,7 @@ class Sensor extends Component {
             state.to = null
         }
         this.setState(state, () => this.loadData(false))
-        new Store().setGraphFrom(v)
+        Store.setGraphFrom(v)
     }
     getFrom() {
         var since = new Date().getTime() - this.state.from * 60 * 60 * 1000;
@@ -520,7 +520,7 @@ class Sensor extends Component {
         exportXLSX(this.state.data, this.props.sensor.name, this.props.t)
     }
     setOpenAccordion(open) {
-        new Store().setOpenAccordions(open)
+        Store.setOpenAccordions(open)
     }
     getGraphData() {
         if (!this.state.data?.measurements?.length) return []
@@ -549,7 +549,7 @@ class Sensor extends Component {
     }
     getSensorMainFields() {
         let mainSensorFields = [];
-        let visibleTypes// = new Store().getPerSensorVisibleTypes(this.props.sensor.sensor);
+        let visibleTypes// = Store.getPerSensorVisibleTypes(this.props.sensor.sensor);
         let readings = this.getLatestReadingFromProps();
 
         if (readings) {

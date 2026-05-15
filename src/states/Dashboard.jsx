@@ -230,13 +230,12 @@ const getSensorCache = () => {
 class Dashboard extends Component {
     constructor(props) {
         super(props)
-        let store = new Store();
         let cachedSensors = getSensorCache();
         this.state = {
             loading: cachedSensors.length === 0,
             sensors: cachedSensors,
             from: 24 * 3,
-            cardType: store.getDashboardCardType(),
+            cardType: Store.getDashboardCardType(),
             showBig: true,
             graphType: null,
             search: "",
@@ -244,12 +243,12 @@ class Dashboard extends Component {
             rename: null,
             showResetOrderConfirmation: false,
             order: this.getOrder(),
-            disableAdaptiveLayout: store.getDashboardDisableAdaptiveLayout(),
+            disableAdaptiveLayout: Store.getDashboardDisableAdaptiveLayout(),
         }
         this._isUnmounted = false;
         this._fetchInProgress = false;
         this.dataRefreshTimer = null;
-        var from = store.getDashboardFrom();
+        var from = Store.getDashboardFrom();
         if (from) {
             // apply new dashboard history length limit to old stored value
             if (from > 24 * 7) from = 24 * 7;
@@ -322,7 +321,7 @@ class Dashboard extends Component {
     }
     updateFrom(v) {
         this.setState({ ...this.state, from: v })
-        new Store().setDashboardFrom(v)
+        Store.setDashboardFrom(v)
     }
     componentDidMount() {
         this._isUnmounted = false;
@@ -399,7 +398,7 @@ class Dashboard extends Component {
     }
     setDashboardViewType(type) {
         this.setState({ ...this.state, cardType: type })
-        new Store().setDashboardCardType(type)
+        Store.setDashboardCardType(type)
     }
     setGraphType(type) {
         this.setState({ ...this.state, graphType: type })
@@ -486,7 +485,7 @@ class Dashboard extends Component {
                 setAdaptiveLayout={() => {
                     this.setState(prev => {
                         const nextVal = !prev.disableAdaptiveLayout
-                        new Store().setDashboardDisableAdaptiveLayout(nextVal)
+                        Store.setDashboardDisableAdaptiveLayout(nextVal)
                         return { disableAdaptiveLayout: nextVal }
                     })
                 }}

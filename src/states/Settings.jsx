@@ -64,7 +64,7 @@ class Settings extends Component {
                 ACCURACY_PRESSURE: "2",
                 ACCURACY_TEMPERATURE: "2"
             },
-            CHART_DRAW_DOTS: new Store().getGraphDrawDots(),
+            CHART_DRAW_DOTS: Store.getGraphDrawDots(),
             savingSettings: [],
             savingSettingsStarted: {},
         }
@@ -134,7 +134,7 @@ class Settings extends Component {
     }
     updateLocalSetting(key, value) {
         if (key === "CHART_DRAW_DOTS") {
-            new Store().setGraphDrawDots(value)
+            Store.setGraphDrawDots(value)
             this.setState({ ...this.state, CHART_DRAW_DOTS: value })
         }
         if (this.props.updateUI) this.props.updateUI()

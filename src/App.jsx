@@ -220,11 +220,10 @@ export default function App() {
     if (!subscription) return
     (async () => {
       try {
-        let store = new Store();
         let notifications = await new NetworkApi().getBanners();
         if (notifications) {
           let notification = notifications.filter(x => x.plan === subscription?.subscriptionName || x.plan === "")
-          notification = notification.filter(x => x.key && !store.getHasSeenBanner(x.key))
+          notification = notification.filter(x => x.key && !Store.getHasSeenBanner(x.key))
           notification = notification.filter(x => {
             if (x.version && x.version !== pjson.version) return false
             return true
@@ -258,7 +257,6 @@ export default function App() {
     };
   }, [user?.email, browserLanguage, forceUpdate]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  let store = new Store();
   const [, updateState] = React.useState();
   const [settingsVersion, setSettingsVersion] = React.useState(0);
   if (!user) {
@@ -299,7 +297,7 @@ export default function App() {
               <Box flex style={{ textAlign: "center", width: "100%" }} dangerouslySetInnerHTML={{ __html: getBannerContent(x) }}></Box>
               <Box flex style={{ width: "16px" }}>
                 <div style={{ cursor: "pointer" }} onClick={() => {
-                  store.setHasSeenBanner(x.key, true)
+                  Store.setHasSeenBanner(x.key, true)
                   let rest = banners.filter(y => y.key !== x.key)
                   setBanners(rest);
                 }}>
