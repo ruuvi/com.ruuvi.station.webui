@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/SensorCard";
@@ -131,7 +131,7 @@ function DashboardGrid(props) {
             gridRef.current.style.height = '';
             const { columnWidth: calculatedColumnWidth, columnCount } = calculateGridDimensions();
 
-            if (columnCount <= 0 || calculatedColumnWidth <= 0) { // Avoid issues with zero or negative columns/width
+            if (columnCount <= 0 || calculatedColumnWidth <= 0) {
                 gridRef.current.style.height = '0px';
                 return;
             }
@@ -178,7 +178,7 @@ function DashboardGrid(props) {
             cardResizeObserver.disconnect();
         };
 
-    }, [containerWidth, size, props.order, props.sensors, gap, minCardWidth, props.disableAdaptiveLayout]); // Dependencies for re-calculating layout
+    }, [containerWidth, size, props.order, props.sensors, gap, minCardWidth, props.disableAdaptiveLayout]);
 
     // Non-adaptive layout: simple CSS grid with equal height rows
     if (props.disableAdaptiveLayout) {
@@ -227,122 +227,179 @@ const getSensorCache = () => {
     return JSON.parse(sensors)
 }
 
-class Dashboard extends Component {
-    constructor(props) {
-        super(props)
-        let cachedSensors = getSensorCache();
-        this.state = {
-            loading: cachedSensors.length === 0,
-            sensors: cachedSensors,
-            from: 24 * 3,
-            cardType: Store.getDashboardCardType(),
-            showBig: true,
-            graphType: null,
-            search: "",
-            currSize: '',
-            rename: null,
-            showResetOrderConfirmation: false,
-            order: this.getOrder(),
-            disableAdaptiveLayout: Store.getDashboardDisableAdaptiveLayout(),
-        }
-        this._isUnmounted = false;
-        this._fetchInProgress = false;
-        this.dataRefreshTimer = null;
-        var from = Store.getDashboardFrom();
-        if (from) {
-            // apply new dashboard history length limit to old stored value
-            if (from > 24 * 7) from = 24 * 7;
-            this.state.from = from;
+function getOrder() {
+    let order = getSetting("SENSOR_ORDER", null)
+    if (order) {
+        order = JSON.parse(order)
+        if (order && order.length) {
+            return order
         }
     }
-    getOrder() {
-        let order = getSetting("SENSOR_ORDER", null)
-        if (order) {
-            order = JSON.parse(order)
-            if (order && order.length) {
-                return order
-            }
+    return null
+}
+
+function addRuuviLink(text) {
+    var splitted = text.split("ruuvi.com")
+    if (splitted.length === 1) return text;
+    var out = [<span>{splitted[0]}</span>]
+    for (var i = 1; i < splitted.length; i++) {
+        out.push(<Link href="https://ruuvi.com" isExternal color="primary">ruuvi.com</Link>)
+        out.push(<span>{splitted[i]}</span>);
+    }
+    return out;
+}
+
+function Dashboard(props) {
+    const { t, params, location, navigate, reloadTags, settingsVersion } = props;
+
+    const [loading, setLoading] = useState(() => getSensorCache().length === 0);
+    const [sensors, setSensors] = useState(getSensorCache);
+    const [from, setFrom] = useState(() => {
+        let f = Store.getDashboardFrom();
+        if (f) {
+            if (f > 24 * 7) f = 24 * 7;
+            return f;
         }
-        return null
-    }
-    getCurrentSensor() {
-        let id = this.props.params.id;
-        return this.state.sensors.find(x => x.sensor === id);
-    }
-    componentDidUpdate(prevProps, prevState) {
+        return 24 * 3;
+    });
+    const [cardType, setCardTypeState] = useState(Store.getDashboardCardType());
+    const [graphType, setGraphTypeState] = useState(null);
+    const [search, setSearch] = useState("");
+    const [currSize, setCurrSize] = useState('');
+    const [rename, setRename] = useState(null);
+    const [showResetOrderConfirmation, setShowResetOrderConfirmation] = useState(false);
+    const [order, setOrder] = useState(getOrder);
+    const [disableAdaptiveLayout, setDisableAdaptiveLayout] = useState(Store.getDashboardDisableAdaptiveLayout());
+
+    const isUnmountedRef = useRef(false);
+    const fetchInProgressRef = useRef(false);
+    const dataRefreshTimerRef = useRef(null);
+    const prevOrderStringRef = useRef(order ? JSON.stringify(order) : null);
+    const fetchDataRef = useRef(null);
+    const reloadTagsRef = useRef(reloadTags);
+    reloadTagsRef.current = reloadTags;
+
+    useEffect(() => {
         document.title = "Ruuvi Station";
+    }, [params.id]);
 
-        const latestOrder = this.getOrder();
-        const currentOrder = this.state.order;
-
+    // Detect external localStorage order changes (e.g. from another tab)
+    useEffect(() => {
+        const latestOrder = getOrder();
         const latestOrderString = latestOrder ? JSON.stringify(latestOrder) : null;
-        const currentOrderString = currentOrder ? JSON.stringify(currentOrder) : null;
-        const previousOrderString = prevState.order ? JSON.stringify(prevState.order) : null;
+        const currentOrderString = order ? JSON.stringify(order) : null;
+        const previousOrderString = prevOrderStringRef.current;
+        prevOrderStringRef.current = currentOrderString;
 
         if (latestOrderString !== currentOrderString && latestOrderString !== previousOrderString) {
-            this.setState(prev => ({ ...prev, order: latestOrder ? [...latestOrder] : null }));
-            return;
+            setOrder(latestOrder ? [...latestOrder] : null);
+        }
+    }, [order]);
+
+    function getCurrentSensor() {
+        return sensors.find(x => x.sensor === params.id);
+    }
+
+    function updateFrom(v) {
+        setFrom(v);
+        Store.setDashboardFrom(v);
+    }
+
+    function updateOrder(newOrder) {
+        setOrder([...newOrder]);
+        try {
+            let settings = JSON.parse(localStorage.getItem("settings") || "{}");
+            settings["SENSOR_ORDER"] = JSON.stringify(newOrder);
+            localStorage.setItem("settings", JSON.stringify(settings));
+        } catch { /* ignore */ }
+        new NetworkApi().setSetting("SENSOR_ORDER", JSON.stringify(newOrder), b => {
+            if (b.result === "success") {
+                new NetworkApi().getSettings(settings => {
+                    if (settings.result === "success") {
+                        localStorage.setItem("settings", JSON.stringify(settings.data.settings));
+                        if (reloadTagsRef.current) reloadTagsRef.current();
+                    }
+                });
+            } else if (b.result === "error") {
+                notify.error(`UserApiError.${t(b.code)}`);
+            }
+        }, error => {
+            logger.error(error);
+            notify.error(t("something_went_wrong"));
+        });
+    }
+
+    function checkSensorOrder(currentSensors) {
+        const currentOrder = getOrder();
+        if (!currentOrder) return;
+        let orderCopy = JSON.parse(JSON.stringify(currentOrder));
+        const sensorIds = currentSensors.map(x => x.sensor);
+        for (let i = 0; i < sensorIds.length; i++) {
+            if (!orderCopy.includes(sensorIds[i])) {
+                orderCopy = [...orderCopy, sensorIds[i]];
+            }
+        }
+        if (orderCopy.length !== currentOrder.length) {
+            updateOrder(orderCopy);
         }
     }
-    componentWillUnmount() {
-        this._isUnmounted = true;
-        clearTimeout(this.dataRefreshTimer);
-    }
-    async fetchData() {
-        if (this._isUnmounted) return;
-        if (this._fetchInProgress) return;
 
-        this._fetchInProgress = true;
+    async function fetchData() {
+        if (isUnmountedRef.current) return;
+        if (fetchInProgressRef.current) return;
+
+        fetchInProgressRef.current = true;
         const api = new NetworkApi();
         let success = false;
         try {
             const resp = await api.getAllSensorsAsync(true);
-            if (!this._isUnmounted && resp.result === "success") {
+            if (!isUnmountedRef.current && resp.result === "success") {
                 success = true;
-                const sensors = resp.data.sensors;
-                if (!this._isUnmounted) {
-                    this.setState(prev => ({ ...prev, sensors, loading: false }), () => {
-                        localStorage.setItem("sensors", JSON.stringify(sensors));
-                        this.checkSensorOrder();
-                    });
+                const newSensors = resp.data.sensors;
+                if (!isUnmountedRef.current) {
+                    setSensors(newSensors);
+                    setLoading(false);
+                    localStorage.setItem("sensors", JSON.stringify(newSensors));
+                    checkSensorOrder(newSensors);
                 }
             }
         } catch (e) {
             logger.error("failed to load sensors", e);
         } finally {
-            this._fetchInProgress = false;
+            fetchInProgressRef.current = false;
         }
 
-        if (this._isUnmounted) return;
+        if (isUnmountedRef.current) return;
 
-        clearTimeout(this.dataRefreshTimer);
-        const delay = success ? 60_000 : 2_000; // 1 min normal refresh, 2s retry on failure
-        this.dataRefreshTimer = setTimeout(() => this.fetchData(), delay);
+        clearTimeout(dataRefreshTimerRef.current);
+        const delay = success ? 60_000 : 2_000;
+        dataRefreshTimerRef.current = setTimeout(() => fetchDataRef.current(), delay);
     }
-    updateFrom(v) {
-        this.setState({ ...this.state, from: v })
-        Store.setDashboardFrom(v)
-    }
-    componentDidMount() {
-        this._isUnmounted = false;
-        this._fetchInProgress = false;
-        this.fetchData();
-    }
-    nextIndex(direction) {
-        var current = this.getCurrentSensor().sensor;
-        var setNext = current;
-        let sensors = this.state.sensors.map(x => x.sensor)
-        let order = this.getOrder()
-        if (order) {
-            sensors = order
-        }
-        var indexOfCurrent = sensors.findIndex(x => x === current)
+    fetchDataRef.current = fetchData;
+
+    useEffect(() => {
+        isUnmountedRef.current = false;
+        fetchInProgressRef.current = false;
+        fetchDataRef.current();
+        return () => {
+            isUnmountedRef.current = true;
+            clearTimeout(dataRefreshTimerRef.current);
+        };
+    }, []);
+
+    function nextIndex(direction) {
+        const currentSensor = getCurrentSensor();
+        if (!currentSensor) return;
+        const current = currentSensor.sensor;
+        let setNext = current;
+        let sensorIds = sensors.map(x => x.sensor);
+        const currentOrder = getOrder();
+        if (currentOrder) sensorIds = currentOrder;
+        const indexOfCurrent = sensorIds.findIndex(x => x === current);
         if (indexOfCurrent === -1) return;
 
-        const existingSensorIds = new Set(this.state.sensors.map(x => x.sensor));
-        const sensorExists = (sensorId) => existingSensorIds.has(sensorId);
-
-        const sensorsCount = sensors.length;
+        const existingSensorIds = new Set(sensors.map(x => x.sensor));
+        const sensorsCount = sensorIds.length;
         for (let i = 1; i <= sensorsCount; i++) {
             let nextIdx;
             if (direction === 1) {
@@ -350,8 +407,8 @@ class Dashboard extends Component {
             } else {
                 nextIdx = (indexOfCurrent - i + sensorsCount) % sensorsCount;
             }
-            const candidateSensor = sensors[nextIdx];
-            if (sensorExists(candidateSensor)) {
+            const candidateSensor = sensorIds[nextIdx];
+            if (existingSensorIds.has(candidateSensor)) {
                 setNext = candidateSensor;
                 break;
             } else {
@@ -360,288 +417,229 @@ class Dashboard extends Component {
         }
 
         if (setNext !== current) {
-            this.props.navigate('/' + setNext + this.props.location.search)
+            navigate('/' + setNext + location.search);
         }
     }
-    removeSensor() {
-        var current = this.getCurrentSensor().sensor;
-        this.setState({ ...this.state, sensors: this.state.sensors.filter(x => x.sensor !== current) })
+
+    function removeSensor() {
+        const current = getCurrentSensor().sensor;
+        setSensors(prev => prev.filter(x => x.sensor !== current));
         localStorage.removeItem("sensors");
-        this.props.navigate('/')
-        this.props.reloadTags();
+        navigate('/');
+        reloadTagsRef.current();
     }
-    updateSensor(sensor) {
-        var idx = this.state.sensors.findIndex(x => x.sensor === sensor.sensor)
-        if (idx > -1) {
-            var sensors = this.state.sensors;
-            sensors[idx] = sensor
-            this.setState({ ...this.state, sensors: sensors })
-            localStorage.removeItem("sensors");
-        }
-        this.props.reloadTags()
-    }
-    addRuuviLink(text) {
-        var splitted = text.split("ruuvi.com")
-        if (splitted.length === 1) return text;
-        var out = [<span>{splitted[0]}</span>]
-        for (var i = 1; i < splitted.length; i++) {
-            out.push(<Link href="https://ruuvi.com" isExternal color="primary">ruuvi.com</Link>)
-            out.push(<span>{splitted[i]}</span>);
-        }
-        return out;
-    }
-    showModal(name) {
-        return this.props.showDialog === name
-    }
-    closeModal() {
-        this.props.closeDialog()
-    }
-    setDashboardViewType(type) {
-        this.setState({ ...this.state, cardType: type })
-        Store.setDashboardCardType(type)
-    }
-    setGraphType(type) {
-        this.setState({ ...this.state, graphType: type })
-    }
-    getSensors() {
-        if (this.state.search === "") return this.state.sensors
-        let sensors = [];
-        for (let i = 0; i < this.state.sensors.length; i++) {
-            let x = this.state.sensors[i]
-            let searchTerm = this.state.search.toLowerCase()
-            if (x.name.toLowerCase().indexOf(searchTerm) !== -1) {
-                sensors.push(x)
+
+    function updateSensor(sensor) {
+        setSensors(prev => {
+            const idx = prev.findIndex(x => x.sensor === sensor.sensor);
+            if (idx > -1) {
+                const next = [...prev];
+                next[idx] = sensor;
+                localStorage.removeItem("sensors");
+                return next;
             }
-        }
-        return sensors
+            return prev;
+        });
+        reloadTagsRef.current();
     }
-    shouldDurationBeDisabled() {
-        // Duration should be disabled when the current dashboard card does not show a graph.
-        // Graphs are shown for 'graph_view' and 'image_graph_view'. Enable duration only for those.
+
+    function setDashboardViewType(type) {
+        setCardTypeState(type);
+        Store.setDashboardCardType(type);
+    }
+
+    function getSensors() {
+        if (search === "") return sensors;
+        const searchTerm = search.toLowerCase();
+        return sensors.filter(x => x.name.toLowerCase().indexOf(searchTerm) !== -1);
+    }
+
+    function shouldDurationBeDisabled() {
         const graphCardTypes = ['graph_view', 'image_graph_view'];
-        return !graphCardTypes.includes(this.state.cardType);
+        return !graphCardTypes.includes(cardType);
     }
-    updateOrder(order) {
-        this.setState({ ...this.state, order: [...order] })
-        try {
-            let settings = JSON.parse(localStorage.getItem("settings") || "{}")
-            settings["SENSOR_ORDER"] = JSON.stringify(order)
-            localStorage.setItem("settings", JSON.stringify(settings))
-        } catch { /* ignore */ }
-        new NetworkApi().setSetting("SENSOR_ORDER", JSON.stringify(order), b => {
-            if (b.result === "success") {
-                //notify.success(this.props.t("successfully_saved"))
-                new NetworkApi().getSettings(settings => {
-                    if (settings.result === "success") {
-                        localStorage.setItem("settings", JSON.stringify(settings.data.settings))
-                        if (this.props.reloadTags) this.props.reloadTags()
+
+    function resetOrder(yes) {
+        setShowResetOrderConfirmation(false);
+        if (yes) updateOrder([]);
+    }
+
+    function removeSensorFromState(mac) {
+        setSensors(prev => prev.filter(x => x.sensor !== mac));
+    }
+
+    const currentSensor = getCurrentSensor();
+    if (params.id) SessionStore.setBackRoute(`/${params.id}`);
+    else SessionStore.setBackRoute("/");
+
+    const dropdowns = <>
+        <DashboardViewType value={cardType}
+            onChange={setDashboardViewType}
+            showResetOrder={getOrder() !== null}
+            resetOrder={() => setShowResetOrderConfirmation(true)}
+            adaptiveLayout={!disableAdaptiveLayout}
+            setAdaptiveLayout={() => {
+                setDisableAdaptiveLayout(prev => {
+                    const nextVal = !prev;
+                    Store.setDashboardDisableAdaptiveLayout(nextVal);
+                    return nextVal;
+                });
+            }}
+        />
+        <SensorTypePicker dashboard value={graphType} onChange={type => setGraphTypeState(type)} sensors={sensors} />
+        <DurationPicker value={from} onChange={v => updateFrom(v)} dashboard disabled={shouldDurationBeDisabled()} />
+    </>
+
+    const renderSearch = width => (
+        <InputGroup width={width}>
+            <InputRightElement className="buttonSideIcon" style={{ cursor: search ? "pointer" : undefined }} onClick={() => setSearch("")}>
+                {search ? <CloseIcon /> : <SearchIcon />}
+            </InputRightElement>
+            <Input placeholder={t("sensor_search_placeholder")}
+                className="searchInput"
+                borderRadius={5}
+                value={search}
+                onChange={e => {
+                    setSearch(e.target.value);
+                    if (e.target.value === "set_staging") {
+                        let staging = new NetworkApi().isStaging();
+                        if (staging) {
+                            if (window.confirm("Switch back to production environment?") === false) return;
+                            new NetworkApi().setEnv("production");
+                            window.location.reload();
+                        } else {
+                            if (window.confirm("Are you sure you want to switch to staging environment?") === false) return;
+                            new NetworkApi().setEnv("staging");
+                            window.location.reload();
+                        }
                     }
-                })
-            } else if (b.result === "error") {
-                notify.error(`UserApiError.${this.props.t(b.code)}`)
-            }
-        }, error => {
-            logger.error(error);
-            notify.error(this.props.t("something_went_wrong"))
-        })
-    }
-    checkSensorOrder() {
-        let order = JSON.parse(JSON.stringify(this.getOrder()))
-        if (order) {
-            let sensors = this.state.sensors.map(x => x.sensor)
-            for (let i = 0; i < sensors.length; i++) {
-                let found = false
-                for (let j = 0; j < order.length; j++) {
-                    if (sensors[i] === order[j]) found = true
-                }
-                if (!found) {
-                    order = [...order, sensors[i]]
-                }
-            }
-            if (order.length !== this.getOrder().length) {
-                this.updateOrder(order)
-            }
-        }
-    }
-    resetOrder(yes) {
-        this.setState({ ...this.state, showResetOrderConfirmation: false }, () => {
-            if (yes) this.updateOrder([])
-        })
-    }
-    removeSensorFromState(mac) {
-        this.setState({ ...this.state, sensors: this.state.sensors.filter(x => x.sensor !== mac) })
-    }
-    render() {
-        var { t } = this.props;
-        let order = this.state.order;
-        if (this.props.params.id) SessionStore.setBackRoute(`/${this.props.params.id}`)
-        else SessionStore.setBackRoute("/")
-        const dropdowns = <>
-            <DashboardViewType value={this.state.cardType}
-                onChange={this.setDashboardViewType.bind(this)}
-                showResetOrder={this.getOrder() !== null}
-                resetOrder={() => this.setState({ ...this.state, showResetOrderConfirmation: true })}
-                adaptiveLayout={!this.state.disableAdaptiveLayout}
-                setAdaptiveLayout={() => {
-                    this.setState(prev => {
-                        const nextVal = !prev.disableAdaptiveLayout
-                        Store.setDashboardDisableAdaptiveLayout(nextVal)
-                        return { disableAdaptiveLayout: nextVal }
-                    })
                 }}
             />
-            <SensorTypePicker dashboard value={this.state.graphType} onChange={type => this.setGraphType(type)} sensors={this.state.sensors} />
-            <DurationPicker value={this.state.from} onChange={v => this.updateFrom(v)} dashboard disabled={this.shouldDurationBeDisabled()} />
-        </>
-        const search = width => {
-            return <InputGroup width={width}>
-                <InputRightElement className="buttonSideIcon" style={{ cursor: this.state.search ? "pointer" : undefined }} onClick={() => this.setState({ ...this.state, search: "" })}>
-                    {this.state.search ? <CloseIcon /> : <SearchIcon />}
-                </InputRightElement>
-                <Input placeholder={t("sensor_search_placeholder")}
-                    className="searchInput"
-                    borderRadius={5}
-                    value={this.state.search}
-                    onChange={e => {
-                        this.setState({ ...this.state, search: e.target.value })
-                        if (e.target.value === "set_staging") {
-                            let staging = new NetworkApi().isStaging()
-                            if (staging) {
-                                if (window.confirm("Switch back to production environment?") === false) return
-                                new NetworkApi().setEnv("production")
-                                window.location.reload()
-                            } else {
-                                if (window.confirm("Are you sure you want to switch to staging environment?") === false) return
-                                new NetworkApi().setEnv("staging")
-                                window.location.reload()
-                            }
+        </InputGroup>
+    );
+
+    const sensorCard = (x, size, sensorsInSearch, columnCount) => {
+        if (!x) return null;
+        const hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined;
+        const isAdaptive = !disableAdaptiveLayout;
+        const wrapperStyle = isAdaptive
+            ? { maxWidth: "100%", display: hide ? "none" : undefined }
+            : { width: 640, maxWidth: "100%", display: hide ? "none" : "flex", flexDirection: "column" };
+        return <span className={isAdaptive ? "masonry-item" : undefined} key={x.sensor} style={wrapperStyle}>
+            <span
+                role="link"
+                onClick={() => navigate('/' + x.sensor)}
+                style={{ cursor: 'pointer', display: isAdaptive ? undefined : "block", height: isAdaptive ? undefined : "100%", flex: isAdaptive ? undefined : 1 }}
+            >
+                <SensorCard sensor={x}
+                    settingsVersion={settingsVersion}
+                    size={size}
+                    adaptiveLayout={!disableAdaptiveLayout}
+                    columnCount={columnCount}
+                    dataFrom={from}
+                    cardType={cardType}
+                    graphType={graphType}
+                    share={() => navigate('/shares?sensor=' + x.sensor)}
+                    rename={() => setRename(x)}
+                    remove={() => removeSensorFromState(x.sensor)}
+                    move={dir => {
+                        let currentOrder = order;
+                        if (!currentOrder) {
+                            currentOrder = sensors.map(y => y.sensor);
                         }
+
+                        let idx = currentOrder.findIndex(y => y === x.sensor);
+                        let toIdx = idx - dir;
+
+                        if (!currentOrder[toIdx]) return;
+
+                        const sensorExistsAtIndex = (targetIndex) => {
+                            return sensors.some(y => y.sensor === currentOrder[targetIndex]);
+                        };
+
+                        while (!sensorExistsAtIndex(toIdx)) {
+                            if (dir && toIdx === currentOrder.length - 1) return;
+                            if (!dir && toIdx === 0) return;
+                            toIdx = toIdx - dir;
+                        }
+
+                        const newOrder = [...currentOrder];
+                        const b = newOrder[idx];
+                        newOrder[idx] = newOrder[toIdx];
+                        newOrder[toIdx] = b;
+
+                        updateOrder(newOrder);
                     }}
                 />
-            </InputGroup>
-        }
-        const sensorCard = (x, size, sensorsInSearch, columnCount) => {
-            if (!x) return null;
-            let hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined
-            const isAdaptive = !this.state.disableAdaptiveLayout;
-            const wrapperStyle = isAdaptive
-                ? { maxWidth: "100%", display: hide ? "none" : undefined }
-                : { width: 640, maxWidth: "100%", display: hide ? "none" : "flex", flexDirection: "column" };
-            return <span className={isAdaptive ? "masonry-item" : undefined} key={x.sensor} style={wrapperStyle}>
-                <span
-                    role="link"
-                    onClick={() => this.props.navigate('/' + x.sensor)}
-                    style={{ cursor: 'pointer', display: isAdaptive ? undefined : "block", height: isAdaptive ? undefined : "100%", flex: isAdaptive ? undefined : 1 }}
-                >
-                    <SensorCard sensor={x}
-                        settingsVersion={this.props.settingsVersion}
-                        size={size}
-                        adaptiveLayout={!this.state.disableAdaptiveLayout}
-                        columnCount={columnCount}
-                        dataFrom={this.state.from}
-                        cardType={this.state.cardType}
-                        graphType={this.state.graphType}
-                        share={() => this.props.navigate('/shares?sensor=' + x.sensor)}
-                        rename={() => this.setState({ ...this.state, rename: x })}
-                        remove={() => this.removeSensorFromState(x.sensor)}
-                        move={dir => {
-                            if (!order) {
-                                order = this.state.sensors.map(y => y.sensor);
-                            }
-
-                            let idx = order.findIndex(y => y === x.sensor);
-                            let toIdx = idx - dir;
-
-                            if (!order[toIdx]) {
-                                return;
-                            }
-
-                            const sensorExistsAtIndex = (targetIndex) => {
-                                return this.state.sensors.some(y => y.sensor === order[targetIndex]);
-                            };
-
-                            while (!sensorExistsAtIndex(toIdx)) {
-                                if (dir && toIdx === order.length - 1) return
-                                if (!dir && toIdx === 0) return
-                                toIdx = toIdx - dir;
-                            }
-
-                            let b = order[idx];
-                            order[idx] = order[toIdx];
-                            order[toIdx] = b;
-
-                            this.updateOrder(order);
-                        }}
-                    />
-                </span>
             </span>
-        }
-        return (
-            <>
-                <Box>
+        </span>
+    };
+
+    return (
+        <>
+            <Box>
+                <Box backgroundSize="cover" backgroundPosition="top" >
                     <Box backgroundSize="cover" backgroundPosition="top" >
-                        <Box backgroundSize="cover" backgroundPosition="top" >
-                            {this.getCurrentSensor() ? (
-                                <Sensor key={this.getCurrentSensor().sensor} sensor={this.getCurrentSensor()}
-                                    close={() => this.props.navigate('/')}
-                                    next={() => this.nextIndex(1)}
-                                    prev={() => this.nextIndex(-1)}
-                                    remove={() => this.removeSensor()}
-                                    updateSensor={(sensor) => this.updateSensor(sensor)}
-                                />
-                            ) : (
-                                <Box paddingLeft={{ base: "10px", lg: "50px" }} paddingRight={{ base: "10px", lg: "50px" }}>
-                                    {this.state.sensors.length !== 0 &&
-                                        <div style={{ paddingTop: 26 }}>
-                                            <Flex flexFlow={"row wrap"} justifyContent={"flex-end"} gap={2}>
-                                                <Show breakpoint='(max-width: 799px)'>
-                                                    {search(undefined)}
-                                                </Show>
-                                                <Show breakpoint='(min-width: 800px)'>
-                                                    {search("300px")}
-                                                </Show>
-                                                {dropdowns}
-                                            </Flex>
-                                        </div>
-                                    }
-                                    <DashboardGrid showGraph={this.state.showGraph} order={this.getOrder()} sensors={this.state.sensors} currSize={this.state.currSize} onSizeChange={s => this.setState({ ...this.state, currSize: s })} disableAdaptiveLayout={this.state.disableAdaptiveLayout}>
-                                        {(size, columnCount) => {
-                                            let sensorsInSearch = this.getSensors()
-                                            if (order && order.length > 0) {
-                                                return <>
-                                                    {order.map(m => {
-                                                        return sensorCard(this.state.sensors.find(x => x.sensor === m), size, sensorsInSearch, columnCount)
-                                                    })}
-                                                </>
-                                            }
+                        {currentSensor ? (
+                            <Sensor key={currentSensor.sensor} sensor={currentSensor}
+                                close={() => navigate('/')}
+                                next={() => nextIndex(1)}
+                                prev={() => nextIndex(-1)}
+                                remove={() => removeSensor()}
+                                updateSensor={(sensor) => updateSensor(sensor)}
+                            />
+                        ) : (
+                            <Box paddingLeft={{ base: "10px", lg: "50px" }} paddingRight={{ base: "10px", lg: "50px" }}>
+                                {sensors.length !== 0 &&
+                                    <div style={{ paddingTop: 26 }}>
+                                        <Flex flexFlow={"row wrap"} justifyContent={"flex-end"} gap={2}>
+                                            <Show breakpoint='(max-width: 799px)'>
+                                                {renderSearch(undefined)}
+                                            </Show>
+                                            <Show breakpoint='(min-width: 800px)'>
+                                                {renderSearch("300px")}
+                                            </Show>
+                                            {dropdowns}
+                                        </Flex>
+                                    </div>
+                                }
+                                <DashboardGrid showGraph={undefined} order={getOrder()} sensors={sensors} currSize={currSize} onSizeChange={s => setCurrSize(s)} disableAdaptiveLayout={disableAdaptiveLayout}>
+                                    {(size, columnCount) => {
+                                        const sensorsInSearch = getSensors();
+                                        if (order && order.length > 0) {
                                             return <>
-                                                {this.state.sensors.map(x => {
-                                                    return sensorCard(x, size, sensorsInSearch, columnCount)
+                                                {order.map(m => {
+                                                    return sensorCard(sensors.find(x => x.sensor === m), size, sensorsInSearch, columnCount);
                                                 })}
                                             </>
-                                        }}
-                                    </DashboardGrid>
-                                </Box>
-                            )}
-                            {this.state.loading &&
-                                <center>
-                                    <Spinner size="xl" />
-                                </center>
-                            }
-                            {!this.state.loading && !this.state.sensors.length &&
-                                <center style={{ margin: 32, ...infoText }}>
-                                    {t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{this.addRuuviLink(x)}<br /></div>)}
-                                </center>
-                            }
-                        </Box>
+                                        }
+                                        return <>
+                                            {sensors.map(x => {
+                                                return sensorCard(x, size, sensorsInSearch, columnCount);
+                                            })}
+                                        </>
+                                    }}
+                                </DashboardGrid>
+                            </Box>
+                        )}
+                        {loading &&
+                            <center>
+                                <Spinner size="xl" />
+                            </center>
+                        }
+                        {!loading && !sensors.length &&
+                            <center style={{ margin: 32, ...infoText }}>
+                                {t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{addRuuviLink(x)}<br /></div>)}
+                            </center>
+                        }
                     </Box>
                 </Box>
-                <EditNameDialog open={this.state.rename} onClose={() => this.setState({ ...this.state, rename: null })} sensor={this.state.rename} updateSensor={(s) => this.updateSensor(s)} />
-                <ConfirmationDialog open={this.state.showResetOrderConfirmation} title="dialog_are_you_sure" description='reset_order_confirmation' onClose={(yes) => this.resetOrder(yes)} />
-                {!this.getCurrentSensor() && <ExtraPadding />}
-            </>
-        )
-    }
+            </Box>
+            <EditNameDialog open={rename} onClose={() => setRename(null)} sensor={rename} updateSensor={(s) => updateSensor(s)} />
+            <ConfirmationDialog open={showResetOrderConfirmation} title="dialog_are_you_sure" description='reset_order_confirmation' onClose={(yes) => resetOrder(yes)} />
+            {!currentSensor && <ExtraPadding />}
+        </>
+    );
 }
 
 function ExtraPadding() {

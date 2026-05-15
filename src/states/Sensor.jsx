@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import logger from "../utils/logger";
 import NetworkApi from '../NetworkApi'
 import {
@@ -183,18 +183,19 @@ function SensorValueGrid(props) {
 
 let alertDebouncer = {}
 
-class Sensor extends Component {
-    constructor(props) {
-        super(props)
-        const queryParams = new URLSearchParams(this.props.router.location.search);
+function Sensor(props) {
+    const { t, sensor, router } = props;
+
+    const getInitialGraphKey = () => {
+        const queryParams = new URLSearchParams(router.location.search);
         const graphKeyFromUrl = queryParams.get('key');
         const graphUnitKeyFromUrl = queryParams.get('unit');
 
         let initialGraphKey = "temperature";
         let initialGraphUnitKey = null;
-        let keys = this.getSensorMainFields();
+        const keys = getSensorMainFieldsFrom(sensor);
         if (keys.length > 0) {
-            let first = keys[0];
+            const first = keys[0];
             if (Array.isArray(first)) {
                 initialGraphKey = first[0];
                 initialGraphUnitKey = first[1];
@@ -208,404 +209,160 @@ class Sensor extends Component {
             graphUnitKey = getUnitSettingFor(graphKeyFromUrl || initialGraphKey);
         }
 
-        this.state = {
-            data: null,
-            loading: true,
+        return {
             graphKey: graphKeyFromUrl || initialGraphKey,
             graphUnitKey: graphUnitKeyFromUrl || graphUnitKey,
-            from: Store.getGraphFrom() || 24,
-            to: null,
-            table: "",
-            resolvedMode: "",
-            editName: false,
-            offsetDialog: null,
-            loadingImage: false,
-            updateGraphKey: 0,
-            graphPDFMode: false,
-            sensorVisibilityDialog: false,
-            notesDialog: false
-        }
-        this.isLoading = false;
-        this.applyAccordionSetting()
-        this.chartRef = React.createRef();
-    }
-    applyAccordionSetting() {
-        this.openAccodrions = Store.getOpenAccordions() || [0];
-    }
-    componentDidMount() {
-        const queryParams = new URLSearchParams(this.props.router.location.search);
-        const paramValue = queryParams.get('scrollTo');
-        if (paramValue) {
-            setTimeout(() => {
-                const targetElement = document.getElementById(paramValue);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop,
-                        behavior: 'smooth',
-                    });
-                }
-            }, 100)
-        }
-        else window.scrollTo(0, 0)
-        if (this.props.sensor) {
-            this.loadData(true)
-        }
-    }
-    componentWillUnmount() {
-        clearTimeout(this.latestDataUpdate);
-    }
-    componentDidUpdate(prevProps) {
-        document.title = "Ruuvi Sensor: " + this.props.sensor.name
-        if (this.props.sensor.sensor !== prevProps.sensor.sensor) {
-            this.applyAccordionSetting()
-            this.isLoading = false;
-            this.loadData(true, true)
-        }
-    }
-    getDataMode() {
-        return "mixed"
-    }
-    async loadData(showLoading, clearLast) {
-        if (this.props.sensor.subscription.maxHistoryDays === 0) {
-            this.isLoading = false;
-            return
-        }
-        if (this.isLoading) return
-        clearTimeout(this.latestDataUpdate);
-        this.latestDataUpdate = setTimeout(() => {
-            this.loadData()
-        }, 60 * 1000);
-        let newState = { ...this.state, loading: showLoading !== undefined, ...(showLoading ? { data: null } : {}) };
-        if (clearLast) {
-            newState.lastestDatapoint = null;
-        }
-        this.setState(newState)
-        try {
-            let dataMode = this.getDataMode();
-            var thisFrom = this.state.from;
-            var that = this;
-            async function load(until, initialLoad) {
-                that.isLoading = true;
-                var since = parseInt(((new Date().getTime()) / 1000) - 60 * 60 * that.state.from);
-                if (typeof (that.state.from) === "object") {
-                    since = that.state.from.getTime() / 1000
-                }
-                if (!until) {
-                    if (that.state.to) until = Math.floor(that.state.to.getTime() / 1000)
-                    else until = Math.floor(new Date().getTime() / 1000)
-                }
-                if (!initialLoad && that.state.data.measurements.length) since = that.state.data.measurements[0].timestamp + 1;
-                if (until <= since) {
-                    that.isLoading = false;
-                    return;
-                }
-                var resp = await new NetworkApi().getAsync(that.props.sensor.sensor, since, until, { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize });
-                that.isLoading = false;
-                // stop fetching data if sensor page has changed
-                if (that.state.from !== thisFrom) return;
-                if (resp.result === "success") {
-                    if (that.props.sensor.sensor !== resp.data.sensor) return;
-                    let returndDataLength = resp.data.measurements.length
-                    Object.keys(that.props.sensor).filter(x => x.startsWith("offset")).forEach(x => {
-                        resp.data[x] = that.props.sensor[x]
-                    })
-                    let d = parse(resp.data);
-                    var stateData = that.state.data;
-                    // no data
-                    if (!stateData && !d.nextUp && d.measurements.length === 0) {
-                        that.setState({ ...that.state, data: d, loading: false })
-                        return
-                    }
-                    // looks like timerange has changed, stop
-                    if (!d.measurements && d.measurements[d.measurements.length - 1].timestamp < since) return;
-                    if (!stateData) stateData = d;
-                    else if (initialLoad && stateData.measurements.length) {
-                        stateData.measurements = stateData.measurements.concat(d.measurements)
-                    }
-                    else {
-                        // data refresh, add new once to the beginning of the array
-                        stateData.measurements = [...d.measurements, ...stateData.measurements]
-                    }
-                    that.setState({ ...that.state, data: stateData, loading: false, table: d.table, resolvedMode: d.resolvedMode })
-                    if (initialLoad && (d.nextUp || d.fromCache || returndDataLength >= pjson.settings.dataFetchPaginationSize)) load(d.nextUp || d.measurements[d.measurements.length - 1].timestamp, initialLoad)
-                } else if (resp.result === "error") {
-                    notify.error(that.props.t(`UserApiError.${resp.code}`))
-                    that.setState({ ...that.state, loading: false })
-                }
-            }
-            load(null, this.state.data === null || showLoading, true)
-        } catch (e) {
-            notify.error(this.props.t("internet_connection_problem"))
-            logger.error("err", e)
-            this.setState({ ...this.state, loading: false })
-        }
-    }
-    getLatestReadingFromProps() {
-        var lastParsedReading = this.props.sensor.measurements.length === 1 ? this.props.sensor.measurements[0] : null
-        if (!lastParsedReading) return null;
-        return { ...lastParsedReading.parsed, timestamp: lastParsedReading.timestamp };
-    }
-    getLatestReading(kv) {
-        let ms = this.getLatestReadingFromProps()
-        if (!ms) return [];
-        if (!kv) return ms;
-        var objs = Object.keys(ms);
-        return objs.map(x => {
-            return { key: x, value: ms[x] }
-        })
-    }
-    getTimeSinceLastUpdate() {
-        if (!this.state.data || !this.state.data.measurements.length) return " - ";
-        var now = new Date().getTime() / 1000
-        var lastUpdate = this.state.data.measurements[0].timestamp
-        return Math.floor(((now - lastUpdate)))
-    }
-    updateStateVar(key, value) {
-        var state = this.state;
-        state[key] = value;
-        this.setState(this.state)
-    }
-    update() {
-        new NetworkApi().update(this.props.sensor.sensor, this.state.editName, _success => {
-            window.location.reload()
-        })
-    }
-    setGraphKey(key) {
-        let graphKey = key;
-        let unitKey = null;
-        if (Array.isArray(key)) {
-            graphKey = key[0];
-            unitKey = key[1];
-        }
-        const params = new URLSearchParams(this.props.router.location.search);
-        if (graphKey) {
-            params.set("key", graphKey);
-        } else {
-            params.delete("key");
-        }
-        if (!unitKey) {
-            unitKey = getUnitSettingFor(graphKey);
-        }
-        if (unitKey) {
-            params.set("unit", unitKey);
-        } else {
-            params.delete("unit");
-        }
-        this.props.router.navigate({ search: params.toString() }, { replace: true });
+        };
+    };
 
-        const currentKeyHasNoData = !this.state.data?.measurements?.some(
-            m => m.parsed && m.parsed[this.state.graphKey] !== undefined
-        );
+    const initial = getInitialGraphKey();
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [graphKey, setGraphKeyState] = useState(initial.graphKey);
+    const [graphUnitKey, setGraphUnitKey] = useState(initial.graphUnitKey);
+    const [from, setFrom] = useState(Store.getGraphFrom() || 24);
+    const [to, setTo] = useState(null);
+    const [editName, setEditName] = useState(false);
+    const [offsetDialog, setOffsetDialog] = useState(null);
+    const [loadingImage, setLoadingImage] = useState(false);
+    const [updateGraphKey, setUpdateGraphKey] = useState(0);
+    const [graphPDFMode, setGraphPDFMode] = useState(false);
+    const [sensorVisibilityDialog, setSensorVisibilityDialog] = useState(false);
+    const [notesDialog, setNotesDialog] = useState(false);
+    const [showRemoveSensor, setShowRemoveSensor] = useState(false);
 
-        this.setState({
-            ...this.state,
-            graphKey,
-            graphUnitKey: unitKey,
-            ...(currentKeyHasNoData ? { updateGraphKey: this.state.updateGraphKey + 1 } : {})
-        });
-    }
-    getAlert(type) {
-        if (!this.props.sensor) return null
-        if (type === "rssi") type = "signal"
-        var idx = this.props.sensor.alerts.findIndex(x => x.type === type)
-        if (idx !== -1) {
-            return this.props.sensor.alerts[idx]
-        }
-        return null
-    }
-    isAlertTriggerd(type) {
-        if (type === "movementCounter") type = "movement";
-        if (type === "rssi") type = "signal";
-        var alert = this.getAlert(type)
-        if (!alert) return false
-        return isAlerting(this.props.sensor, type)
-    }
-    isSharedSensor() {
-        var user = new NetworkApi().getUser().email
-        var owner = this.props.sensor.owner
-        return user !== owner;
-    }
-    remove() {
-        this.setState({ ...this.state, removeSensor: true })
-    }
-    updateFrom(v) {
-        this.isLoading = false
-        let state = this.state;
-        state.data = null
-        state.loading = false
-        if (typeof (v) === "object") {
-            state = { ...state, ...v }
-        } else {
-            state.from = v
-            state.to = null
-        }
-        this.setState(state, () => this.loadData(false))
-        Store.setGraphFrom(v)
-    }
-    getFrom() {
-        var since = new Date().getTime() - this.state.from * 60 * 60 * 1000;
-        if (typeof (this.state.from) === "object") {
-            since = this.state.from.getTime()
-        }
-        return since
-    }
-    getTo() {
-        if (this.state.to !== null) {
-            return this.state.to.getTime()
-        }
-        return new Date().getTime()
-    }
-    share() {
-        this.props.router.navigate(`/shares?sensor=${this.props.sensor.sensor}`)
-    }
-    editName(state) {
-        this.setState({ ...this.state, editName: state })
-    }
-    updateAlert(alert, prevEnabled) {
-        let prev = null;
-        if (alertDebouncer[alert.sensor + alert.type]) {
-            prev = JSON.parse(JSON.stringify(alertDebouncer[alert.sensor + alert.type]))
-        }
-        let ts = new Date().getTime()
-        alertDebouncer[alert.sensor + alert.type] = {
-            alert: alert,
-            prevEnabled: prevEnabled,
-            timestamp: ts
-        }
-        let executeAfter = 0
-        if (prev && prev.timestamp + 1000 > new Date().getTime()) {
-            executeAfter = 1000
-        }
-        setTimeout(() => {
-            if (alertDebouncer[alert.sensor + alert.type].timestamp !== ts) {
-                logger.log("newer alert debouncer, skipping")
-                return
-            }
-            var offToOn = alert.enabled;
-            let sensor = JSON.parse(JSON.stringify(this.props.sensor))
-            var alertIdx = sensor.alerts.findIndex(x => x.sensor === alert.sensor && x.type === alert.type)
-            if (alertIdx !== -1) {
-                offToOn = !prevEnabled && alert.enabled
-                sensor.alerts[alertIdx] = alert
-            } else {
-                sensor.alerts.push(alert)
-            }
-            this.props.updateSensor(sensor)
-            this.setState({ ...this.state, updateGraphKey: this.state.updateGraphKey + 1 })
-            new NetworkApi().setAlert({ ...alert, sensor: this.props.sensor.sensor }, resp => {
-                switch (resp.result) {
-                    case "success":
-                        notify.success(this.props.t(offToOn ? "alert_enabled" : "successfully_saved"))
-                        break
-                    case "error":
-                        notify.error(this.props.t(`UserApiError.${resp.code}`))
-                        break;
-                    default:
-                }
-            })
-        }, executeAfter)
-    }
-    export() {
-        exportCSV(this.state.data, this.props.sensor.name, this.props.t)
-    }
-    export_PDF() {
-        this.setState({ ...this.state, graphPDFMode: true });
-        let from = this.getFrom()
-        let to = this.state.to || new Date().getTime()
-        exportPDF(this.props.sensor, this.state.data, this.getGraphData(), this.state.graphKey, from, to, this.chartRef, this.props.t, () => {
-            this.setState({ ...this.state, graphPDFMode: false })
-        })
-    }
-    export_XLSX() {
-        exportXLSX(this.state.data, this.props.sensor.name, this.props.t)
-    }
-    setOpenAccordion(open) {
-        Store.setOpenAccordions(open)
-    }
-    getGraphData() {
-        if (!this.state.data?.measurements?.length) return []
-        let data = this.state.data.measurements;
-        if (this.getDataMode() === "dense") return data;
-        let latestDP = this.state.lastestDatapoint;
-        if (latestDP && latestDP.measurements.length) data.unshift(latestDP.measurements[0])
-        return data;
-    }
-    getSelectedUnit() {
-        if (this.state.graphKey === "measurementSequenceNumber") return "";
-        const uh = getUnitHelper(this.state.graphKey);
-        if (this.state.graphUnitKey && uh?.units) {
-            const uDef = uh.units.find(u => u.cloudStoreKey === this.state.graphUnitKey);
-            if (uDef) {
-                const translatedUnit = this.props.t(uDef.translationKey);
-                return translatedUnit ? `(${translatedUnit})` : "";
-            }
-        }
-        let unit = uh.unit;
-        if (!unit || unit === "") return "";
-        return <>({unit})</>
-    }
-    sensorHasData() {
-        return this.getLatestReadingFromProps() !== null
-    }
-    getSensorMainFields() {
+    // Refs for values accessed inside async functions to avoid stale closures
+    const dataRef = useRef(null);
+    dataRef.current = data;
+    const fromRef = useRef(from);
+    fromRef.current = from;
+    const toRef = useRef(to);
+    toRef.current = to;
+    const propsRef = useRef(props);
+    propsRef.current = props;
+
+    const isLoadingRef = useRef(false);
+    const openAccordionsRef = useRef(Store.getOpenAccordions() || [0]);
+    const chartRef = useRef(null);
+    const latestDataUpdateRef = useRef(null);
+    const loadDataRef = useRef(null);
+
+    function getSensorMainFieldsFrom(sensorProp) {
         let mainSensorFields = [];
-        let visibleTypes// = Store.getPerSensorVisibleTypes(this.props.sensor.sensor);
-        let readings = this.getLatestReadingFromProps();
+        let visibleTypes;
+        const readings = getLatestReadingFromProps(sensorProp);
 
         if (readings) {
-
-            let settings = this.props.sensor.settings;
+            const settings = sensorProp.settings;
             if (settings?.defaultDisplayOrder === "true") {
                 visibleTypes = DEFAULT_VISIBLE_SENSOR_TYPES;
             } else if (settings?.displayOrder && settings.displayOrder.length > 0) {
                 try {
-                    let webTypes = []
-                    let cTypes = JSON.parse(settings.displayOrder);
+                    let webTypes = [];
+                    const cTypes = JSON.parse(settings.displayOrder);
                     for (const cType of cTypes) {
-                        let webType = this.convertToWebSensorType(cType);
-                        if (webType) {
-                            webTypes.push(webType);
-                        }
+                        const webType = visibilityFromCloudToWeb(cType);
+                        if (webType) webTypes.push(webType);
                     }
-                    if (webTypes.length === 0) {
-                        webTypes = DEFAULT_VISIBLE_SENSOR_TYPES;
-                    }
+                    if (webTypes.length === 0) webTypes = DEFAULT_VISIBLE_SENSOR_TYPES;
                     visibleTypes = webTypes;
                 } catch (e) {
                     logger.warn("Failed to parse displayOrder, using default", e);
                     visibleTypes = DEFAULT_VISIBLE_SENSOR_TYPES;
                 }
             }
-            const allReadingKeys = Object.keys(readings);
 
+            const allReadingKeys = Object.keys(readings);
             const effectiveVisibleTypes = visibleTypes && visibleTypes.length > 0
                 ? visibleTypes
                 : DEFAULT_VISIBLE_SENSOR_TYPES;
 
             mainSensorFields = effectiveVisibleTypes.filter(type => {
-                let name = type;
-                if (Array.isArray(type)) {
-                    name = type[0];
-                }
+                const name = Array.isArray(type) ? type[0] : type;
                 return allReadingKeys.includes(name) && getUnitHelper(name).graphable;
             });
         }
         return mainSensorFields;
     }
-    convertToWebSensorType(sensorType) {
-        return visibilityFromCloudToWeb(sensorType);
+
+    function getLatestReadingFromProps(sensorProp) {
+        const s = sensorProp || sensor;
+        const lastParsedReading = s.measurements.length === 1 ? s.measurements[0] : null;
+        if (!lastParsedReading) return null;
+        return { ...lastParsedReading.parsed, timestamp: lastParsedReading.timestamp };
     }
-    getVisibleFieldType(field) {
+
+    function getLatestReading(kv) {
+        const ms = getLatestReadingFromProps();
+        if (!ms) return [];
+        if (!kv) return ms;
+        return Object.keys(ms).map(x => ({ key: x, value: ms[x] }));
+    }
+
+    function getSensorMainFields() {
+        return getSensorMainFieldsFrom(sensor);
+    }
+
+    function getVisibleFieldType(field) {
         return Array.isArray(field) ? field[0] : field;
     }
-    getVisibleFieldUnit(field) {
+
+    function getVisibleFieldUnit(field) {
         if (Array.isArray(field)) return field[1] ?? null;
         if (["temperature", "humidity", "pressure", "voc"].includes(field)) {
             return getUnitSettingFor(field);
         }
         return null;
     }
-    getAlertVisibleFieldIndex(type, visibleFields) {
+
+    function getAlert(type) {
+        if (!sensor) return null;
+        if (type === "rssi") type = "signal";
+        const idx = sensor.alerts.findIndex(x => x.type === type);
+        if (idx !== -1) return sensor.alerts[idx];
+        return null;
+    }
+
+    function isAlertTriggerd(type) {
+        if (type === "movementCounter") type = "movement";
+        if (type === "rssi") type = "signal";
+        const alert = getAlert(type);
+        if (!alert) return false;
+        return isAlerting(sensor, type);
+    }
+
+    function isSharedSensor() {
+        const user = new NetworkApi().getUser().email;
+        return user !== sensor.owner;
+    }
+
+    function sensorHasData() {
+        return getLatestReadingFromProps() !== null;
+    }
+
+    function getGraphData() {
+        if (!dataRef.current?.measurements?.length) return [];
+        return dataRef.current.measurements;
+    }
+
+    function getSelectedUnit(currentGraphKey, currentGraphUnitKey) {
+        const gKey = currentGraphKey ?? graphKey;
+        const gUnitKey = currentGraphUnitKey ?? graphUnitKey;
+        if (gKey === "measurementSequenceNumber") return "";
+        const uh = getUnitHelper(gKey);
+        if (gUnitKey && uh?.units) {
+            const uDef = uh.units.find(u => u.cloudStoreKey === gUnitKey);
+            if (uDef) {
+                const translatedUnit = t(uDef.translationKey);
+                return translatedUnit ? `(${translatedUnit})` : "";
+            }
+        }
+        const unit = uh.unit;
+        if (!unit || unit === "") return "";
+        return <>({unit})</>
+    }
+
+    function getAlertVisibleFieldIndex(type, visibleFields) {
         if (!visibleFields?.length) return -1;
 
         const dataKey = getMappedAlertDataType(type);
@@ -642,586 +399,772 @@ class Sensor extends Component {
         }
 
         let orderIndex = visibleFields.findIndex(field => {
-            if (this.getVisibleFieldType(field) !== dataKey) return false;
+            if (getVisibleFieldType(field) !== dataKey) return false;
             if (preferredUnit === null) return true;
-            return this.getVisibleFieldUnit(field) === preferredUnit;
+            return getVisibleFieldUnit(field) === preferredUnit;
         });
 
         if (orderIndex !== -1) return orderIndex;
         if (strictUnitMatch) return -1;
 
-        orderIndex = visibleFields.findIndex(field => this.getVisibleFieldType(field) === dataKey);
+        orderIndex = visibleFields.findIndex(field => getVisibleFieldType(field) === dataKey);
         if (orderIndex !== -1) return orderIndex;
 
         if (fallbackMatcher) {
-            return visibleFields.findIndex(field => fallbackMatcher(this.getVisibleFieldType(field)));
+            return visibleFields.findIndex(field => fallbackMatcher(getVisibleFieldType(field)));
         }
 
         return -1;
     }
-    getAlertTypesOrdered(baseTypes, visibleFields) {
+
+    function getAlertTypesOrdered(baseTypes, visibleFields) {
         if (!visibleFields?.length) return baseTypes;
         const baseOrder = new Map();
         baseTypes.forEach((type, index) => baseOrder.set(type, index));
         const fallbackIndex = Number.MAX_SAFE_INTEGER;
         const typeOrder = new Map();
         baseTypes.forEach(type => {
-            const orderIndex = this.getAlertVisibleFieldIndex(type, visibleFields);
+            const orderIndex = getAlertVisibleFieldIndex(type, visibleFields);
             typeOrder.set(type, orderIndex === -1 ? fallbackIndex : orderIndex);
         });
         return [...baseTypes].sort((a, b) => {
             const aIdx = typeOrder.get(a);
             const bIdx = typeOrder.get(b);
-            if (aIdx === bIdx) {
-                return baseOrder.get(a) - baseOrder.get(b);
-            }
+            if (aIdx === bIdx) return baseOrder.get(a) - baseOrder.get(b);
             return aIdx - bIdx;
         });
     }
-    render() {
-        var { t } = this.props
-        let lastReading = this.getLatestReading()
-        let sensorSubscription = this.props.sensor?.subscription
-        let freeMode = this.props.sensor?.subscription.maxHistoryDays === 0
-        let noHistoryStrKey = "no_data_in_range"
-        if (this.props.sensor?.subscription.maxHistoryDays === 0) noHistoryStrKey = "no_data_free_mode"
-        let noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>)
 
-        let tnpGetAlert = (x) => {
-            let dataKey = x === "movement" ? "movementCounter" : x === "signal" ? "rssi" : x;
-            if (this.getLatestReading()[dataKey] === undefined) return null;
-            return this.getAlert(x)
+    function getFrom() {
+        let since = new Date().getTime() - from * 60 * 60 * 1000;
+        if (typeof from === "object") since = from.getTime();
+        return since;
+    }
+
+    function getTo() {
+        if (to !== null) return to.getTime();
+        return new Date().getTime();
+    }
+
+    async function loadData(showLoading, _clearLast) {
+        const currentSensor = propsRef.current.sensor;
+        if (currentSensor.subscription.maxHistoryDays === 0) {
+            isLoadingRef.current = false;
+            return;
+        }
+        if (isLoadingRef.current) return;
+
+        clearTimeout(latestDataUpdateRef.current);
+        latestDataUpdateRef.current = setTimeout(() => loadDataRef.current(), 60 * 1000);
+
+        if (showLoading !== undefined) setLoading(true);
+        if (showLoading) {
+            dataRef.current = null;
+            setData(null);
         }
 
-        let graphCtrl = () => {
-            return <>
-                <ZoomInfo />
-                <ExportMenu buttonText={uppercaseFirst(t("export"))} enablePDF={sensorSubscription.pdfExportAllowed} onClick={val => {
-                    switch (val) {
-                        case "XLSX":
-                            this.export_XLSX()
-                            break
-                        case "PDF":
-                            this.export_PDF()
-                            break
-                        default:
-                            this.export()
-                    }
-                }} />
-                <DurationPicker value={this.state.from} showMaxHours={this.props.sensor.subscription.maxHistoryDays * 24} onChange={v => this.updateFrom(v)} />
-            </>
-        }
+        try {
+            const dataMode = "mixed";
+            const thisFrom = fromRef.current;
 
-        let graphTitle = (mobile) => {
-            const uh = getUnitHelper(this.state.graphKey);
-            let mainLabel = uh ? t(uh.label) : "";
-            let unitPart = this.getSelectedUnit();
+            async function load(until, initialLoad) {
+                isLoadingRef.current = true;
 
-            if (this.state.graphUnitKey && uh?.units) {
-                const uDef = uh.units.find(u => u.cloudStoreKey === this.state.graphUnitKey);
-                if (uDef) {
-                    const uhWithUnit = getUnitHelper(this.state.graphKey, false, this.state.graphUnitKey);
-                    if (uhWithUnit && uhWithUnit.label) {
-                        mainLabel = t(uhWithUnit.label);
+                let since = parseInt((new Date().getTime() / 1000) - 60 * 60 * fromRef.current);
+                if (typeof fromRef.current === "object") {
+                    since = fromRef.current.getTime() / 1000;
+                }
+
+                if (!until) {
+                    if (toRef.current) until = Math.floor(toRef.current.getTime() / 1000);
+                    else until = Math.floor(new Date().getTime() / 1000);
+                }
+
+                if (!initialLoad && dataRef.current?.measurements?.length) {
+                    since = dataRef.current.measurements[0].timestamp + 1;
+                }
+
+                if (until <= since) {
+                    isLoadingRef.current = false;
+                    return;
+                }
+
+                const resp = await new NetworkApi().getAsync(
+                    currentSensor.sensor, since, until,
+                    { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize }
+                );
+                isLoadingRef.current = false;
+
+                // stop fetching if time range has changed
+                if (fromRef.current !== thisFrom) return;
+
+                if (resp.result === "success") {
+                    if (currentSensor.sensor !== resp.data.sensor) return;
+                    const returnedDataLength = resp.data.measurements.length;
+
+                    Object.keys(currentSensor).filter(x => x.startsWith("offset")).forEach(x => {
+                        resp.data[x] = currentSensor[x];
+                    });
+
+                    let d = parse(resp.data);
+                    let stateData = dataRef.current;
+
+                    if (!stateData && !d.nextUp && d.measurements.length === 0) {
+                        dataRef.current = d;
+                        setData(d);
+                        setLoading(false);
+                        return;
                     }
-                    unitPart = uhWithUnit.unit ? <>({uhWithUnit.unit})</> : "";
+
+                    // guard from original (preserves existing behavior)
+                    if (!d.measurements && d.measurements[d.measurements.length - 1].timestamp < since) return;
+
+                    let newData;
+                    if (!stateData) {
+                        newData = d;
+                    } else if (initialLoad && stateData.measurements.length) {
+                        newData = { ...stateData, measurements: [...stateData.measurements, ...d.measurements] };
+                    } else {
+                        newData = { ...stateData, measurements: [...d.measurements, ...stateData.measurements] };
+                    }
+
+                    dataRef.current = newData;
+                    setData(newData);
+                    setLoading(false);
+
+                    if (initialLoad && (d.nextUp || d.fromCache || returnedDataLength >= pjson.settings.dataFetchPaginationSize)) {
+                        load(d.nextUp || d.measurements[d.measurements.length - 1].timestamp, initialLoad);
+                    }
+                } else if (resp.result === "error") {
+                    notify.error(propsRef.current.t(`UserApiError.${resp.code}`));
+                    setLoading(false);
                 }
             }
 
-            return <div style={{ marginLeft: 30 }}>
-                <span className="graphLengthText" style={{ fontSize: mobile ? "20px" : "24px" }}>
-                    {mainLabel}
-                </span>
-                {!mobile && <br />}
-                <span className="graphInfo" style={{ marginLeft: mobile ? 6 : undefined }}>
-                    {unitPart}
-                </span>
-            </div>
+            load(null, dataRef.current === null || showLoading);
+        } catch (e) {
+            notify.error(propsRef.current.t("internet_connection_problem"));
+            logger.error("err", e);
+            setLoading(false);
+        }
+    }
+    loadDataRef.current = loadData;
+
+    // componentDidMount — intentionally only runs on mount
+    useEffect(() => {
+        const queryParams = new URLSearchParams(router.location.search);
+        const paramValue = queryParams.get('scrollTo');
+        if (paramValue) {
+            setTimeout(() => {
+                const targetElement = document.getElementById(paramValue);
+                if (targetElement) {
+                    window.scrollTo({ top: targetElement.offsetTop, behavior: 'smooth' });
+                }
+            }, 100);
+        } else {
+            window.scrollTo(0, 0);
         }
 
-        let mainSensorFields = this.getSensorMainFields();
-        const baseAlertTypes = ["temperature", "humidity", "humidityAbsolute", "dewPoint", "pressure", "signal", "movement", "offline", "battery", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
-        const orderedAlertTypes = this.getAlertTypesOrdered(baseAlertTypes, mainSensorFields);
-        return (
-            <Box>
-                <Box minHeight={1500}>
-                    <Box overflow="hidden" pt={{ base: "5px", md: "35px" }} backgroundPosition="center" paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
-                        <SensorHeader {...this.props} lastUpdateTime={lastReading ? lastReading.timestamp : " - "} editName={() => this.updateStateVar("editName", this.state.editName ? null : this.props.sensor.name)}
-                            isAlertTriggerd={this.isAlertTriggerd.bind(this)}
-                            loadingImage={this.state.loadingImage}
-                            fileUploadChange={f => {
-                                this.setState({ ...this.state, loadingImage: true })
-                                uploadBackgroundImage(this.props.sensor, f, t, _res => {
-                                    this.setState({ ...this.state, loadingImage: false })
-                                })
-                            }}
-                        />
-                        <div>
-                            <SensorValueGrid>
-                                {mainSensorFields.map(field => {
-                                    let sensorType = field;
-                                    let unitKey = null;
-                                    if (Array.isArray(field)) {
-                                        sensorType = field[0];
-                                        unitKey = field[1];
-                                    }
-                                    const latest = this.getLatestReading();
-                                    if (!latest) return null;
-                                    const unitHelper = getUnitHelper(sensorType);
-                                    if (!unitHelper) return null;
-                                    let rawValue = latest[sensorType];
-                                    if (rawValue === undefined) return null;
-                                    let unitDisplay = unitHelper.unit;
-                                    let label = unitHelper.shortLabel || unitHelper.label;
-                                    let infoLabel = unitHelper.infoLabel;
-                                    let showValue;
-                                    if (unitKey && unitHelper.valueWithUnit) {
-                                        showValue = localeNumber(
-                                            unitHelper.valueWithUnit(
-                                                rawValue,
-                                                unitKey,
-                                                latest["temperature"]
-                                            ),
-                                            unitHelper.decimals
-                                        );
-                                        const uDef = unitHelper.units?.find(u => u.cloudStoreKey === unitKey);
-                                        if (uDef?.translationKey) unitDisplay = uDef.translationKey;
-                                        if (uDef?.infoLabel) infoLabel = uDef.infoLabel;
-                                        let uhWithUnit = getUnitHelper(sensorType, false, unitKey);
-                                        if (uhWithUnit) {
-                                            showValue = localeNumber(
-                                                uhWithUnit.valueWithUnit(
-                                                    rawValue,
-                                                    unitKey,
-                                                    latest["temperature"]
-                                                ),
-                                                uhWithUnit.decimals
-                                            );
-                                            unitDisplay = uhWithUnit.unit;
-                                            label = uhWithUnit.shortLabel || unitHelper.shortLabel || uhWithUnit.label;
-                                        }
+        if (sensor) loadDataRef.current(true);
+
+        return () => {
+            clearTimeout(latestDataUpdateRef.current);
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // componentDidUpdate: sensor change detection
+    useEffect(() => {
+        openAccordionsRef.current = Store.getOpenAccordions() || [0];
+        isLoadingRef.current = false;
+        loadDataRef.current(true, true);
+    }, [sensor.sensor]);
+
+    // document title
+    useEffect(() => {
+        document.title = "Ruuvi Sensor: " + sensor.name;
+    }, [sensor.name]);
+
+    function setGraphKey(key) {
+        let newGraphKey = key;
+        let unitKey = null;
+        if (Array.isArray(key)) {
+            newGraphKey = key[0];
+            unitKey = key[1];
+        }
+        const params = new URLSearchParams(router.location.search);
+        if (newGraphKey) params.set("key", newGraphKey);
+        else params.delete("key");
+
+        if (!unitKey) unitKey = getUnitSettingFor(newGraphKey);
+        if (unitKey) params.set("unit", unitKey);
+        else params.delete("unit");
+
+        router.navigate({ search: params.toString() }, { replace: true });
+
+        const currentKeyHasNoData = !dataRef.current?.measurements?.some(
+            m => m.parsed && m.parsed[graphKey] !== undefined
+        );
+
+        setGraphKeyState(newGraphKey);
+        setGraphUnitKey(unitKey);
+        if (currentKeyHasNoData) setUpdateGraphKey(prev => prev + 1);
+    }
+
+    function updateFrom(v) {
+        isLoadingRef.current = false;
+        dataRef.current = null;
+
+        if (typeof v === "object") {
+            if (v.from !== undefined) { fromRef.current = v.from; setFrom(v.from); }
+            if (v.to !== undefined) { toRef.current = v.to; setTo(v.to); }
+        } else {
+            fromRef.current = v;
+            toRef.current = null;
+            setFrom(v);
+            setTo(null);
+        }
+        setData(null);
+        Store.setGraphFrom(v);
+        loadDataRef.current(false);
+    }
+
+    function updateAlert(alert, prevEnabled) {
+        let prev = null;
+        if (alertDebouncer[alert.sensor + alert.type]) {
+            prev = JSON.parse(JSON.stringify(alertDebouncer[alert.sensor + alert.type]));
+        }
+        const ts = new Date().getTime();
+        alertDebouncer[alert.sensor + alert.type] = { alert, prevEnabled, timestamp: ts };
+        let executeAfter = 0;
+        if (prev && prev.timestamp + 1000 > new Date().getTime()) executeAfter = 1000;
+
+        setTimeout(() => {
+            if (alertDebouncer[alert.sensor + alert.type].timestamp !== ts) {
+                logger.log("newer alert debouncer, skipping");
+                return;
+            }
+            var offToOn = alert.enabled;
+            const updatedSensor = JSON.parse(JSON.stringify(propsRef.current.sensor));
+            const alertIdx = updatedSensor.alerts.findIndex(x => x.sensor === alert.sensor && x.type === alert.type);
+            if (alertIdx !== -1) {
+                offToOn = !prevEnabled && alert.enabled;
+                updatedSensor.alerts[alertIdx] = alert;
+            } else {
+                updatedSensor.alerts.push(alert);
+            }
+            propsRef.current.updateSensor(updatedSensor);
+            setUpdateGraphKey(prev => prev + 1);
+            new NetworkApi().setAlert({ ...alert, sensor: propsRef.current.sensor.sensor }, resp => {
+                switch (resp.result) {
+                    case "success":
+                        notify.success(propsRef.current.t(offToOn ? "alert_enabled" : "successfully_saved"));
+                        break;
+                    case "error":
+                        notify.error(propsRef.current.t(`UserApiError.${resp.code}`));
+                        break;
+                    default:
+                }
+            });
+        }, executeAfter);
+    }
+
+    function exportCSVHandler() {
+        exportCSV(dataRef.current, sensor.name, t);
+    }
+
+    function exportPDFHandler() {
+        setGraphPDFMode(true);
+        const fromTime = getFrom();
+        const toTime = to || new Date().getTime();
+        exportPDF(sensor, dataRef.current, getGraphData(), graphKey, fromTime, toTime, chartRef.current, t, () => {
+            setGraphPDFMode(false);
+        });
+    }
+
+    function exportXLSXHandler() {
+        exportXLSX(dataRef.current, sensor.name, t);
+    }
+
+    const lastReading = getLatestReading();
+    const sensorSubscription = sensor?.subscription;
+    const freeMode = sensor?.subscription.maxHistoryDays === 0;
+    const noHistoryStrKey = freeMode ? "no_data_free_mode" : "no_data_in_range";
+    const noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>);
+
+    const tnpGetAlert = (x) => {
+        const dataKey = x === "movement" ? "movementCounter" : x === "signal" ? "rssi" : x;
+        if (getLatestReading()[dataKey] === undefined) return null;
+        return getAlert(x);
+    };
+
+    const graphCtrl = () => (
+        <>
+            <ZoomInfo />
+            <ExportMenu buttonText={uppercaseFirst(t("export"))} enablePDF={sensorSubscription.pdfExportAllowed} onClick={val => {
+                switch (val) {
+                    case "XLSX": exportXLSXHandler(); break;
+                    case "PDF": exportPDFHandler(); break;
+                    default: exportCSVHandler();
+                }
+            }} />
+            <DurationPicker value={from} showMaxHours={sensor.subscription.maxHistoryDays * 24} onChange={v => updateFrom(v)} />
+        </>
+    );
+
+    const graphTitle = (mobile) => {
+        const uh = getUnitHelper(graphKey);
+        let mainLabel = uh ? t(uh.label) : "";
+        let unitPart = getSelectedUnit();
+
+        if (graphUnitKey && uh?.units) {
+            const uDef = uh.units.find(u => u.cloudStoreKey === graphUnitKey);
+            if (uDef) {
+                const uhWithUnit = getUnitHelper(graphKey, false, graphUnitKey);
+                if (uhWithUnit && uhWithUnit.label) mainLabel = t(uhWithUnit.label);
+                unitPart = uhWithUnit.unit ? <>({uhWithUnit.unit})</> : "";
+            }
+        }
+
+        return <div style={{ marginLeft: 30 }}>
+            <span className="graphLengthText" style={{ fontSize: mobile ? "20px" : "24px" }}>{mainLabel}</span>
+            {!mobile && <br />}
+            <span className="graphInfo" style={{ marginLeft: mobile ? 6 : undefined }}>{unitPart}</span>
+        </div>;
+    };
+
+    const mainSensorFields = getSensorMainFields();
+    const baseAlertTypes = ["temperature", "humidity", "humidityAbsolute", "dewPoint", "pressure", "signal", "movement", "offline", "battery", "aqi", "co2", "voc", "nox", "pm10", "pm25", "pm40", "pm100", "luminosity", "sound"];
+    const orderedAlertTypes = getAlertTypesOrdered(baseAlertTypes, mainSensorFields);
+
+    return (
+        <Box>
+            <Box minHeight={1500}>
+                <Box overflow="hidden" pt={{ base: "5px", md: "35px" }} backgroundPosition="center" paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
+                    <SensorHeader {...props} lastUpdateTime={lastReading ? lastReading.timestamp : " - "} editName={() => setEditName(editName ? false : sensor.name)}
+                        isAlertTriggerd={isAlertTriggerd}
+                        loadingImage={loadingImage}
+                        fileUploadChange={f => {
+                            setLoadingImage(true);
+                            uploadBackgroundImage(sensor, f, t, _res => {
+                                setLoadingImage(false);
+                            });
+                        }}
+                    />
+                    <div>
+                        <SensorValueGrid>
+                            {mainSensorFields.map(field => {
+                                let sensorType = field;
+                                let unitKey = null;
+                                if (Array.isArray(field)) {
+                                    sensorType = field[0];
+                                    unitKey = field[1];
+                                }
+                                const latest = getLatestReading();
+                                if (!latest) return null;
+                                const unitHelper = getUnitHelper(sensorType);
+                                if (!unitHelper) return null;
+                                const rawValue = latest[sensorType];
+                                if (rawValue === undefined) return null;
+                                let unitDisplay = unitHelper.unit;
+                                let label = unitHelper.shortLabel || unitHelper.label;
+                                let infoLabel = unitHelper.infoLabel;
+                                let showValue;
+                                if (unitKey && unitHelper.valueWithUnit) {
+                                    const uDef = unitHelper.units?.find(u => u.cloudStoreKey === unitKey);
+                                    if (uDef?.translationKey) unitDisplay = uDef.translationKey;
+                                    if (uDef?.infoLabel) infoLabel = uDef.infoLabel;
+                                    const uhWithUnit = getUnitHelper(sensorType, false, unitKey);
+                                    if (uhWithUnit) {
+                                        showValue = localeNumber(uhWithUnit.valueWithUnit(rawValue, unitKey, latest["temperature"]), uhWithUnit.decimals);
+                                        unitDisplay = uhWithUnit.unit;
+                                        label = uhWithUnit.shortLabel || unitHelper.shortLabel || uhWithUnit.label;
                                     } else {
-                                        showValue = localeNumber(
-                                            unitHelper.value(
-                                                rawValue,
-                                                sensorType === "humidity" ? latest["temperature"] : undefined
-                                            ),
-                                            unitHelper.decimals
-                                        );
+                                        showValue = localeNumber(unitHelper.valueWithUnit(rawValue, unitKey, latest["temperature"]), unitHelper.decimals);
                                     }
-                                    const selected = this.state.graphKey === sensorType && (
-                                        (this.state.graphUnitKey || null) === (unitKey || null) ||
-                                        (!unitKey && this.state.graphUnitKey === getUnitSettingFor(sensorType))
+                                } else {
+                                    showValue = localeNumber(
+                                        unitHelper.value(rawValue, sensorType === "humidity" ? latest["temperature"] : undefined),
+                                        unitHelper.decimals
                                     );
+                                }
+                                const selected = graphKey === sensorType && (
+                                    (graphUnitKey || null) === (unitKey || null) ||
+                                    (!unitKey && graphUnitKey === getUnitSettingFor(sensorType))
+                                );
 
-                                    return (
-                                        <SensorReading
-                                            key={sensorType + (unitKey || "")}
-                                            value={showValue || "-"}
-                                            info={sensorType !== "battery" ? undefined :
-                                                isBatteryLow(rawValue, latest.temperature) ?
-                                                    "replace_battery" : "battery_ok"
-                                            }
-                                            alertTriggered={this.isAlertTriggerd(sensorType)}
-                                            label={label}
-                                            infoLabel={infoLabel}
-                                            sensorType={sensorType}
-                                            unit={unitDisplay}
-                                            selected={selected}
-                                            onClick={() => this.setGraphKey([sensorType, unitKey])}
-                                        />
-                                    );
-                                })}
-                            </SensorValueGrid>
+                                return (
+                                    <SensorReading
+                                        key={sensorType + (unitKey || "")}
+                                        value={showValue || "-"}
+                                        info={sensorType !== "battery" ? undefined :
+                                            isBatteryLow(rawValue, latest.temperature) ? "replace_battery" : "battery_ok"
+                                        }
+                                        alertTriggered={isAlertTriggerd(sensorType)}
+                                        label={label}
+                                        infoLabel={infoLabel}
+                                        sensorType={sensorType}
+                                        unit={unitDisplay}
+                                        selected={selected}
+                                        onClick={() => setGraphKey([sensorType, unitKey])}
+                                    />
+                                );
+                            })}
+                        </SensorValueGrid>
 
-                            {this.props.sensor.subscription.maxHistoryDays !== 0 &&
+                        {sensor.subscription.maxHistoryDays !== 0 &&
+                            <>
+                                <ScreenSizeWrapper>
+                                    <div style={{ marginTop: 30 }} id="history">
+                                        <table width="100%">
+                                            <tbody>
+                                                <tr>
+                                                    <td>{graphTitle()}</td>
+                                                    <td>
+                                                        <Flex justify="end" gap={"6px"}>
+                                                            {graphCtrl()}
+                                                        </Flex>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </ScreenSizeWrapper>
+                                <ScreenSizeWrapper isMobile>
+                                    <div style={{ marginTop: 30, marginBottom: -10 }} id="history">
+                                        {graphTitle(true)}
+                                        <table width="100%" style={{ marginTop: "10px" }}>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <Flex justify="end" flexWrap="wrap" gap={"6px"}>
+                                                            {graphCtrl(true)}
+                                                        </Flex>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </ScreenSizeWrapper>
+                            </>}
+                        <Box height={520}>
+                            <> {!loading && (!data || !data?.measurements?.length) ? (
                                 <>
-                                    <ScreenSizeWrapper>
-                                        <div style={{ marginTop: 30 }} id="history">
-                                            <table width="100%">
-                                                <tbody>
-                                                    <tr>
-                                                        <td>
-                                                            {graphTitle()}
-                                                        </td>
-                                                        <td>
-                                                            <Flex justify="end" gap={"6px"}>
-                                                                {graphCtrl()}
-                                                            </Flex>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </ScreenSizeWrapper>
-                                    <ScreenSizeWrapper isMobile>
-                                        <div style={{ marginTop: 30, marginBottom: -10 }} id="history">
-                                            {graphTitle(true)}
-                                            <table width="100%" style={{ marginTop: "10px" }}>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>
-                                                            <Flex justify="end" flexWrap="wrap" gap={"6px"}>
-                                                                {graphCtrl(true)}
-                                                            </Flex>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </ScreenSizeWrapper>
-                                </>}
-                            <Box height={520}>
-                                <> {!this.isLoading && (!this.state.data || !this.state.data?.measurements?.length) ? (
-                                    <>
-                                        <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">{noHistoryStr}
-                                            {freeMode && !this.isSharedSensor() && this.sensorHasData() && <>
-                                                <Box mt={2} />
-                                                <UpgradePlanButton />
-                                            </>}
-                                        </center>
-                                    </>
-                                ) : (
-                                    <Box ml={-5} mr={-5}>
-                                        {this.isLoading &&
-                                            <div style={graphLoadingOverlay}>
-                                                <div style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: "100%", textAlign: "center" }}><div style={{ position: "relative", top: "45%" }}><Spinner size="xl" /></div></div>
-                                            </div>
-                                        }
-                                        <div style={graph}>
-                                            {this.state.data?.measurements?.length &&
-                                                <Graph
-                                                    overrideColorMode={this.state.graphPDFMode ? "light" : null}
-                                                    width={this.state.graphPDFMode ? 1017 : null}
-                                                    key={"sensor_graph" + this.state.updateGraphKey}
-                                                    unit={this.getSelectedUnit()}
-                                                    setRef={(ref) => (this.chartRef = ref)}
-                                                    alert={tnpGetAlert(this.state.graphKey)}
-                                                    dataKey={this.state.graphKey}
-                                                    unitKey={this.state.graphUnitKey}
-                                                    dataName={(() => {
-                                                        const uh = getUnitHelper(this.state.graphKey);
-                                                        if (this.state.graphUnitKey && uh?.units) {
-                                                            const uDef = uh.units.find(u => u.cloudStoreKey === this.state.graphUnitKey);
-                                                            if (uDef) {
-                                                                const translatedUnit = t(uDef.translationKey);
-                                                                const unit = translatedUnit || uDef.translationKey;
-                                                                return unit ? `${t(uh.label)} (${unit})` : t(uh.label);
-                                                            }
-                                                        }
-                                                        return t(uh.label);
-                                                    })()}
-                                                    data={this.getGraphData()}
-                                                    loading={this.isLoading}
-                                                    height={450} cursor={true}
-                                                    from={this.getFrom()}
-                                                    to={this.getTo()}
-                                                />
-                                            }
-                                        </div>
-                                    </Box>
-                                )}
-                                </>
-                            </Box>
-                        </div>
-                    </Box>
-                    <Box id="settings">
-                        <div style={{ height: "20px" }} />
-                        <Accordion allowMultiple defaultIndex={this.openAccodrions} onChange={v => this.setOpenAccordion(v)}>
-                            <AccordionItem>
-                                <AccordionButton style={accordionButton} _hover={{}}>
-                                    <AccordionText>
-                                        {t("general")}
-                                    </AccordionText>
-                                    <AccordionIcon />
-                                </AccordionButton>
-                                <hr />
-                                <AccordionPanel style={accordionPanel}>
-                                    <List>
-                                        <ListItem>
-                                            <table style={accordionContent}>
-                                                <tbody>
-                                                    <tr>
-                                                        <td style={detailedTitle}>
-                                                            {t("sensor_name")}
-                                                        </td>
-                                                        <td style={detailedText}>
-                                                            <EditableText text={this.props.sensor.name} onClick={() => this.editName(true)} />
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </ListItem>
-                                        <hr />
-                                        <ListItem>
-                                            <table style={accordionContent}>
-                                                <tbody>
-                                                    <tr>
-                                                        <td style={detailedTitle}>
-                                                            {t("owner")}
-                                                        </td>
-                                                        <td style={detailedText}>
-                                                            {this.props.sensor.owner.toLowerCase()}
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </ListItem>
-                                        <hr />
-                                        {this.props.sensor.canShare ?
-                                            <ListItem style={{ cursor: "pointer" }} onClick={() => this.share(true)}>
-                                                <table style={accordionContent}>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td style={detailedTitle}>
-                                                                {t("share")}
-                                                            </td>
-                                                            <td style={detailedText}>
-                                                                {addVariablesInString(t("shared_to_x"), [this.props.sensor.sharedTo.length, this.props.sensor.subscription.maxSharesPerSensor])}
-                                                                <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </ListItem>
-                                            :
-                                            <ListItem>
-                                                <table style={accordionContent}>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td style={detailedTitle}>
-                                                                {t("owners_plan")}
-                                                            </td>
-                                                            <td style={detailedText}>
-                                                                {sensorSubscription?.subscriptionName || JSON.stringify(sensorSubscription)}
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </ListItem>
-                                        }
-                                        {!this.isSharedSensor() && <>
-                                            <hr />
-                                            <ListItem style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, sensorVisibilityDialog: true })}>
-                                                <table style={accordionContent}>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td style={detailedTitle}>
-                                                                {t("visible_measurements")}
-                                                            </td>
-                                                            <td style={detailedText}>
-                                                                {(() => {
-                                                                    const useDefault = this.props.sensor.settings?.defaultDisplayOrder || "true"
-                                                                    if (useDefault === "true") return t("use_default")
-                                                                    const visibleFields = this.props.sensor.settings?.displayOrder ? JSON.parse(this.props.sensor.settings.displayOrder) : [];
-                                                                    let maxAvailable = 0;
-                                                                    const parsed0 = this.props.sensor?.measurements?.[0]?.parsed;
-                                                                    if (parsed0) {
-                                                                        const presentKeys = Object.keys(parsed0);
-                                                                        maxAvailable = visibilityCodes.filter(vc => presentKeys.includes(vc[1])).length;
-                                                                    }
-                                                                    return visibleFields.length > 0 ? `${visibleFields.length}/${maxAvailable || visibleFields.length}` : t("no_visible_measurements");
-                                                                })()}
-                                                                <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </ListItem>
+                                    <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">{noHistoryStr}
+                                        {freeMode && !isSharedSensor() && sensorHasData() && <>
+                                            <Box mt={2} />
+                                            <UpgradePlanButton />
                                         </>}
-                                        <hr />
-                                        <ListItem>
+                                    </center>
+                                </>
+                            ) : (
+                                <Box ml={-5} mr={-5}>
+                                    {loading &&
+                                        <div style={graphLoadingOverlay}>
+                                            <div style={{ fontFamily: "montserrat", fontSize: 16, fontWeight: "bold", height: "100%", textAlign: "center" }}><div style={{ position: "relative", top: "45%" }}><Spinner size="xl" /></div></div>
+                                        </div>
+                                    }
+                                    <div style={graph}>
+                                        {data?.measurements?.length &&
+                                            <Graph
+                                                overrideColorMode={graphPDFMode ? "light" : null}
+                                                width={graphPDFMode ? 1017 : null}
+                                                key={"sensor_graph" + updateGraphKey}
+                                                unit={getSelectedUnit()}
+                                                setRef={(ref) => { chartRef.current = ref; }}
+                                                alert={tnpGetAlert(graphKey)}
+                                                dataKey={graphKey}
+                                                unitKey={graphUnitKey}
+                                                dataName={(() => {
+                                                    const uh = getUnitHelper(graphKey);
+                                                    if (graphUnitKey && uh?.units) {
+                                                        const uDef = uh.units.find(u => u.cloudStoreKey === graphUnitKey);
+                                                        if (uDef) {
+                                                            const translatedUnit = t(uDef.translationKey);
+                                                            const unit = translatedUnit || uDef.translationKey;
+                                                            return unit ? `${t(uh.label)} (${unit})` : t(uh.label);
+                                                        }
+                                                    }
+                                                    return t(uh.label);
+                                                })()}
+                                                data={getGraphData()}
+                                                loading={loading}
+                                                height={450} cursor={true}
+                                                from={getFrom()}
+                                                to={getTo()}
+                                            />
+                                        }
+                                    </div>
+                                </Box>
+                            )}
+                            </>
+                        </Box>
+                    </div>
+                </Box>
+                <Box id="settings">
+                    <div style={{ height: "20px" }} />
+                    <Accordion allowMultiple defaultIndex={openAccordionsRef.current} onChange={v => Store.setOpenAccordions(v)}>
+                        <AccordionItem>
+                            <AccordionButton style={accordionButton} _hover={{}}>
+                                <AccordionText>{t("general")}</AccordionText>
+                                <AccordionIcon />
+                            </AccordionButton>
+                            <hr />
+                            <AccordionPanel style={accordionPanel}>
+                                <List>
+                                    <ListItem>
+                                        <table style={accordionContent}>
+                                            <tbody>
+                                                <tr>
+                                                    <td style={detailedTitle}>{t("sensor_name")}</td>
+                                                    <td style={detailedText}>
+                                                        <EditableText text={sensor.name} onClick={() => setEditName(true)} />
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </ListItem>
+                                    <hr />
+                                    <ListItem>
+                                        <table style={accordionContent}>
+                                            <tbody>
+                                                <tr>
+                                                    <td style={detailedTitle}>{t("owner")}</td>
+                                                    <td style={detailedText}>{sensor.owner.toLowerCase()}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </ListItem>
+                                    <hr />
+                                    {sensor.canShare ?
+                                        <ListItem style={{ cursor: "pointer" }} onClick={() => router.navigate(`/shares?sensor=${sensor.sensor}`)}>
                                             <table style={accordionContent}>
                                                 <tbody>
                                                     <tr>
-                                                        <td style={detailedTitle}>
-                                                            {t("notes")}
-                                                        </td>
+                                                        <td style={detailedTitle}>{t("share")}</td>
                                                         <td style={detailedText}>
-                                                            {!this.isSharedSensor() && <EditableText text="" onClick={() => this.setState({ ...this.state, notesDialog: true })} />}
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </ListItem>
-                                    </List>
-                                    <SensorNotesPreview text={this.props.sensor.settings?.description} t={t} />
-                                </AccordionPanel>
-                            </AccordionItem>
-                            <AccordionItem>
-                                <AccordionButton style={accordionButton} _hover={{}}>
-                                    <AccordionText>
-                                        {t("alerts")}
-                                    </AccordionText>
-                                    <AccordionIcon />
-                                </AccordionButton>
-                                <hr />
-                                <AccordionPanel style={accordionPanel}>
-                                    <List style={accordionContent}>
-                                        {sensorSubscription.subscriptionName === "Free" && <Box pt={6} pb={6} style={detailedSubText}>
-                                            {(() => {
-                                                let text = t("sensor_alert_free_info")
-                                                let parts = text.split(t("cloud_ruuvi_link"))
-                                                return <div>{parts[0]}<a style={{ color: "teal" }} target="blank" href={t("cloud_ruuvi_link_url")}>{t("cloud_ruuvi_link")}</a>{parts[1]}</div>
-                                            })()}
-                                        </Box>}
-                                        {orderedAlertTypes.map(x => {
-                                            const dataKey = getMappedAlertDataType(x);
-                                            let latestValue = this.getLatestReading()[dataKey]
-                                            if (latestValue === undefined && x !== "offline") return null;
-
-                                            var alert = this.getAlert(x)
-                                            let ignoreVisibleTypes = ["offline"];
-
-                                            if (!ignoreVisibleTypes.includes(x)) {
-                                                if (this.getAlertVisibleFieldIndex(x, mainSensorFields) === -1) return null;
-                                            }
-
-                                            let key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description + x : x
-                                            return <ListItem key={key}>
-                                                <AlertItem alerts={this.props.sensor.alerts} alert={alert} sensor={this.props.sensor}
-                                                    latestValue={latestValue}
-                                                    noUpgradeButton={this.isSharedSensor() || !this.sensorHasData()}
-                                                    showOffline={sensorSubscription.offlineAlertAllowed}
-                                                    showDelay={sensorSubscription.delayedAlertAllowed}
-                                                    detailedTitle={detailedTitle}
-                                                    detailedText={detailedText} detailedSubText={detailedSubText}
-                                                    type={x} dataKey={dataKey} onChange={(a, prevEnabled) => this.updateAlert(a, prevEnabled)} />
-                                            </ListItem>
-                                        })}
-                                    </List>
-                                </AccordionPanel>
-                            </AccordionItem>
-                            <AccordionItem hidden={this.isSharedSensor()}>
-                                <AccordionButton style={accordionButton} _hover={{}}>
-                                    <AccordionText>
-                                        {t("offset_correction")}
-                                    </AccordionText>
-                                    <AccordionIcon />
-                                </AccordionButton>
-                                <hr />
-                                <AccordionPanel style={accordionPanel}>
-                                    <List>
-                                        {["Temperature", "Humidity", "Pressure"].map(x => {
-                                            if (this.getLatestReading()[x.toLowerCase()] === undefined) return null;
-                                            var uh = getUnitHelper(x.toLocaleLowerCase());
-                                            var value = uh.value(this.props.sensor["offset" + x], true);
-                                            var unit = uh.unit;
-                                            if (x === "Humidity") {
-                                                // humidity offset is always %
-                                                value = this.props.sensor["offset" + x]
-                                                unit = "%"
-                                            }
-                                            return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => this.setState({ ...this.state, offsetDialog: x })}>
-                                                <table style={accordionContent}>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
-                                                            <td style={detailedText}>
-                                                                {localeNumber(value, uh.decimals)} {unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                                {x !== "Pressure" && <hr />}
-                                            </ListItem>
-                                        })}
-                                    </List>
-                                </AccordionPanel>
-                            </AccordionItem>
-                            <AccordionItem>
-                                <AccordionButton style={accordionButton} _hover={{}}>
-                                    <AccordionText>
-                                        {uppercaseFirst(t("more_info"))}
-                                    </AccordionText>
-                                    <AccordionIcon />
-                                </AccordionButton>
-                                <hr />
-                                <AccordionPanel style={accordionPanel}>
-                                    <List>
-                                        {(() => {
-                                            let readings = this.getLatestReadingFromProps();
-                                            if (!readings) return null;
-
-                                            const moreInfoFields = ["mac", "dataFormat", "rssi", "measurementSequenceNumber"];
-
-                                            return moreInfoFields.map((order, i) => {
-                                                var x = this.getLatestReading(true).find(x => x.key === order);
-                                                if (order === "mac") {
-                                                    x = { key: "mac", value: this.props.sensor.sensor }
-                                                }
-                                                if (!x) return null
-                                                let uh = getUnitHelper(x.key)
-                                                return (
-                                                    <ListItem key={x.key}>
-                                                        <table style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? this.setGraphKey(x.key) : undefined}>
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td style={detailedTitle}> {t(uh.label || x.key)}</td>
-                                                                    <td style={{ ...detailedText, textDecoration: uh.graphable ? "underline" : "" }}>
-                                                                        {localeNumber(uh.value(x.value), uh.decimals)} {uh.unit}
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                        {i !== moreInfoFields.length - 1 && <hr />}
-                                                    </ListItem>
-                                                )
-                                            });
-                                        })()}
-
-                                    </List>
-                                </AccordionPanel>
-                            </AccordionItem>
-
-                            <AccordionItem>
-                                <AccordionButton style={accordionButton} _hover={{}}>
-                                    <AccordionText>
-                                        {t("remove")}
-                                    </AccordionText>
-                                    <AccordionIcon />
-                                </AccordionButton>
-                                <hr />
-                                <AccordionPanel style={accordionPanel}>
-                                    <List>
-                                        <ListItem style={{ cursor: "pointer" }} onClick={() => this.remove()}>
-                                            <table width="100%" style={accordionContent}>
-                                                <tbody>
-                                                    <tr>
-                                                        <td style={detailedTitle}>
-                                                            {t("remove_this_sensor")}
-                                                        </td>
-                                                        <td style={detailedText}>
+                                                            {addVariablesInString(t("shared_to_x"), [sensor.sharedTo.length, sensor.subscription.maxSharesPerSensor])}
                                                             <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
                                                         </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </ListItem>
-                                    </List>
-                                </AccordionPanel>
-                            </AccordionItem>
-                        </Accordion>
-                    </Box>
-                    <EditNameDialog open={this.state.editName} onClose={() => this.editName(false)} sensor={this.props.sensor} updateSensor={this.props.updateSensor} />
-                    <OffsetDialog open={this.state.offsetDialog} onClose={() => this.setState({ ...this.state, offsetDialog: null })} sensor={this.props.sensor} offsets={{ "Humidity": this.props.sensor.offsetHumidity, "Pressure": this.props.sensor.offsetPressure, "Temperature": this.props.sensor.offsetTemperature }} lastReading={this.getLatestReading()} updateSensor={this.props.updateSensor} />
-                    <RemoveSensorDialog open={this.state.removeSensor} onClose={() => this.setState({ ...this.state, removeSensor: null })} sensor={this.props.sensor} updateSensor={this.props.updateSensor} t={t} remove={() => this.props.remove()} />
-                    <SensorTypeVisibilityDialog
-                        sensor={this.props.sensor}
-                        open={this.state.sensorVisibilityDialog}
-                        onClose={() => this.setState({ ...this.state, sensorVisibilityDialog: false })}
-                        updateSensor={this.props.updateSensor}
-                    />
-                    <NotesDialog
-                        open={this.state.notesDialog}
-                        onClose={() => this.setState({ ...this.state, notesDialog: false })}
-                        sensor={this.props.sensor}
-                        updateSensor={this.props.updateSensor}
-                    />
+                                        :
+                                        <ListItem>
+                                            <table style={accordionContent}>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style={detailedTitle}>{t("owners_plan")}</td>
+                                                        <td style={detailedText}>{sensorSubscription?.subscriptionName || JSON.stringify(sensorSubscription)}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </ListItem>
+                                    }
+                                    {!isSharedSensor() && <>
+                                        <hr />
+                                        <ListItem style={{ cursor: "pointer" }} onClick={() => setSensorVisibilityDialog(true)}>
+                                            <table style={accordionContent}>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style={detailedTitle}>{t("visible_measurements")}</td>
+                                                        <td style={detailedText}>
+                                                            {(() => {
+                                                                const useDefault = sensor.settings?.defaultDisplayOrder || "true";
+                                                                if (useDefault === "true") return t("use_default");
+                                                                const visibleFields = sensor.settings?.displayOrder ? JSON.parse(sensor.settings.displayOrder) : [];
+                                                                let maxAvailable = 0;
+                                                                const parsed0 = sensor?.measurements?.[0]?.parsed;
+                                                                if (parsed0) {
+                                                                    const presentKeys = Object.keys(parsed0);
+                                                                    maxAvailable = visibilityCodes.filter(vc => presentKeys.includes(vc[1])).length;
+                                                                }
+                                                                return visibleFields.length > 0 ? `${visibleFields.length}/${maxAvailable || visibleFields.length}` : t("no_visible_measurements");
+                                                            })()}
+                                                            <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </ListItem>
+                                    </>}
+                                    <hr />
+                                    <ListItem>
+                                        <table style={accordionContent}>
+                                            <tbody>
+                                                <tr>
+                                                    <td style={detailedTitle}>{t("notes")}</td>
+                                                    <td style={detailedText}>
+                                                        {!isSharedSensor() && <EditableText text="" onClick={() => setNotesDialog(true)} />}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </ListItem>
+                                </List>
+                                <SensorNotesPreview text={sensor.settings?.description} t={t} />
+                            </AccordionPanel>
+                        </AccordionItem>
+                        <AccordionItem>
+                            <AccordionButton style={accordionButton} _hover={{}}>
+                                <AccordionText>{t("alerts")}</AccordionText>
+                                <AccordionIcon />
+                            </AccordionButton>
+                            <hr />
+                            <AccordionPanel style={accordionPanel}>
+                                <List style={accordionContent}>
+                                    {sensorSubscription.subscriptionName === "Free" && <Box pt={6} pb={6} style={detailedSubText}>
+                                        {(() => {
+                                            const text = t("sensor_alert_free_info");
+                                            const parts = text.split(t("cloud_ruuvi_link"));
+                                            return <div>{parts[0]}<a style={{ color: "teal" }} target="blank" href={t("cloud_ruuvi_link_url")}>{t("cloud_ruuvi_link")}</a>{parts[1]}</div>;
+                                        })()}
+                                    </Box>}
+                                    {orderedAlertTypes.map(x => {
+                                        const dataKey = getMappedAlertDataType(x);
+                                        const latestValue = getLatestReading()[dataKey];
+                                        if (latestValue === undefined && x !== "offline") return null;
+
+                                        const alert = getAlert(x);
+                                        const ignoreVisibleTypes = ["offline"];
+
+                                        if (!ignoreVisibleTypes.includes(x)) {
+                                            if (getAlertVisibleFieldIndex(x, mainSensorFields) === -1) return null;
+                                        }
+
+                                        const key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description + x : x;
+                                        return <ListItem key={key}>
+                                            <AlertItem alerts={sensor.alerts} alert={alert} sensor={sensor}
+                                                latestValue={latestValue}
+                                                noUpgradeButton={isSharedSensor() || !sensorHasData()}
+                                                showOffline={sensorSubscription.offlineAlertAllowed}
+                                                showDelay={sensorSubscription.delayedAlertAllowed}
+                                                detailedTitle={detailedTitle}
+                                                detailedText={detailedText} detailedSubText={detailedSubText}
+                                                type={x} dataKey={dataKey} onChange={(a, prevEnabled) => updateAlert(a, prevEnabled)} />
+                                        </ListItem>;
+                                    })}
+                                </List>
+                            </AccordionPanel>
+                        </AccordionItem>
+                        <AccordionItem hidden={isSharedSensor()}>
+                            <AccordionButton style={accordionButton} _hover={{}}>
+                                <AccordionText>{t("offset_correction")}</AccordionText>
+                                <AccordionIcon />
+                            </AccordionButton>
+                            <hr />
+                            <AccordionPanel style={accordionPanel}>
+                                <List>
+                                    {["Temperature", "Humidity", "Pressure"].map(x => {
+                                        if (getLatestReading()[x.toLowerCase()] === undefined) return null;
+                                        const uh = getUnitHelper(x.toLocaleLowerCase());
+                                        let value = uh.value(sensor["offset" + x], true);
+                                        let unit = uh.unit;
+                                        if (x === "Humidity") {
+                                            value = sensor["offset" + x];
+                                            unit = "%";
+                                        }
+                                        return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => setOffsetDialog(x)}>
+                                            <table style={accordionContent}>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
+                                                        <td style={detailedText}>
+                                                            {localeNumber(value, uh.decimals)} {unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            {x !== "Pressure" && <hr />}
+                                        </ListItem>;
+                                    })}
+                                </List>
+                            </AccordionPanel>
+                        </AccordionItem>
+                        <AccordionItem>
+                            <AccordionButton style={accordionButton} _hover={{}}>
+                                <AccordionText>{uppercaseFirst(t("more_info"))}</AccordionText>
+                                <AccordionIcon />
+                            </AccordionButton>
+                            <hr />
+                            <AccordionPanel style={accordionPanel}>
+                                <List>
+                                    {(() => {
+                                        const readings = getLatestReadingFromProps();
+                                        if (!readings) return null;
+
+                                        const moreInfoFields = ["mac", "dataFormat", "rssi", "measurementSequenceNumber"];
+
+                                        return moreInfoFields.map((order, i) => {
+                                            let x = getLatestReading(true).find(x => x.key === order);
+                                            if (order === "mac") x = { key: "mac", value: sensor.sensor };
+                                            if (!x) return null;
+                                            const uh = getUnitHelper(x.key);
+                                            return (
+                                                <ListItem key={x.key}>
+                                                    <table style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? setGraphKey(x.key) : undefined}>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td style={detailedTitle}> {t(uh.label || x.key)}</td>
+                                                                <td style={{ ...detailedText, textDecoration: uh.graphable ? "underline" : "" }}>
+                                                                    {localeNumber(uh.value(x.value), uh.decimals)} {uh.unit}
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    {i !== moreInfoFields.length - 1 && <hr />}
+                                                </ListItem>
+                                            );
+                                        });
+                                    })()}
+                                </List>
+                            </AccordionPanel>
+                        </AccordionItem>
+
+                        <AccordionItem>
+                            <AccordionButton style={accordionButton} _hover={{}}>
+                                <AccordionText>{t("remove")}</AccordionText>
+                                <AccordionIcon />
+                            </AccordionButton>
+                            <hr />
+                            <AccordionPanel style={accordionPanel}>
+                                <List>
+                                    <ListItem style={{ cursor: "pointer" }} onClick={() => setShowRemoveSensor(true)}>
+                                        <table width="100%" style={accordionContent}>
+                                            <tbody>
+                                                <tr>
+                                                    <td style={detailedTitle}>{t("remove_this_sensor")}</td>
+                                                    <td style={detailedText}>
+                                                        <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </ListItem>
+                                </List>
+                            </AccordionPanel>
+                        </AccordionItem>
+                    </Accordion>
                 </Box>
+                <EditNameDialog open={editName} onClose={() => setEditName(false)} sensor={sensor} updateSensor={props.updateSensor} />
+                <OffsetDialog open={offsetDialog} onClose={() => setOffsetDialog(null)} sensor={sensor} offsets={{ "Humidity": sensor.offsetHumidity, "Pressure": sensor.offsetPressure, "Temperature": sensor.offsetTemperature }} lastReading={getLatestReading()} updateSensor={props.updateSensor} />
+                <RemoveSensorDialog open={showRemoveSensor} onClose={() => setShowRemoveSensor(false)} sensor={sensor} updateSensor={props.updateSensor} t={t} remove={() => props.remove()} />
+                <SensorTypeVisibilityDialog
+                    sensor={sensor}
+                    open={sensorVisibilityDialog}
+                    onClose={() => setSensorVisibilityDialog(false)}
+                    updateSensor={props.updateSensor}
+                />
+                <NotesDialog
+                    open={notesDialog}
+                    onClose={() => setNotesDialog(false)}
+                    sensor={sensor}
+                    updateSensor={props.updateSensor}
+                />
             </Box>
-        )
-    }
+        </Box>
+    );
 }
 
 export default withRouter(withTranslation()(Sensor));
