@@ -40,6 +40,17 @@ const useSensorData = (sensor, dataFrom, options = {}) => {
     }, [fetchHistory]);
 
     useEffect(() => {
+        if (!fetchHistory) return;
+        const PERIODIC_REFRESH_MS = 15 * 60 * 1000;
+        const id = setInterval(() => {
+            if (Date.now() - lastFetchTimeRef.current > STALE_THRESHOLD_MS) {
+                setFetchKey((k) => k + 1);
+            }
+        }, PERIODIC_REFRESH_MS);
+        return () => clearInterval(id);
+    }, [fetchHistory]);
+
+    useEffect(() => {
         abortControllerRef.current?.abort();
 
         if (!fetchHistory) {
