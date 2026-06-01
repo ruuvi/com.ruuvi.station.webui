@@ -9,6 +9,7 @@
     "uploadImageMaxSize": 3000
   },
   "private": true,
+  "packageManager": "pnpm@11.3.0",
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",
     "@chakra-ui/layout": "^2.3.1",

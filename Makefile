@@ -18,4 +18,4 @@ clean_build:
 	rm -rf build
 
 build:
-	CI=false npm run build
+	CI=false pnpm run build
