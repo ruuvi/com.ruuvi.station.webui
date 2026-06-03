@@ -17,11 +17,7 @@ function sortSensors(sensors) {
         sensors[i].name = sensors[i].name.substring(0, pjson.settings.sensorNameMaxLength);
     }
     // order sensors by name
-    sensors.sort(function (a, b) {
-        var textA = a.name.toUpperCase();
-        var textB = b.name.toUpperCase();
-        return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
-    });
+    sensors.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "accent" }));
     return sensors
 }
 
