@@ -2,7 +2,7 @@ import bell from '../img/icon-bell.svg'
 import bellAlert from '../img/icon-bell-alert.svg'
 import bellAlertLightTheme from '../img/icon-bell-alert-light-theme.svg'
 import { Image } from '@chakra-ui/react'
-import { alertTypes } from '../UnitHelper'
+import { alertTypes, getUnitSettingFor } from '../UnitHelper'
 import { relativeToAbsolute, relativeToDewpoint } from './humidity'
 
 export function getAlertIcon(sensor, type, colorMode = "dark") {
@@ -99,4 +99,90 @@ function checkIfShouldBeAlerting(alert, data) {
         default:
             return (data > alert.max || data < alert.min)
     }
+}
+
+function getVisibleFieldType(field) {
+    return Array.isArray(field) ? field[0] : field;
+}
+
+function getVisibleFieldUnit(field) {
+    if (Array.isArray(field)) return field[1] ?? null;
+    if (["temperature", "humidity", "pressure", "voc"].includes(field)) {
+        return getUnitSettingFor(field);
+    }
+    return null;
+}
+
+function getAlertVisibleFieldIndex(type, visibleFields) {
+    if (!visibleFields?.length) return -1;
+
+    const dataKey = getMappedAlertDataType(type);
+    let preferredUnit = null;
+    let strictUnitMatch = false;
+    let fallbackMatcher = null;
+
+    switch (type) {
+        case "humidity":
+            preferredUnit = "0";
+            strictUnitMatch = true;
+            break;
+        case "humidityAbsolute":
+            preferredUnit = "1";
+            strictUnitMatch = true;
+            break;
+        case "dewPoint":
+            preferredUnit = "2";
+            strictUnitMatch = true;
+            break;
+        case "temperature":
+            preferredUnit = getUnitSettingFor("temperature");
+            break;
+        case "pressure":
+            preferredUnit = getUnitSettingFor("pressure");
+            break;
+        case "voc":
+            preferredUnit = getUnitSettingFor("voc");
+            break;
+        case "sound":
+            fallbackMatcher = (fieldType) => fieldType.startsWith("soundLevel");
+            break;
+        default:
+    }
+
+    let orderIndex = visibleFields.findIndex(field => {
+        if (getVisibleFieldType(field) !== dataKey) return false;
+        if (preferredUnit === null) return true;
+        return getVisibleFieldUnit(field) === preferredUnit;
+    });
+
+    if (orderIndex !== -1) return orderIndex;
+    if (strictUnitMatch) return -1;
+
+    orderIndex = visibleFields.findIndex(field => getVisibleFieldType(field) === dataKey);
+    if (orderIndex !== -1) return orderIndex;
+
+    if (fallbackMatcher) {
+        return visibleFields.findIndex(field => fallbackMatcher(getVisibleFieldType(field)));
+    }
+
+    return -1;
+}
+
+export function getAlertVisibleFieldIndexes(types, visibleFields) {
+    return new Map(types.map(type => [type, getAlertVisibleFieldIndex(type, visibleFields)]));
+}
+
+export function getAlertTypesOrdered(baseTypes, fieldIndexByType) {
+    const baseOrder = new Map(baseTypes.map((type, index) => [type, index]));
+    const fallbackIndex = Number.MAX_SAFE_INTEGER;
+    const order = type => {
+        const idx = fieldIndexByType.get(type);
+        return idx === -1 ? fallbackIndex : idx;
+    };
+    return [...baseTypes].sort((a, b) => {
+        const aIdx = order(a);
+        const bIdx = order(b);
+        if (aIdx === bIdx) return baseOrder.get(a) - baseOrder.get(b);
+        return aIdx - bIdx;
+    });
 }
