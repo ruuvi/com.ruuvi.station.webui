@@ -15,7 +15,6 @@ import {
     getSensorTypeOnly,
     getUnitFor,
     getUnitHelper,
-    getUnitHelperWithUnit,
     getUnitOnly,
     getUnitSettingFor,
     humidityToUserFormat,
@@ -476,9 +475,6 @@ describe("getUnitHelper", () => {
         });
     });
 
-    it("getUnitHelperWithUnit behaves like getUnitHelper", () => {
-        expect(getUnitHelperWithUnit("pressure", true, "2").unit).toBe("mmHg");
-    });
 });
 
 describe("option string helpers", () => {

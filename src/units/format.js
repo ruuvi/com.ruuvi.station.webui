@@ -1,7 +1,7 @@
 // Locale-aware display formatting of sensor values.
 
 import logger from "../utils/logger";
-import { allUnits } from "./sensorTypes";
+import { displayDecimalsFor } from "./sensorTypes";
 import { ACCURACY_SETTING_KEYS, readSettings } from "./settings";
 
 export function localeNumber(value, decimals) {
@@ -31,10 +31,7 @@ export function getDisplayValue(key, value, settings) {
         else if (typeof settings === "string") settings = JSON.parse(settings);
         if (value == null) return value;
 
-        const accuracy = settings[ACCURACY_SETTING_KEYS[key]];
-        let resolution = accuracy ? parseInt(accuracy) : allUnits[key].decimals;
-        // don't show decimals for Pa
-        if (key === "pressure" && settings.UNIT_PRESSURE === "0") resolution = 0;
+        const resolution = displayDecimalsFor(key, settings);
 
         if (typeof value === "string") value = parseLocaleNumber(value);
         value = parseFloat(value).toFixed(resolution);

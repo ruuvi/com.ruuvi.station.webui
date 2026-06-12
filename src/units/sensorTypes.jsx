@@ -262,6 +262,24 @@ function resolveUnitSetting(key, unit, settings) {
     return key === "temperature" ? (unit || stored || fallback) : (unit ?? stored ?? fallback);
 }
 
+// Decimals for a resolved variant: a decimals on the variant is final
+// (Pa is always 0), otherwise the user's ACCURACY_* setting applies.
+// Returns undefined when the type's base decimals should be kept.
+function variantDecimals(key, variant, settings) {
+    if (variant?.decimals !== undefined) return variant.decimals;
+    const accuracy = settings[ACCURACY_SETTING_KEYS[key]];
+    return accuracy ? parseInt(accuracy) : undefined;
+}
+
+// Decimal count getDisplayValue should use for a value of this type,
+// given a settings object (which may differ from localStorage).
+export function displayDecimalsFor(key, settings) {
+    const type = sensorTypes[key];
+    const setting = resolveUnitSetting(key, undefined, settings);
+    const variant = type.units?.find(u => u.cloudStoreKey === setting);
+    return variantDecimals(key, variant, settings) ?? type.decimals;
+}
+
 function applyVariant(thing, variant, plaintext, settings) {
     const symbol = variant.getSymbol ? variant.getSymbol(settings) : (variant.symbol ?? variant.translationKey);
     thing.unit = plaintext ? symbol : (variant.symbolJSX ?? symbol);
@@ -295,18 +313,10 @@ export function getUnitHelper(key, plaintext, unit) {
     const variant = thing.units.find(u => u.cloudStoreKey === setting);
     if (variant) applyVariant(thing, variant, plaintext, settings);
 
-    if (variant?.decimals !== undefined) {
-        thing.decimals = variant.decimals;
-    } else {
-        const accuracy = settings[ACCURACY_SETTING_KEYS[key]];
-        if (accuracy) thing.decimals = parseInt(accuracy);
-    }
+    const decimals = variantDecimals(key, variant, settings);
+    if (decimals !== undefined) thing.decimals = decimals;
 
     return thing;
-}
-
-export function getUnitHelperWithUnit(key, plaintext, unit) {
-    return getUnitHelper(key, plaintext, unit);
 }
 
 // Helpers for "<type>_<unit>" option strings, e.g. "humidity_1", "voc_ethanol_mgm3".

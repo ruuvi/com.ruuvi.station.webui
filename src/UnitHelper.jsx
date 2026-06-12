@@ -16,7 +16,6 @@ export {
     getSensorTypeOnly,
     getUnitFor,
     getUnitHelper,
-    getUnitHelperWithUnit,
     getUnitOnly
 } from "./units/sensorTypes";
 export { getDisplayValue, localeNumber } from "./units/format";
