@@ -279,6 +279,23 @@ describe("exported tables", () => {
         }
     });
 
+    it("humidity displayVariants keeps its public shape", () => {
+        expect(allUnits.humidity.displayVariants).toEqual({
+            "0": { unitKey: "%", label: "relative_humidity" },
+            "1": { unitKey: "g/m³", label: "absolute_humidity" },
+            "2": { unitKey: "dewpoint", label: "dewpoint" },
+        });
+    });
+
+    it("units lists keep their cloudStoreKey/translationKey shape", () => {
+        expect(allUnits.temperature.units.map((u) => u.cloudStoreKey)).toEqual(["C", "F", "K"]);
+        expect(allUnits.pressure.units.map((u) => u.translationKey)).toEqual(["Pa", "hPa", "mmHg", "inHg"]);
+        expect(allUnits.voc.units.map((u) => u.cloudStoreKey)).toEqual([
+            "index", "ethanol_mgm3", "isobutylene_mgm3", "molhave_mgm3",
+        ]);
+        expect(allUnits.voc.units.map((u) => u.translationKey)).toEqual(["", "mgm3", "mgm3", "mgm3"]);
+    });
+
     it("graphable types match the current list", () => {
         const graphable = Object.keys(allUnits).filter((k) => allUnits[k].graphable);
         expect(graphable).toEqual([

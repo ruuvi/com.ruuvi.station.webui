@@ -12,6 +12,13 @@ export const UNIT_SETTING_KEYS = {
     voc: "UNIT_VOC"
 };
 
+// Settings key for the user-selected decimal count, per sensor type.
+export const ACCURACY_SETTING_KEYS = {
+    temperature: "ACCURACY_TEMPERATURE",
+    humidity: "ACCURACY_HUMIDITY",
+    pressure: "ACCURACY_PRESSURE"
+};
+
 export const UNIT_DEFAULTS = {
     UNIT_TEMPERATURE: "C",
     UNIT_HUMIDITY: "0",

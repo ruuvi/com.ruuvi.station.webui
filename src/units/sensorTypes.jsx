@@ -10,18 +10,7 @@ import {
     temperatureToUserFormat,
     vocToUserFormat
 } from "./conversions";
-import { readSettings } from "./settings";
-
-const COMMON_UNITS = {
-    degreeC: "°C",
-    degreeF: "°F",
-    kelvin: "K",
-    percent: "%",
-    gm3Plain: "g/m³",
-    gm3JSX: <span>g/m<sup>3</sup></span>,
-    mgm3Plain: "mg/m³",
-    mgm3JSX: <span>mg/m<sup>3</sup></span>
-};
+import { ACCURACY_SETTING_KEYS, readSettings, UNIT_DEFAULTS, UNIT_SETTING_KEYS } from "./settings";
 
 const identity = (value) => value;
 
@@ -59,6 +48,35 @@ const soundLevel = (kind) => defineSensorType({
     decimals: 1
 });
 
+// Each entry in a type's `units` list describes one selectable unit variant.
+// `translationKey`/`cloudStoreKey` are the long-standing public shape that
+// pickers and exports read; the remaining fields tell getUnitHelper what to
+// override on the base entry when that variant is selected:
+//   symbol       display unit; defaults to translationKey
+//   symbolJSX    rich-text unit, used unless plaintext is requested
+//   getSymbol    computes the unit from settings (dewpoint follows the
+//                temperature unit)
+//   label, shortLabel, shortLabelJSX, infoLabel, decimals
+// A `decimals` on the variant is final and wins over ACCURACY_* settings
+// (Pa is always shown without decimals).
+
+const temperatureSymbolFor = (setting) =>
+    setting === "F" ? "°F" : setting === "K" ? "K" : "°C";
+
+const vocMgm3 = (substance) => {
+    const name = substance.charAt(0).toUpperCase() + substance.slice(1);
+    return {
+        translationKey: "mgm3",
+        cloudStoreKey: `${substance}_mgm3`,
+        symbol: "mg/m³",
+        symbolJSX: <span>mg/m<sup>3</sup></span>,
+        label: "total_volatile_organic_compounds",
+        shortLabel: `TVOC${name}`,
+        shortLabelJSX: <span>TVOC<sub>{name}</sub></span>,
+        decimals: 2
+    };
+};
+
 const sensorTypes = {
     temperature: defineSensorType({
         label: "temperature",
@@ -70,7 +88,6 @@ const sensorTypes = {
             { translationKey: "°F", cloudStoreKey: "F", infoLabel: "description_text_temperature_fahrenheit" },
             { translationKey: "K", cloudStoreKey: "K", infoLabel: "description_text_temperature_kelvin" }
         ],
-        displayUnits: { C: "°C", F: "°F", K: "K" },
         value: temperatureToUserFormat,
         valueWithUnit: (value, unitKey) => temperatureToUserFormat(value, null, { UNIT_TEMPERATURE: unitKey }),
         fromUser: temperatureFromUserFormat,
@@ -81,15 +98,24 @@ const sensorTypes = {
         unit: "%",
         infoLabel: "description_text_humidity_relative",
         units: [
-            { translationKey: "%", cloudStoreKey: "0", infoLabel: "description_text_humidity_relative" },
-            { translationKey: "g/m³", cloudStoreKey: "1", infoLabel: "description_text_humidity_absolute" },
-            { translationKey: "dewpoint", cloudStoreKey: "2", infoLabel: "description_text_humidity_dewpoint" }
+            {
+                translationKey: "%", cloudStoreKey: "0",
+                infoLabel: "description_text_humidity_relative",
+                label: "relative_humidity", shortLabel: "rel_humidity"
+            },
+            {
+                translationKey: "g/m³", cloudStoreKey: "1",
+                infoLabel: "description_text_humidity_absolute",
+                label: "absolute_humidity", shortLabel: "abs_humidity",
+                symbolJSX: <span>g/m<sup>3</sup></span>
+            },
+            {
+                translationKey: "dewpoint", cloudStoreKey: "2",
+                infoLabel: "description_text_humidity_dewpoint",
+                label: "dewpoint", shortLabel: "dewpoint",
+                getSymbol: (settings) => temperatureSymbolFor(settings.UNIT_TEMPERATURE)
+            }
         ],
-        displayVariants: {
-            "0": { unitKey: "%", label: "relative_humidity" },
-            "1": { unitKey: "g/m³", label: "absolute_humidity" },
-            "2": { unitKey: "dewpoint", label: "dewpoint" }
-        },
         value: humidityToUserFormat,
         valueWithUnit: (value, unitKey, temperature) => {
             const stored = readSettings();
@@ -106,12 +132,11 @@ const sensorTypes = {
         infoLabel: "description_text_pressure",
         unit: "hPa",
         units: [
-            { translationKey: "Pa", cloudStoreKey: "0" },
+            { translationKey: "Pa", cloudStoreKey: "0", decimals: 0 },
             { translationKey: "hPa", cloudStoreKey: "1" },
             { translationKey: "mmHg", cloudStoreKey: "2" },
             { translationKey: "inHg", cloudStoreKey: "3" }
         ],
-        displayUnits: { "0": "Pa", "1": "hPa", "2": "mmHg", "3": "inHg" },
         value: pressureToUserFormat,
         valueWithUnit: (value, unitKey) => pressureToUserFormat(value, { UNIT_PRESSURE: unitKey }),
         fromUser: pressureFromUserFormat,
@@ -176,11 +201,10 @@ const sensorTypes = {
         infoLabel: "description_text_voc",
         units: [
             { translationKey: "", cloudStoreKey: "index" },
-            { translationKey: "mgm3", cloudStoreKey: "ethanol_mgm3" },
-            { translationKey: "mgm3", cloudStoreKey: "isobutylene_mgm3" },
-            { translationKey: "mgm3", cloudStoreKey: "molhave_mgm3" }
+            vocMgm3("ethanol"),
+            vocMgm3("isobutylene"),
+            vocMgm3("molhave")
         ],
-        displayUnits: { index: "", ethanol_mgm3: "mg/m³", isobutylene_mgm3: "mg/m³", molhave_mgm3: "mg/m³" },
         valueWithUnit: vocToUserFormat
     }),
     nox: defineSensorType({
@@ -207,124 +231,78 @@ const sensorTypes = {
     })
 };
 
+// displayVariants is part of the public shape (dashboard pickers read it);
+// derive it from the humidity variant list.
+sensorTypes.humidity.displayVariants = Object.fromEntries(
+    sensorTypes.humidity.units.map(u => [u.cloudStoreKey, { unitKey: u.translationKey, label: u.label }])
+);
+
 export const allUnits = sensorTypes;
 
 export const DEFAULT_VISIBLE_SENSOR_TYPES = ["aqi", "co2", "pm25", "voc", "nox", "temperature", "humidity", "pressure", "illuminance", "movementCounter", "soundLevelInstant"];
 
 export function getUnitFor(key, setting) {
-    switch (key) {
-        case "temperature":
-            switch (setting) {
-                case "F": return "°F";
-                case "K": return "K";
-                default: return "°C";
-            }
-        case "humidity":
-            switch (setting) {
-                case "1": return "g/m³";
-                case "2": {
-                    const settings = readSettings();
-                    return getUnitFor("temperature", settings.UNIT_TEMPERATURE);
-                }
-                default: return "%";
-            }
-        case "pressure":
-            switch (setting) {
-                case "0": return "Pa";
-                case "2": return "mmHg";
-                case "3": return "inHg";
-                default: return "hPa";
-            }
-        default:
-            return "";
+    if (!["temperature", "humidity", "pressure"].includes(key)) return "";
+    if (key === "humidity" && setting === "2") {
+        // dewpoint is shown in the temperature unit
+        return getUnitFor("temperature", readSettings().UNIT_TEMPERATURE);
     }
+    const units = sensorTypes[key].units;
+    const fallback = UNIT_DEFAULTS[UNIT_SETTING_KEYS[key]];
+    const variant = units.find(u => u.cloudStoreKey === setting) ?? units.find(u => u.cloudStoreKey === fallback);
+    return variant.symbol ?? variant.translationKey;
+}
+
+function resolveUnitSetting(key, unit, settings) {
+    const settingKey = UNIT_SETTING_KEYS[key];
+    const stored = settings[settingKey];
+    const fallback = UNIT_DEFAULTS[settingKey];
+    // temperature historically treats any falsy override as "use the stored
+    // setting"; the others only fall through on null/undefined
+    return key === "temperature" ? (unit || stored || fallback) : (unit ?? stored ?? fallback);
+}
+
+function applyVariant(thing, variant, plaintext, settings) {
+    const symbol = variant.getSymbol ? variant.getSymbol(settings) : (variant.symbol ?? variant.translationKey);
+    thing.unit = plaintext ? symbol : (variant.symbolJSX ?? symbol);
+    if (variant.label !== undefined) thing.label = variant.label;
+    if (variant.shortLabel !== undefined) {
+        thing.shortLabel = plaintext ? variant.shortLabel : (variant.shortLabelJSX ?? variant.shortLabel);
+    }
+    if (variant.infoLabel !== undefined) thing.infoLabel = variant.infoLabel;
 }
 
 export function getUnitHelper(key, plaintext, unit) {
     const settings = readSettings();
 
     if (key && key.startsWith("tvoc_")) {
-        const suffix = key.substring("tvoc_".length); // ethanol, isobutylene, molhave
+        const substance = key.substring("tvoc_".length);
         key = "voc";
-        if (!unit) {
-            if (suffix === "ethanol") unit = "ethanol_mgm3";
-            else if (suffix === "isobutylene") unit = "isobutylene_mgm3";
-            else if (suffix === "molhave") unit = "molhave_mgm3";
+        if (!unit && ["ethanol", "isobutylene", "molhave"].includes(substance)) {
+            unit = `${substance}_mgm3`;
         }
-    }
-
-    const C = COMMON_UNITS;
-
-    if (key === "temperature") {
-        const setting = unit || settings.UNIT_TEMPERATURE || "C";
-        let thing = { ...sensorTypes[key] };
-        thing.unit = thing.displayUnits?.[setting] || thing.unit;
-        let currUnit = thing.units.find(u => u.cloudStoreKey === setting);
-        if (currUnit && currUnit.infoLabel) thing.infoLabel = currUnit.infoLabel;
-        if (settings.ACCURACY_TEMPERATURE) thing.decimals = parseInt(settings.ACCURACY_TEMPERATURE);
-        return thing;
-    }
-
-    if (key === "humidity") {
-        const humSetting = unit ?? settings.UNIT_HUMIDITY ?? "0";
-        let thing = { ...sensorTypes[key] };
-        const variant = thing.displayVariants?.[humSetting];
-        if (variant) {
-            if (humSetting === "0") {
-                // relative humidity
-                thing.label = variant.label;
-                thing.shortLabel = "rel_humidity";
-                thing.unit = C.percent;
-            } else if (humSetting === "1") {
-                // absolute humidity
-                thing.label = variant.label;
-                thing.shortLabel = "abs_humidity";
-                thing.infoLabel = "description_text_humidity_absolute";
-                thing.unit = plaintext ? C.gm3Plain : C.gm3JSX;
-            } else if (humSetting === "2") {
-                // dew point
-                thing.label = variant.label;
-                thing.shortLabel = "dewpoint";
-                thing.infoLabel = "description_text_humidity_dewpoint";
-                const tempSetting = settings.UNIT_TEMPERATURE || "C";
-                thing.unit = tempSetting === "F" ? C.degreeF : tempSetting === "K" ? C.kelvin : C.degreeC;
-            }
-        }
-        if (settings.ACCURACY_HUMIDITY) thing.decimals = parseInt(settings.ACCURACY_HUMIDITY);
-        return thing;
-    }
-
-    if (key === "pressure") {
-        const pSetting = unit ?? settings.UNIT_PRESSURE ?? "1"; // default hPa
-        let thing = { ...sensorTypes[key] };
-        thing.unit = thing.displayUnits?.[pSetting] || thing.unit;
-        if (pSetting === "0") thing.decimals = 0; // Pa, no decimals
-        else if (settings.ACCURACY_PRESSURE) thing.decimals = parseInt(settings.ACCURACY_PRESSURE);
-        return thing;
-    }
-
-    if (key === "voc") {
-        let thing = { ...sensorTypes[key] };
-        const vocUnit = unit ?? settings.UNIT_VOC ?? "index";
-        if (["ethanol_mgm3", "isobutylene_mgm3", "molhave_mgm3"].includes(vocUnit)) {
-            thing.unit = plaintext ? C.mgm3Plain : C.mgm3JSX;
-            const suffix = vocUnit.substring(0, vocUnit.indexOf("_"));
-            thing.shortLabel = "TVOC" + suffix.charAt(0).toUpperCase() + suffix.slice(1);
-            if (!plaintext) {
-                thing.shortLabel = <span>TVOC<sub>{suffix.charAt(0).toUpperCase() + suffix.slice(1)}</sub></span>;
-            }
-            thing.label = "total_volatile_organic_compounds";
-            thing.decimals = 2;
-        } else {
-            thing.unit = thing.displayUnits?.[vocUnit] ?? "";
-        }
-        return thing;
     }
 
     if (key === "signal") key = "rssi"; // alias
 
-    if (sensorTypes[key]) return { ...sensorTypes[key] };
-    return { label: "", unit: "", value: identity, decimals: 0 };
+    const base = sensorTypes[key];
+    if (!base) return { label: "", unit: "", value: identity, decimals: 0 };
+
+    const thing = { ...base };
+    if (!UNIT_SETTING_KEYS[key] || !thing.units) return thing;
+
+    const setting = resolveUnitSetting(key, unit, settings);
+    const variant = thing.units.find(u => u.cloudStoreKey === setting);
+    if (variant) applyVariant(thing, variant, plaintext, settings);
+
+    if (variant?.decimals !== undefined) {
+        thing.decimals = variant.decimals;
+    } else {
+        const accuracy = settings[ACCURACY_SETTING_KEYS[key]];
+        if (accuracy) thing.decimals = parseInt(accuracy);
+    }
+
+    return thing;
 }
 
 export function getUnitHelperWithUnit(key, plaintext, unit) {

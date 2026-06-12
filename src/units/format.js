@@ -2,7 +2,7 @@
 
 import logger from "../utils/logger";
 import { allUnits } from "./sensorTypes";
-import { readSettings } from "./settings";
+import { ACCURACY_SETTING_KEYS, readSettings } from "./settings";
 
 export function localeNumber(value, decimals) {
     if (typeof (value) !== "number") return value;
@@ -12,12 +12,6 @@ export function localeNumber(value, decimals) {
     if (decimals === undefined) return value.toLocaleString(lng);
     return value.toLocaleString(lng, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
-
-const ACCURACY_SETTING_KEYS = {
-    temperature: "ACCURACY_TEMPERATURE",
-    humidity: "ACCURACY_HUMIDITY",
-    pressure: "ACCURACY_PRESSURE"
-};
 
 // Parse a number the user's locale formatted, e.g. "1 234,56" → 1234.56.
 function parseLocaleNumber(value) {
