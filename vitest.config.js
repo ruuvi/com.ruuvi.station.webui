@@ -5,5 +5,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
+    // Node's built-in experimental localStorage shadows jsdom's; turn it off
+    execArgv: ['--no-experimental-webstorage'],
   },
 });
