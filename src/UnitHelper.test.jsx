@@ -56,11 +56,11 @@ describe("temperatureToUserFormat", () => {
         expect(temperatureToUserFormat(0, false, { UNIT_TEMPERATURE: "K" })).toBe(273.15);
     });
 
-    it("offset mode scales Fahrenheit without the +32", () => {
+    it("offset mode treats the value as a delta: °F scales without the +32", () => {
         expect(temperatureToUserFormat(10, true, { UNIT_TEMPERATURE: "F" })).toBe(18);
     });
 
-    it("offset mode leaves Kelvin values unconverted (quirk)", () => {
+    it("offset mode treats the value as a delta: a °C delta equals a K delta", () => {
         expect(temperatureToUserFormat(10, true, { UNIT_TEMPERATURE: "K" })).toBe(10);
     });
 
