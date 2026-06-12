@@ -7,31 +7,31 @@ import {
     Flex,
 } from "@chakra-ui/react"
 import 'uplot/dist/uPlot.min.css';
-import Graph from "../components/Graph";
+import Graph from "../components/graphs/Graph";
 import parse from "../decoder/parser";
 import { withTranslation } from 'react-i18next';
 import { getUnitHelper, getUnitSettingFor } from "../UnitHelper";
 import { exportCSV, exportPDF, exportXLSX } from "../utils/export";
 import withRouter from "../utils/withRouter"
 import Store from "../Store";
-import EditNameDialog from "../components/EditNameDialog";
+import EditNameDialog from "../components/dialogs/EditNameDialog";
 import { uppercaseFirst } from "../TextHelper";
-import OffsetDialog from "../components/OffsetDialog";
-import DurationPicker from "../components/DurationPicker";
+import OffsetDialog from "../components/dialogs/OffsetDialog";
+import DurationPicker from "../components/common/DurationPicker";
 import notify from "../utils/notify"
 import pjson from '../../package.json';
 import uploadBackgroundImage from "../BackgroundUploader";
-import ScreenSizeWrapper from "../components/ScreenSizeWrapper";
+import ScreenSizeWrapper from "../components/common/ScreenSizeWrapper";
 import { isAlerting } from "../utils/alertHelper";
-import RemoveSensorDialog from "../components/RemoveSensorDialog";
-import ExportMenu from "../components/ExportMenu";
-import UpgradePlanButton from "../components/UpgradePlanButton";
-import ZoomInfo from "../components/ZoomInfo";
-import SensorTypeVisibilityDialog from "../components/SensorTypeVisibilityDialog";
-import NotesDialog from "../components/NotesDialog";
-import SensorHeader from "../components/SensorHeader";
-import SensorReadingGrid from "../components/SensorReadingGrid";
-import SensorSettings from "../components/SensorSettings";
+import RemoveSensorDialog from "../components/dialogs/RemoveSensorDialog";
+import ExportMenu from "../components/menus/ExportMenu";
+import UpgradePlanButton from "../components/common/UpgradePlanButton";
+import ZoomInfo from "../components/graphs/ZoomInfo";
+import SensorTypeVisibilityDialog from "../components/dialogs/SensorTypeVisibilityDialog";
+import NotesDialog from "../components/dialogs/NotesDialog";
+import SensorHeader from "../components/sensor/SensorHeader";
+import SensorReadingGrid from "../components/sensor/SensorReadingGrid";
+import SensorSettings from "../components/sensor/SensorSettings";
 import {
     getAlert,
     getLatestReading,

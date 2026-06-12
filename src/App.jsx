@@ -21,17 +21,17 @@ import { useTranslation } from "react-i18next";
 import Store from "./Store";
 import { logout } from "./utils/loginUtils";
 import ShareCenter from "./states/ShareCenter";
-import AddSensorModal from "./components/AddSensorModal";
-import SettingsModal from "./components/SettingsModal";
-import MyAccountModal from "./components/MyAccountModal";
-import SettingsMenu from "./components/SettingsMenu";
-import MobileMenu from "./components/MobileMenu";
+import AddSensorModal from "./components/dialogs/AddSensorModal";
+import SettingsModal from "./components/dialogs/SettingsModal";
+import MyAccountModal from "./components/dialogs/MyAccountModal";
+import SettingsMenu from "./components/menus/SettingsMenu";
+import MobileMenu from "./components/menus/MobileMenu";
 import SensorCompare from "./states/SensorCompare";
 import detectForceRefresh from "./utils/detectForceRefresh";
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
-const UserMenu = React.lazy(() => import("./components/UserMenu"));
-const SensorMenu = React.lazy(() => import("./components/SensorMenu"));
+const UserMenu = React.lazy(() => import("./components/menus/UserMenu"));
+const SensorMenu = React.lazy(() => import("./components/menus/SensorMenu"));
 
 
 const bottomText = {

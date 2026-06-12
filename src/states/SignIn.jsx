@@ -3,7 +3,7 @@ import logo from '../img/ruuvi-vector-logo.svg'
 import NetworkApi from '../NetworkApi'
 import { Center, Heading, HStack, Stack, Image, Input, Text, Button, CircularProgress, SlideFade, PinInput, PinInputField } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
-import LanguageMenu from "../components/LanguageMenu";
+import LanguageMenu from "../components/menus/LanguageMenu";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 

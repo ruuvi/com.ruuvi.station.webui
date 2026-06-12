@@ -1,0 +1,711 @@
+import React, { useState, useEffect, useRef } from "react";
+import logger from "../../utils/logger";
+import {
+    Button,
+    Switch,
+    Box,
+    List,
+    ListItem,
+    Flex,
+    Text,
+    IconButton,
+    useColorModeValue,
+    VStack,
+    HStack,
+    Divider
+} from "@chakra-ui/react";
+import { withTranslation } from 'react-i18next';
+import RDialog from "./RDialog";
+import { DEFAULT_VISIBLE_SENSOR_TYPES, getUnitHelper, getUnitSettingFor } from "../../UnitHelper";
+import SensorCard from "../sensor/SensorCard";
+import { MdAdd, MdClose, MdUnfoldMore } from "react-icons/md";
+import ConfirmationDialog from "./ConfirmationDialog";
+import NetworkApi from "../../NetworkApi";
+import { visibilityCodes, visibilityFromCloudToWeb, visibilityFromWebToCloud, ORDERED_VISIBILITY_CODES } from "../../utils/cloudTranslator";
+import notify from "../../utils/notify";
+
+const ENABLE_TVOC_VISIBILITY = true;
+const isTvocVisibilityCode = (code) => code?.startsWith("TVOC_");
+
+const SensorTypeVisibilityDialog = ({ open, onClose, t, sensor, graphType: _graphType, updateSensor }) => {
+    const [isSaving, setIsSaving] = useState(false);
+    const getAvailableSensorTypes = (dataObj) => {
+        let availableTypes = [];
+        if (sensor && sensor.measurements && sensor.measurements.length > 0) {
+            if (sensor.measurements[0].parsed) {
+                availableTypes = Object.keys(sensor.measurements[0].parsed);
+            }
+        }
+        if (dataObj) return availableTypes;
+        return visibilityCodes
+            .filter(code => availableTypes.includes(code[1]))
+            .filter(code => ENABLE_TVOC_VISIBILITY || !isTvocVisibilityCode(code[0]))
+            .map(code => code[0]);
+    };
+
+    const getPreferredUnitKeyForType = (type) => {
+        switch (type) {
+            case "temperature":
+            case "humidity":
+            case "pressure":
+            case "voc":
+                return getUnitSettingFor(type);
+            default:
+                return null;
+        }
+    };
+
+    const getInitialVisibleTypes = () => {
+        const availableCodes = getAvailableSensorTypes();
+        if (!availableCodes || availableCodes.length === 0) return [];
+
+        const availableCodeSet = new Set(availableCodes);
+        const availableWebTypes = getAvailableSensorTypes(true);
+
+        const defaultTypeCandidates = availableWebTypes.length > 0
+            ? DEFAULT_VISIBLE_SENSOR_TYPES.filter(type => availableWebTypes.includes(type))
+            : [];
+
+        const resolvedDefaults = [];
+
+        for (const type of defaultTypeCandidates) {
+            const preferredUnit = getPreferredUnitKeyForType(type);
+            if (preferredUnit) {
+                const preferredCloudCode = visibilityFromWebToCloud(preferredUnit, type);
+                if (preferredCloudCode && availableCodeSet.has(preferredCloudCode)) {
+                    resolvedDefaults.push(preferredCloudCode);
+                    continue;
+                }
+            }
+
+            const fallbackCloudCode = availableCodes.find(code => {
+                const mapping = visibilityFromCloudToWeb(code);
+                return mapping && mapping[0] === type;
+            });
+
+            if (fallbackCloudCode) {
+                resolvedDefaults.push(fallbackCloudCode);
+            }
+        }
+
+        return resolvedDefaults;
+    };
+
+    const [visibleTypes, setVisibleTypes] = useState([]);
+    const [customVisibleTypes, setCustomVisibleTypes] = useState([]);
+    const [dragOverIndex, setDragOverIndex] = useState(null);
+    const [useDefault, setUseDefault] = useState(false);
+    const [confirmationDialog, setConfirmationDialog] = useState({ open: false, sensorType: null, affectedAlerts: [] });
+    const dragCounter = useRef(0);
+    const draggedItemRef = useRef(null);
+    const visibleTypesRef = useRef([]);
+
+    const dragOverBg = useColorModeValue("blue.50", "blue.900");
+
+    let avaiableSensorTypes = getAvailableSensorTypes();
+
+    // if some sensor is selected but no measurements are available, add those to the list
+    for (const type of visibleTypes) {
+        if (!avaiableSensorTypes.includes(type)) {
+            avaiableSensorTypes.push(type);
+        }
+    }
+
+    useEffect(() => {
+        if (open && sensor?.sensor) {
+            const savedCustomTypes = sensor.settings?.displayOrder ? JSON.parse(sensor.settings.displayOrder) : [];
+            const savedUseDefault = (sensor.settings?.defaultDisplayOrder || "true") === "true";
+            const availableCodes = getAvailableSensorTypes();
+            const hasAvailableCodes = availableCodes.length > 0;
+            const availableCodeSet = new Set(availableCodes);
+
+            const sanitizedCustomTypes = savedCustomTypes && savedCustomTypes.length > 0
+                ? (hasAvailableCodes ? savedCustomTypes.filter(type => availableCodeSet.has(type)) : savedCustomTypes)
+                : [];
+
+            const defaultTypes = getInitialVisibleTypes();
+            const initialCustomTypes = sanitizedCustomTypes.length > 0
+                ? sanitizedCustomTypes
+                : defaultTypes;
+
+            setCustomVisibleTypes(initialCustomTypes);
+            setUseDefault(savedUseDefault);
+
+            if (savedUseDefault) {
+                setVisibleTypes(defaultTypes);
+            } else {
+                setVisibleTypes(initialCustomTypes);
+            }
+        } else if (open && !sensor?.sensor) {
+            // Fallback when no sensor data available yet, should not happen in normal use
+            const fallbackTypes = [];
+            setVisibleTypes(fallbackTypes);
+            setCustomVisibleTypes(fallbackTypes);
+        }
+    }, [open, sensor?.sensor]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        if (useDefault) {
+            setVisibleTypes(getInitialVisibleTypes());
+        } else {
+            setVisibleTypes(customVisibleTypes);
+        }
+    }, [useDefault, customVisibleTypes]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        visibleTypesRef.current = visibleTypes;
+    }, [visibleTypes]);
+
+    const reorderVisibleTypes = (types, fromIndex, toIndex) => {
+        if (!Number.isInteger(fromIndex) || !Number.isInteger(toIndex)) return types;
+        if (fromIndex === toIndex) return types;
+        if (fromIndex < 0 || toIndex < 0 || fromIndex >= types.length || toIndex >= types.length) return types;
+
+        const newTypes = [...types];
+        const [draggedSensor] = newTypes.splice(fromIndex, 1);
+        if (draggedSensor === undefined) return types;
+        newTypes.splice(toIndex, 0, draggedSensor);
+        return newTypes;
+    };
+
+    const getAlertTypeFromSensorType = (sensorType) => {
+        const sensorTypeToAlertType = {
+            "movementCounter": "movement",
+            "rssi": "signal",
+            "illuminance": "luminosity",
+            "soundLevelAvg": "sound"
+        };
+
+        return sensorTypeToAlertType[sensorType] || sensorType || null;
+    };
+
+    const getAlertTypeFromCloudCode = (cloudCode) => {
+        // Handle humidity variants
+        if (cloudCode === "HUMIDITY_0") return "humidity";
+        if (cloudCode === "HUMIDITY_1") return "humidityAbsolute";
+        if (cloudCode === "HUMIDITY_2") return "dewPoint";
+
+        // For other types, convert to web type and use the standard mapping
+        const webType = getWebTypeFromSensorType(cloudCode);
+        return getAlertTypeFromSensorType(webType);
+    };
+
+    const hasEnabledAlerts = (sensorType) => {
+        if (!sensor?.alerts) return [];
+
+
+        const alertType = getAlertTypeFromCloudCode(sensorType);
+        if (!alertType) return [];
+
+        const otherVisibleSameAlertType = visibleTypes.some(vt => {
+            if (vt === sensorType) return false;
+            return getAlertTypeFromCloudCode(vt) === alertType;
+        });
+        if (otherVisibleSameAlertType) return [];
+
+
+        return sensor.alerts.filter(alert =>
+            alert.type === alertType && alert.enabled
+        );
+    };
+
+    const getOrphanedAlerts = (targetVisibleTypes) => {
+        if (!sensor?.alerts) return [];
+
+        const orphanedAlerts = [];
+        const enabledAlerts = sensor.alerts.filter(a => a.enabled);
+
+        for (const alert of enabledAlerts) {
+            const isSupported = targetVisibleTypes.some(vt => {
+                const alertType = getAlertTypeFromCloudCode(vt);
+                return alertType === alert.type;
+            });
+
+            if (!isSupported) {
+                orphanedAlerts.push(alert);
+            }
+        }
+        return orphanedAlerts;
+    };
+
+    const disableAlertsForSensorType = async (sensorType) => {
+        const enabledAlerts = hasEnabledAlerts(sensorType);
+
+        for (const alert of enabledAlerts) {
+            try {
+                const disabledAlert = { ...alert, enabled: false, sensor: sensor.sensor };
+                await new Promise((resolve) => {
+                    new NetworkApi().setAlert(disabledAlert, resolve);
+                });
+            } catch (error) {
+                logger.error('Failed to disable alert:', error);
+            }
+        }
+
+        const updatedSensor = { ...sensor };
+        updatedSensor.alerts = updatedSensor.alerts.map(alert => {
+            if (enabledAlerts.some(ea => ea.type === alert.type && ea.sensor === alert.sensor)) {
+                return { ...alert, enabled: false };
+            }
+            return alert;
+        });
+        updateSensor(updatedSensor);
+    };
+
+    const toggleSensorType = (sensorType) => {
+        const isRemoving = visibleTypes.includes(sensorType);
+
+        if (isRemoving) {
+            // Prevent removing the last visible measurement
+            if (visibleTypes.length <= 1) {
+                notify.error(t("visible_measurements_last_element_message"));
+                return;
+            }
+
+            const enabledAlerts = hasEnabledAlerts(sensorType);
+
+            if (enabledAlerts.length > 0) {
+                const measurementName = getSensorDisplayNameWithUnit(sensorType);
+                setConfirmationDialog({
+                    open: true,
+                    sensorType: sensorType,
+                    affectedAlerts: enabledAlerts,
+                    measurementName: measurementName
+                });
+                return;
+            }
+        }
+
+        performToggleSensorType(sensorType);
+    };
+
+    const performToggleSensorType = (sensorType) => {
+        const newTypes = (() => {
+            if (visibleTypes.includes(sensorType)) {
+                if (visibleTypes.length <= 1) return visibleTypes;
+
+                return visibleTypes.filter(type => type !== sensorType);
+            } else {
+                return [...visibleTypes, sensorType];
+            }
+        })();
+
+        setVisibleTypes(newTypes);
+
+        if (!useDefault) {
+            setCustomVisibleTypes(newTypes);
+        }
+    };
+
+    const handleConfirmHideSensorType = async (confirmed) => {
+        const { sensorType, alertsToDisable } = confirmationDialog;
+
+        setConfirmationDialog({ open: false, sensorType: null, affectedAlerts: [], alertsToDisable: null });
+
+        if (confirmed) {
+            if (sensorType) {
+                await disableAlertsForSensorType(sensorType);
+                performToggleSensorType(sensorType);
+            } else if (alertsToDisable) {
+                for (const alert of alertsToDisable) {
+                    try {
+                        const disabledAlert = { ...alert, enabled: false, sensor: sensor.sensor };
+                        await new Promise((resolve) => {
+                            new NetworkApi().setAlert(disabledAlert, resolve);
+                        });
+                    } catch (error) {
+                        logger.error('Failed to disable alert:', error);
+                    }
+                }
+
+                // Update local sensor state to reflect disabled alerts
+                const updatedSensor = { ...sensor };
+                updatedSensor.alerts = updatedSensor.alerts.map(alert => {
+                    if (alertsToDisable.some(ad => ad.type === alert.type && ad.sensor === alert.sensor)) {
+                        return { ...alert, enabled: false };
+                    }
+                    return alert;
+                });
+                updateSensor(updatedSensor);
+
+                setUseDefault(true);
+            }
+        }
+    };
+
+    const handleDragStart = (e, index) => {
+        draggedItemRef.current = index;
+        try {
+            e.dataTransfer.setData('text/plain', String(index));
+        } catch {
+            // Safari sometimes requires explicit drag data for reliable DnD state.
+        }
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    const handleDragOver = (e, index) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setDragOverIndex(index);
+    };
+
+    const handleDragEnter = (e) => {
+        e.preventDefault();
+        dragCounter.current++;
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        dragCounter.current--;
+        if (dragCounter.current === 0) {
+            setDragOverIndex(null);
+        }
+    };
+
+    const handleDrop = (e, dropIndex) => {
+        e.preventDefault();
+        dragCounter.current = 0;
+        setDragOverIndex(null);
+
+        let draggedIndex = draggedItemRef.current;
+        if (!Number.isInteger(draggedIndex)) {
+            const dragPayload = e.dataTransfer?.getData('text/plain');
+            if (dragPayload !== undefined && dragPayload !== null && dragPayload !== '') {
+                draggedIndex = Number(dragPayload);
+            }
+        }
+
+        if (Number.isInteger(draggedIndex) && draggedIndex !== dropIndex) {
+            const newTypes = reorderVisibleTypes(visibleTypesRef.current, draggedIndex, dropIndex);
+            setVisibleTypes(newTypes);
+
+            if (!useDefault) {
+                setCustomVisibleTypes(newTypes);
+            }
+        }
+        draggedItemRef.current = null;
+    };
+
+    const handleDragEnd = () => {
+        draggedItemRef.current = null;
+        setDragOverIndex(null);
+        dragCounter.current = 0;
+    };
+
+    const handleUseDefaultChange = (checked) => {
+        if (checked) {
+            const defaultTypes = getInitialVisibleTypes();
+            const orphanedAlerts = getOrphanedAlerts(defaultTypes);
+
+            if (orphanedAlerts.length > 0) {
+                const measurementNames = [...new Set(orphanedAlerts.map(alert => {
+                    const correspondingType = visibleTypes.find(vt => {
+                        const alertType = getAlertTypeFromCloudCode(vt);
+                        return alertType === alert.type;
+                    });
+                    return correspondingType ? getSensorDisplayNameWithUnit(correspondingType) : null;
+                }).filter(Boolean))];
+
+                const message = measurementNames.length === 1
+                    ? t("visible_measurements_change_use_default_confirmation").replace("{%@^%1$s}", measurementNames[0])
+                    : t("visible_measurements_change_use_default_multiple_alerts_confirmation").replace("{%@^%1$s}", measurementNames.join(", "));
+
+                setConfirmationDialog({
+                    open: true,
+                    sensorType: null,
+                    affectedAlerts: orphanedAlerts,
+                    alertsToDisable: orphanedAlerts,
+                    customMessage: message
+                });
+                return;
+            }
+        }
+
+        if (!checked && customVisibleTypes.length === 0) {
+            const defaults = getInitialVisibleTypes();
+            setCustomVisibleTypes(defaults);
+            setVisibleTypes(defaults);
+        }
+        setUseDefault(checked);
+    };
+
+    const handleSave = async () => {
+        if (!sensor?.sensor) {
+            logger.warn("No sensor ID available for saving visibility settings");
+            return;
+        }
+        setIsSaving(true);
+        try {
+            let data = await new NetworkApi().updateSensorSetting(sensor.sensor, ["defaultDisplayOrder", "displayOrder"], [useDefault ? "true" : "false", JSON.stringify(customVisibleTypes)]);
+            if (!data || data.result !== "success") {
+                notify.error(t("failed_to_save_visibility_settings"));
+                setIsSaving(false);
+                return
+            }
+
+            // Update the sensor object with the new visibility settings
+            if (updateSensor) {
+                const updatedSensor = {
+                    ...sensor,
+                    settings: {
+                        ...(sensor.settings || {}),
+                        defaultDisplayOrder: useDefault ? "true" : "false",
+                        displayOrder: JSON.stringify(customVisibleTypes)
+                    }
+                };
+                updateSensor(updatedSensor);
+            }
+            onClose();
+        } catch (error) {
+            logger.error("Failed to save visibility settings:", error);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const getWebTypeFromSensorType = (sensorType) => {
+        if (sensorType.indexOf("_") !== -1) {
+            let webType = visibilityFromCloudToWeb(sensorType);
+            if (!webType) return sensorType;
+            return webType[0];
+        }
+        return sensorType;
+    };
+
+    const getSensorDisplayName = (sensorType) => {
+        let unit = null;
+        if (sensorType.indexOf("_") !== -1) {
+            let webType = visibilityFromCloudToWeb(sensorType)
+            if (!webType) return sensorType;
+            const [type, _unit] = webType;
+            unit = _unit;
+            sensorType = type
+        }
+        const unitHelper = getUnitHelper(sensorType, true, unit);
+        return t(unitHelper.shortLabel || sensorType);
+    };
+
+    const getSensorUnit = (sensorType) => {
+        if (sensorType.indexOf("_") !== -1) {
+            let webType = visibilityFromCloudToWeb(sensorType)
+            if (!webType) return sensorType;
+            const [type, unit] = webType;
+            const unitHelper = getUnitHelper(type, true, unit);
+            return unitHelper.unit || "";
+        }
+        const unitHelper = getUnitHelper(sensorType);
+        return unitHelper.unit || "";
+    };
+
+    const getSensorDisplayNameWithUnit = (sensorType) => {
+        const displayName = getSensorDisplayName(sensorType);
+        const unit = getSensorUnit(sensorType);
+        if (unit) {
+            return `${displayName} (${unit})`;
+        }
+        return displayName;
+    };
+
+    const getSensorTypeOrder = (sensorType) => {
+        // Find the index in ORDERED_VISIBILITY_CODES
+        const index = ORDERED_VISIBILITY_CODES.indexOf(sensorType);
+        return index === -1 ? 999 : index;
+    };
+
+    const unselectedSensors = avaiableSensorTypes
+        .filter(type => !visibleTypes.includes(type))
+        .sort((a, b) => getSensorTypeOrder(a) - getSensorTypeOrder(b));
+
+    const sensorTypeLeftSide = sensorType => {
+        return <Box>
+            <Text fontSize="md" fontWeight="medium">
+                {getSensorDisplayName(sensorType)}
+            </Text>
+            <Text fontSize="xs" color="gray.500">
+                {getSensorUnit(sensorType) && `(${getSensorUnit(sensorType)})`}
+            </Text>
+        </Box>
+    }
+
+    return (
+        <RDialog title={t("visible_measurements")} isOpen={open} onClose={onClose} size="lg">
+            <Box mb={4}>
+                <Text fontSize="sm">
+                    {t("visible_measurements_description")}
+                </Text>
+            </Box>
+            <Box mb={4}>
+                <Flex justify="space-between" align="center">
+                    <Box>
+                        <Text fontWeight="bold" fontSize="md">
+                            {t("use_default")}
+                        </Text>
+                    </Box>
+                    <Switch
+                        size="md"
+                        isChecked={useDefault}
+                        colorScheme="buttonIconScheme"
+                        onChange={(e) => handleUseDefaultChange(e.target.checked)}
+                    />
+                </Flex>
+            </Box>
+
+            <Box mb={4}>
+                <Text fontWeight="bold" fontSize="md" mb={3}>
+                    {t("preview")}
+                </Text>
+            </Box>
+
+            <Box mb={4}>
+                <div style={{ width: "75%", margin: "0 auto", position: "relative" }}>
+                    <div
+                        style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            zIndex: 2,
+                            background: "transparent",
+                            pointerEvents: "auto",
+                        }}
+                        tabIndex={0}
+                        aria-hidden={true}
+                    />
+                    <div style={{ position: "relative", zIndex: 1 }}>
+                        {sensor && <SensorCard sensor={sensor}
+                            visibleSensorTypes={useDefault ? "default" : visibleTypes}
+                            graphType={null}
+                            isPreview={true}
+                        />}
+                    </div>
+                </div>
+            </Box>
+
+            <Box mb={4}>
+                <Text fontWeight="bold" fontSize="md" mb={3}>
+                    {t("customisation_settings")}
+                </Text>
+            </Box>
+
+            <Box mb={4}>
+                <Text fontSize="sm" >
+                    {t("customisation_settings_description")}
+                </Text>
+            </Box>
+
+            <VStack
+                align="stretch"
+                overflowY="auto"
+                className="visibilitSettingList"
+                gap={0}
+                borderRadius={8}
+                opacity={useDefault ? 0.4 : 1}
+                pointerEvents={useDefault ? "none" : "auto"}
+                transition="opacity 0.2s ease-in-out"
+                mx={-6}
+            >
+                <Box className="visibilitySettingsTitle">
+                    <Text fontWeight="bold" fontSize="md">
+                        {t("show_measurements")}
+                    </Text>
+                </Box>
+                {visibleTypes.length > 0 && (
+                    <Box>
+                        <List spacing={0}>
+                            {visibleTypes.map((sensorType, index) => (
+                                <React.Fragment key={`selected-frag-${sensorType}`}>
+                                    <ListItem
+                                        className="visibilitySettingsItem"
+                                        bg={dragOverIndex === index ? dragOverBg : undefined}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, index)}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDragEnter={handleDragEnter}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, index)}
+                                        onDragEnd={handleDragEnd}
+                                        cursor="move"
+                                    >
+                                        <Flex justify="space-between" align="center">
+                                            <HStack spacing={3}>
+                                                <MdUnfoldMore opacity={0.6} className="visibilityListIcons" />
+                                                {sensorTypeLeftSide(sensorType)}
+                                            </HStack>
+                                            <HStack spacing={2}>
+                                                <IconButton
+                                                    isRound={true}
+                                                    icon={<MdClose className="visibilityListIcons" />}
+                                                    variant="ghost"
+                                                    onClick={() => toggleSensorType(sensorType)}
+                                                />
+                                            </HStack>
+                                        </Flex>
+                                    </ListItem>
+                                    {index < visibleTypes.length - 1 && <Divider />}
+                                </React.Fragment>
+                            ))}
+                        </List>
+                    </Box>
+                )}
+
+                {unselectedSensors.length > 0 && (
+                    <Box>
+                        <Box className="visibilitySettingsTitle">
+                            <Text fontWeight="bold" fontSize="md">
+                                {t("hide_measurements")}
+                            </Text>
+                        </Box>
+                        <List spacing={0}>
+                            {unselectedSensors.map((sensorType, idx) => {
+                                return (
+                                    <React.Fragment key={`unselected-frag-${sensorType}`}>
+                                        <ListItem className="visibilitySettingsItem">
+                                            <Flex justify="space-between" align="center">
+                                                {sensorTypeLeftSide(sensorType)}
+                                                <IconButton
+                                                    icon={<MdAdd className="visibilityListIcons" />}
+                                                    variant="ghost"
+                                                    onClick={() => toggleSensorType(sensorType)}
+                                                />
+                                            </Flex>
+                                        </ListItem>
+                                        {idx < unselectedSensors.length - 1 && <Divider />}
+                                    </React.Fragment>
+                                )
+                            })}
+                        </List>
+                    </Box>
+                )}
+            </VStack>
+
+            <Flex justify="space-between" mt={6}>
+                <Text fontSize="sm" >
+                </Text>
+                <Flex gap={3}>
+                    <Button onClick={onClose}>
+                        {t("cancel")}
+                    </Button>
+                    <Button onClick={handleSave} isLoading={isSaving}>
+                        {t("ok")}
+                    </Button>
+                </Flex>
+            </Flex>
+
+            <ConfirmationDialog
+                open={confirmationDialog.open}
+                title="dialog_are_you_sure"
+                description={
+                    confirmationDialog.customMessage
+                        ? confirmationDialog.customMessage
+                        : confirmationDialog.sensorType
+                            ? t("visible_measurements_active_alert_confirmation").replace("{%@^%1$s}", confirmationDialog.measurementName || "")
+                            : ""
+                }
+                onClose={handleConfirmHideSensorType}
+            />
+        </RDialog>
+    );
+};
+
+export default withTranslation()(SensorTypeVisibilityDialog);

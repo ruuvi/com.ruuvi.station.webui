@@ -1,22 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
-import SensorCard from "../components/SensorCard";
+import SensorCard from "../components/sensor/SensorCard";
 import Sensor from "./Sensor";
 import { Spinner, Box, Link, useMediaQuery, Flex, Input, InputGroup, InputRightElement, Show } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
-import DurationPicker from "../components/DurationPicker";
+import DurationPicker from "../components/common/DurationPicker";
 import Store from "../Store";
 import SessionStore from "../SessionStore";
 import notify from "../utils/notify";
 import { withColorMode } from "../utils/withColorMode";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import SensorTypePicker from "../components/SensorTypePicker";
-import DashboardViewType from "../components/DashboardViewType";
+import SensorTypePicker from "../components/sensor/SensorTypePicker";
+import DashboardViewType from "../components/common/DashboardViewType";
 import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
 import { getSetting } from "../UnitHelper";
-import EditNameDialog from "../components/EditNameDialog";
-import ConfirmationDialog from "../components/ConfirmationDialog";
+import EditNameDialog from "../components/dialogs/EditNameDialog";
+import ConfirmationDialog from "../components/dialogs/ConfirmationDialog";
 
 const infoText = {
     fontFamily: "mulish",

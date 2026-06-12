@@ -5,10 +5,10 @@ import { MdClear } from 'react-icons/md';
 import notify from '../utils/notify';
 import i18next from 'i18next';
 import { addVariablesInString } from "../TextHelper";
-import RemoveSensorDialog from '../components/RemoveSensorDialog';
-import ConfirmModal from '../components/ConfirmModal';
-import { SensorPicker } from '../components/SensorPicker';
-import { EmailBox } from '../components/EmailBox';
+import RemoveSensorDialog from '../components/dialogs/RemoveSensorDialog';
+import ConfirmModal from '../components/dialogs/ConfirmModal';
+import { SensorPicker } from '../components/sensor/SensorPicker';
+import { EmailBox } from '../components/common/EmailBox';
 
 const SensorSharedWithMeBox = ({ sensor, onRemove }) => {
     const [remove, setRemove] = React.useState(false);

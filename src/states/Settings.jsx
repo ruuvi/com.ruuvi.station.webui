@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
-import RadioInput from "../components/RadioInput";
+import RadioInput from "../components/common/RadioInput";
 import { Box, Progress, HStack } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
-import NavClose from "../components/NavClose";
+import NavClose from "../components/common/NavClose";
 import notify from "../utils/notify";
-import LanguageMenu from '../components/LanguageMenu';
+import LanguageMenu from '../components/menus/LanguageMenu';
 import { getUnitFor, localeNumber } from "../UnitHelper";
 import Store from "../Store";
 
