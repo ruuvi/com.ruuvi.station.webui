@@ -13,6 +13,8 @@ export {
 export {
     allUnits,
     DEFAULT_VISIBLE_SENSOR_TYPES,
+    displayDecimalsFor,
+    getMaxDecimals,
     getSensorTypeOnly,
     getUnitFor,
     getUnitHelper,

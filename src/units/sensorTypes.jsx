@@ -101,19 +101,22 @@ const sensorTypes = {
             {
                 translationKey: "%", cloudStoreKey: "0",
                 infoLabel: "description_text_humidity_relative",
-                label: "relative_humidity", shortLabel: "rel_humidity"
+                label: "relative_humidity", shortLabel: "rel_humidity",
+                accuracyKey: "ACCURACY_HUMIDITY_RELATIVE"
             },
             {
                 translationKey: "g/m³", cloudStoreKey: "1",
                 infoLabel: "description_text_humidity_absolute",
                 label: "absolute_humidity", shortLabel: "abs_humidity",
-                symbolJSX: <span>g/m<sup>3</sup></span>
+                symbolJSX: <span>g/m<sup>3</sup></span>,
+                accuracyKey: "ACCURACY_HUMIDITY_ABSOLUTE"
             },
             {
                 translationKey: "dewpoint", cloudStoreKey: "2",
                 infoLabel: "description_text_humidity_dewpoint",
                 label: "dewpoint", shortLabel: "dewpoint",
-                getSymbol: (settings) => temperatureSymbolFor(settings.UNIT_TEMPERATURE)
+                getSymbol: (settings) => temperatureSymbolFor(settings.UNIT_TEMPERATURE),
+                accuracyKey: "ACCURACY_HUMIDITY_DEW_POINT"
             }
         ],
         value: humidityToUserFormat,
@@ -242,7 +245,9 @@ export const allUnits = sensorTypes;
 export const DEFAULT_VISIBLE_SENSOR_TYPES = ["aqi", "co2", "pm25", "voc", "nox", "temperature", "humidity", "pressure", "illuminance", "movementCounter", "soundLevelInstant"];
 
 export function getUnitFor(key, setting) {
-    if (!["temperature", "humidity", "pressure"].includes(key)) return "";
+    if (!["temperature", "humidity", "pressure"].includes(key)) {
+        return sensorTypes[key]?.unit ?? "";
+    }
     if (key === "humidity" && setting === "2") {
         // dewpoint is shown in the temperature unit
         return getUnitFor("temperature", readSettings().UNIT_TEMPERATURE);
@@ -264,11 +269,24 @@ function resolveUnitSetting(key, unit, settings) {
 
 // Decimals for a resolved variant: a decimals on the variant is final
 // (Pa is always 0), otherwise the user's ACCURACY_* setting applies.
+// Variant-specific accuracyKey (e.g. ACCURACY_HUMIDITY_RELATIVE) takes
+// precedence over the generic ACCURACY_SETTING_KEYS[key].
 // Returns undefined when the type's base decimals should be kept.
 function variantDecimals(key, variant, settings) {
     if (variant?.decimals !== undefined) return variant.decimals;
-    const accuracy = settings[ACCURACY_SETTING_KEYS[key]];
-    return accuracy ? parseInt(accuracy) : undefined;
+    const variantAccuracyKey = variant?.accuracyKey;
+    const genericAccuracyKey = ACCURACY_SETTING_KEYS[key];
+    // Try variant-specific key first (e.g. ACCURACY_HUMIDITY_RELATIVE)
+    if (variantAccuracyKey) {
+        const accuracy = settings[variantAccuracyKey];
+        if (accuracy !== undefined) return parseInt(accuracy);
+    }
+    // Fall back to generic key (e.g. legacy ACCURACY_HUMIDITY)
+    if (genericAccuracyKey) {
+        const accuracy = settings[genericAccuracyKey];
+        if (accuracy !== undefined) return parseInt(accuracy);
+    }
+    return undefined;
 }
 
 // Decimal count getDisplayValue should use for a value of this type,
@@ -278,6 +296,11 @@ export function displayDecimalsFor(key, settings) {
     const setting = resolveUnitSetting(key, undefined, settings);
     const variant = type.units?.find(u => u.cloudStoreKey === setting);
     return variantDecimals(key, variant, settings) ?? type.decimals;
+}
+
+// Base decimal count for a sensor type, before any user accuracy override.
+export function getMaxDecimals(key) {
+    return sensorTypes[key]?.decimals ?? 2;
 }
 
 function applyVariant(thing, variant, plaintext, settings) {
@@ -307,14 +330,21 @@ export function getUnitHelper(key, plaintext, unit) {
     if (!base) return { label: "", unit: "", value: identity, decimals: 0 };
 
     const thing = { ...base };
-    if (!UNIT_SETTING_KEYS[key] || !thing.units) return thing;
 
-    const setting = resolveUnitSetting(key, unit, settings);
-    const variant = thing.units.find(u => u.cloudStoreKey === setting);
-    if (variant) applyVariant(thing, variant, plaintext, settings);
-
-    const decimals = variantDecimals(key, variant, settings);
-    if (decimals !== undefined) thing.decimals = decimals;
+    // For types with selectable units (temperature, humidity, pressure, voc),
+    // resolve the variant and apply its overrides.
+    if (UNIT_SETTING_KEYS[key] && thing.units) {
+        const setting = resolveUnitSetting(key, unit, settings);
+        const variant = thing.units.find(u => u.cloudStoreKey === setting);
+        if (variant) applyVariant(thing, variant, plaintext, settings);
+        const decimals = variantDecimals(key, variant, settings);
+        if (decimals !== undefined) thing.decimals = decimals;
+    } else if (ACCURACY_SETTING_KEYS[key]) {
+        // For single-unit types with accuracy keys (PM, acceleration, battery),
+        // apply the accuracy setting directly.
+        const accuracy = settings[ACCURACY_SETTING_KEYS[key]];
+        if (accuracy !== undefined) thing.decimals = parseInt(accuracy);
+    }
 
     return thing;
 }

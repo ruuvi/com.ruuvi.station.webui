@@ -7,17 +7,13 @@ import { withTranslation } from 'react-i18next';
 import NavClose from "../components/common/NavClose";
 import notify from "../utils/notify";
 import LanguageMenu from '../components/menus/LanguageMenu';
-import { getUnitFor, localeNumber } from "../UnitHelper";
 import Store from "../Store";
+import ResolutionSettings from "../components/settings/ResolutionSettings";
 
 const header = {
     fontFamily: "montserrat",
     fontSize: "24px",
     fontWeight: 800,
-}
-
-const tabbed = {
-    marginLeft: "18px"
 }
 
 const temperatureOptions = [
@@ -37,15 +33,6 @@ const pressureOptions = [
     { value: "3", label: "pressure_inhg_name" },
 ]
 
-let resolutionOptions = (type, unitVal) => {
-    let unit = getUnitFor(type, unitVal)
-    return [
-        { value: "0", label: `${localeNumber(1)} ${unit}`},
-        { value: "1", label: `${localeNumber(0.1)} ${unit}`},
-        { value: "2", label: `${localeNumber(0.01)} ${unit}`},
-    ]
-}
-
 const boolOpt = [
     { value: true, label: "yes" },
     { value: false, label: "no" },
@@ -61,8 +48,14 @@ class Settings extends Component {
                 UNIT_TEMPERATURE: "C",
                 UNIT_PRESSURE: "1",
                 ACCURACY_HUMIDITY: "2",
+                ACCURACY_HUMIDITY_RELATIVE: "2",
+                ACCURACY_HUMIDITY_ABSOLUTE: "2",
+                ACCURACY_HUMIDITY_DEW_POINT: "2",
                 ACCURACY_PRESSURE: "2",
-                ACCURACY_TEMPERATURE: "2"
+                ACCURACY_TEMPERATURE: "2",
+                ACCURACY_PM: "1",
+                ACCURACY_ACCELERATION: "3",
+                ACCURACY_VOLTAGE: "2"
             },
             CHART_DRAW_DOTS: Store.getGraphDrawDots(),
             savingSettings: [],
@@ -155,24 +148,18 @@ class Settings extends Component {
                     <br />
                     <RadioInput label={"settings_temperature_unit"} value={this.state.settings.UNIT_TEMPERATURE} options={temperatureOptions} onChange={v => this.updateSetting("UNIT_TEMPERATURE", v)} loading={this.state.savingSettings.indexOf("UNIT_TEMPERATURE") !== -1} />
                     <br />
-                    <RadioInput label={"temperature_resolution"} style={tabbed} value={this.state.settings.ACCURACY_TEMPERATURE} options={resolutionOptions("temperature", this.state.settings.UNIT_TEMPERATURE)} onChange={v => this.updateSetting("ACCURACY_TEMPERATURE", v)} loading={this.state.savingSettings.indexOf("ACCURACY_TEMPERATURE") !== -1} />
-                    <br />
                     <RadioInput label={"settings_humidity_unit"} value={this.state.settings.UNIT_HUMIDITY} options={humidityOptions} onChange={v => this.updateSetting("UNIT_HUMIDITY", v)} loading={this.state.savingSettings.indexOf("UNIT_HUMIDITY") !== -1} />
-                    <br />
-                    <RadioInput label={"humidity_resolution"} style={tabbed} value={this.state.settings.ACCURACY_HUMIDITY} options={resolutionOptions("humidity", this.state.settings.UNIT_HUMIDITY)} onChange={v => this.updateSetting("ACCURACY_HUMIDITY", v)} loading={this.state.savingSettings.indexOf("ACCURACY_HUMIDITY") !== -1} />
                     <br />
                     <RadioInput label={"settings_pressure_unit"} value={this.state.settings.UNIT_PRESSURE} options={pressureOptions} onChange={v => this.updateSetting("UNIT_PRESSURE", v)} loading={this.state.savingSettings.indexOf("UNIT_PRESSURE") !== -1} />
                     <br />
-                    {this.state.settings.UNIT_PRESSURE !== "0" && <>
-                        <RadioInput label={"pressure_resolution"} style={tabbed} value={this.state.settings.ACCURACY_PRESSURE} options={resolutionOptions("pressure", this.state.settings.UNIT_PRESSURE)} onChange={v => this.updateSetting("ACCURACY_PRESSURE", v)} loading={this.state.savingSettings.indexOf("ACCURACY_PRESSURE") !== -1} />
-                        <br />
-                    </>
-                    }
                     <RadioInput label={"settings_chart_draw_dots"} value={this.state.CHART_DRAW_DOTS} options={boolOpt} onChange={v => this.updateLocalSetting("CHART_DRAW_DOTS", JSON.parse(v))} />
                     <br />
                     <RadioInput label={"settings_email_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_EMAIL_NOTIFICATIONS)} options={boolOpt} onChange={v => this.updateSetting("DISABLE_EMAIL_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} loading={this.state.savingSettings.indexOf("DISABLE_EMAIL_NOTIFICATIONS") !== -1} />
                     <br />
                     <RadioInput label={"settings_mobile_push_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_PUSH_NOTIFICATIONS)} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} loading={this.state.savingSettings.indexOf("DISABLE_PUSH_NOTIFICATIONS") !== -1} />
+                    <br /><br />
+                    <hr style={{ marginBottom: 20 }} />
+                    <ResolutionSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
                 </>
             )}
         </>

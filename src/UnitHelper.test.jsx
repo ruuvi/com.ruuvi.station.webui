@@ -214,6 +214,23 @@ describe("getDisplayValue", () => {
         expect(getDisplayValue("pressure", 1013.256, { ACCURACY_PRESSURE: "1" })).toBe("1,013.3");
     });
 
+    it("honors variant-specific humidity accuracy keys", () => {
+        expect(getDisplayValue("humidity", 50.567, { ACCURACY_HUMIDITY_RELATIVE: "0" })).toBe("51");
+        expect(getDisplayValue("humidity", 50.567, { ACCURACY_HUMIDITY: "1", ACCURACY_HUMIDITY_RELATIVE: "0" })).toBe("51");
+    });
+
+    it("honors ACCURACY_PM", () => {
+        expect(getDisplayValue("pm25", 12.345, { ACCURACY_PM: "0" })).toBe("12");
+    });
+
+    it("honors ACCURACY_ACCELERATION", () => {
+        expect(getDisplayValue("accelerationX", 1.23456, { ACCURACY_ACCELERATION: "2" })).toBe("1.23");
+    });
+
+    it("honors ACCURACY_VOLTAGE", () => {
+        expect(getDisplayValue("battery", 2.956, { ACCURACY_VOLTAGE: "1" })).toBe("3.0");
+    });
+
     it("forces zero decimals for pressure in Pa", () => {
         expect(getDisplayValue("pressure", 101325.5, { UNIT_PRESSURE: "0", ACCURACY_PRESSURE: "2" })).toBe("101,326");
     });
@@ -394,6 +411,26 @@ describe("getUnitHelper", () => {
             expect(getUnitHelper("humidity").decimals).toBe(0);
         });
 
+        it("honors ACCURACY_HUMIDITY_RELATIVE over legacy ACCURACY_HUMIDITY", () => {
+            setStoredSettings({ ACCURACY_HUMIDITY: "0", ACCURACY_HUMIDITY_RELATIVE: "1" });
+            expect(getUnitHelper("humidity").decimals).toBe(1);
+        });
+
+        it("falls back to legacy ACCURACY_HUMIDITY when variant key not set", () => {
+            setStoredSettings({ ACCURACY_HUMIDITY: "0" });
+            expect(getUnitHelper("humidity").decimals).toBe(0);
+        });
+
+        it("honors ACCURACY_HUMIDITY_ABSOLUTE", () => {
+            setStoredSettings({ UNIT_HUMIDITY: "1", ACCURACY_HUMIDITY_ABSOLUTE: "0" });
+            expect(getUnitHelper("humidity").decimals).toBe(0);
+        });
+
+        it("honors ACCURACY_HUMIDITY_DEW_POINT", () => {
+            setStoredSettings({ UNIT_HUMIDITY: "2", ACCURACY_HUMIDITY_DEW_POINT: "1" });
+            expect(getUnitHelper("humidity").decimals).toBe(1);
+        });
+
         it("valueWithUnit converts using stored temperature unit", () => {
             setStoredSettings({ UNIT_TEMPERATURE: "F" });
             const h = getUnitHelper("humidity");
@@ -422,6 +459,19 @@ describe("getUnitHelper", () => {
             const h = getUnitHelper("pressure");
             expect(h.unit).toBe("mmHg");
             expect(h.decimals).toBe(1);
+        });
+    });
+
+    describe("particulate matter", () => {
+        it("has default decimals of 1", () => {
+            expect(getUnitHelper("pm25").decimals).toBe(1);
+            expect(getUnitHelper("pm100").decimals).toBe(1);
+        });
+
+        it("honors ACCURACY_PM", () => {
+            setStoredSettings({ ACCURACY_PM: "0" });
+            expect(getUnitHelper("pm25").decimals).toBe(0);
+            expect(getUnitHelper("pm100").decimals).toBe(0);
         });
     });
 
@@ -472,6 +522,18 @@ describe("getUnitHelper", () => {
         it("acceleration converts mG to g", () => {
             expect(getUnitHelper("accelerationX").value(1000)).toBe(1);
             expect(getUnitHelper("accelerationY").decimals).toBe(3);
+        });
+
+        it("honors ACCURACY_ACCELERATION", () => {
+            setStoredSettings({ ACCURACY_ACCELERATION: "1" });
+            expect(getUnitHelper("accelerationX").decimals).toBe(1);
+            expect(getUnitHelper("accelerationY").decimals).toBe(1);
+            expect(getUnitHelper("accelerationZ").decimals).toBe(1);
+        });
+
+        it("honors ACCURACY_VOLTAGE", () => {
+            setStoredSettings({ ACCURACY_VOLTAGE: "0" });
+            expect(getUnitHelper("battery").decimals).toBe(0);
         });
     });
 

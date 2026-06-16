@@ -13,10 +13,20 @@ export const UNIT_SETTING_KEYS = {
 };
 
 // Settings key for the user-selected decimal count, per sensor type.
+// Humidity uses per-variant keys (resolved via variant.accuracyKey),
+// but the legacy ACCURACY_HUMIDITY is kept as a fallback.
 export const ACCURACY_SETTING_KEYS = {
     temperature: "ACCURACY_TEMPERATURE",
     humidity: "ACCURACY_HUMIDITY",
-    pressure: "ACCURACY_PRESSURE"
+    pressure: "ACCURACY_PRESSURE",
+    pm10: "ACCURACY_PM",
+    pm25: "ACCURACY_PM",
+    pm40: "ACCURACY_PM",
+    pm100: "ACCURACY_PM",
+    accelerationX: "ACCURACY_ACCELERATION",
+    accelerationY: "ACCURACY_ACCELERATION",
+    accelerationZ: "ACCURACY_ACCELERATION",
+    battery: "ACCURACY_VOLTAGE"
 };
 
 export const UNIT_DEFAULTS = {
