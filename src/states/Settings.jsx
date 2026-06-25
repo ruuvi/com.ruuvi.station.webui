@@ -9,29 +9,13 @@ import notify from "../utils/notify";
 import LanguageMenu from '../components/menus/LanguageMenu';
 import Store from "../Store";
 import ResolutionSettings from "../components/settings/ResolutionSettings";
+import UnitSettings from "../components/settings/UnitSettings";
 
 const header = {
     fontFamily: "montserrat",
     fontSize: "24px",
     fontWeight: 800,
 }
-
-const temperatureOptions = [
-    { value: "C", label: "temperature_celsius_name" },
-    { value: "F", label: "temperature_fahrenheit_name" },
-    { value: "K", label: "temperature_kelvin_name" },
-]
-const humidityOptions = [
-    { value: "0", label: "humidity_relative_name" },
-    { value: "1", label: "humidity_absolute_name" },
-    { value: "2", label: "humidity_dew_point_name" },
-]
-const pressureOptions = [
-    { value: "0", label: "pressure_pa_name" },
-    { value: "1", label: "pressure_hpa_name" },
-    { value: "2", label: "pressure_mmhg_name" },
-    { value: "3", label: "pressure_inhg_name" },
-]
 
 const boolOpt = [
     { value: true, label: "yes" },
@@ -144,13 +128,10 @@ class Settings extends Component {
                 </>
             ) : (
                 <>
+                    <Box fontSize="sm" mb={4} opacity={0.7}>
+                        {this.props.t("settings_introduction")}
+                    </Box>
                     <LanguageMenu onChange={v => this.updateSetting("PROFILE_LANGUAGE_CODE", v)} loading={this.state.savingSettings.indexOf("PROFILE_LANGUAGE_CODE") !== -1} />
-                    <br />
-                    <RadioInput label={"settings_temperature_unit"} value={this.state.settings.UNIT_TEMPERATURE} options={temperatureOptions} onChange={v => this.updateSetting("UNIT_TEMPERATURE", v)} loading={this.state.savingSettings.indexOf("UNIT_TEMPERATURE") !== -1} />
-                    <br />
-                    <RadioInput label={"settings_humidity_unit"} value={this.state.settings.UNIT_HUMIDITY} options={humidityOptions} onChange={v => this.updateSetting("UNIT_HUMIDITY", v)} loading={this.state.savingSettings.indexOf("UNIT_HUMIDITY") !== -1} />
-                    <br />
-                    <RadioInput label={"settings_pressure_unit"} value={this.state.settings.UNIT_PRESSURE} options={pressureOptions} onChange={v => this.updateSetting("UNIT_PRESSURE", v)} loading={this.state.savingSettings.indexOf("UNIT_PRESSURE") !== -1} />
                     <br />
                     <RadioInput label={"settings_chart_draw_dots"} value={this.state.CHART_DRAW_DOTS} options={boolOpt} onChange={v => this.updateLocalSetting("CHART_DRAW_DOTS", JSON.parse(v))} />
                     <br />
@@ -158,7 +139,8 @@ class Settings extends Component {
                     <br />
                     <RadioInput label={"settings_mobile_push_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_PUSH_NOTIFICATIONS)} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} loading={this.state.savingSettings.indexOf("DISABLE_PUSH_NOTIFICATIONS") !== -1} />
                     <br /><br />
-                    <hr style={{ marginBottom: 20 }} />
+                    <UnitSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
+                    <br /><br />
                     <ResolutionSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
                 </>
             )}
