@@ -14,13 +14,14 @@ const temperatureOptions = [
     { value: "F", label: "temperature_fahrenheit_name" },
     { value: "K", label: "temperature_kelvin_name" },
 ]
-// Dew point (value "2") is intentionally omitted: it is hidden from the humidity
-// unit options and cannot be selected. If it was previously selected it stays as
-// the stored value and is not changed automatically.
+// Dew point (value "2") is no longer offered as a humidity unit. It is only shown
+// when it is the currently selected value, so existing selections stay visible; once
+// the user picks another unit it disappears and can no longer be selected.
 const humidityOptions = [
     { value: "0", label: "humidity_relative_name" },
     { value: "1", label: "humidity_absolute_name" },
 ]
+const dewPointOption = { value: "2", label: "humidity_dew_point_name" }
 const pressureOptions = [
     { value: "0", label: "pressure_pa_name" },
     { value: "1", label: "pressure_hpa_name" },
@@ -30,6 +31,10 @@ const pressureOptions = [
 
 export default function UnitSettings({ settings, savingSettings, updateSetting }) {
     const { t } = useTranslation();
+
+    const humidityUnitOptions = settings.UNIT_HUMIDITY === "2"
+        ? [...humidityOptions, dewPointOption]
+        : humidityOptions;
 
     return (
         <Box>
@@ -50,7 +55,7 @@ export default function UnitSettings({ settings, savingSettings, updateSetting }
             <RadioInput
                 label={"settings_humidity_unit"}
                 value={settings.UNIT_HUMIDITY}
-                options={humidityOptions}
+                options={humidityUnitOptions}
                 onChange={v => updateSetting("UNIT_HUMIDITY", v)}
                 loading={savingSettings.indexOf("UNIT_HUMIDITY") !== -1}
             />
