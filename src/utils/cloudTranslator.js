@@ -19,6 +19,7 @@ export const ORDERED_VISIBILITY_CODES = [
     "PRESSURE_2",             // mmHg
     "PRESSURE_3",             // inHg
     "MOVEMENT_COUNT",
+    "MSN_COUNT",
     "SOUNDINSTANT_DBA",
     "SOUNDAVG_DBA",
     "SOUNDPEAK_DBA",
@@ -53,6 +54,7 @@ export const visibilityCodes = [
     ["PRESSURE_2", "pressure", "2"],
     ["PRESSURE_3", "pressure", "3"],
     ["MOVEMENT_COUNT", "movementCounter", ""],
+    ["MSN_COUNT", "measurementSequenceNumber", ""],
     ["SOUNDINSTANT_DBA", "soundLevelInstant", "dBA"],
     ["SOUNDAVG_DBA", "soundLevelAvg", "dBA"],
     ["SOUNDPEAK_DBA", "soundLevelPeak", "dBA"],
