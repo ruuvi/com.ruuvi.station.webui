@@ -4,12 +4,6 @@ import { useTranslation } from "react-i18next";
 import RadioInput from "../common/RadioInput";
 import { getUnitFor, getMaxDecimals, localeNumber } from "../../UnitHelper";
 
-const sectionHeader = {
-    fontFamily: "montserrat",
-    fontSize: "18px",
-    fontWeight: 700,
-}
-
 function resolutionOptions(type, unitVal, maxDecimals) {
     let unit = getUnitFor(type, unitVal);
     const opts = [];
@@ -52,8 +46,7 @@ export default function ResolutionSettings({ settings, savingSettings, updateSet
 
     return (
         <Box>
-            <Text style={sectionHeader}>{t("resolution_settings")}</Text>
-            <Text fontSize="sm" mt={1} mb={4} opacity={0.7}>
+            <Text fontSize="sm" mb={4} opacity={0.7}>
                 {t("resolution_settings_description")}
             </Text>
 

@@ -2,7 +2,16 @@ import React, { Component } from "react";
 import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
 import RadioInput from "../components/common/RadioInput";
-import { Box, Progress, HStack } from "@chakra-ui/react"
+import {
+    Box,
+    Progress,
+    HStack,
+    Accordion,
+    AccordionItem,
+    AccordionButton,
+    AccordionPanel,
+    AccordionIcon,
+} from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import NavClose from "../components/common/NavClose";
 import notify from "../utils/notify";
@@ -15,6 +24,22 @@ const header = {
     fontFamily: "montserrat",
     fontSize: "24px",
     fontWeight: 800,
+}
+
+const accordionTitle = {
+    fontFamily: "montserrat",
+    fontSize: "16px",
+    fontWeight: 800,
+}
+
+const accordionButton = {
+    paddingTop: 12,
+    paddingBottom: 12,
+}
+
+const accordionPanel = {
+    paddingTop: 16,
+    paddingBottom: 16,
 }
 
 const boolOpt = [
@@ -121,6 +146,17 @@ class Settings extends Component {
         return JSON.parse(value) ? true : false
     }
     render() {
+        // in the modal, bleed the accordion through the ModalBody padding (24px)
+        // so the rows and dividers span the full dialog width; the same padding
+        // is applied inside the button/panel to keep the content aligned.
+        // vertically, counter the ModalBody bottom padding (8px) + its mb="3"
+        // (12px, set in RDialog) so the accordion sits flush with the dialog edge
+        const accordionBleed = this.props.isModal ? -6 : 0;
+        const accordionBleedBottom = this.props.isModal ? -5 : 0;
+        const accordionPad = this.props.isModal ? 24 : 0;
+        const accordionButtonStyle = { ...accordionButton, paddingLeft: accordionPad, paddingRight: accordionPad };
+        const accordionPanelStyle = { ...accordionPanel, paddingLeft: accordionPad, paddingRight: accordionPad };
+
         var content = <>
             {this.state.loading ? (
                 <>
@@ -139,9 +175,32 @@ class Settings extends Component {
                     <br />
                     <RadioInput label={"settings_mobile_push_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_PUSH_NOTIFICATIONS)} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} loading={this.state.savingSettings.indexOf("DISABLE_PUSH_NOTIFICATIONS") !== -1} />
                     <br /><br />
-                    <UnitSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
-                    <br /><br />
-                    <ResolutionSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
+                    <Box mx={accordionBleed} mb={accordionBleedBottom} borderBottomRadius={this.props.isModal ? "md" : 0} overflow="hidden">
+                        <Accordion allowMultiple>
+                            <AccordionItem>
+                                <AccordionButton style={accordionButtonStyle} _hover={{}}>
+                                    <Box flex="1" textAlign="left" style={accordionTitle}>
+                                        {this.props.t("unit_settings")}
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                                <AccordionPanel style={accordionPanelStyle}>
+                                    <UnitSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
+                                </AccordionPanel>
+                            </AccordionItem>
+                            <AccordionItem>
+                                <AccordionButton style={accordionButtonStyle} _hover={{}}>
+                                    <Box flex="1" textAlign="left" style={accordionTitle}>
+                                        {this.props.t("resolution_settings")}
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                                <AccordionPanel style={accordionPanelStyle}>
+                                    <ResolutionSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
+                                </AccordionPanel>
+                            </AccordionItem>
+                        </Accordion>
+                    </Box>
                 </>
             )}
         </>

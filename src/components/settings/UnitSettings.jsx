@@ -3,12 +3,6 @@ import { Box, Text } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import RadioInput from "../common/RadioInput";
 
-const sectionHeader = {
-    fontFamily: "montserrat",
-    fontSize: "18px",
-    fontWeight: 700,
-}
-
 const temperatureOptions = [
     { value: "C", label: "temperature_celsius_name" },
     { value: "F", label: "temperature_fahrenheit_name" },
@@ -38,8 +32,7 @@ export default function UnitSettings({ settings, savingSettings, updateSetting }
 
     return (
         <Box>
-            <Text style={sectionHeader}>{t("unit_settings")}</Text>
-            <Text fontSize="sm" mt={1} mb={4} opacity={0.7}>
+            <Text fontSize="sm" mb={4} opacity={0.7}>
                 {t("unit_settings_description")}
             </Text>
 
