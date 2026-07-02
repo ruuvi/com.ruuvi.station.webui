@@ -535,9 +535,7 @@ class NetworkApi {
         return respData;
     }
     async getBanners() {
-        let url = window.location.href.indexOf("devstation") !== -1
-            ? "https://raw.githubusercontent.com/ruuvi/station.localization/dev/web_banners.json"
-            : "https://raw.githubusercontent.com/ruuvi/station.localization/master/web_banners.json"
+        let url = "https://raw.githubusercontent.com/ruuvi/station.localization/master/web_banners.json"
         const resp = await fetch(url, { cache: "no-store" })
         return await resp.json()
     }
