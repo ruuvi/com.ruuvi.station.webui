@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import UplotReact from 'uplot-react';
 import 'uplot/dist/uPlot.min.css';
 import pjson from '../../../package.json';
@@ -9,12 +9,15 @@ import { Box, Spinner, useColorMode } from "@chakra-ui/react";
 import { t } from "i18next";
 import { getSensorTypeOnly, getUnitHelper, getUnitOnly, round } from "../../UnitHelper";
 import UplotTouchZoomPlugin from "./uplotPlugins/UplotTouchZoomPlugin";
-import { date2digits, secondsToUserDateString, time2digits } from "../../TimeHelper";
+import { secondsToUserDateString } from "../../TimeHelper";
 import Store from "../../Store";
 import drawDataGapLines from "./uplotHooks/drawDataGapLines";
 import uPlot from "uplot";
+import useGraphZoom from "./useGraphZoom";
+import useContainerDimensions from "./useContainerDimensions";
+import { makeXAxis, makeYAxis } from "./graphAxes";
 
-function getGraphColor(idx, _fill) {
+function getGraphColor(idx) {
     const colors = [
         "#01b9a8",
         "#f77a61",
@@ -30,6 +33,7 @@ function getGraphColor(idx, _fill) {
     }
     return color
 }
+
 const graphLoadingOverlay = {
     position: "absolute",
     width: "100%",
@@ -37,104 +41,80 @@ const graphLoadingOverlay = {
     zIndex: 1,
 }
 
-function CompareView(props) {
-    const getDataKey = () => {
-        const params = new URLSearchParams(location.search);
-        return params.get("unit") || "temperature_C";
+// Unit settings encoded in the compare URL, e.g. "humidity_2C" means dew
+// point in Celsius.
+function getUnitSettings(dataKey, unit) {
+    if (!unit) return undefined;
+    if (dataKey === "temperature") {
+        return { UNIT_TEMPERATURE: unit };
     }
+    if (dataKey === "humidity") {
+        if (unit.startsWith("2") && unit.length > 1) {
+            return { UNIT_HUMIDITY: "2", UNIT_TEMPERATURE: unit.substring(1) };
+        }
+        return { UNIT_HUMIDITY: unit };
+    }
+    if (dataKey === "pressure") {
+        return { UNIT_PRESSURE: unit };
+    }
+    return undefined;
+}
 
+// Converts each sensor's measurements to uPlot series in the selected unit
+// (with null markers in time gaps) and joins them on a shared x-axis.
+function buildGraphData(sensorData, fullDataKey) {
+    if (!sensorData || !sensorData.length) return [];
+
+    const dataKey = getSensorTypeOnly(fullDataKey) || "";
+    const settings = getUnitSettings(dataKey, getUnitOnly(fullDataKey) || null);
+    const oneHourInSeconds = 3600;
+    const unitHelper = getUnitHelper(dataKey);
+
+    const tableData = sensorData.map(data => {
+        const thisSensorsData = [[], []];
+        // Measurements are already sorted ascending from the fetch loop
+        for (let j = 0; j < data.measurements.length; j++) {
+            if (!data.measurements[j].parsed) continue;
+            const timestamp = data.measurements[j].timestamp;
+
+            let value;
+            switch (dataKey) {
+                case "temperature":
+                    value = unitHelper.value(data.measurements[j].parsed[dataKey], undefined, settings)
+                    break
+                case "humidity":
+                    value = unitHelper.value(data.measurements[j].parsed[dataKey], data.measurements[j].parsed.temperature, settings)
+                    break
+                default:
+                    value = unitHelper.value(data.measurements[j].parsed[dataKey], settings)
+                    break
+            }
+
+            if (j > 0) {
+                const prevTimestamp = data.measurements[j - 1].timestamp;
+                if (timestamp - prevTimestamp >= oneHourInSeconds) {
+                    thisSensorsData[0].push(prevTimestamp + 1);
+                    thisSensorsData[1].push(null);
+                }
+            }
+            if (Number.isNaN(value)) value = null;
+            thisSensorsData[0].push(timestamp);
+            thisSensorsData[1].push(value);
+        }
+        return thisSensorsData;
+    });
+
+    return uPlot.join(tableData, tableData.map(t => t.map(_s => 2)))
+}
+
+function CompareView(props) {
     let sensors = props.sensors;
     const [sensorData, setSensorData] = useState([])
     const [loading, setLoading] = useState(false)
-    const [zoom, setZoom] = useState(undefined)
     const ref = useRef(null);
 
-    const touchZoomStateRef = useRef(undefined);
-    const wasTouchZoomingRef = useRef(false);
-    const fromComponentUpdateRef = useRef(false);
-    const isTouchZoomingRef = useRef(false);
-
-    const dataKey = getDataKey();
-    const prevDataKeyRef = useRef(dataKey);
-    const dataKeyChangedRef = useRef(false);
-    useEffect(() => {
-        if (prevDataKeyRef.current !== dataKey) {
-            dataKeyChangedRef.current = true;
-        }
-        prevDataKeyRef.current = dataKey;
-    }, [dataKey]);
-
-
-    const getGraphData = () => {
-        if (!sensorData) return [];
-        let dataKey = getSensorTypeOnly(getDataKey()) || "";
-        let unit = getUnitOnly(getDataKey()) || null;
-        let settings = undefined
-        if (unit) {
-            if (dataKey === "temperature" && unit) {
-                settings = { UNIT_TEMPERATURE: unit }
-            }
-            if (dataKey === "humidity") {
-                // Handle dew point temperature variants (e.g. unit "2C", "2F", "2K")
-                if (unit && unit.startsWith("2") && unit.length > 1) {
-                    settings = { UNIT_HUMIDITY: "2", UNIT_TEMPERATURE: unit.substring(1) }
-                } else {
-                    settings = { UNIT_HUMIDITY: unit }
-                }
-            }
-            if (dataKey === "pressure") {
-                settings = { UNIT_PRESSURE: unit }
-            }
-        }
-        const oneHourInSeconds = 3600;
-        let tableData = [];
-        const unitHelper = getUnitHelper(dataKey);
-        sensorData.forEach(data => {
-            let thisSensorsData = [[], []];
-            if (data.measurements.length) {
-                // Measurements are already sorted ascending from the fetch loop
-                for (let j = 0; j < data.measurements.length; j++) {
-                    if (!data.measurements[j].parsed) continue;
-                    const timestamp = data.measurements[j].timestamp;
-
-                    let value;
-                    switch (dataKey) {
-                        case "temperature":
-                            value = unitHelper.value(data.measurements[j].parsed[dataKey], undefined, settings)
-                            break
-                        case "humidity":
-                            value = unitHelper.value(data.measurements[j].parsed[dataKey], data.measurements[j].parsed.temperature, settings)
-                            break
-                        default:
-                            value = unitHelper.value(data.measurements[j].parsed[dataKey], settings)
-                            break
-                    }
-
-                    if (j > 0) {
-                        const prevTimestamp = data.measurements[j - 1].timestamp;
-                        const timeDifference = timestamp - prevTimestamp;
-
-                        if (timeDifference >= oneHourInSeconds) {
-                            let insertTime = prevTimestamp + 1;
-                            thisSensorsData[0].push(insertTime);
-                            thisSensorsData[1].push(null);
-                        }
-                    }
-                    if (Number.isNaN(value)) value = null;
-                    thisSensorsData[0].push(timestamp);
-                    thisSensorsData[1].push(value);
-
-                }
-            }
-
-            tableData.push(thisSensorsData);
-        });
-
-        if (tableData.length) {
-            return uPlot.join(tableData, tableData.map(t => t.map(_s => 2)))
-        }
-        return [];
-    };
+    const params = new URLSearchParams(location.search);
+    const fullDataKey = params.get("unit") || "temperature_C";
 
     useEffect(() => {
         (async () => {
@@ -248,19 +228,74 @@ function CompareView(props) {
         props.setData(sensorData);
     }, [sensorData]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    useEffect(() => {
-        fromComponentUpdateRef.current = true;
-    }, [zoom]);
+    // Latest prop values for the callbacks living inside the memoized uPlot
+    // options, which would otherwise close over stale values.
+    const live = useRef({});
+    live.current.from = props.from;
+    live.current.to = props.to;
 
-    function getXRange() {
-        return [props.from, props.to || new Date().getTime() / 1000]
-    }
+    const getXRange = useCallback(() => {
+        const { from, to } = live.current;
+        return [from, to || new Date().getTime() / 1000];
+    }, []);
+
+    const { xRange, yRange, onTouchZoom } = useGraphZoom({
+        dataKey: fullDataKey,
+        getXRange,
+        hasFixedRange: !!(props.from && props.to),
+    });
+
+    const graphData = useMemo(
+        () => buildGraphData(sensorData, fullDataKey),
+        [sensorData, fullDataKey]
+    );
 
     const { width } = useContainerDimensions(ref)
     const colorMode = useColorMode().colorMode;
-    let showDots = Store.getGraphDrawDots()
-    //if (loading) return <Box height={450}><Progress isIndeterminate /></Box>
-    let graphData = getGraphData();
+    const showDots = Store.getGraphDrawDots()
+    const seriesKey = sensorData.map(x => x.name || x.sensor).join("|");
+
+    // uplot-react re-creates the whole chart when anything but width/height
+    // changes in the options, so keep this object as stable as possible;
+    // progressively loaded data then flows through the cheaper setData path.
+    const baseOptions = useMemo(() => ({
+        plugins: [UplotTouchZoomPlugin(getXRange(), onTouchZoom)],
+        padding: [10, 10, 0, -10],
+        series: [
+            {
+                label: t('time'),
+                class: "graphLabel",
+                value: (_, ts) => secondsToUserDateString(ts),
+            },
+            ...sensorData.map((x, i) => {
+                return {
+                    label: x.name || x.sensor,
+                    points: { show: showDots, size: 3, fill: getGraphColor(i) },
+                    class: "graphLabel",
+                    spanGaps: false,
+                    stroke: getGraphColor(i),
+                }
+            })
+        ],
+        scales: {
+            y: { range: yRange },
+            x: { range: xRange },
+        },
+        hooks: {
+            drawSeries: [(u, si) => drawDataGapLines(u, si, getGraphColor(si - 1))],
+        },
+        axes: [
+            makeXAxis(colorMode),
+            makeYAxis(colorMode, { size: 55 }),
+        ],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }), [seriesKey, colorMode, showDots]);
+
+    const options = useMemo(
+        () => ({ ...baseOptions, width, height: 450 }),
+        [baseOptions, width]
+    );
+
     return (
         <div ref={ref}>
             {loading &&
@@ -276,162 +311,13 @@ function CompareView(props) {
                 </Box>
                 : (
                     <UplotReact
-                        options={{
-                            plugins: [UplotTouchZoomPlugin(getXRange(), (isZooming) => {
-                                isTouchZoomingRef.current = isZooming
-                                wasTouchZoomingRef.current = true;
-                            })],
-                            padding: [10, 10, 0, -10],
-                            width: width,
-                            height: 450,
-                            series: [
-                                {
-                                    label: t('time'),
-                                    class: "graphLabel",
-                                    value: (_, ts) => secondsToUserDateString(ts),
-                                },
-                                ...sensorData.map((x, i) => {
-                                    return {
-                                        label: x.name || x.sensor,
-                                        points: { show: showDots, size: 3, fill: getGraphColor(i) },
-                                        class: "graphLabel",
-                                        spanGaps: false,
-                                        stroke: getGraphColor(i),
-                                    }
-                                })
-                            ],
-                            scales: {
-                                y: {
-                                    range: (_, fromY, toY) => {
-                                        fromY -= 0.5
-                                        toY += 0.5
-                                        return [fromY, toY]
-                                    }
-                                }, x: {
-                                    //range: getXRange(),
-                                    range: (_, fromX, toX) => {
-                                        let propFrom = props.from
-                                        let propTo = props.to
-                                        if (!propFrom || !propTo) {
-                                            return getXRange()
-                                        }
-
-                                        if (isTouchZoomingRef.current) {
-                                            // if zoom is close enought to full x range, assume fully zoomed out
-                                            if (Math.abs(fromX - propFrom / 1000) < 1 && Math.abs(toX - propTo / 1000) < 1) {
-                                                touchZoomStateRef.current = "reset"
-                                            } else {
-                                                touchZoomStateRef.current = [fromX, toX]
-                                            }
-                                            return [fromX, toX]
-                                        }
-
-                                        if (wasTouchZoomingRef.current) {
-                                            if (touchZoomStateRef.current) {
-                                                if (touchZoomStateRef.current === "reset") {
-                                                    setZoom(undefined);
-                                                    touchZoomStateRef.current = undefined
-                                                    return getXRange()
-                                                }
-                                                setZoom(touchZoomStateRef.current)
-                                                touchZoomStateRef.current = undefined
-                                            }
-                                            wasTouchZoomingRef.current = false;
-                                            if (zoom && fromComponentUpdateRef.current) {
-                                                fromComponentUpdateRef.current = false;
-                                                return zoom;
-                                            }
-                                            if (!fromComponentUpdateRef.current && Number.isInteger(fromX) && Number.isInteger(toX)) {
-                                                setZoom(undefined)
-                                                return getXRange()
-                                            }
-                                            return [fromX, toX]
-                                        }
-
-                                        if (zoom && fromComponentUpdateRef.current) {
-                                            fromComponentUpdateRef.current = false;
-                                            return zoom;
-                                        }
-                                        if (Number.isInteger(fromX) && Number.isInteger(toX)) {
-                                            if (dataKeyChangedRef.current) {
-                                                dataKeyChangedRef.current = false;
-                                                return zoom || getXRange();
-                                            }
-                                            setZoom(undefined);
-                                            return getXRange();
-                                        } else {
-                                            setZoom([fromX, toX]);
-                                            return [fromX, toX];
-                                        }
-                                    }
-                                }
-                            },
-                            hooks: {
-                                drawSeries: [(u, si) => drawDataGapLines(u, si, getGraphColor(si - 1))],
-                            },
-                            axes: [
-                                {
-                                    grid: { show: false },
-                                    font: "12px Arial",
-                                    stroke: ruuviTheme.graph.axisLabels[colorMode],
-                                    values: (_, ticks) => {
-                                        var xRange = ticks[ticks.length - 1] - ticks[0]
-                                        var xRangeHours = xRange / 60 / 60
-                                        var prevRaw = null;
-                                        var useDates = xRangeHours >= 72;
-                                        return ticks.map(raw => {
-                                            var out = useDates ? date2digits(raw) : time2digits(raw);
-                                            if (prevRaw === out) {
-                                                if (useDates) return time2digits(raw);
-                                                return null;
-                                            }
-                                            prevRaw = out;
-                                            return out;
-                                        })
-                                    }
-                                }, {
-                                    grid: { stroke: ruuviTheme.graph.grid[colorMode], width: 2 },
-                                    stroke: ruuviTheme.graph.axisLabels[colorMode],
-                                    size: 55,
-                                    font: "12px Arial",
-                                }
-                            ],
-                        }}
+                        options={options}
                         data={graphData}
-                        onCreate={(_chart) => { }}
-                        onDelete={(_chart) => { }}
                     />
                 )}
         </div>
     )
 }
-
-export const useContainerDimensions = myRef => {
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
-
-    useEffect(() => {
-        const getDimensions = () => ({
-            width: myRef.current.offsetWidth,
-            height: myRef.current.offsetHeight
-        })
-
-        const handleResize = () => {
-            setDimensions(getDimensions())
-        }
-
-        if (myRef.current) {
-            setDimensions(getDimensions())
-        }
-
-        window.addEventListener("resize", handleResize)
-
-        return () => {
-            window.removeEventListener("resize", handleResize)
-        }
-    }, [myRef])
-
-    return dimensions;
-};
 
 export function EmptyGraph() {
     const ref = useRef(null);

@@ -1,93 +1,307 @@
-import React, { Component, Suspense, useEffect, useState, useMemo } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef } from "react";
 import 'uplot/dist/uPlot.min.css';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import { IconButton, useColorMode } from "@chakra-ui/react";
+import { MdInfo } from "react-icons/md";
 import { getDisplayValue, getUnitHelper, localeNumber } from "../../UnitHelper";
 import UplotTouchZoomPlugin from "./uplotPlugins/UplotTouchZoomPlugin";
 import UplotLegendHider from "./uplotPlugins/UplotLegendHider";
 import { ruuviTheme } from "../../themes";
-import { withColorMode } from "../../utils/withColorMode";
-import { IconButton } from "@chakra-ui/react";
-import { MdInfo } from "react-icons/md";
 import notify from "../../utils/notify";
-import { date2digits, secondsToUserDateString, time2digits } from "../../TimeHelper";
+import { secondsToUserDateString } from "../../TimeHelper";
 import Store from "../../Store";
 import drawDataGapLines from "./uplotHooks/drawDataGapLines";
+import useGraphZoom from "./useGraphZoom";
+import useContainerDimensions from "./useContainerDimensions";
+import { makeXAxis, makeYAxis } from "./graphAxes";
 const UplotReact = React.lazy(() => import('uplot-react'));
 
-let zoomData = {
-    value: undefined,
-    aListener: function (_val) { },
-    set a(val) {
-        this.value = val;
-        this.aListener(val);
-    },
-    get a() {
-        return this.value;
-    },
-    registerListener: function (listener) {
-        this.aListener = listener;
-    },
-    unregisterListener: function (_listener) {
-        this.aListener = function (_val) { };
+// Gaps of at least this many seconds are drawn as dashed lines, and points
+// with no neighbor within it are drawn as isolated points.
+const GAP_LIMIT_SECONDS = 3600;
+
+// Converts raw measurements into uPlot data [timestamps, values] in the
+// currently selected unit, with null markers inserted into time gaps so
+// uPlot breaks the line. Also returns the minimum value (for the alert
+// gradient) and the indexes of isolated points (for the draw hooks).
+function buildGraphData(data, dataKey, unitKey) {
+    if (!data || !data.length) return { data: [[], []], dataMin: Number.POSITIVE_INFINITY, isolated: [] };
+
+    const unitHelper = getUnitHelper(dataKey);
+    const points = [];
+    for (let i = 0; i < data.length; i++) {
+        const x = data[i];
+        if (x.parsed && x.parsed[dataKey] !== undefined) {
+            points.push(x);
+        }
+    }
+    points.sort((a, b) => a.timestamp - b.timestamp);
+
+    const timestamps = [];
+    const values = [];
+    let dataMin = Number.POSITIVE_INFINITY;
+    for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+        const maybeTemp = dataKey === "humidity" ? p.parsed.temperature : undefined;
+        const value = unitKey && unitHelper.valueWithUnit // e.g. humidity absolute, voc mg/m3 etc.
+            ? unitHelper.valueWithUnit(p.parsed[dataKey], unitKey, maybeTemp)
+            : unitHelper.value(p.parsed[dataKey], maybeTemp);
+
+        if (i > 0 && p.timestamp - points[i - 1].timestamp >= GAP_LIMIT_SECONDS) {
+            timestamps.push(points[i - 1].timestamp + GAP_LIMIT_SECONDS);
+            values.push(null);
+        }
+        timestamps.push(p.timestamp);
+        values.push(value);
+        if (value !== null && value < dataMin) dataMin = value;
+    }
+
+    return { data: [timestamps, values], dataMin, isolated: findIsolatedPoints(timestamps, values) };
+}
+
+// Indexes of points whose nearest non-null neighbors are all at least
+// GAP_LIMIT_SECONDS away; these get special rendering since the normal
+// line drawing would leave them invisible.
+function findIsolatedPoints(timestamps, values) {
+    const nonNull = [];
+    for (let i = 0; i < values.length; i++) {
+        if (values[i] !== null) nonNull.push(i);
+    }
+    const isolated = [];
+    for (let k = 0; k < nonNull.length; k++) {
+        const i = nonNull[k];
+        const left = k > 0 ? timestamps[i] - timestamps[nonNull[k - 1]] : Number.POSITIVE_INFINITY;
+        const right = k < nonNull.length - 1 ? timestamps[nonNull[k + 1]] - timestamps[i] : Number.POSITIVE_INFINITY;
+        if (Math.min(left, right) >= GAP_LIMIT_SECONDS) isolated.push(i);
+    }
+    return isolated;
+}
+
+// Alert limits converted to the currently selected unit.
+function getAlertRange(alert) {
+    let alertMin = alert?.min;
+    let alertMax = alert?.max;
+    try {
+        const uh = getUnitHelper(alert?.type);
+        if (alert?.type === "humidity" && uh.unit !== "%") {
+            alertMin = -70000;
+            alertMax = 70000;
+        } else {
+            alertMin = uh.value(alertMin);
+            alertMax = uh.value(alertMax);
+        }
+    } catch { /* alert range parse error */ }
+    return [alertMin, alertMax];
+}
+
+function scaleGradient(u, scaleKey, ori, scaleStops, discrete = false) {
+    try {
+        let scale = u.scales[scaleKey];
+
+        let minStopIdx;
+        let maxStopIdx;
+
+        for (let i = 0; i < scaleStops.length; i++) {
+            let stopVal = scaleStops[i][0];
+
+            if (stopVal <= scale.min || minStopIdx === null)
+                minStopIdx = i;
+
+            maxStopIdx = i;
+
+            if (stopVal >= scale.max)
+                break;
+        }
+
+        if (minStopIdx === maxStopIdx)
+            return scaleStops[minStopIdx][1];
+
+        let minStopVal = scaleStops[minStopIdx][0];
+        let maxStopVal = scaleStops[maxStopIdx][0];
+
+        if (minStopVal === -Infinity)
+            minStopVal = scale.min;
+
+        if (maxStopVal === Infinity)
+            maxStopVal = scale.max;
+
+        let minStopPos = u.valToPos(minStopVal, scaleKey, true);
+        let maxStopPos = u.valToPos(maxStopVal, scaleKey, true);
+
+        let range = minStopPos - maxStopPos;
+
+        let x0, y0, x1, y1;
+
+        if (ori === 1) {
+            x0 = x1 = 0;
+            y0 = minStopPos;
+            y1 = maxStopPos;
+        }
+        else {
+            y0 = y1 = 0;
+            x0 = minStopPos;
+            x1 = maxStopPos;
+        }
+
+        let grd = u.ctx.createLinearGradient(x0, y0, x1, y1);
+
+        let prevColor;
+
+        for (let i = minStopIdx; i <= maxStopIdx; i++) {
+            let s = scaleStops[i];
+            let stopPos = i === minStopIdx ? minStopPos : i === maxStopIdx ? maxStopPos : u.valToPos(s[0], scaleKey, true);
+            let pct = (minStopPos - stopPos) / range;
+            if (discrete && i > minStopIdx)
+                grd.addColorStop(pct, prevColor);
+            grd.addColorStop(pct, prevColor = s[1]);
+        }
+
+        return grd;
+    } catch {
+        return null
     }
 }
 
-function DataInfo(props) {
-    const { graphData, t, type } = props;
-    const [currZoom, setCurrZoom] = useState(null);
+// Draws small areas from each isolated point down to the zero line so the
+// point remains visible without a line segment.
+function drawIsolatedPointAreas(u, meta) {
+    const s = u.series[1];
+    if (!s.show || !meta.isolated.length) return;
 
-    const uh = getUnitHelper(type);
+    const ctx = u.ctx;
+    ctx.save();
+    const xd = u.data[0];
+    const yd = u.data[1];
 
-    useEffect(() => {
-        const listener = zoomData.registerListener(v => {
-            setCurrZoom(v);
-        });
-        return () => {
-            zoomData.unregisterListener(listener);
-        };
-    }, []);
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const areaWidth = Math.min(Math.max(1 * devicePixelRatio, 1), 3);
 
-    const filteredData = useMemo(() => {
-        return graphData[0].reduce((acc, timestamp, i) => {
-            const value = graphData[1][i];
-            if (value !== null && (!currZoom || (timestamp >= currZoom[0] && timestamp <= currZoom[1]))) {
-                acc.push({ timestamp, value });
-            }
-            return acc;
-        }, []);
-    }, [graphData, currZoom]);
+    for (const i of meta.isolated) {
+        if (yd[i] === null || yd[i] === undefined) continue;
+        if (u.scales.x.min > xd[i] || u.scales.x.max < xd[i]) continue;
 
-    const { min, max, avg } = useMemo(() => {
-        if (filteredData.length === 0) {
-            return { min: null, max: null, avg: null };
+        const x = u.valToPos(xd[i], 'x', true);
+        let y = u.valToPos(yd[i], 'y', true);
+        if (u.scales.y.min > yd[i]) y = u.valToPos(u.scales.y.min, 'y', true);
+        if (u.scales.y.max < yd[i]) y = u.valToPos(u.scales.y.max, 'y', true);
+
+        let areaToValue = u.valToPos(0, 'y', true);
+        if (u.scales.y.min > 0) areaToValue = u.valToPos(u.scales.y.min, 'y', true) + 1;
+        if (u.scales.y.max < 0) areaToValue = u.valToPos(u.scales.y.max, 'y', true) - 1;
+
+        ctx.beginPath();
+        ctx.moveTo(x - areaWidth, y);
+        ctx.lineTo(x - areaWidth, areaToValue);
+        ctx.lineTo(x + areaWidth, areaToValue);
+        ctx.lineTo(x + areaWidth, y);
+        ctx.closePath();
+
+        ctx.fillStyle = meta.fill;
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+// Draws dots for isolated points (when the dot setting is off) and the
+// horizontal alert limit lines.
+function drawIsolatedPointsAndAlertLines(u, si, meta) {
+    if (si !== 1) return; // only data series
+
+    const ctx = u.ctx;
+    const s = u.series[si];
+    const offset = (s.width % 2) / 2;
+
+    ctx.save();
+    const xd = u.data[0];
+    const yd = u.data[1];
+
+    if (!meta.showDots) {
+        for (const i of meta.isolated) {
+            if (yd[i] === null || yd[i] === undefined) continue;
+            if (u.scales.x.min > xd[i] || u.scales.x.max < xd[i]) continue;
+            if (u.scales.y.min > yd[i] || u.scales.y.max < yd[i]) continue;
+
+            const x = u.valToPos(xd[i], 'x', true);
+            const y = u.valToPos(yd[i], 'y', true);
+            ctx.beginPath();
+            ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
+            ctx.stroke();
         }
-        let min = Number.POSITIVE_INFINITY;
-        let max = Number.NEGATIVE_INFINITY;
-        let sum = 0;
-        let weightedSum = 0;
-        let totalTime = 0;
+    }
 
-        for (let i = 0; i < filteredData.length; i++) {
-            const { value, timestamp } = filteredData[i];
-            min = Math.min(min, value);
-            max = Math.max(max, value);
-            sum += value;
-
-            if (i > 0) {
-                const prev = filteredData[i - 1];
-                const timeDiff = timestamp - prev.timestamp;
-                const avgVal = (value + prev.value) / 2;
-                weightedSum += avgVal * timeDiff;
-                totalTime += timeDiff;
-            }
+    if (meta.alertEnabled) {
+        ctx.save();
+        ctx.translate(offset, offset);
+        ctx.beginPath();
+        const [i0, i1] = s.idxs;
+        const lineAt = (val) => {
+            const y = u.valToPos(val, 'y', true);
+            ctx.moveTo(u.valToPos(xd[i0], 'x', true), y);
+            ctx.lineTo(u.valToPos(xd[i1], 'x', true), y);
         }
 
-        let decimalPlaces = uh.decimals;
-        let avg = totalTime > 0 ? weightedSum / totalTime : sum / filteredData.length;
-        avg = Math.round(avg * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
+        ctx.strokeStyle = meta.alertStroke;
 
-        return { min, max, avg };
-    }, [filteredData]); // eslint-disable-line react-hooks/exhaustive-deps
+        if (meta.alertMax <= u.scales.y.max && meta.alertMax >= u.scales.y.min) {
+            lineAt(meta.alertMax);
+        }
+        if (meta.alertMin >= u.scales.y.min && meta.alertMin <= u.scales.y.max) {
+            lineAt(meta.alertMin);
+        }
+
+        ctx.stroke();
+        ctx.translate(-offset, -offset);
+        ctx.restore();
+    }
+
+    ctx.restore();
+}
+
+// Time-weighted stats over the (possibly zoomed) visible data.
+function calculateStats(graphData, zoom, decimals) {
+    const [timestamps, values] = graphData;
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    let sum = 0;
+    let count = 0;
+    let weightedSum = 0;
+    let totalTime = 0;
+    let prevTs = null;
+    let prevVal = null;
+
+    for (let i = 0; i < timestamps.length; i++) {
+        const value = values[i];
+        if (value === null) continue;
+        if (zoom && (timestamps[i] < zoom[0] || timestamps[i] > zoom[1])) continue;
+
+        if (value < min) min = value;
+        if (value > max) max = value;
+        sum += value;
+        count++;
+
+        if (prevTs !== null) {
+            const timeDiff = timestamps[i] - prevTs;
+            weightedSum += ((value + prevVal) / 2) * timeDiff;
+            totalTime += timeDiff;
+        }
+        prevTs = timestamps[i];
+        prevVal = value;
+    }
+
+    if (count === 0) return { min: null, max: null, avg: null };
+
+    let avg = totalTime > 0 ? weightedSum / totalTime : sum / count;
+    const factor = Math.pow(10, decimals);
+    avg = Math.round(avg * factor) / factor;
+
+    return { min, max, avg };
+}
+
+function DataInfo({ graphData, zoom, t, type }) {
+    const { min, max, avg } = useMemo(
+        () => calculateStats(graphData, zoom, getUnitHelper(type).decimals),
+        [graphData, zoom, type]
+    );
 
     return (
         <>
@@ -107,651 +321,183 @@ function DataInfo(props) {
     );
 }
 
+function Graph(props) {
+    const { dataKey, unitKey, cardView, alert } = props;
+    const { t } = useTranslation();
+    const systemColorMode = useColorMode().colorMode;
+    const colorMode = props.overrideColorMode || systemColorMode;
+    const height = props.height || 300;
+    const showDots = Store.getGraphDrawDots();
 
-let screenW = window.innerWidth
+    const containerRef = useRef(null);
+    const measured = useContainerDimensions(containerRef);
+    const width = props.width || measured.width;
 
-class Graph extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            data: [],
-            zoom: undefined,
-            resizing: false,
-        }
-        this.pRef = React.createRef();
-        this.prevDataKey = props.dataKey;
-        this.dataKeyChanged = false;
-        this.resize.bind(this)
-        this.resizeTimeout = undefined;
-        this.lastDataPointTs = -1;
-        this.dataUpdated = false;
-        this.fromComponentUpdate = false;
-        this.isTouchZooming = false;
-        this.wasTouchZooming = false;
-        this.touchZoomState = undefined;
-        this.yZoomState = undefined;
-    }
-    getGraphData() {
-        if (!this.props.data) return [[], []];
+    useEffect(() => {
+        if (props.setRef) props.setRef(containerRef);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-        const dataKey = this.props.dataKey;
-        const unitHelper = getUnitHelper(dataKey);
-        const variantUnitKey = this.props.unitKey; // e.g. humidity absolute, voc mg/m3 etc.
+    // Latest prop values for the callbacks living inside the memoized uPlot
+    // options, which would otherwise close over stale values.
+    const live = useRef({});
+    live.current.from = props.from;
+    live.current.to = props.to;
 
-        // Filter and sort the data
-        const filteredData = [];
-        for (let i = 0; i < this.props.data.length; i++) {
-            const x = this.props.data[i];
-            if (x.parsed && x.parsed[dataKey] !== undefined) {
-                filteredData.push(x);
-            }
-        }
+    const getXRange = useCallback(() => {
+        const { from, to } = live.current;
+        return [from / 1000, to ? to / 1000 : new Date().getTime() / 1000];
+    }, []);
 
-        filteredData.sort((a, b) => a.timestamp - b.timestamp);
+    const { zoom, xRange, yRange, onTouchZoom } = useGraphZoom({
+        dataKey,
+        getXRange,
+        hasFixedRange: !cardView && !!(props.from && props.to),
+    });
 
-        // Process the sorted data
-        const timestamps = [];
-        const values = [];
-        for (let i = 0; i < filteredData.length; i++) {
-            const x = filteredData[i];
-            timestamps.push(x.timestamp);
-            if (variantUnitKey && unitHelper.valueWithUnit) {
-                const maybeTemp = dataKey === "humidity" ? x.parsed.temperature : undefined;
-                values.push(unitHelper.valueWithUnit(x.parsed[dataKey], variantUnitKey, maybeTemp));
-            } else {
-                values.push(unitHelper.value(x.parsed[dataKey], dataKey === "humidity" ? x.parsed.temperature : undefined));
-            }
-        }
+    // Unit settings are read from the global store inside the unit helpers,
+    // so the current unit strings stand in for them as memo dependencies.
+    let unitSig = "";
+    try {
+        unitSig = getUnitHelper(dataKey).unit || "";
+        if (dataKey === "humidity") unitSig += "|" + getUnitHelper("temperature").unit;
+    } catch { /* no unit helper for this key */ }
+    const dataSig = `${props.data?.length ?? 0}:${props.data?.[0]?.timestamp ?? ""}`;
 
-        // Insert null values for time gaps
-        if (timestamps.length > 1) {
-            const outTs = [timestamps[0]];
-            const outVals = [values[0]];
-            for (let i = 1; i < timestamps.length; i++) {
-                if (timestamps[i] - timestamps[i - 1] >= 3600) {
-                    outTs.push(timestamps[i - 1] + 3600);
-                    outVals.push(null);
-                }
-                outTs.push(timestamps[i]);
-                outVals.push(values[i]);
-            }
-            return [outTs, outVals];
-        }
+    const { data: graphData, dataMin, isolated } = useMemo(
+        () => buildGraphData(props.data, dataKey, unitKey),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [dataSig, unitSig, dataKey, unitKey]
+    );
 
-        return [timestamps, values];
-    }
-    setStateVar(k, v) {
-        if (k === "zoom") zoomData.a = v
-        this.setState({ [k]: v });
-    }
-    shouldComponentUpdate(nextProps, nextState) {
-        this.fromComponentUpdate = true;
-        if (JSON.stringify(this.state.zoom) !== JSON.stringify(nextState.zoom)) return true;
-        if (this.props.unit !== nextProps.unit) return true;
-        if (this.props.height !== nextProps.height) return true;
-        if (nextProps.colorMode.colorMode !== this.props.colorMode.colorMode) return true;
-        if (nextProps.overrideColorMode !== this.props.overrideColorMode) return true;
-        let dataKeyChanged = this.props.dataKey !== nextProps.dataKey;
-        if (this.state.zoom && !dataKeyChanged) return false;
-        if (this.props.data && this.props.data.length) {
-            let ts = this.props.data[0].timestamp;
-            this.dataUpdated = ts !== this.lastDataPointTs || this.props.data.length !== nextProps.data.length;
-            this.lastDataPointTs = ts;
-        }
-        if (this.state.zoom && this.props.data.length && nextProps.data.length && this.props.data[0].timestamp !== nextProps.data[0].timestamp) return false
-        return dataKeyChanged || this.props.data.length !== nextProps.data.length || this.dataUpdated
-    }
-    componentDidUpdate(prevProps) {
-        if (prevProps.dataKey !== this.props.dataKey) {
-            this.dataKeyChanged = true;
-        }
-    }
-    getXRange() {
-        return [this.props.from / 1000, this.props.to ? this.props.to / 1000 : new Date().getTime() / 1000]
-    }
-    resize = (_e) => {
-        if (window.innerWidth === screenW) return;
-        //if (!this.props.showLoadingOnResize) return this.forceUpdate()
-        if (!this.resizeTimeout && !this.props.loading) {
-            this.setState({ ...this.state, resizing: true })
-            this.forceUpdate()
-        }
-        clearTimeout(this.resizeTimeout)
-        this.resizeTimeout = setTimeout(() => {
-            this.lastResize = new Date().getTime();
-            this.resizeTimeout = undefined;
-            this.setState({ ...this.state, resizing: false })
-            this.forceUpdate()
-        }, 500)
-    }
-    componentDidMount() {
-        if (this.props.setRef) this.props.setRef(this.pRef)
-        window.addEventListener('resize', this.resize)
-    }
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.resize)
-    }
-    render() {
-        let showDots = Store.getGraphDrawDots()
-        let alert = this.props.alert
-        let width = this.props.width || this.pRef?.current?.offsetWidth
-        setTimeout(() => {
-            if (!width) {
-                this.forceUpdate()
-            }
-        }, 100)
-        var plugins = [];
-        if (!this.props.cardView) {
-            plugins.push(UplotTouchZoomPlugin(this.getXRange(), (isZooming) => {
-                this.isTouchZooming = isZooming
-                this.wasTouchZooming = true;
-            }))
-            plugins.push(UplotLegendHider())
-        }
-        let colorMode = this.props.overrideColorMode ? this.props.overrideColorMode : this.props.colorMode.colorMode;
-        let height = this.props.height || 300;
-        let graphData = this.getGraphData()
+    const [alertMin, alertMax] = getAlertRange(alert);
+    const colorFillVar = cardView ? "fillCard" : "fill";
 
-        function scaleGradient(u, scaleKey, ori, scaleStops, discrete = false) {
-            try {
-                let scale = u.scales[scaleKey];
+    let gradFloor = dataMin;
+    if (isNaN(gradFloor)) gradFloor = -70000;
+    gradFloor -= 10;
 
-                let minStopIdx;
-                let maxStopIdx;
-
-                for (let i = 0; i < scaleStops.length; i++) {
-                    let stopVal = scaleStops[i][0];
-
-                    if (stopVal <= scale.min || minStopIdx === null)
-                        minStopIdx = i;
-
-                    maxStopIdx = i;
-
-                    if (stopVal >= scale.max)
-                        break;
-                }
-
-                if (minStopIdx === maxStopIdx)
-                    return scaleStops[minStopIdx][1];
-
-                let minStopVal = scaleStops[minStopIdx][0];
-                let maxStopVal = scaleStops[maxStopIdx][0];
-
-                if (minStopVal === -Infinity)
-                    minStopVal = scale.min;
-
-                if (maxStopVal === Infinity)
-                    maxStopVal = scale.max;
-
-                let minStopPos = u.valToPos(minStopVal, scaleKey, true);
-                let maxStopPos = u.valToPos(maxStopVal, scaleKey, true);
-
-                let range = minStopPos - maxStopPos;
-
-                let x0, y0, x1, y1;
-
-                if (ori === 1) {
-                    x0 = x1 = 0;
-                    y0 = minStopPos;
-                    y1 = maxStopPos;
-                }
-                else {
-                    y0 = y1 = 0;
-                    x0 = minStopPos;
-                    x1 = maxStopPos;
-                }
-
-                let grd = u.ctx.createLinearGradient(x0, y0, x1, y1);
-
-                let prevColor;
-
-                for (let i = minStopIdx; i <= maxStopIdx; i++) {
-                    let s = scaleStops[i];
-                    let stopPos = i === minStopIdx ? minStopPos : i === maxStopIdx ? maxStopPos : u.valToPos(s[0], scaleKey, true);
-                    let pct = (minStopPos - stopPos) / range;
-                    if (discrete && i > minStopIdx)
-                        grd.addColorStop(pct, prevColor);
-                    grd.addColorStop(pct, prevColor = s[1]);
-                }
-
-                return grd;
-            } catch {
-                return null
-            }
-        }
-
-        let alertMin = alert?.min
-        let alertMax = alert?.max
-        try {
-            var uh = getUnitHelper(alert?.type)
-            if (alert?.type === "humidity" && uh.unit !== "%") {
-                alertMin = -70000
-                alertMax = 70000
-            } else {
-                alertMin = uh.value(alertMin)
-                alertMax = uh.value(alertMax)
-            }
-        } catch { /* alert range parse error */ }
-
-        let dataMin = Number.POSITIVE_INFINITY;
-
-        for (let i = 0; i < graphData[1].length; i++) {
-            if (graphData[1][i] !== null && graphData[1][i] < dataMin) {
-                dataMin = graphData[1][i];
-            }
-        }
-        let colorFillVar = this.props.cardView ? "fillCard" : "fill"
-
-        if (isNaN(dataMin)) dataMin = -70000;
-        dataMin -= 10;
-        let fillGrad = [
-            [dataMin, ruuviTheme.graph.alert[colorFillVar][colorMode]],
+    // Everything the memoized draw callbacks need, refreshed every render so
+    // redraws always use current data-derived values, alerts and theme colors.
+    const drawMeta = useRef({});
+    drawMeta.current = {
+        isolated,
+        showDots,
+        fill: ruuviTheme.graph[colorFillVar][colorMode],
+        stroke: ruuviTheme.graph.stroke[colorMode],
+        alertEnabled: !!(alert && alert.enabled),
+        alertMin,
+        alertMax,
+        alertStroke: ruuviTheme.graph.alert.stroke[colorMode],
+        fillGrad: [
+            [gradFloor, ruuviTheme.graph.alert[colorFillVar][colorMode]],
             [alertMin, ruuviTheme.graph[colorFillVar][colorMode]],
             [alertMax, ruuviTheme.graph.alert[colorFillVar][colorMode]],
-        ];
-        let strokeGrad = [
-            [dataMin, ruuviTheme.graph.alert.stroke[colorMode]],
+        ],
+        strokeGrad: [
+            [gradFloor, ruuviTheme.graph.alert.stroke[colorMode]],
             [alertMin, ruuviTheme.graph.stroke[colorMode]],
             [alertMax, ruuviTheme.graph.alert.stroke[colorMode]],
-        ];
+        ],
+    };
 
-        const alertColor = () => {
-            if (alert && alert.enabled) {
-                return {
-                    fill: (u, _seriesIdx) => {
-                        return scaleGradient(u, 'y', 1, fillGrad, true);
-                    },
-                    stroke: (u, _seriesIdx) => {
-                        return scaleGradient(u, 'y', 1, strokeGrad, true);
-                    }
-                }
-            }
-            return {
-                fill: ruuviTheme.graph[colorFillVar][colorMode],
-                stroke: ruuviTheme.graph.stroke[colorMode]
-            }
+    const alertSig = alert ? `${alert.enabled}|${alertMin}|${alertMax}` : "off";
+
+    // uplot-react re-creates the whole chart when anything but width/height
+    // changes in the options, so keep this object as stable as possible;
+    // data updates then flow through the much cheaper setData path.
+    const baseOptions = useMemo(() => {
+        const plugins = [];
+        if (!cardView) {
+            plugins.push(UplotTouchZoomPlugin(getXRange(), onTouchZoom));
+            plugins.push(UplotLegendHider());
         }
+        const seriesStroke = (u) => {
+            const m = drawMeta.current;
+            return m.alertEnabled ? scaleGradient(u, 'y', 1, m.strokeGrad, true) : m.stroke;
+        };
+        return {
+            title: props.title,
+            drawOrder: ["series", "axes"],
+            plugins,
+            legend: {
+                show: props.legend === undefined ? true : props.legend,
+            },
+            series: [{
+                label: t('time'),
+                class: "graphLabel",
+                value: (_, ts) => secondsToUserDateString(ts),
+            }, {
+                label: props.dataName || t(dataKey),
+                class: "graphLabel",
+                spanGaps: false,
+                points: { show: showDots, size: 3, fill: ruuviTheme.graph.stroke[colorMode] },
+                width: 1,
+                fill: (u) => {
+                    const m = drawMeta.current;
+                    return m.alertEnabled ? scaleGradient(u, 'y', 1, m.fillGrad, true) : m.fill;
+                },
+                stroke: seriesStroke,
+                value: (_, rawValue) => localeNumber(rawValue),
+            }],
+            hooks: {
+                drawClear: [
+                    (u) => drawIsolatedPointAreas(u, drawMeta.current),
+                ],
+                drawSeries: [
+                    (u, si) => drawDataGapLines(u, si, seriesStroke(u)),
+                    (u, si) => drawIsolatedPointsAndAlertLines(u, si, drawMeta.current),
+                ],
+            },
+            cursor: {
+                show: props.cursor || false,
+                drag: { x: true, y: true, uni: 50 },
+                points: {
+                    size: 9,
+                    fill: ruuviTheme.graph.stroke[colorMode],
+                },
+            },
+            scales: {
+                x: { time: true, range: xRange },
+                y: { range: yRange },
+            },
+            axes: [
+                makeXAxis(colorMode),
+                makeYAxis(colorMode, {
+                    size: 45,
+                    ticks: { size: 0 },
+                    values: (_, ticks) => ticks.map(rawValue => localeNumber(rawValue)),
+                }),
+            ],
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [colorMode, showDots, cardView, alertSig, dataKey, props.dataName, props.title, props.legend, props.cursor, t]);
 
-        return (
-            <div ref={this.pRef}>
-                {this.state.resizing ? (
-                    <center style={{ width: "100%", height: height, paddingTop: height / 4 }}>
-                        <span className='spinner'></span>
+    const options = useMemo(
+        () => ({ ...baseOptions, width, height }),
+        [baseOptions, width, height]
+    );
+
+    const fallback = (
+        <center style={{ width: "100%", height: height, paddingTop: height / 4 }}>
+            <span className='spinner'></span>
+        </center>
+    );
+
+    return (
+        <div ref={containerRef}>
+            <Suspense fallback={fallback}>
+                <div style={{ height: height }} id="singleSerieGraph">
+                    {width > 0 && <UplotReact options={options} data={graphData} />}
+                </div>
+                {!cardView &&
+                    <center style={{ fontFamily: "Arial", fontSize: "14px", marginTop: 35 }}>
+                        <DataInfo graphData={graphData} zoom={zoom} t={t} type={dataKey} />
                     </center>
-                ) : (
-                    <Suspense fallback={
-                        <center style={{ width: "100%", height: height, paddingTop: height / 4 }}>
-                            <span className='spinner'></span>
-                        </center>
-                    }>
-                        <>
-                            <div style={{ height: height }} id="singleSerieGraph">
-                                <UplotReact
-                                    options={{
-                                        title: this.props.title,
-                                        width: width,
-                                        drawOrder: ["series", "axes"],
-                                        height: height,
-                                        plugins: plugins,
-                                        legend: {
-                                            show: this.props.legend === undefined ? true : this.props.legend,
-                                        },
-                                        series: [{
-                                            label: this.props.t('time'),
-                                            class: "graphLabel",
-                                            value: (_, ts) => secondsToUserDateString(ts),
-                                        }, {
-                                            label: this.props.dataName || this.props.t(this.props.dataKey),
-                                            class: "graphLabel",
-                                            spanGaps: false,
-                                            points: { show: showDots, size: 3, fill: ruuviTheme.graph.stroke[colorMode] },
-                                            width: 1,
-                                            ...alertColor(),
-                                            value: (self, rawValue) => localeNumber(rawValue)
-                                        }],
-                                        hooks: {
-                                            drawClear: [
-                                                (u) => {
-                                                    let s = u.series[1];
-                                                    if (!s.show) return;
-
-                                                    let ctx = u.ctx;
-                                                    // eslint-disable-next-line no-unused-vars
-                                                    const offset = (s.width % 2) / 2;
-
-                                                    ctx.save();
-                                                    let xd = u.data[0];
-                                                    let yd = u.data[1];
-
-                                                    // Draw the lone datapoint areas that extend to the zero-line
-                                                    const timeToClosestDatapoint = (idx) => {
-                                                        let closestToLeft = Number.POSITIVE_INFINITY;
-                                                        let closestToRight = Number.POSITIVE_INFINITY;
-                                                        if (idx !== 0) {
-                                                            for (let i = idx - 1; i >= 0; i--) {
-                                                                if (yd[i] !== null) {
-                                                                    closestToLeft = Math.abs(xd[i] - xd[idx]);
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                        if (idx !== yd.length - 1) {
-                                                            for (let i = idx + 1; i < yd.length; i++) {
-                                                                if (yd[i] !== null) {
-                                                                    closestToRight = Math.abs(xd[i] - xd[idx]);
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                        if (closestToLeft < closestToRight) return closestToLeft;
-                                                        return closestToRight;
-                                                    };
-
-                                                    for (let i = 0; i < xd.length; i++) {
-                                                        if (yd[i] === null) continue;
-                                                        if (timeToClosestDatapoint(i) < 3600) continue;
-                                                        let x = u.valToPos(xd[i], 'x', true);
-                                                        let y = u.valToPos(yd[i], 'y', true);
-
-                                                        if (u.scales.x.min > xd[i] || u.scales.x.max < xd[i]) continue;
-                                                        if (u.scales.y.min > yd[i]) {
-                                                            y = u.valToPos(u.scales.y.min, 'y', true);
-                                                        }
-                                                        if (u.scales.y.max < yd[i]) {
-                                                            y = u.valToPos(u.scales.y.max, 'y', true);
-                                                        }
-
-                                                        ctx.beginPath();
-
-                                                        const devicePixelRatio = window.devicePixelRatio || 1;
-                                                        const areaWidth = Math.min(Math.max(1 * devicePixelRatio, 1), 3);
-
-                                                        let areaToValue = u.valToPos(0, 'y', true);
-                                                        if (u.scales.y.min > 0) areaToValue = u.valToPos(u.scales.y.min, 'y', true) + 1;
-                                                        if (u.scales.y.max < 0) areaToValue = u.valToPos(u.scales.y.max, 'y', true) - 1;
-
-                                                        // Create a small area that extends from the point to the zero line
-                                                        ctx.moveTo(x - areaWidth, y);
-                                                        ctx.lineTo(x - areaWidth, areaToValue);
-                                                        ctx.lineTo(x + areaWidth, areaToValue);
-                                                        ctx.lineTo(x + areaWidth, y);
-                                                        ctx.closePath();
-
-                                                        ctx.fillStyle = ruuviTheme.graph[colorFillVar][colorMode];
-                                                        ctx.fill();
-                                                    }
-                                                    ctx.restore();
-                                                }
-                                            ],
-                                            drawSeries: [
-                                                (u, si) => {
-                                                    let color;
-                                                    if (alert && alert.enabled) {
-                                                        color = scaleGradient(u, 'y', 1, strokeGrad, true);
-                                                    } else {
-                                                        color = ruuviTheme.graph.stroke[colorMode];
-                                                    }
-                                                    drawDataGapLines(u, si, color);
-                                                },
-                                                (u, si) => {
-                                                    if (si !== 1) return; // only data series
-
-                                                    let ctx = u.ctx;
-                                                    let s = u.series[si];
-                                                    const offset = (s.width % 2) / 2;
-
-                                                    ctx.save();
-                                                    let xd = u.data[0];
-                                                    let yd = u.data[1];
-
-                                                    // Draw small points for isolated datapoints if showDots is false
-                                                    const timeToClosestDatapoint = (idx) => {
-                                                        let closestToLeft = Number.POSITIVE_INFINITY;
-                                                        let closestToRight = Number.POSITIVE_INFINITY;
-                                                        if (idx !== 0) {
-                                                            for (let i = idx - 1; i >= 0; i--) {
-                                                                if (yd[i] !== null) {
-                                                                    closestToLeft = Math.abs(xd[i] - xd[idx]);
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                        if (idx !== yd.length - 1) {
-                                                            for (let i = idx + 1; i < yd.length; i++) {
-                                                                if (yd[i] !== null) {
-                                                                    closestToRight = Math.abs(xd[i] - xd[idx]);
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                        if (closestToLeft < closestToRight) return closestToLeft;
-                                                        return closestToRight;
-                                                    };
-
-                                                    for (let i = 0; i < xd.length; i++) {
-                                                        if (yd[i] === null) continue;
-                                                        if (timeToClosestDatapoint(i) < 3600) continue;
-
-                                                        let x = u.valToPos(xd[i], 'x', true);
-                                                        let y = u.valToPos(yd[i], 'y', true);
-
-                                                        if (u.scales.x.min > xd[i] || u.scales.x.max < xd[i]) continue;
-                                                        let datapointIsInGraph = true;
-                                                        if (u.scales.y.min > yd[i]) {
-                                                            datapointIsInGraph = false;
-                                                            y = u.valToPos(u.scales.y.min, 'y', true);
-                                                        }
-                                                        if (u.scales.y.max < yd[i]) {
-                                                            datapointIsInGraph = false;
-                                                            y = u.valToPos(u.scales.y.max, 'y', true);
-                                                        }
-
-                                                        if (!showDots && datapointIsInGraph) {
-                                                            ctx.beginPath();
-                                                            ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
-                                                            ctx.stroke();
-                                                        }
-                                                    }
-
-                                                    // Draw alert lines
-                                                    if (alert && alert.enabled) {
-                                                        ctx.save();
-                                                        ctx.translate(offset, offset);
-                                                        ctx.beginPath();
-                                                        let xd = u.data[0];
-                                                        let [i0, i1] = s.idxs;
-                                                        const lineAt = (val) => {
-                                                            let x0 = u.valToPos(xd[i0], 'x', true);
-                                                            let y0 = u.valToPos(val, 'y', true);
-                                                            let x1 = u.valToPos(xd[i1], 'x', true);
-                                                            let y1 = u.valToPos(val, 'y', true);
-                                                            ctx.moveTo(x0, y0);
-                                                            ctx.lineTo(x1, y1);
-                                                        }
-
-                                                        ctx.strokeStyle = ruuviTheme.graph.alert.stroke[colorMode];
-
-                                                        if (alertMax <= u.scales.y.max && alertMax >= u.scales.y.min) {
-                                                            lineAt(alertMax);
-                                                        }
-
-                                                        if (alertMin >= u.scales.y.min && alertMin <= u.scales.y.max) {
-                                                            lineAt(alertMin);
-                                                        }
-
-                                                        ctx.stroke();
-                                                        ctx.translate(-offset, -offset);
-                                                        ctx.restore();
-                                                    }
-
-                                                    ctx.restore();
-                                                }
-                                            ]
-                                        },
-                                        cursor: {
-                                            show: this.props.cursor || false,
-                                            drag: { x: true, y: true, uni: 50 },
-                                            points: {
-                                                size: 9,
-                                                fill: ruuviTheme.graph.stroke[colorMode],
-                                            },
-                                        },
-                                        scales: {
-                                            x: {
-                                                time: true,
-                                                range: (_, fromX, toX) => {
-                                                    if (this.props.cardView) {
-                                                        return this.getXRange();
-                                                    }
-
-                                                    let propFrom = this.props.from
-                                                    let propTo = this.props.to
-                                                    if (!propFrom || !propTo) {
-                                                        return this.getXRange()
-                                                    }
-
-                                                    if (this.isTouchZooming) {
-                                                        // if zoom is close enought to full x range, assume fully zoomed out
-                                                        if (Math.abs(fromX - propFrom / 1000) < 1 && Math.abs(toX - propTo / 1000) < 1) {
-                                                            this.touchZoomState = "reset"
-                                                        } else {
-                                                            this.touchZoomState = [fromX, toX]
-                                                        }
-                                                        return [fromX, toX]
-                                                    }
-
-                                                    if (this.wasTouchZooming) {
-                                                        if (this.touchZoomState) {
-                                                            if (this.touchZoomState === "reset") {
-                                                                this.setState({ zoom: undefined })
-                                                                this.touchZoomState = undefined
-                                                                this.yZoomState = undefined
-                                                                return this.getXRange()
-                                                            }
-                                                            this.setState({ zoom: this.touchZoomState })
-                                                            this.touchZoomState = undefined
-                                                        }
-                                                        this.wasTouchZooming = false;
-                                                        if (this.state.zoom && this.fromComponentUpdate) {
-                                                            this.fromComponentUpdate = false;
-                                                            return this.state.zoom;
-                                                        }
-                                                        if (!this.fromComponentUpdate && Number.isInteger(fromX) && Number.isInteger(toX)) {
-                                                            this.setState({ zoom: undefined })
-                                                            this.yZoomState = undefined
-                                                            return this.getXRange()
-                                                        }
-                                                        return [fromX, toX]
-                                                    }
-
-
-
-                                                    if (this.state.zoom && this.fromComponentUpdate) {
-                                                        this.fromComponentUpdate = false;
-                                                        return this.state.zoom;
-                                                    }
-                                                    // full-range snap: reset zoom unless dataKey changed
-                                                    if (Number.isInteger(fromX) && Number.isInteger(toX)) {
-                                                        if (this.dataKeyChanged) {
-                                                            // preserve existing zoom on dataKey change
-                                                            this.dataKeyChanged = false;
-                                                            return this.state.zoom || this.getXRange();
-                                                        }
-                                                        this.setState({ zoom: undefined });
-                                                        this.yZoomState = undefined;
-                                                        return this.getXRange();
-                                                    } else {
-                                                        this.setState({ zoom: [fromX, toX] });
-                                                        return [fromX, toX];
-                                                    }
-                                                }
-                                            },
-                                            y: {
-                                                range: (_, fromY, toY) => {
-                                                    if (this.props.cardView) {
-                                                        const bufferedFromY = fromY - 0.5;
-                                                        const bufferedToY = toY + 0.5;
-                                                        return [bufferedFromY, bufferedToY];
-                                                    }
-
-                                                    if (this.yZoomState && this.fromComponentUpdate) {
-                                                        this.fromComponentUpdate = false;
-                                                        return this.yZoomState;
-                                                    }
-
-                                                    if (this.isTouchZooming) {
-                                                        return [fromY, toY];
-                                                    }
-
-                                                    if (this.wasTouchZooming) {
-                                                        this.yZoomState = [fromY, toY];
-                                                        return [fromY, toY];
-                                                    }
-
-                                                    if (this.dataKeyChanged) {
-                                                        this.yZoomState = undefined;
-                                                    }
-
-                                                    if (this.yZoomState && !this.fromComponentUpdate) {
-                                                        return this.yZoomState;
-                                                    }
-
-                                                    if (!this.fromComponentUpdate && fromY !== undefined && toY !== undefined) {
-                                                        this.yZoomState = undefined;
-                                                    }
-
-                                                    const bufferedFromY = fromY - 0.5;
-                                                    const bufferedToY = toY + 0.5;
-                                                    return [bufferedFromY, bufferedToY];
-                                                }
-                                            }
-                                        },
-                                        axes: [
-                                            {
-                                                grid: { show: false },
-                                                font: "12px Arial",
-                                                stroke: ruuviTheme.graph.axisLabels[colorMode],
-                                                values: (_, ticks) => {
-                                                    var xRange = ticks[ticks.length - 1] - ticks[0]
-                                                    var xRangeHours = xRange / 60 / 60
-                                                    var prevRaw = null;
-                                                    var useDates = xRangeHours >= 72;
-                                                    return ticks.map(raw => {
-                                                        var out = useDates ? date2digits(raw) : time2digits(raw);
-                                                        if (prevRaw === out) {
-                                                            if (useDates) return time2digits(raw);
-                                                            return null;
-                                                        }
-                                                        prevRaw = out;
-                                                        return out;
-                                                    })
-                                                }
-                                            }, {
-                                                grid: { stroke: ruuviTheme.graph.grid[colorMode], width: 2 },
-                                                stroke: ruuviTheme.graph.axisLabels[colorMode],
-                                                size: 45,
-                                                ticks: {
-                                                    size: 0
-                                                },
-                                                font: "12px Arial",
-                                                values: (_, ticks) => ticks.map(rawValue => localeNumber(rawValue)),
-                                            }
-                                        ]
-                                    }}
-                                    data={graphData}
-                                />
-                            </div>
-                            {!this.props.cardView && <>
-                                <center style={{ fontFamily: "Arial", fontSize: "14px", marginTop: 35 }}>
-                                    <DataInfo graphData={graphData} t={this.props.t} zoom={this.state.zoom} type={this.props.dataKey} />
-                                </center>
-                            </>}
-                        </>
-                    </Suspense>
-                )}
-            </div>
-        )
-    }
+                }
+            </Suspense>
+        </div>
+    );
 }
 
-export default withTranslation()(withColorMode(Graph));
+export default Graph;
