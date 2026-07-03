@@ -53,7 +53,7 @@ const parse = function (data) {
   if (soundLevelPeak !== 511) robject.soundLevelPeak = soundLevelPeak * 0.2 + 18
 
   const measurementSequenceNumber = (data[29] << 16) | (data[30] << 8) | data[31];
-  if (robject.measurementSequenceNumber !== 0xFFFFFF) robject.measurementSequenceNumber = measurementSequenceNumber
+  if (measurementSequenceNumber !== 0xFFFFFF) robject.measurementSequenceNumber = measurementSequenceNumber
 
   robject.flags = {
     calibrating: (data[32] & 0b00000001),

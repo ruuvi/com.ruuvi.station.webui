@@ -1,12 +1,14 @@
 import * as localForage from "localforage";
 import logger from "./utils/logger";
-//import pjson from "./../package.json"
 
 const DB_VERSION = 2;
 
 function getKey(sensor, mode) {
     return `cache_${sensor}_${mode}`
 }
+
+// Measurement data is cached per (sensor, mode) as an object of segments
+// keyed by the `until` timestamp of the fetch that produced them.
 
 var cache = {
     init: async () => {
@@ -17,12 +19,9 @@ var cache = {
     clear: () => {
         localForage.clear();
     },
-    getData: async (sensor, mode, from) => {
+    getData: async (sensor, mode) => {
         try {
-            var data = await localForage.getItem(getKey(sensor, mode))
-            if (!data) return null;
-            if (from) data = data.filter(x => x.timestamp >= from)
-            return data
+            return await localForage.getItem(getKey(sensor, mode))
         } catch (e) {
             logger.error(e);
         }
@@ -40,13 +39,51 @@ var cache = {
     },
     setData: async (sensor, mode, data) => {
         try {
-            // limit the data cache
-            //data = data.filter(x => x.timestamp > (new Date().getTime() / 1000) - 60 * 60 * 24 * pjson.settings.dataCacheLengthInDays);
             await localForage.setItem(getKey(sensor, mode), data);
         } catch (e) {
             logger.error(e);
         }
-    }
+    },
+    // Stores a fetched segment under its `until` timestamp. Segments with
+    // fewer than minMeasurements points are not worth caching.
+    saveSegment: async (sensor, mode, until, data, minMeasurements = 100) => {
+        if (data.measurements.length < minMeasurements) return;
+        try {
+            const segments = await cache.getData(sensor, mode) || {};
+            segments[until] = data;
+            await cache.setData(sensor, mode, segments);
+        } catch (error) {
+            logger.error("Error saving data to cache", error);
+        }
+    },
+    // Returns the newest cached segment whose `until` falls inside
+    // (since, until], or null. Resolves null after timeoutMs — Safari's
+    // IndexedDB can hang, and a cache read must never block the fetch
+    // that follows it.
+    getClosestSegment: async (sensor, mode, since, until, timeoutMs = 3000) => {
+        const lookup = async () => {
+            try {
+                const segments = await cache.getData(sensor, mode) || {};
+                const timestamps = Object.keys(segments)
+                    .map(Number)
+                    .filter(ts => !isNaN(ts) && ts <= until && ts > since)
+                    .sort((a, b) => b - a);
+                for (const ts of timestamps) {
+                    if (segments[ts]) {
+                        segments[ts].fromCache = true;
+                        return { until: ts, data: segments[ts] };
+                    }
+                }
+            } catch (error) {
+                logger.error("Error getting cache data", error);
+            }
+            return null;
+        };
+        return Promise.race([
+            lookup(),
+            new Promise(resolve => setTimeout(resolve, timeoutMs, null))
+        ]);
+    },
 }
 
 export default cache

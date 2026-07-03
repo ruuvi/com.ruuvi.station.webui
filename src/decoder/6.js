@@ -20,7 +20,7 @@ const parseRawRuuvi = function (data) {
   let co2 = (data[11] << 8) | data[12];
   robject.co2 = round(co2, 2);
 
-  let humidity = (((data[13] << 8) | (data[14] & 0x11000000))) >> 6
+  let humidity = (((data[13] << 8) | (data[14] & 0b11000000))) >> 6
   robject.humidity = round(humidity / 10, 2)
 
   let temperature = (((data[16] & 0b00000011) << 8) | (data[17]))

@@ -2,10 +2,12 @@ const parseRawRuuvi = function (data) {
   const robject = {};
 
   let temperature = (data[3] << 8) | (data[4] & 0xff);
-  if (temperature > 32767) {
-    temperature -= 65536;
+  if (temperature !== 0x8000) { // 0x8000 = value not available
+    if (temperature > 32767) {
+      temperature -= 65536;
+    }
+    robject.temperature = temperature / 200.0;
   }
-  robject.temperature = temperature / 200.0;
 
   if (!(data[5] === 255 && data[6] === 255)) {
     robject.humidity = (((data[5] & 0xff) << 8) | (data[6] & 0xff)) / 400.0;

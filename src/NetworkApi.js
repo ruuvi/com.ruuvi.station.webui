@@ -4,11 +4,11 @@ import parse from './decoder/parser';
 import { logout } from './utils/loginUtils';
 import logger from './utils/logger';
 
-let GET_ALL_SENSORS_CACHE;
+let GET_ALL_SENSORS_CACHE = { ts: 0, data: null };
 
 // api docs: https://docs.ruuvi.com/communication/ruuvi-network/backends/serverless/user-api
 
-function sortSensors(sensors) {
+export function sortSensors(sensors) {
     for (var i = 0; i < sensors.length; i++) {
         if (!sensors[i].name) {
             let splitMac = sensors[i].sensor.split(":")
@@ -21,26 +21,39 @@ function sortSensors(sensors) {
     return sensors
 }
 
-function checkStatusCode(response) {
-    let status = response?.status
-    if (status === 401) {
-        logout()
-        return false
-    }
-    return true
-}
-
 class NetworkApi {
     constructor() {
-        this.url = "https://network.ruuvi.com"
-        if (this.isStaging()) {
-            this.url = "https://testnet.ruuvi.com"
+        this.url = this.isStaging() ? "https://testnet.ruuvi.com" : "https://network.ruuvi.com"
+    }
+    // Built per request instead of in the constructor so a sign-in or
+    // sign-out during the session is always picked up.
+    authOptions() {
+        const user = this.getUser();
+        return user ? { headers: new Headers({ "Authorization": "Bearer " + user.accessToken }) } : {};
+    }
+    // Shared request pipeline: auth header, 401 -> logout, JSON parsing.
+    // The backend reports errors as JSON bodies with non-2xx statuses, so
+    // by default those are parsed and returned like any other response;
+    // `strict` restores the old behavior of throwing the Response instead.
+    async request(path, { method = 'GET', body, signal, timeout, strict, auth = true } = {}) {
+        const options = { ...(auth ? this.authOptions() : {}), method };
+        if (body !== undefined) options.body = JSON.stringify(body);
+        const response = timeout !== undefined
+            ? await this.fetchWithTimeout(this.url + path, options, timeout, signal)
+            : await fetch(this.url + path, options);
+        if (auth && response.status === 401) {
+            logout()
+            throw new Error("Unauthorized")
         }
-        var user = localStorage.getItem(this.getUserKey());
-        if (user) {
-            user = JSON.parse(user)
-            this.options = { headers: new Headers({ "Authorization": "Bearer " + user.accessToken }) }
-        }
+        if (strict && !response.ok) throw response;
+        return response.json();
+    }
+    // Bridges a request promise to the older (success, fail) callback style.
+    callback(promise, success, fail) {
+        promise.then(success).catch(error => {
+            if (fail) fail(error);
+            else logger.error("Request failed", error);
+        });
     }
     getUserKey() {
         return this.isStaging() ? "staging_user" : "user"
@@ -67,78 +80,27 @@ class NetworkApi {
         localStorage.setItem("env", env)
     }
     register(email, success, fail) {
-        fetch(this.url + "/register", {
-            method: 'POST',
-            body: JSON.stringify({ email: email }),
-        })
-            .then(function (response) {
-                if (response.status === 200) {
-                    return response.json();
-                }
-                throw (response)
-            })
-            .then(response => {
-                success(response);
-            })
-            .catch(error => fail ? fail(error) : {});
-    };
+        this.callback(this.request("/register", { method: 'POST', body: { email }, strict: true, auth: false }), success, fail);
+    }
     verify(token, success, fail) {
-        fetch(this.url + "/verify?token=" + token).then(function (response) {
-            return response.json();
-        })
-            .then(response => success(response))
-            .catch(error => fail ? fail(error) : {});
-    };
+        this.callback(this.request("/verify?token=" + token, { auth: false }), success, fail);
+    }
     user(success, fail) {
-        if (!this.options) return fail("Not signed in")
-        fetch(this.url + "/user", this.options).then(function (response) {
-            if (!checkStatusCode(response)) return
-            return response.json();
-        })
-            .then(response => {
-                if (response.data && response.data.sensors.length > 0) {
-                    let email = response.data.email
-                    let userObj = this.getUser()
-                    if (userObj && userObj.email !== email) {
-                        logger.log("email changed")
-                        userObj.email = email
-                        this.setUser(userObj)
-                    }
-                    response.data.sensors = sortSensors(response.data.sensors)
+        if (!this.getUser()) return fail ? fail("Not signed in") : undefined;
+        const promise = this.request("/user").then(response => {
+            if (response.data && response.data.sensors.length > 0) {
+                let email = response.data.email
+                let userObj = this.getUser()
+                if (userObj && userObj.email !== email) {
+                    logger.log("email changed")
+                    userObj.email = email
+                    this.setUser(userObj)
                 }
-                success(response)
-            })
-            .catch(error => fail ? fail(error) : {});
-    };
-    sensors(success, fail) {
-        if (!this.options) return fail("Not signed in")
-        fetch(this.url + "/sensors", this.options).then(function (response) {
-            if (!checkStatusCode(response)) return
-            return response.json();
-        })
-            .then(response => {
-                if (response.data) {
-                    response.data.sensors = response.data.sensors.concat(response.data.sharedToMe)
-                    if (response.data.sensors.length > 0) {
-                        response.data.sensors = sortSensors(response.data.sensors)
-                    }
-                }
-                success(response)
-            })
-            .catch(error => fail ? fail(error) : {});
-    };
-    async getLastestDataAsync(mac) {
-        let data = await this.getAsync(mac, null, null, { limit: 1 })
-        if (data.result === "success") {
-            if (data.data.measurements.length > 1) {
-                data.data.measurements = [data.data.measurements.reduce((prev, curr) => {
-                    return prev.timestamp > curr.timestamp ? prev : curr;
-                })]
-                //data.data.measurements = [Math.max.apply(Math, data.data.measurements.map(function(o) { return o.timestamp; }))]
+                response.data.sensors = sortSensors(response.data.sensors)
             }
-            data.data = parse(data.data);
-        }
-        return data;
+            return response
+        });
+        this.callback(promise, success, fail);
     }
     async fetchWithTimeout(resource, options = {}, timeout = 30000, signal) {
         const controller = new AbortController();
@@ -157,95 +119,46 @@ class NetworkApi {
         const mode = settings?.mode || "mixed";
         const limit = settings?.limit || 100000;
         const paginationSize = pjson.settings.dataFetchPaginationSize;
-    
-        // Helper function to save cache data if the measurements array is large enough
-        const saveCacheData = async (data) => {
-            if (data.measurements.length < 100) return;
-    
-            try {
-                const cacheData = await cache.getData(mac, mode) || {};
-                cacheData[until] = data;
-                await cache.setData(mac, mode, cacheData);
-            } catch (error) {
-                logger.error("Error saving data to cache", error);
-            }
-        };
-    
-        // Helper function to get the closest cached data within the time range
-        const getClosestCacheData = async () => {
-            try {
-                const cacheData = await cache.getData(mac, mode) || {};
-                const timestamps = Object.keys(cacheData)
-                    .map(Number)
-                    .filter(ts => !isNaN(ts) && ts <= until && ts > since)  // Ensure valid timestamps
-                    .sort((a, b) => b - a);  // Sort timestamps in descending order
-    
-                // Loop through the timestamps in reverse to get the closest valid cache
-                for (let ts of timestamps) {
-                    if (cacheData[ts]) {
-                        cacheData[ts].fromCache = true;
-                        return { until: ts, data: cacheData[ts] };
-                    }
-                }
-            } catch (error) {
-                logger.error("Error getting cache data", error);
-            }
-            return null;
-        };
-    
-        // Attempt to retrieve the closest cached data (with timeout to avoid
-        // Safari IndexedDB hangs that would prevent the fetch from ever starting)
-        let closestCache = await Promise.race([
-            getClosestCacheData(),
-            new Promise(resolve => setTimeout(resolve, 3000, null))
-        ]);
-    
-        // If cache is found and fully covers the request, return it
+
+        const closestCache = await cache.getClosestSegment(mac, mode, since, until);
+
+        // Cache fully covers the request
         if (closestCache && closestCache.until === until) {
             const { data } = closestCache;
             const originalLength = data.measurements.length;
-    
-            // Filter measurements to include only those after `since`
             data.measurements = data.measurements.filter(x => x.timestamp >= since);
-    
-            // If some measurements were filtered out, mark cache as incomplete
+            // Some cached measurements fell outside the request -> mark incomplete
             if (originalLength > data.measurements.length) {
                 data.fromCache = false;
             }
-    
             return { result: "success", data };
         }
-    
-        // If cache is found but not complete, update `since` to continue fetching from API
+
+        // Partial hit: continue fetching from where the cache ends
         if (closestCache) {
             since = closestCache.until;
         }
-    
-        // Build query string for API call
+
         let query = `?sensor=${encodeURIComponent(mac)}&mode=${encodeURIComponent(mode)}`;
-        query += `&since=${since || 0}`;  // Ensure default value if `since` is undefined
-        query += `&until=${until || Math.floor(Date.now() / 1000)}`;  // Use current timestamp if `until` is undefined
+        query += `&since=${since || 0}`;
+        query += `&until=${until || Math.floor(Date.now() / 1000)}`;
         query += `&limit=${limit}`;
-        
         if (settings?.sort) {
             query += `&sort=${settings.sort}`;
         }
-    
-        // Make API call and handle potential errors
+
         let respData;
         try {
-            const response = await this.fetchWithTimeout(`${this.url}/get${query}`, this.options, 30000, signal);
-            checkStatusCode(response);
-            respData = await response.json();
+            respData = await this.request(`/get${query}`, { timeout: 30000, signal });
         } catch (error) {
             logger.error("Error fetching data from API", error);
             return { result: "error", message: "Failed to fetch data", error };
         }
-    
-        // Cache data in the background (don't await — avoids Safari IndexedDB
+
+        // Cache in the background (don't await — avoids Safari IndexedDB
         // hangs blocking the return of already-fetched data)
         if (respData.result === "success") {
-            saveCacheData(respData.data).catch(() => {});
+            cache.saveSegment(mac, mode, until, respData.data).catch(() => {});
         }
 
         // If fetched data is smaller than the pagination size, indicate that fetching should stop
@@ -258,9 +171,6 @@ class NetworkApi {
     async getAllSensorsAsync(noCache) {
         const now = Date.now();
         const cacheTTL = 65_000;
-        if (!GET_ALL_SENSORS_CACHE) {
-            GET_ALL_SENSORS_CACHE = { ts: 0, data: null };
-        }
         if (!noCache && GET_ALL_SENSORS_CACHE.data && (now - GET_ALL_SENSORS_CACHE.ts) < cacheTTL) {
             return GET_ALL_SENSORS_CACHE.data;
         }
@@ -270,9 +180,7 @@ class NetworkApi {
         q += "&alerts=true";
         q += "&sharedToOthers=true";
         q += "&settings=true";
-        const resp = await fetch(this.url + "/sensors-dense" + q, this.options);
-        checkStatusCode(resp);
-        const respData = await resp.json();
+        const respData = await this.request("/sensors-dense" + q);
         respData.data?.sensors.forEach(x => {
             parse(x);
         });
@@ -283,203 +191,56 @@ class NetworkApi {
         return respData;
     }
     share(mac, email, success) {
-        fetch(this.url + "/share", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ sensor: mac, user: email }),
-        }).then(function (response) {
-            checkStatusCode(response)
-            return response.json();
-        }).then(response => {
-            success(response);
-        })
+        this.callback(this.request("/share", { method: 'POST', body: { sensor: mac, user: email } }), success);
     }
     async shareAsync(mac, email) {
-        const response = await fetch(this.url + "/share", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ sensor: mac, user: email }),
-        });
-        checkStatusCode(response);
-        const data = await response.json();
-        return data
+        return this.request("/share", { method: 'POST', body: { sensor: mac, user: email } });
     }
     unshare(mac, email, success) {
-        fetch(this.url + "/unshare", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ sensor: mac, user: email }),
-        }).then(function (response) {
-            checkStatusCode(response)
-            return response.json();
-        }).then(response => {
-            success(response);
-        })
+        this.callback(this.request("/unshare", { method: 'POST', body: { sensor: mac, user: email } }), success);
     }
     update(mac, name, success) {
-        fetch(this.url + "/update", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ sensor: mac, name: name }),
-        })
-            .then(function (response) {
-                checkStatusCode(response)
-                if (response.status === 200) {
-                    return response.json();
-                }
-                throw (response)
-            })
-            .then(response => {
-                success(response);
-            })
+        this.callback(this.request("/update", { method: 'POST', body: { sensor: mac, name }, strict: true }), success);
     }
     updateSensorData(mac, data, success) {
-        fetch(this.url + "/update", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ ...data, sensor: mac }),
-        })
-            .then(function (response) {
-                checkStatusCode(response)
-                //if (response.status === 200) {
-                return response.json();
-                //}
-                //throw (response)
-            })
-            .then(response => {
-                success(response);
-            })
+        this.callback(this.request("/update", { method: 'POST', body: { ...data, sensor: mac } }), success);
     }
     async claim(sensor, name) {
-        let res = await fetch(this.url + "/claim", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ sensor, name }),
-        })
-        checkStatusCode(res)
-        return await res.json()
+        return this.request("/claim", { method: 'POST', body: { sensor, name } });
     }
     unclaim(mac, deleteData, success) {
-        fetch(this.url + "/unclaim", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ sensor: mac, deleteData: deleteData }),
-        })
-            .then(function (response) {
-                checkStatusCode(response)
-                if (response.status === 200) {
-                    cache.removeData(mac)
-                    return response.json();
-                }
-                throw (response)
-            })
+        const promise = this.request("/unclaim", { method: 'POST', body: { sensor: mac, deleteData }, strict: true })
             .then(response => {
-                success(response);
-            })
+                cache.removeData(mac)
+                return response
+            });
+        this.callback(promise, success);
     }
     getSettings(success) {
-        fetch(this.url + "/settings", this.options).then(function (response) {
-            checkStatusCode(response)
-            return response.json();
-        })
-            .then(response => success(response))
+        this.callback(this.request("/settings"), success);
     }
     setSetting(name, value, success, error) {
-        fetch(this.url + "/settings", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ name, value }),
-        })
-            .then(function (response) {
-                checkStatusCode(response)
-                if (response.status === 200) {
-                    return response.json()
-                }
-                throw (response)
-            })
-            .then(response => {
-                success(response);
-            }).catch(e => {
-                error(e);
-            });
+        this.callback(this.request("/settings", { method: 'POST', body: { name, value }, strict: true }), success, error);
     }
     getAlerts(mac, success) {
-        let url = this.url + "/alerts";
-        if (mac) url += "?sensor=" + mac
-        fetch(url, this.options).then(function (response) {
-            checkStatusCode(response)
-            return response.json();
-        })
-            .then(response => success(response))
+        this.callback(this.request("/alerts" + (mac ? "?sensor=" + mac : "")), success);
     }
     setAlert(data, success) {
-        fetch(this.url + "/alerts", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify(data)
-        }).then(function (response) {
-            checkStatusCode(response)
-            return response.json();
-        })
-            .then(response => success(response))
+        this.callback(this.request("/alerts", { method: 'POST', body: data }), success);
     }
     async updateSensorSetting(sensorId, type, value) {
         try {
-            const response = await fetch(this.url + "/sensor-settings", {
-                ...this.options,
-                method: 'POST',
-                body: JSON.stringify({ sensor: sensorId, type, value, timestamp: Math.floor(Date.now() / 1000) }),
-            });
-            
-            checkStatusCode(response);
-            
-            if (response.status === 200) {
-                return await response.json();
-            }
-            throw response;
+            const body = { sensor: sensorId, type, value, timestamp: Math.floor(Date.now() / 1000) };
+            return await this.request("/sensor-settings", { method: 'POST', body, strict: true });
         } catch (e) {
             logger.error("Error updating sensor setting:", e);
             throw e;
         }
     }
-    resetImage(sensor, success, error) {
-        fetch(this.url + "/upload", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ action: "reset", sensor }),
-        })
-            .then(function (response) {
-                checkStatusCode(response)
-                if (response.status === 200) {
-                    return response.json()
-                }
-                throw (response)
-            })
-            .then(response => {
-                success(response);
-            }).catch(e => {
-                error(e);
-            });
-    }
     prepareUpload(sensor, type, success, error) {
-        fetch(this.url + "/upload", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ sensor, type }),
-        })
-            .then(function (response) {
-                checkStatusCode(response)
-                if (response.status === 200) {
-                    return response.json()
-                }
-                throw (response)
-            })
-            .then(response => {
-                success(response);
-            }).catch(e => {
-                error(e);
-            });
+        this.callback(this.request("/upload", { method: 'POST', body: { sensor, type }, strict: true }), success, error);
     }
+    // Uploads to the presigned URL from prepareUpload; not a Ruuvi API endpoint.
     async uploadImage(url, type, file, success, error) {
         function dataURItoBlob(dataURI) {
             var byteString = dataURI.split(',')[0].indexOf('base64') >= 0 ?
@@ -492,47 +253,28 @@ class NetworkApi {
             }
             return new Blob([ia], { type: mimeString });
         }
-        fetch(url, {
-            ...{ headers: new Headers({ "Content-Type": "multipart/form-data" }) },
-            method: 'PUT',
-            body: dataURItoBlob(file),
-        })
-            .then(function (response) {
-                checkStatusCode(response)
-                if (response.status === 200) {
-                    return
-                }
-                throw (response)
-            })
-            .then(response => {
-                success(response);
-            }).catch(e => {
-                error(e);
+        try {
+            const blob = dataURItoBlob(file);
+            const response = await fetch(url, {
+                headers: new Headers({ "Content-Type": blob.type || type }),
+                method: 'PUT',
+                body: blob,
             });
+            if (!response.ok) throw response;
+            success();
+        } catch (e) {
+            if (error) error(e);
+            else logger.error("Image upload failed", e);
+        }
     }
     async getSubscription() {
-        const resp = await fetch(this.url + "/subscription", this.options)
-        checkStatusCode(resp)
-        const respData = await resp.json()
-        return respData;
+        return this.request("/subscription");
     }
     async claimSubscription(code) {
-        const resp = await fetch(this.url + "/subscription", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ code })
-        })
-        const respData = await resp.json()
-        return respData;
+        return this.request("/subscription", { method: 'POST', body: { code } });
     }
     async requestDelete(email) {
-        const resp = await fetch(this.url + "/request-delete", {
-            ...this.options,
-            method: 'POST',
-            body: JSON.stringify({ email })
-        })
-        const respData = await resp.json()
-        return respData;
+        return this.request("/request-delete", { method: 'POST', body: { email } });
     }
     async getBanners() {
         let url = "https://raw.githubusercontent.com/ruuvi/station.localization/master/web_banners.json"

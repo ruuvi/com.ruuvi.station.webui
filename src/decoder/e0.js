@@ -48,10 +48,10 @@ const parse = function (data) {
   if (data[28] !== 0xFF) robject.soundLevelPeak = data[28] * 0.5
 
   const measurementSequenceNumber = ((data[29] & 0xff) << 8) | (data[30] & 0xff);
-  if (robject.measurementSequenceNumber !== 0xFFFF) robject.measurementSequenceNumber = measurementSequenceNumber
+  if (measurementSequenceNumber !== 0xFFFF) robject.measurementSequenceNumber = measurementSequenceNumber
 
-  if (data[31] === 0xFF) robject.battery = data[31] * 0.03 * 1000;
-
+  // 30 mV per bit, 0xFF = value not available
+  if (data[31] !== 0xFF) robject.battery = data[31] * 0.03 * 1000;
 
   robject.flags = {
     usbOn: (data[32] & 0b00000001),
