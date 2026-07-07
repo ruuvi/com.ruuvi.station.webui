@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useEffect, useState } from "react";
 import logger from "../../utils/logger";
 import {
     Menu,
@@ -10,109 +10,105 @@ import {
 } from "@chakra-ui/react"
 import { MdArrowDropDown, MdOpenInNew } from "react-icons/md"
 import NetworkApi from "../../NetworkApi";
-import withRouter from "../../utils/withRouter"
-import { withTranslation } from 'react-i18next';
-import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from "react-router-dom";
 import { getSetting } from "../../UnitHelper";
 import i18next from "i18next";
 
 
-class SensorMenu extends Component {
-    constructor(props) {
-        super(props)
-        this.state = { sensors: [], sensorsOpen: true, isMenuOpen: false }
-    }
-    componentDidMount() {
+function SensorMenu(props) {
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [sensors, setSensors] = useState([]);
+    const [sensorsOpen, setSensorsOpen] = useState(true);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    useEffect(() => {
         new NetworkApi().user(resp => {
             if (resp.result === "success") {
-                var d = resp.data.sensors;
-                this.setState({ ...this.state, sensors: d })
+                setSensors(resp.data.sensors)
             } else if (resp.result === "error") {
                 logger.error("sensor menu error", resp.error)
             }
         });
-    }
-    getCurrentSensor() {
-        var path = this.props.router.location.pathname
+    }, []);
+
+    const getCurrentSensor = () => {
+        var path = location.pathname
         return path.substring(path.indexOf("/") + 1, path.length)
     }
-    getSensors() {
+
+    const getSensors = () => {
         let order = getSetting("SENSOR_ORDER", null)
         if (order) {
             order = JSON.parse(order)
             if (order && order.length > 0) {
-                return order.map(x => this.state.sensors.find(y => y.sensor === x))
+                return order.map(x => sensors.find(y => y.sensor === x))
             }
         }
-        return this.state.sensors
+        return sensors
     }
-    toggleSensorList = e => {
+
+    const toggleSensorList = e => {
         e.stopPropagation();
         e.nativeEvent.stopImmediatePropagation();
-        this.setState({ ...this.state, sensorsOpen: !this.state.sensorsOpen })
+        setSensorsOpen(open => !open)
     }
-    sensorClicked(sensor) {
-        this.toggleMenu()
-        this.props.navigate('/' + sensor)
+
+    const toggleMenu = () => {
+        setIsMenuOpen(open => !open)
     }
-    toggleMenu = () => {
-        this.setState(prevState => ({ ...prevState, isMenuOpen: !prevState.isMenuOpen }));
+
+    const sensorClicked = (sensor) => {
+        toggleMenu()
+        navigate('/' + sensor)
     }
-    closeMenu = () => {
-        this.setState({ isMenuOpen: false });
+
+    const extraStyle = {}
+    if (props.small) {
+        extraStyle.paddingLeft = 4
+        extraStyle.paddingRight = 0
     }
-    render() {
-        const { t } = this.props;
-        const extraStyle = {}
-        if (this.props.small) {
-            extraStyle.paddingLeft = 4
-            extraStyle.paddingRight = 0
-        }
-        return (
-            <>
-                <Menu autoSelect={false} closeOnSelect={false} placement="bottom-end" isOpen={this.state.isMenuOpen} onClose={this.closeMenu}>
-                    <MenuButton as={Button} variant="topbar"
-                        rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />}
-                        onClick={this.toggleMenu}
-                        style={extraStyle}>
-                        {t("my_sensors")}
-                    </MenuButton>
-                    <MenuList mt="2" zIndex={10}>
-                        <MenuItem className="ddlItem" style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => window.open(`https://${i18next.language === "fi" ? "ruuvi.com/fi/tuotteet" : "ruuvi.com/products"}`, "_blank")}>
-                            {t('buy_sensors')}  <MdOpenInNew style={{ marginLeft: 8 }} />
-                        </MenuItem>
-                        <MenuDivider />
-                        <MenuItem className="ddlItem" onClick={() => this.props.addSensor()}>{t('add_new_sensor')}</MenuItem>
-                        <MenuDivider />
-                        <MenuItem className="ddlItem" onClick={this.toggleSensorList} display={"flex"} justifyContent={"space-between"} style={this.state.sensorsOpen ? undefined : { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }}>
-                            <span>
-                                {t('all_my_sensors')}
-                            </span>
-                            <MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />
-                        </MenuItem>
-                        {this.getSensors().map((x, i) => {
-                            if (!this.state.sensorsOpen) return null
-                            if (!x) return null
-                            let divider = <></>
-                            let borderStyle = {};
-                            if (i === this.state.sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
-                            else divider = <MenuDivider />
-                            return <div key={x.sensor + "div"}>
-                                {i === 0 && <MenuDivider />}
-                                <MenuItem key={x.sensor} className={`ddlSubItem ${this.getCurrentSensor() === x.sensor ? "selectedSensorInMenu" : ""}`} style={{ ...borderStyle }} onClick={() => this.sensorClicked(x.sensor)}>{x.name || x.sensor}</MenuItem>
-                                {divider}
-                            </div>
-                        })}
-                    </MenuList>
-                </Menu>
-            </>
-        )
-    }
+    return (
+        <>
+            <Menu autoSelect={false} closeOnSelect={false} placement="bottom-end" isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)}>
+                <MenuButton as={Button} variant="topbar"
+                    rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />}
+                    onClick={toggleMenu}
+                    style={extraStyle}>
+                    {t("my_sensors")}
+                </MenuButton>
+                <MenuList mt="2" zIndex={10}>
+                    <MenuItem className="ddlItem" style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => window.open(`https://${i18next.language === "fi" ? "ruuvi.com/fi/tuotteet" : "ruuvi.com/products"}`, "_blank")}>
+                        {t('buy_sensors')}  <MdOpenInNew style={{ marginLeft: 8 }} />
+                    </MenuItem>
+                    <MenuDivider />
+                    <MenuItem className="ddlItem" onClick={() => props.addSensor()}>{t('add_new_sensor')}</MenuItem>
+                    <MenuDivider />
+                    <MenuItem className="ddlItem" onClick={toggleSensorList} display={"flex"} justifyContent={"space-between"} style={sensorsOpen ? undefined : { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }}>
+                        <span>
+                            {t('all_my_sensors')}
+                        </span>
+                        <MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marignRight: -10 }} />
+                    </MenuItem>
+                    {getSensors().map((x, i) => {
+                        if (!sensorsOpen) return null
+                        if (!x) return null
+                        let divider = <></>
+                        let borderStyle = {};
+                        if (i === sensors.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
+                        else divider = <MenuDivider />
+                        return <div key={x.sensor + "div"}>
+                            {i === 0 && <MenuDivider />}
+                            <MenuItem key={x.sensor} className={`ddlSubItem ${getCurrentSensor() === x.sensor ? "selectedSensorInMenu" : ""}`} style={{ ...borderStyle }} onClick={() => sensorClicked(x.sensor)}>{x.name || x.sensor}</MenuItem>
+                            {divider}
+                        </div>
+                    })}
+                </MenuList>
+            </Menu>
+        </>
+    )
 }
 
-export default withRouter(withTranslation()((props) => (
-    <SensorMenu
-        {...props}
-        navigate={useNavigate()}
-    />
-)));
+export default SensorMenu;

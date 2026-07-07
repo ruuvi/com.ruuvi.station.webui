@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import {
     Button,
     Input,
@@ -6,82 +6,81 @@ import {
     FormControl,
     FormLabel,
 } from "@chakra-ui/react"
-import { withTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import RDialog from "./RDialog";
 
-class RangeInputDialog extends Component {
-    constructor(props) {
-        super(props)
-        this.state = { value: [props.range.min, props.range.max] };
-        if (props.value) this.state.value = props.value;
-    }
-    update() {
-        var value = this.state.value;
-        if (this.props.number) {
-            for (var i = 0; i < value.length; i++) {
-                value[i] = parseFloat(value[i]);
-                if (isNaN(value[i])) {
-                    this.props.onClose(false)
+function RangeInputDialog(props) {
+    const { t } = useTranslation();
+    const [value, setValue] = useState(props.value || [props.range.min, props.range.max]);
+
+    const update = () => {
+        let v = [...value];
+        if (props.number) {
+            for (let i = 0; i < v.length; i++) {
+                v[i] = parseFloat(v[i]);
+                if (isNaN(v[i])) {
+                    props.onClose(false)
                     return
                 }
             }
         }
-        this.props.onClose(true, value)
+        props.onClose(true, v)
     }
-    isValid(index) {
-        var value = JSON.parse(JSON.stringify(this.state.value));
+
+    const isValid = (index) => {
+        let v = [...value];
         if (index === undefined) {
-            for (var i = 0; i < value.length; i++) {
-                value[i] = parseFloat(value[i]);
-                if (isNaN(value[i])) {
+            for (let i = 0; i < v.length; i++) {
+                v[i] = parseFloat(v[i]);
+                if (isNaN(v[i])) {
                     return false
                 }
             }
-            if (value[0] > value[1]) return false
-            if (this.props.allowOutOfRange) return true
-            if (value[0] < this.props.range.min) return false
-            if (value[1] > this.props.range.max) return false
+            if (v[0] > v[1]) return false
+            if (props.allowOutOfRange) return true
+            if (v[0] < props.range.min) return false
+            if (v[1] > props.range.max) return false
             return true;
         } else {
-            value[index] = parseFloat(value[index]);
-            if (isNaN(value[index])) {
+            v[index] = parseFloat(v[index]);
+            if (isNaN(v[index])) {
                 return false
             }
-            if (value[0] > value[1]) return false
-            if (this.props.allowOutOfRange) return true
-            if (index === 0 && value[index] < this.props.range.min) return false
-            if (index === 1 && value[index] > this.props.range.max) return false
+            if (v[0] > v[1]) return false
+            if (props.allowOutOfRange) return true
+            if (index === 0 && v[index] < props.range.min) return false
+            if (index === 1 && v[index] > props.range.max) return false
             return true;
         }
     }
-    keyDown = (e) => {
+
+    const keyDown = (e) => {
         if (e.key === 'Enter') {
-            if (!this.isValid()) return
-            this.update();
+            if (!isValid()) return
+            update();
         }
     }
-    render() {
-        var unit = this.props.unit();
-        return (
-            <RDialog title={this.props.title} isOpen={this.props.open} onClose={() => this.props.onClose(false)}>
-                <FormControl>
-                    <SimpleGrid columns={2} spacing={4}>
-                        <span>
-                            <FormLabel>{this.props.t("min") + (unit ? ` (${this.props.range.min} ${unit})` : "")}</FormLabel>
-                            <Input autoFocus value={this.state.value[0]} type={"number"} onChange={e => this.setState({ ...this.state, value: [e.target.value, this.state.value[1]] })} onKeyDown={this.keyDown.bind(this)} isInvalid={!this.isValid(0)} />
-                        </span>
-                        <span>
-                            <FormLabel>{this.props.t("max") + (unit ? ` (${this.props.range.max} ${unit})` : "")}</FormLabel>
-                            <Input value={this.state.value[1]} type={"number"} onChange={e => this.setState({ ...this.state, value: [this.state.value[0], e.target.value] })} onKeyDown={this.keyDown.bind(this)} isInvalid={!this.isValid(1)} />
-                        </span>
-                    </SimpleGrid>
-                </FormControl>
-                <div style={{ textAlign: "right" }}>
-                    <Button onClick={this.update.bind(this)} mt="17px" isDisabled={!this.isValid()}>{this.props.buttonText}</Button>
-                </div>
-            </RDialog>
-        )
-    }
+
+    const unit = props.unit();
+    return (
+        <RDialog title={props.title} isOpen={props.open} onClose={() => props.onClose(false)}>
+            <FormControl>
+                <SimpleGrid columns={2} spacing={4}>
+                    <span>
+                        <FormLabel>{t("min") + (unit ? ` (${props.range.min} ${unit})` : "")}</FormLabel>
+                        <Input autoFocus value={value[0]} type={"number"} onChange={e => setValue([e.target.value, value[1]])} onKeyDown={keyDown} isInvalid={!isValid(0)} />
+                    </span>
+                    <span>
+                        <FormLabel>{t("max") + (unit ? ` (${props.range.max} ${unit})` : "")}</FormLabel>
+                        <Input value={value[1]} type={"number"} onChange={e => setValue([value[0], e.target.value])} onKeyDown={keyDown} isInvalid={!isValid(1)} />
+                    </span>
+                </SimpleGrid>
+            </FormControl>
+            <div style={{ textAlign: "right" }}>
+                <Button onClick={update} mt="17px" isDisabled={!isValid()}>{props.buttonText}</Button>
+            </div>
+        </RDialog>
+    )
 }
 
-export default withTranslation()(RangeInputDialog);
+export default RangeInputDialog;

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import {
     Button,
     Input,
@@ -6,50 +6,47 @@ import {
 } from "@chakra-ui/react"
 import RDialog from "./RDialog";
 
-class InputDialog extends Component {
-    constructor(props) {
-        super(props)
-        this.state = { value: "" }
-        if (props.value != null) this.state.value = props.value;
-    }
-    update() {
-        var value = this.state.value;
-        if (this.props.number) {
-            value = parseFloat(value);
-            if (isNaN(value)) {
-                this.props.onClose(false)
+function InputDialog(props) {
+    const [value, setValue] = useState(props.value != null ? props.value : "");
+
+    const getNumber = () => parseFloat(value);
+
+    const update = () => {
+        let v = value;
+        if (props.number) {
+            v = parseFloat(v);
+            if (isNaN(v)) {
+                props.onClose(false)
                 return
             }
         }
-        this.props.onClose(true, value)
+        props.onClose(true, v)
     }
-    getNumber() {
-        return parseFloat(this.state.value)
-    }
-    updateInput(e) {
-        var value = e.target.value;
-        if (this.props.maxLength) {
-            value = value.substring(0, this.props.maxLength)
+
+    const updateInput = (e) => {
+        let v = e.target.value;
+        if (props.maxLength) {
+            v = v.substring(0, props.maxLength)
         }
-        this.setState({ ...this.state, value: value })
+        setValue(v)
     }
-    keyDown = (e) => {
+
+    const keyDown = (e) => {
         if (e.key === 'Enter') {
-            if (this.props.number && isNaN(this.getNumber())) return
-            this.update();
+            if (props.number && isNaN(getNumber())) return
+            update();
         }
     }
-    render() {
-        return (
-            <RDialog title={this.props.title} isOpen={this.props.open} onClose={() => this.props.onClose(false)}>
-                {this.props.description && <Box mb="2">{this.props.description}</Box>}
-                <Input autoFocus value={this.state.value} type={this.props.number ? "number" : ""} onChange={e => this.updateInput(e)} onKeyDown={this.keyDown.bind(this)} />
-                <div style={{ textAlign: "right" }}>
-                    <Button onClick={this.update.bind(this)} mt="17px" disabled={this.props.number && isNaN(this.getNumber())}>{this.props.buttonText}</Button>
-                </div>
-            </RDialog>
-        )
-    }
+
+    return (
+        <RDialog title={props.title} isOpen={props.open} onClose={() => props.onClose(false)}>
+            {props.description && <Box mb="2">{props.description}</Box>}
+            <Input autoFocus value={value} type={props.number ? "number" : ""} onChange={updateInput} onKeyDown={keyDown} />
+            <div style={{ textAlign: "right" }}>
+                <Button onClick={update} mt="17px" disabled={props.number && isNaN(getNumber())}>{props.buttonText}</Button>
+            </div>
+        </RDialog>
+    )
 }
 
 export default InputDialog;

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
     IconButton
 } from "@chakra-ui/react"
@@ -7,37 +7,26 @@ import SessionStore from "../../SessionStore";
 import { MdClose } from "react-icons/md";
 import { useParams, useNavigate } from "react-router-dom";
 
-class NavClose extends Component {
-    constructor(props) {
-        super(props)
-        this.clicked = this.clicked.bind(this)
-    }
-    componentDidMount() {
-        addListener("Escape", this.clicked);
-    }
-    componentWillUnmount() {
-        removeListener("Escape")
-    }
-    clicked() {
-        if (this.props.params.id) {
-            this.props.navigate('/')
+function NavClose() {
+    const params = useParams();
+    const navigate = useNavigate();
+
+    const clicked = useCallback(() => {
+        if (params.id) {
+            navigate('/')
         } else {
-            this.props.navigate(SessionStore.getBackRoute())
+            navigate(SessionStore.getBackRoute())
         }
-    }
-    render() {
-        return (
-            <>
-                <IconButton isRound={true} className="navButton" variant="nav" onClick={this.clicked} style={{ marginTop: "1px", marginRight: "5px" }}><MdClose /></IconButton>
-            </>
-        )
-    }
+    }, [params.id, navigate]);
+
+    useEffect(() => {
+        addListener("Escape", clicked);
+        return () => removeListener("Escape");
+    }, [clicked]);
+
+    return (
+        <IconButton isRound={true} className="navButton" variant="nav" onClick={clicked} style={{ marginTop: "1px", marginRight: "5px" }}><MdClose /></IconButton>
+    )
 }
 
-export default (props) => (
-    <NavClose
-        {...props}
-        params={useParams()}
-        navigate={useNavigate()}
-    />
-);
+export default NavClose;
