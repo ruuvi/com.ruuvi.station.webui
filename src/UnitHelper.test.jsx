@@ -148,7 +148,11 @@ describe("getUnitFor", () => {
     });
 
     it("returns empty string for unknown keys", () => {
-        expect(getUnitFor("co2", "whatever")).toBe("");
+        expect(getUnitFor("notARealSensorType", "whatever")).toBe("");
+    });
+
+    it("returns the sensor type's unit for keys with a fixed unit", () => {
+        expect(getUnitFor("co2", "whatever")).toBe("ppm");
     });
 });
 
