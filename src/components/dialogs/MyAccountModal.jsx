@@ -197,8 +197,9 @@ function MyAccountModal(props) {
                         <Content>
                             {addLink(t('my_account_information'), t("cloud_ruuvi_link"), t("cloud_ruuvi_link_url"), true, t('my_account_information_hightlighted_text'))}
                         </Content>
+                        <Box mt="15px" />
                         <Title>{t("enter_activation_code")}</Title>
-                        <Box mt={1} />
+                        <Box mt={2} />
                         <PinInput variant="filled" type="alphanumeric" value={activationCode} autoFocus={false} focusBorderColor="#1f938500" onChange={code => updateValidationCode(code)}>
                             {Array(4).fill().map(() => {
                                 return <PinInputField bg={ruuviTheme.colors.pinFieldBgColor} _focus={{ backgroundColor: ruuviTheme.colors.pinFieldBgHoverColor }} _hover={{ backgroundColor: ruuviTheme.colors.pinFieldBgHoverColor }} color={"black"} height={12} style={{ margin: 5, fontWeight: 800, maxWidth: "9%" }} onPaste={handleCodePaste} />
