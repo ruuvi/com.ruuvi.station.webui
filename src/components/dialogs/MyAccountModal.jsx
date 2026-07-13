@@ -247,7 +247,7 @@ function MyAccountModal(props) {
                                                 )}
                                                 {!session.current && (
                                                     <Button size="xs" variant="link" fontWeight="bold" color={sessionCurrentColor} isLoading={deletingSessionId === session.id} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => deleteSession(session.id)}>
-                                                        {t("sessions_delete")}
+                                                        {t("sessions_sign_out")}
                                                     </Button>
                                                 )}
                                             </Box>
