@@ -40,6 +40,7 @@ const accordionButton = {
 const accordionPanel = {
     paddingTop: 16,
     paddingBottom: 16,
+    backgroundColor: "transparent",
 }
 
 const boolOpt = [
@@ -177,7 +178,7 @@ class Settings extends Component {
                     <br /><br />
                     <Box mx={accordionBleed} mb={accordionBleedBottom} borderBottomRadius={this.props.isModal ? "md" : 0} overflow="hidden">
                         <Accordion allowMultiple>
-                            <AccordionItem>
+                            <AccordionItem border="none">
                                 <AccordionButton style={accordionButtonStyle} _hover={{}}>
                                     <Box flex="1" textAlign="left" style={accordionTitle}>
                                         {this.props.t("unit_settings")}
@@ -188,7 +189,7 @@ class Settings extends Component {
                                     <UnitSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
                                 </AccordionPanel>
                             </AccordionItem>
-                            <AccordionItem>
+                            <AccordionItem border="none">
                                 <AccordionButton style={accordionButtonStyle} _hover={{}}>
                                     <Box flex="1" textAlign="left" style={accordionTitle}>
                                         {this.props.t("resolution_settings")}
