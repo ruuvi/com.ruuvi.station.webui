@@ -1,4 +1,4 @@
-import { Box, Button, PinInput, PinInputField, Progress, useColorModeValue } from "@chakra-ui/react";
+import { Box, Button, PinInput, PinInputField, Progress, useColorModeValue, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { withTranslation } from 'react-i18next';
 import NetworkApi from "../../NetworkApi";
@@ -20,7 +20,6 @@ function MyAccountModal(props) {
     const [isProcessingCode, setIsProcessingCode] = useState(false)
     const [showDeleteAccount, setShowDeleteAccount] = useState(false)
     const [showActivationConfirmation, setShowActivationConfirmation] = useState(false)
-    const [sessionsExpanded, setSessionsExpanded] = useState(false)
     const [sessions, setSessions] = useState(null)
     const [sessionsLoading, setSessionsLoading] = useState(false)
     const [showSignOutAll, setShowSignOutAll] = useState(false)
@@ -127,12 +126,6 @@ function MyAccountModal(props) {
             setSessionsLoading(false)
         }
     }
-    const toggleSessions = () => {
-        if (!sessionsExpanded && sessions === null) {
-            loadSessions()
-        }
-        setSessionsExpanded(x => !x)
-    }
     const deleteSession = async (id) => {
         setDeletingSessionId(id)
         try {
@@ -221,47 +214,56 @@ function MyAccountModal(props) {
                 )}
             </Box>
             <Box mt={4} />
-            <Box>
-                <Button variant='link' onClick={toggleSessions} style={{ fontFamily: "mulish", fontSize: "16px", fontWeight: 800 }}>
-                    {t("sessions")} {sessionsExpanded ? "▲" : "▼"}
-                </Button>
-                {sessionsExpanded && (
-                    <Box mt={2}>
-                        {sessionsLoading ? (
-                            <Progress isIndeterminate />
-                        ) : sessions && sessions.length > 0 ? (
-                            <>
-                                {sessions.map(session => (
-                                    <Box key={session.id} mb={3} p={3} borderRadius={4} bg={sessionCardBg}>
-                                        <Box style={{ fontFamily: "mulish", fontSize: "13px", color: sessionTextColor }}>
-                                            {t("sessions_created")}: {dateToText(new Date(session.createdAt * 1000))}
+            <Box mx={-6} mb={-5} borderBottomRadius="md" overflow="hidden">
+                <Accordion allowToggle onChange={(index) => {
+                    if (index === 0 && sessions === null) {
+                        loadSessions()
+                    }
+                }}>
+                    <AccordionItem border="none">
+                        <AccordionButton style={{ paddingTop: 12, paddingBottom: 12, paddingLeft: 24, paddingRight: 24 }} _hover={{}}>
+                            <Box flex="1" textAlign="left" style={{ fontFamily: "mulish", fontSize: "16px", fontWeight: 800 }}>
+                                {t("sessions")}
+                            </Box>
+                            <AccordionIcon />
+                        </AccordionButton>
+                        <AccordionPanel style={{ paddingTop: 16, paddingBottom: 16, paddingLeft: 24, paddingRight: 24, backgroundColor: "transparent" }}>
+                            {sessionsLoading ? (
+                                <Progress isIndeterminate />
+                            ) : sessions && sessions.length > 0 ? (
+                                <>
+                                    {sessions.map(session => (
+                                        <Box key={session.id} mb={3} p={3} borderRadius={4} bg={sessionCardBg}>
+                                            <Box style={{ fontFamily: "mulish", fontSize: "13px", color: sessionTextColor }}>
+                                                {t("sessions_created")}: {dateToText(new Date(session.createdAt * 1000))}
+                                            </Box>
+                                            <Box style={{ fontFamily: "mulish", fontSize: "13px", color: sessionTextColor }}>
+                                                {t("sessions_last_accessed")}: {dateToText(new Date(session.lastAccessed * 1000))}
+                                            </Box>
+                                            <Box mt={1}>
+                                                {session.current && (
+                                                    <Box style={{ fontFamily: "mulish", fontSize: "13px", fontWeight: 700, color: sessionCurrentColor }}>
+                                                        {t("sessions_current")}
+                                                    </Box>
+                                                )}
+                                                {!session.current && (
+                                                    <Button size="xs" variant="link" color={sessionCurrentColor} isLoading={deletingSessionId === session.id} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => deleteSession(session.id)}>
+                                                        {t("sessions_delete")}
+                                                    </Button>
+                                                )}
+                                            </Box>
                                         </Box>
-                                        <Box style={{ fontFamily: "mulish", fontSize: "13px", color: sessionTextColor }}>
-                                            {t("sessions_last_accessed")}: {dateToText(new Date(session.lastAccessed * 1000))}
-                                        </Box>
-                                        <Box mt={1}>
-                                            {session.current && (
-                                                <Box style={{ fontFamily: "mulish", fontSize: "13px", fontWeight: 700, color: sessionCurrentColor }}>
-                                                    {t("sessions_current")}
-                                                </Box>
-                                            )}
-                                            {!session.current && (
-                                                <Button size="xs" variant="link" color={sessionCurrentColor} isLoading={deletingSessionId === session.id} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => deleteSession(session.id)}>
-                                                    {t("sessions_delete")}
-                                                </Button>
-                                            )}
-                                        </Box>
+                                    ))}
+                                    <Box mt={2}>
+                                        <Button size="sm" variant="link" color={sessionCurrentColor} isLoading={signingOutAll} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => setShowSignOutAll(true)}>
+                                            {t("sessions_sign_out_all")}
+                                        </Button>
                                     </Box>
-                                ))}
-                                <Box mt={2}>
-                                    <Button size="sm" variant="link" color={sessionCurrentColor} isLoading={signingOutAll} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => setShowSignOutAll(true)}>
-                                        {t("sessions_sign_out_all")}
-                                    </Button>
-                                </Box>
-                            </>
-                        ) : null}
-                    </Box>
-                )}
+                                </>
+                            ) : null}
+                        </AccordionPanel>
+                    </AccordionItem>
+                </Accordion>
             </Box>
             <Box mt={8}></Box>
             <Button variant='link' onClick={async () => {
