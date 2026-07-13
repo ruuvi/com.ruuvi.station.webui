@@ -13,7 +13,7 @@ function MyAccountModal(props) {
     var { t, i18n } = props;
     const _lng = i18n.language || "en";
     const sessionCardBg = useColorModeValue("rgba(198, 227, 224, 0.5)", "rgba(53, 173, 159, 0.15)");
-    const sessionTextColor = useColorModeValue("#1b484780", "#ffffff80");
+    const sessionTextColor = useColorModeValue("#1b4847", "#ffffff");
     const sessionCurrentColor = useColorModeValue("#1f9385", "#44c9b9");
     const [subscriptions, setSubscriptions] = useState([])
     const [activationCode, setActivationCode] = useState("")
@@ -169,7 +169,7 @@ function MyAccountModal(props) {
             <Content>
                 {addLink(t("my_account_change_email"), t("my_account_change_email_link_markup"), t("my_account_change_email_link"))}
             </Content>
-            <Box minHeight="250px">
+            <Box minHeight="250px" pb={12}>
                 {subscriptions.length < 1 ? (
                     <Progress isIndeterminate />
                 ) : (
@@ -213,8 +213,7 @@ function MyAccountModal(props) {
                     </>
                 )}
             </Box>
-            <Box mt={4} />
-            <Box mx={-6} mb={-5} borderBottomRadius="md" overflow="hidden">
+            <Box mx={-6} mb={12} borderBottomRadius="md" overflow="hidden">
                 <Accordion allowToggle onChange={(index) => {
                     if (index === 0 && sessions === null) {
                         loadSessions()
@@ -233,12 +232,12 @@ function MyAccountModal(props) {
                             ) : sessions && sessions.length > 0 ? (
                                 <>
                                     {sessions.map(session => (
-                                        <Box key={session.id} mb={3} p={3} borderRadius={4} bg={sessionCardBg}>
+                                        <Box key={session.id} mb={3} p={3} borderRadius="lg" bg={sessionCardBg}>
                                             <Box style={{ fontFamily: "mulish", fontSize: "13px", color: sessionTextColor }}>
-                                                {t("sessions_created")}: {dateToText(new Date(session.createdAt * 1000))}
+                                                <b>{t("sessions_created")}:</b> {dateToText(new Date(session.createdAt * 1000))}
                                             </Box>
                                             <Box style={{ fontFamily: "mulish", fontSize: "13px", color: sessionTextColor }}>
-                                                {t("sessions_last_accessed")}: {dateToText(new Date(session.lastAccessed * 1000))}
+                                                <b>{t("sessions_last_accessed")}:</b> {dateToText(new Date(session.lastAccessed * 1000))}
                                             </Box>
                                             <Box mt={1}>
                                                 {session.current && (
@@ -247,7 +246,7 @@ function MyAccountModal(props) {
                                                     </Box>
                                                 )}
                                                 {!session.current && (
-                                                    <Button size="xs" variant="link" color={sessionCurrentColor} isLoading={deletingSessionId === session.id} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => deleteSession(session.id)}>
+                                                    <Button size="xs" variant="link" fontWeight="bold" color={sessionCurrentColor} isLoading={deletingSessionId === session.id} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => deleteSession(session.id)}>
                                                         {t("sessions_delete")}
                                                     </Button>
                                                 )}
@@ -255,7 +254,7 @@ function MyAccountModal(props) {
                                         </Box>
                                     ))}
                                     <Box mt={2}>
-                                        <Button size="sm" variant="link" color={sessionCurrentColor} isLoading={signingOutAll} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => setShowSignOutAll(true)}>
+                                        <Button size="sm" variant="link" fontWeight="bold" color={sessionCurrentColor} isLoading={signingOutAll} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => setShowSignOutAll(true)}>
                                             {t("sessions_sign_out_all")}
                                         </Button>
                                     </Box>
@@ -265,7 +264,6 @@ function MyAccountModal(props) {
                     </AccordionItem>
                 </Accordion>
             </Box>
-            <Box mt={8}></Box>
             <Button variant='link' onClick={async () => {
                 setShowDeleteAccount(true)
             }}>{t("delete_account")}</Button>
