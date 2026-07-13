@@ -165,9 +165,6 @@ class Settings extends Component {
                 </>
             ) : (
                 <>
-                    <Box fontSize="sm" mb={4} opacity={0.7}>
-                        {this.props.t("settings_introduction")}
-                    </Box>
                     <LanguageMenu onChange={v => this.updateSetting("PROFILE_LANGUAGE_CODE", v)} loading={this.state.savingSettings.indexOf("PROFILE_LANGUAGE_CODE") !== -1} />
                     <br />
                     <RadioInput label={"settings_chart_draw_dots"} value={this.state.CHART_DRAW_DOTS} options={boolOpt} onChange={v => this.updateLocalSetting("CHART_DRAW_DOTS", JSON.parse(v))} />
@@ -181,7 +178,7 @@ class Settings extends Component {
                             <AccordionItem border="none">
                                 <AccordionButton style={accordionButtonStyle} _hover={{}}>
                                     <Box flex="1" textAlign="left" style={accordionTitle}>
-                                        {this.props.t("unit_settings")}
+                                        {this.props.t("global_units")}
                                     </Box>
                                     <AccordionIcon />
                                 </AccordionButton>

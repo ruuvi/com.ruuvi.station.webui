@@ -33,7 +33,7 @@ export default function UnitSettings({ settings, savingSettings, updateSetting }
     return (
         <Box>
             <Text fontSize="sm" mb={4} opacity={0.7}>
-                {t("unit_settings_description")}
+                {t("global_units_description")}
             </Text>
 
             <RadioInput
