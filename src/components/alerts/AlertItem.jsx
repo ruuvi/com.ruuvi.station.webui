@@ -150,6 +150,10 @@ class AlertItem extends Component {
             let conversionHelper = type === "dewPoint" ? getUnitHelper("temperature") : uh;
             validRange.min = conversionHelper.value(min)
             validRange.max = conversionHelper.value(max)
+            // keep extended in user units too, so RangeInputDialog labels show converted bounds
+            if (validRange.extended) {
+                validRange.extended = { min: validRange.min, max: validRange.max }
+            }
         }
         let label = type === "signal" ? "signal_strength" : type
         if (type === "offline") label = "alert_offline_title"

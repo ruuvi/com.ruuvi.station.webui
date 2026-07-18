@@ -27,6 +27,11 @@ function RangeInputDialog(props) {
         props.onClose(true, v)
     }
 
+    // manual input accepts (and labels show) the extended range when one exists;
+    // range.min/max stay the standard range and only seed the default values
+    const acceptedMin = props.range.extended ? props.range.extended.min : props.range.min;
+    const acceptedMax = props.range.extended ? props.range.extended.max : props.range.max;
+
     const isValid = (index) => {
         let v = [...value];
         if (index === undefined) {
@@ -38,8 +43,8 @@ function RangeInputDialog(props) {
             }
             if (v[0] > v[1]) return false
             if (props.allowOutOfRange) return true
-            if (v[0] < props.range.min) return false
-            if (v[1] > props.range.max) return false
+            if (v[0] < acceptedMin) return false
+            if (v[1] > acceptedMax) return false
             return true;
         } else {
             v[index] = parseFloat(v[index]);
@@ -48,8 +53,8 @@ function RangeInputDialog(props) {
             }
             if (v[0] > v[1]) return false
             if (props.allowOutOfRange) return true
-            if (index === 0 && v[index] < props.range.min) return false
-            if (index === 1 && v[index] > props.range.max) return false
+            if (index === 0 && v[index] < acceptedMin) return false
+            if (index === 1 && v[index] > acceptedMax) return false
             return true;
         }
     }
@@ -67,11 +72,11 @@ function RangeInputDialog(props) {
             <FormControl>
                 <SimpleGrid columns={2} spacing={4}>
                     <span>
-                        <FormLabel>{t("min") + (unit ? ` (${props.range.min} ${unit})` : "")}</FormLabel>
+                        <FormLabel>{t("min") + (unit ? ` (${acceptedMin} ${unit})` : "")}</FormLabel>
                         <Input autoFocus value={value[0]} type={"number"} onChange={e => setValue([e.target.value, value[1]])} onKeyDown={keyDown} isInvalid={!isValid(0)} />
                     </span>
                     <span>
-                        <FormLabel>{t("max") + (unit ? ` (${props.range.max} ${unit})` : "")}</FormLabel>
+                        <FormLabel>{t("max") + (unit ? ` (${acceptedMax} ${unit})` : "")}</FormLabel>
                         <Input value={value[1]} type={"number"} onChange={e => setValue([value[0], e.target.value])} onKeyDown={keyDown} isInvalid={!isValid(1)} />
                     </span>
                 </SimpleGrid>

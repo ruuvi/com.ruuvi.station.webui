@@ -260,7 +260,11 @@ describe("getAlertRange", () => {
         expect(getAlertRange("offline")).toEqual({ max: +Infinity, min: 120 });
         expect(getAlertRange("signal")).toEqual({ max: 0, min: -105 });
         expect(getAlertRange("battery")).toEqual({ max: 3.6, min: 1.8 });
-        expect(getAlertRange("co2")).toEqual({ max: 2500, min: 350 });
+        expect(getAlertRange("co2")).toEqual({ max: 2500, min: 350, extended: { max: 40000, min: 0 } });
+        expect(getAlertRange("pm10")).toEqual({ max: 250, min: 0, extended: { max: 1000, min: 0 } });
+        expect(getAlertRange("pm25")).toEqual({ max: 250, min: 0, extended: { max: 1000, min: 0 } });
+        expect(getAlertRange("pm40")).toEqual({ max: 250, min: 0, extended: { max: 1000, min: 0 } });
+        expect(getAlertRange("pm100")).toEqual({ max: 250, min: 0, extended: { max: 1000, min: 0 } });
         expect(getAlertRange("luminosity")).toEqual({ max: 144284, min: 0 });
         expect(getAlertRange("sound")).toEqual({ max: 127, min: 0 });
     });

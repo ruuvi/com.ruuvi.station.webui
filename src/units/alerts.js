@@ -16,13 +16,13 @@ const ALERT_RANGES = {
     offline: { max: +Infinity, min: 120 },
     battery: { max: 3.6, min: 1.8 },
     aqi: { max: 100, min: 0 },
-    co2: { max: 2500, min: 350 },
+    co2: { max: 2500, min: 350, extended: { max: 40000, min: 0 } },
     voc: { max: 500, min: 0 },
     nox: { max: 500, min: 0 },
-    pm10: { max: 250, min: 0 },
-    pm25: { max: 250, min: 0 },
-    pm40: { max: 250, min: 0 },
-    pm100: { max: 250, min: 0 },
+    pm10: { max: 250, min: 0, extended: { max: 1000, min: 0 } },
+    pm25: { max: 250, min: 0, extended: { max: 1000, min: 0 } },
+    pm40: { max: 250, min: 0, extended: { max: 1000, min: 0 } },
+    pm100: { max: 250, min: 0, extended: { max: 1000, min: 0 } },
     luminosity: { max: 144284, min: 0 },
     sound: { max: 127, min: 0 }
 };
