@@ -4,7 +4,7 @@ import NetworkApi from '../NetworkApi';
 import { MdClear } from 'react-icons/md';
 import notify from '../utils/notify';
 import i18next from 'i18next';
-import { addVariablesInString } from "../TextHelper";
+import { addNewlines, addVariablesInString } from "../TextHelper";
 import RemoveSensorDialog from '../components/dialogs/RemoveSensorDialog';
 import ConfirmModal from '../components/dialogs/ConfirmModal';
 import { SensorPicker } from '../components/sensor/SensorPicker';
@@ -230,6 +230,9 @@ const ShareCenter = ({ subscription }) => {
                     <Box className='contentImportant' borderRadius={8} width="100%" padding={{ base: "24px", md: "40px" }}>
                         <Box mb={8} style={descriptionStyle}>
                             {i18next.t("share_center_description")}
+                            <Box mt={4}>
+                                {addNewlines(i18next.t("share_sensor_description"), "\\n")}
+                            </Box>
                         </Box>
 
                         {isWideVersion ? <>
