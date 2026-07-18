@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Range, getTrackBackground } from 'react-range';
 import { getAlertRange, getUnitHelper, pressureFromUserFormat, temperatureFromUserFormat } from '../../UnitHelper';
 import { ruuviTheme } from "../../themes";
@@ -11,13 +11,11 @@ function getColor(gray, alert) {
 function AlertSlider(props) {
     const getRange = () => {
         var range = getAlertRange(props.type)
-        if (props.type === "temperature" || props.type === "pressure") {
-            if (range.extended) {
-                if (props.value.min < range.min ||
-                    props.value.max > range.max) {
-                    range.min = range.extended.min
-                    range.max = range.extended.max
-                }
+        if (range.extended) {
+            if (props.value.min < range.min ||
+                props.value.max > range.max) {
+                range.min = range.extended.min
+                range.max = range.extended.max
             }
         }
         if (props.value.max > range.max) range.max = props.value.max
@@ -31,9 +29,9 @@ function AlertSlider(props) {
         return range
     }
 
-    // range for the track background is computed once on mount, matching the
-    // behavior of the original class component's constructor-initialized state
-    const [trackRange] = useState(getRange);
+    // the slider bounds and the track background must use the same range, otherwise
+    // the colored area drifts away from the thumbs when the range widens
+    const trackRange = getRange();
 
     const onChange = (values, final) => {
         if (props.type === "temperature" || props.type === "dewPoint") {
@@ -73,7 +71,7 @@ function AlertSlider(props) {
     var sliderValues = [min, max]
 
     return <div style={{ display: 'flex', alignItems: 'center', marginLeft: 4, marginRight: 4 }}>
-        <Range {...getRange()} values={sliderValues}
+        <Range min={trackRange.min} max={trackRange.max} values={sliderValues}
             step={props.type === "pressure" && uh.unit === "Pa" ? 100 : props.type === "battery" ? 0.1 : 1}
             disabled={props.disabled}
             onChange={values => onChange(values, false)}
