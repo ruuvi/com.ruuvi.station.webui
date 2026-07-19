@@ -8,6 +8,9 @@ export default defineConfig(() => {
       rolldownOptions: {
         output: {
           manualChunks(id) {
+            // keep dynamically imported date-fns locales out of the vendor
+            // chunk so only the active locale is fetched
+            if (id.includes('date-fns/locale')) return undefined;
             if (id.includes('node_modules')) {
               return id.toString().split('node_modules/')[1].split('/')[0].toString();
             }

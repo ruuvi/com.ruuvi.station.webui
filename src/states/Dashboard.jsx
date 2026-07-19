@@ -44,7 +44,7 @@ function DashboardGrid(props) {
     const debouncedWindowResizeHandlerRef = useRef(null);
     const debouncedResizeObserverHandlerRef = useRef(null);
 
-    let size = "";
+    let size;
     if (isLargeDisplay) size = "large";
     else if (isMediumDisplay) size = "medium";
     else size = "mobile";

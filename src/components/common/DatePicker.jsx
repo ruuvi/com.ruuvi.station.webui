@@ -1,22 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { DayPicker } from 'react-day-picker';
-import { enGB, fi, sv, de, fr, pl } from 'date-fns/locale';
-import 'react-day-picker/dist/style.css';
+import { enGB } from 'date-fns/locale/en-GB';
+import 'react-day-picker/style.css';
 import i18next, { t } from 'i18next';
 
+// Loaded on demand so only the active locale ships to the client
+const localeLoaders = {
+  sv: () => import('date-fns/locale/sv').then(m => m.sv),
+  fi: () => import('date-fns/locale/fi').then(m => m.fi),
+  de: () => import('date-fns/locale/de').then(m => m.de),
+  fr: () => import('date-fns/locale/fr').then(m => m.fr),
+  pl: () => import('date-fns/locale/pl').then(m => m.pl),
+};
+
+// react-day-picker v10 puts modifier classes (my-selected) on the grid cell,
+// not the day button, so button styling goes through .rdp-day_button
 const css = `
-  .my-selected:not([disabled]) { 
-    background: #35AD9FB3;
+  .rdp-root {
+    --rdp-accent-color: #35AD9FB3;
+    --rdp-range_middle-background-color: #35AD9F33;
+    --rdp-today-color: currentColor;
   }
-  .my-selected:hover:not([disabled]) { 
+  .rdp-day_button:hover:not(:disabled):not(.my-selected *) {
+    background: #5e8d88a0;
+  }
+  .my-selected:hover .rdp-day_button {
     color: #35AD9F;
   }
-  .my-today { 
+  .my-today {
     font-weight: bold;
-  }
-  .rdp-day_range_middle {
-    background: #35AD9F33 !important;
   }
 `;
 
@@ -25,13 +38,15 @@ function ddmm(ts) {
 }
 
 export default function DatePicker(props) {
-  let local = enGB;
-  let lng = i18next.language
-  if (lng === "sv") local = sv
-  if (lng === "fi") local = fi
-  if (lng === "de") local = de
-  if (lng === "fr") local = fr
-  if (lng === "pl") local = pl
+  const lng = i18next.language
+  const [locale, setLocale] = useState(enGB);
+  useEffect(() => {
+    let active = true;
+    const load = localeLoaders[lng];
+    if (load) load().then(l => { if (active) setLocale(l) });
+    else setLocale(enGB);
+    return () => { active = false };
+  }, [lng]);
   const defaultSelected = {
     from: null,
     to: null
@@ -63,7 +78,7 @@ export default function DatePicker(props) {
       <DayPicker
       style={{paddingLeft: "3px"}}
         mode="range"
-        locale={local}
+        locale={locale}
         selected={range}
         modifiersClassNames={{
           selected: 'my-selected',

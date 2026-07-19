@@ -266,7 +266,7 @@ function SensorCompare(_props) {
     const updateDuration = (v) => {
         if (loading) return
         setDurationPickerValue(v)
-        let setFromTo = null, setToTo = null
+        let setFromTo, setToTo
         if (typeof v === "object") {
             setFromTo = v.from.getTime() / 1000
             setToTo = v.to.getTime() / 1000

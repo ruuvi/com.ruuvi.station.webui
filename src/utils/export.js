@@ -519,7 +519,7 @@ export function exportPDF(sensor, data, graphData, type, from, to, chartRef, t, 
         drawInfoBox(max.toString(), t("graph_stat_max"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius);
         drawInfoBox(avg.toString(), t("graph_stat_avg"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius);
         let alertsHit = hasAlertBeenHit(sensor.alerts, data.measurements, type)
-        drawInfoBox("", t(alertsHit ? "limits_hit" : "no_limits_hit"), boxPos[boxidx++], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius, alertsHit);
+        drawInfoBox("", t(alertsHit ? "limits_hit" : "no_limits_hit"), boxPos[boxidx], bottom_info_value_y_pos, bottom_info_y_label_pos, box_corner_radius, alertsHit);
 
         let text_timestamp = getTimestamp(new Date())
         let ts_size = doc.getTextDimensions(text_timestamp)

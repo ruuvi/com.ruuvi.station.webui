@@ -69,7 +69,7 @@ const SmallStats = ({
                     const unitHelper = getUnitHelper(sensorType);
                     if (!unitHelper) return null;
 
-                    let showValue = null;
+                    let showValue;
                     let unitLabel = unitHelper.unit;
                     let label = unitHelper.shortLabel || unitHelper.label;
 

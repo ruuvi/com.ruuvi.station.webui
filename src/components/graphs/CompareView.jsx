@@ -136,7 +136,6 @@ function CompareView(props) {
                 for (; ;) {
                     // Check if cancelled
                     if (props.cancelRef?.current) {
-                        stop = true;
                         break;
                     }
 

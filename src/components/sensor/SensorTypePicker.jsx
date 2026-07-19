@@ -136,7 +136,7 @@ export default function SensorTypePicker(props) {
             return t("not_selected") || "Not selected";
         }
 
-        let label = ""
+        let label
         if (value == null) return ""
 
         let sensorType = getSensorTypeOnly(value)
