@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { uppercaseFirst } from "../../TextHelper";
 import RadioInput from "../common/RadioInput";
 
-const langs = ["en", "fi", "sv", "fr", "de"];
+const langs = ["en", "fi", "sv", "fr", "de", "pl"];
 const radioLangs = [
     {label: "language_english", value: "en"},
     {label: "language_finnish", value: "fi"},
     {label: "language_swedish", value: "sv"},
     {label: "language_french", value: "fr"},
-    {label: "language_german", value: "de"}
+    {label: "language_german", value: "de"},
+    {label: "language_polish", value: "pl"}
 ];
 
 function LanguageMenu(props) {
