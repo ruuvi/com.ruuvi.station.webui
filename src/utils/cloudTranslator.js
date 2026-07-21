@@ -19,7 +19,6 @@ export const ORDERED_VISIBILITY_CODES = [
     "PRESSURE_2",             // mmHg
     "PRESSURE_3",             // inHg
     "MOVEMENT_COUNT",
-    "MSN_COUNT",
     "SOUNDINSTANT_DBA",
     "SOUNDAVG_DBA",
     "SOUNDPEAK_DBA",
@@ -29,6 +28,7 @@ export const ORDERED_VISIBILITY_CODES = [
     "ACCELERATION_GY",
     "ACCELERATION_GZ",
     "SIGNAL_DBM",
+    "MSN_COUNT",
 ];
 
 export const visibilityCodes = [
