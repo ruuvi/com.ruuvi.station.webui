@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import logger from "../utils/logger";
 import NetworkApi from '../NetworkApi'
 import {
@@ -129,10 +129,16 @@ function Sensor(props) {
         return isAlerting(sensor, type);
     }
 
-    function getGraphData() {
-        if (!dataRef.current?.measurements?.length) return [];
-        return dataRef.current.measurements;
-    }
+    const graphData = useMemo(() => {
+        const historical = data?.measurements;
+        if (!historical?.length) return [];
+
+        const live = to === null && sensorHasData(sensor) ? sensor.measurements[0] : null;
+        if (live && live.timestamp > historical[0].timestamp) {
+            return [live, ...historical];
+        }
+        return historical;
+    }, [data, to, sensor]);
 
     function getSelectedUnit(currentGraphKey, currentGraphUnitKey) {
         const gKey = currentGraphKey ?? graphKey;
@@ -168,10 +174,10 @@ function Sensor(props) {
             isLoadingRef.current = false;
             return;
         }
-        if (isLoadingRef.current) return;
-
         clearTimeout(latestDataUpdateRef.current);
         latestDataUpdateRef.current = setTimeout(() => loadDataRef.current(), 60 * 1000);
+
+        if (isLoadingRef.current) return;
 
         if (showLoading !== undefined) setLoading(true);
         if (showLoading) {
@@ -232,9 +238,6 @@ function Sensor(props) {
                         return;
                     }
 
-                    // guard from original (preserves existing behavior)
-                    if (!d.measurements && d.measurements[d.measurements.length - 1].timestamp < since) return;
-
                     let newData;
                     if (!stateData) {
                         newData = d;
@@ -249,7 +252,8 @@ function Sensor(props) {
                     setLoading(false);
 
                     if (initialLoad && (d.nextUp || d.fromCache || returnedDataLength >= pjson.settings.dataFetchPaginationSize)) {
-                        load(d.nextUp || d.measurements[d.measurements.length - 1].timestamp, initialLoad);
+                        const nextUntil = d.nextUp || d.measurements[d.measurements.length - 1]?.timestamp;
+                        if (nextUntil) load(nextUntil, initialLoad);
                     }
                 } else if (resp.result === "error") {
                     notify.error(propsRef.current.t(`UserApiError.${resp.code}`));
@@ -392,7 +396,7 @@ function Sensor(props) {
         setGraphPDFMode(true);
         const fromTime = getFrom();
         const toTime = to || new Date().getTime();
-        exportPDF(sensor, dataRef.current, getGraphData(), graphKey, fromTime, toTime, chartRef.current, t, () => {
+        exportPDF(sensor, dataRef.current, graphData, graphKey, fromTime, toTime, chartRef.current, t, () => {
             setGraphPDFMode(false);
         });
     }
@@ -555,7 +559,7 @@ function Sensor(props) {
                                                     }
                                                     return t(uh.label);
                                                 })()}
-                                                data={getGraphData()}
+                                                data={graphData}
                                                 loading={loading}
                                                 height={450} cursor={true}
                                                 from={getFrom()}
