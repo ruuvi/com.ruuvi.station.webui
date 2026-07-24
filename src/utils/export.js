@@ -118,7 +118,6 @@ function processData(data, t) {
     var csvHeader = [t('date')]
     columnDefs.forEach(colDef => {
         let header = t(colDef.helper.exportLabel || colDef.helper.shortLabel || colDef.helper.label)
-        if (colDef.sensorType === "rssi") header = "RSSI"
         if (header === "Tx Power") header = "TX Power"
         if (!colDef.helper.noUnitInExport && colDef.helper.unit) {
             header += ` (${t(colDef.helper.unit)})`
