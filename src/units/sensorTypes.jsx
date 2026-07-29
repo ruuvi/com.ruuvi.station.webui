@@ -31,7 +31,7 @@ const acceleration = (axis) => defineSensorType({
     infoLabel: "description_text_acceleration",
     unit: "g",
     value: (value) => value / 1000,
-    decimals: 3
+    decimals: 2
 });
 
 const particulateMatter = (size) => defineSensorType({

@@ -95,7 +95,7 @@ export default function ResolutionSettings({ settings, savingSettings, updateSet
             {showAcceleration && <>
                 <RadioInput
                     label={"acceleration_resolution"}
-                    value={settings.ACCURACY_ACCELERATION || "3"}
+                    value={settings.ACCURACY_ACCELERATION || "2"}
                     options={resolutionOptions("accelerationX", null, getMaxDecimals("accelerationX"))}
                     onChange={v => updateSetting("ACCURACY_ACCELERATION", v)}
                     loading={savingSettings.indexOf("ACCURACY_ACCELERATION") !== -1}

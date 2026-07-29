@@ -64,7 +64,7 @@ class Settings extends Component {
                 ACCURACY_PRESSURE: "2",
                 ACCURACY_TEMPERATURE: "2",
                 ACCURACY_PM: "1",
-                ACCURACY_ACCELERATION: "3",
+                ACCURACY_ACCELERATION: "2",
                 ACCURACY_VOLTAGE: "2"
             },
             CHART_DRAW_DOTS: Store.getGraphDrawDots(),

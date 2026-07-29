@@ -529,7 +529,7 @@ describe("getUnitHelper", () => {
 
         it("acceleration converts mG to g", () => {
             expect(getUnitHelper("accelerationX").value(1000)).toBe(1);
-            expect(getUnitHelper("accelerationY").decimals).toBe(3);
+            expect(getUnitHelper("accelerationY").decimals).toBe(2);
         });
 
         it("honors ACCURACY_ACCELERATION", () => {
