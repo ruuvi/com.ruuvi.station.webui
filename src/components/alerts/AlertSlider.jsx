@@ -29,28 +29,10 @@ function AlertSlider(props) {
         return range
     }
 
-    // the slider bounds and the track background must use the same range, otherwise
-    // the colored area drifts away from the thumbs when the range widens
-    const trackRange = getRange();
-
-    const onChange = (values, final) => {
-        if (props.type === "temperature" || props.type === "dewPoint") {
-            values = [temperatureFromUserFormat(values[0]), temperatureFromUserFormat(values[1])]
-        } else if (props.type === "pressure") {
-            values = [pressureFromUserFormat(values[0]), pressureFromUserFormat(values[1])]
-        }
-        // always keep min and max different
-        if (values[0] === values[1]) {
-            // figure out which value has changed
-            let oldMin = props.value.min
-            if (oldMin === values[0]) {
-                values[1] = values[0] + 1
-            } else {
-                values[0] = values[1] - 1
-            }
-        }
-        props.onChange(values, final)
-    }
+    // props.value changes on every move while a thumb is dragged, and recomputing the
+    // range then would rescale the track (and the values) under the user's finger, so the
+    // bounds are frozen for the duration of the drag and only updated once it ends
+    const dragRange = React.useRef(null)
 
     var range = getAlertRange(props.type)
     var max = props.value.max
@@ -69,6 +51,33 @@ function AlertSlider(props) {
         max = tmp
     }
     var sliderValues = [min, max]
+
+    // the slider bounds and the track background must use the same range, otherwise
+    // the colored area drifts away from the thumbs when the range widens
+    const trackRange = dragRange.current ? { ...dragRange.current } : getRange();
+    // the values must always fit inside the bounds, react-range throws otherwise
+    if (sliderValues[1] > trackRange.max) trackRange.max = sliderValues[1]
+    if (sliderValues[0] < trackRange.min) trackRange.min = sliderValues[0]
+
+    const onChange = (values, final) => {
+        dragRange.current = final ? null : trackRange
+        if (props.type === "temperature" || props.type === "dewPoint") {
+            values = [temperatureFromUserFormat(values[0]), temperatureFromUserFormat(values[1])]
+        } else if (props.type === "pressure") {
+            values = [pressureFromUserFormat(values[0]), pressureFromUserFormat(values[1])]
+        }
+        // always keep min and max different
+        if (values[0] === values[1]) {
+            // figure out which value has changed
+            let oldMin = props.value.min
+            if (oldMin === values[0]) {
+                values[1] = values[0] + 1
+            } else {
+                values[0] = values[1] - 1
+            }
+        }
+        props.onChange(values, final)
+    }
 
     return <div style={{ display: 'flex', alignItems: 'center', marginLeft: 4, marginRight: 4 }}>
         <Range min={trackRange.min} max={trackRange.max} values={sliderValues}
