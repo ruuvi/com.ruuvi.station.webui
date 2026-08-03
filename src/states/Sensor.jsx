@@ -29,6 +29,7 @@ import UpgradePlanButton from "../components/common/UpgradePlanButton";
 import ZoomInfo from "../components/graphs/ZoomInfo";
 import SensorTypeVisibilityDialog from "../components/dialogs/SensorTypeVisibilityDialog";
 import NotesDialog from "../components/dialogs/NotesDialog";
+import PublicSensorDialog from "../components/dialogs/PublicSensorDialog";
 import SensorHeader from "../components/sensor/SensorHeader";
 import SensorReadingGrid from "../components/sensor/SensorReadingGrid";
 import SensorSettings from "../components/sensor/SensorSettings";
@@ -59,7 +60,7 @@ const graph = {
 let alertDebouncer = {}
 
 function Sensor(props) {
-    const { t, sensor, router } = props;
+    const { t, sensor, router, isPublic } = props;
 
     const getInitialGraphKey = () => {
         const queryParams = new URLSearchParams(router.location.search);
@@ -106,6 +107,7 @@ function Sensor(props) {
     const [sensorVisibilityDialog, setSensorVisibilityDialog] = useState(false);
     const [notesDialog, setNotesDialog] = useState(false);
     const [showRemoveSensor, setShowRemoveSensor] = useState(false);
+    const [publicDialog, setPublicDialog] = useState(false);
 
     // Refs for values accessed inside async functions to avoid stale closures
     const dataRef = useRef(null);
@@ -464,6 +466,7 @@ function Sensor(props) {
                     <SensorHeader
                         sensor={sensor}
                         t={t}
+                        isPublic={isPublic}
                         prev={props.prev}
                         next={props.next}
                         lastUpdateTime={lastReading.timestamp}
@@ -528,7 +531,7 @@ function Sensor(props) {
                             <> {!loading && (!data || !data?.measurements?.length) ? (
                                 <>
                                     <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">{noHistoryStr}
-                                        {freeMode && !shared && sensorHasData(sensor) && <>
+                                        {freeMode && !shared && !isPublic && sensorHasData(sensor) && <>
                                             <Box mt={2} />
                                             <UpgradePlanButton />
                                         </>}
@@ -578,7 +581,7 @@ function Sensor(props) {
                         </Box>
                     </div>
                 </Box>
-                <SensorSettings
+                {!isPublic && <SensorSettings
                     sensor={sensor}
                     t={t}
                     latestReading={lastReading}
@@ -589,24 +592,28 @@ function Sensor(props) {
                     onEditName={() => setEditName(true)}
                     onEditNotes={() => setNotesDialog(true)}
                     onEditVisibility={() => setSensorVisibilityDialog(true)}
+                    onMakePublicClick={() => setPublicDialog(true)}
                     onOffsetClick={setOffsetDialog}
                     onRemoveClick={() => setShowRemoveSensor(true)}
-                />
-                <EditNameDialog open={editName} onClose={() => setEditName(false)} sensor={sensor} updateSensor={props.updateSensor} />
-                <OffsetDialog open={offsetDialog} onClose={() => setOffsetDialog(null)} sensor={sensor} offsets={{ "Humidity": sensor.offsetHumidity, "Pressure": sensor.offsetPressure, "Temperature": sensor.offsetTemperature }} lastReading={lastReading} updateSensor={props.updateSensor} />
-                <RemoveSensorDialog open={showRemoveSensor} onClose={() => setShowRemoveSensor(false)} sensor={sensor} updateSensor={props.updateSensor} t={t} remove={() => props.remove()} />
-                <SensorTypeVisibilityDialog
-                    sensor={sensor}
-                    open={sensorVisibilityDialog}
-                    onClose={() => setSensorVisibilityDialog(false)}
-                    updateSensor={props.updateSensor}
-                />
-                <NotesDialog
-                    open={notesDialog}
-                    onClose={() => setNotesDialog(false)}
-                    sensor={sensor}
-                    updateSensor={props.updateSensor}
-                />
+                />}
+                {!isPublic && <>
+                    <EditNameDialog open={editName} onClose={() => setEditName(false)} sensor={sensor} updateSensor={props.updateSensor} />
+                    <OffsetDialog open={offsetDialog} onClose={() => setOffsetDialog(null)} sensor={sensor} offsets={{ "Humidity": sensor.offsetHumidity, "Pressure": sensor.offsetPressure, "Temperature": sensor.offsetTemperature }} lastReading={lastReading} updateSensor={props.updateSensor} />
+                    <RemoveSensorDialog open={showRemoveSensor} onClose={() => setShowRemoveSensor(false)} sensor={sensor} updateSensor={props.updateSensor} t={t} remove={() => props.remove()} />
+                    <SensorTypeVisibilityDialog
+                        sensor={sensor}
+                        open={sensorVisibilityDialog}
+                        onClose={() => setSensorVisibilityDialog(false)}
+                        updateSensor={props.updateSensor}
+                    />
+                    <NotesDialog
+                        open={notesDialog}
+                        onClose={() => setNotesDialog(false)}
+                        sensor={sensor}
+                        updateSensor={props.updateSensor}
+                    />
+                    <PublicSensorDialog open={publicDialog} onClose={() => setPublicDialog(false)} sensor={sensor} updateSensor={props.updateSensor} />
+                </>}
             </Box>
         </Box>
     );
