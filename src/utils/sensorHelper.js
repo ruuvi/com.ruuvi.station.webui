@@ -36,6 +36,6 @@ export function getAlert(sensor, type) {
 }
 
 export function isSharedSensor(sensor) {
-    const user = new NetworkApi().getUser().email;
-    return user !== sensor.owner;
+    const user = new NetworkApi().getUser();
+    return !!user && user.email !== sensor.owner;
 }

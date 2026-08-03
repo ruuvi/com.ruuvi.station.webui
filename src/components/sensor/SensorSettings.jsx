@@ -69,7 +69,7 @@ function AccordionText(props) {
 }
 
 function SensorSettings(props) {
-    const { t, sensor, router, latestReading, mainSensorFields, isShared, updateAlert, setGraphKey, onEditName, onEditNotes, onEditVisibility, onOffsetClick, onRemoveClick } = props;
+    const { t, sensor, router, latestReading, mainSensorFields, isShared, updateAlert, setGraphKey, onEditName, onEditNotes, onEditVisibility, onMakePublicClick, onOffsetClick, onRemoveClick } = props;
 
     // v3 accordions are keyed by string values; keep persisting plain indexes.
     const openAccordionsRef = useRef((Store.getOpenAccordions() || [0]).map(String));
@@ -162,6 +162,22 @@ function SensorSettings(props) {
                                                         }
                                                         return visibleFields.length > 0 ? `${visibleFields.length}/${maxAvailable || visibleFields.length}` : t("no_visible_measurements");
                                                     })()}
+                                                    <IconButton aria-label="open" variant="ghost" _hover={{}}><MdChevronRight /></IconButton>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </List.Item>
+                            </>}
+                            {!isShared && <>
+                                <hr />
+                                <List.Item style={{ cursor: "pointer" }} onClick={onMakePublicClick}>
+                                    <table style={accordionContent}>
+                                        <tbody>
+                                            <tr>
+                                                <td style={detailedTitle}>{t("make_public")}</td>
+                                                <td style={detailedText}>
+                                                    {sensor.public ? t("public") : t("private")}
                                                     <IconButton aria-label="open" variant="ghost" _hover={{}}><MdChevronRight /></IconButton>
                                                 </td>
                                             </tr>

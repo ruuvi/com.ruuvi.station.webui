@@ -52,7 +52,9 @@ class NetworkApi {
             }
             if (body !== undefined) options.body = JSON.stringify(body);
             const response = await fetch(this.url + path, options);
-            if (auth && response.status === 401) {
+            // Only force a logout for an expired session; unauthenticated requests
+            // (e.g. public sensor pages) report the error to the caller instead.
+            if (auth && response.status === 401 && this.getUser()) {
                 logout()
                 throw new Error("Unauthorized")
             }
