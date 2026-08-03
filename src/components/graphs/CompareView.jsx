@@ -258,7 +258,7 @@ function CompareView(props) {
     // changes in the options, so keep this object as stable as possible;
     // progressively loaded data then flows through the cheaper setData path.
     const baseOptions = useMemo(() => ({
-        plugins: [UplotTouchZoomPlugin(getXRange(), onTouchZoom)],
+        plugins: [UplotTouchZoomPlugin(getXRange, onTouchZoom)],
         padding: [10, 10, 0, -10],
         series: [
             {

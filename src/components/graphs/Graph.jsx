@@ -409,7 +409,7 @@ function Graph(props) {
     const baseOptions = useMemo(() => {
         const plugins = [];
         if (!cardView) {
-            plugins.push(UplotTouchZoomPlugin(getXRange(), onTouchZoom));
+            plugins.push(UplotTouchZoomPlugin(getXRange, onTouchZoom));
             plugins.push(UplotLegendHider());
         }
         const seriesStroke = (u) => {

@@ -1,6 +1,6 @@
 // Renders the real DatePicker against react-day-picker v10 and exercises
 // range selection, verifying the v10 DOM model the custom CSS relies on.
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import DatePicker from "./DatePicker";
@@ -8,6 +8,17 @@ import DatePicker from "./DatePicker";
 const tick = (ms = 50) => new Promise(r => setTimeout(r, ms));
 
 describe("DatePicker", () => {
+    // DatePicker disables future days and opens on the current month, so early
+    // in a month there are too few selectable days. Fake Date only (not the
+    // timers) to keep the visible month deterministic.
+    beforeAll(() => {
+        vi.useFakeTimers({ toFake: ["Date"] });
+        vi.setSystemTime(new Date(2026, 0, 20, 12, 0, 0));
+    });
+    afterAll(() => {
+        vi.useRealTimers();
+    });
+
     it("selects a range and applies modifier classes to day cells", async () => {
         const changes = [];
         const container = document.createElement("div");
