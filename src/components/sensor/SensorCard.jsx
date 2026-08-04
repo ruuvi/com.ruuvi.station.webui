@@ -248,7 +248,7 @@ const SensorCard = ({
     );
 
     const altFileUpload = (
-        <label htmlFor={uploadInputId} id={uploadLabelId}>
+        <label htmlFor={uploadInputId} id={uploadLabelId} onClick={event => event.stopPropagation()}>
             <input
                 type="file"
                 accept="image/*"
