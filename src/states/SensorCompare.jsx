@@ -148,7 +148,9 @@ function SensorCompare(_props) {
             unit = getUnitHelper("temperature").units?.find(x => x.cloudStoreKey === tempUnit)?.translationKey || tempUnit;
             label = "dewpoint";
         } else {
-            unit = uh.units?.find(x => x.cloudStoreKey === unitKey)?.translationKey || uh.unit
+            const unitDefinition = uh.units?.find(x => x.cloudStoreKey === unitKey);
+            unit = unitDefinition?.translationKey || uh.unit;
+            label = unitDefinition?.label || label;
         }
 
         return <div style={{ marginLeft: 30 }}>
