@@ -13,7 +13,7 @@ import {
 import { MdChevronRight } from "react-icons/md"
 import Store from "../../Store";
 import withRouter from "../../utils/withRouter"
-import { alertTypes, getUnitHelper, localeNumber } from "../../UnitHelper";
+import { alertTypes, getMaxDecimals, getUnitHelper, localeNumber } from "../../UnitHelper";
 import { addVariablesInString, uppercaseFirst } from "../../TextHelper";
 import AlertItem from "../alerts/AlertItem";
 import EditableText from "../common/EditableText";
@@ -253,7 +253,7 @@ function SensorSettings(props) {
                                             <tr>
                                                 <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
                                                 <td style={detailedText}>
-                                                    {localeNumber(value, uh.decimals)} {unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
+                                                    {localeNumber(value, getMaxDecimals(x.toLocaleLowerCase()))} {unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
                                                 </td>
                                             </tr>
                                         </tbody>

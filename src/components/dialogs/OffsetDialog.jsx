@@ -6,7 +6,7 @@ import {
     Spinner,
 } from "@chakra-ui/react"
 import { useTranslation } from 'react-i18next';
-import { getUnitHelper, localeNumber } from "../../UnitHelper";
+import { getMaxDecimals, getUnitHelper, localeNumber } from "../../UnitHelper";
 import InputDialog from "./InputDialog";
 import NetworkApi from "../../NetworkApi";
 import notify from "../../utils/notify";
@@ -79,7 +79,7 @@ function OffsetDialog(props) {
 
     const format = (number) => {
         if (!props.open) return number;
-        return localeNumber(number, getUnitHelper(props.open.toLowerCase()).decimals);
+        return localeNumber(number, getMaxDecimals(props.open.toLowerCase()));
     }
 
     return (

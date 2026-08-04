@@ -298,9 +298,19 @@ export function displayDecimalsFor(key, settings) {
     return variantDecimals(key, variant, settings) ?? type.decimals;
 }
 
-// Base decimal count for a sensor type, before any user accuracy override.
+// Full decimal count for a sensor type, ignoring the user's accuracy setting
+// but still honouring a variant's own fixed decimals (Pa is always shown
+// without decimals, so full resolution in Pa is 0 decimals, not the 2 that
+// the hPa-based base value implies).
 export function getMaxDecimals(key) {
-    return sensorTypes[key]?.decimals ?? 2;
+    const type = sensorTypes[key];
+    if (!type) return 2;
+    if (UNIT_SETTING_KEYS[key] && type.units) {
+        const setting = resolveUnitSetting(key, undefined, readSettings());
+        const variant = type.units.find(u => u.cloudStoreKey === setting);
+        if (variant?.decimals !== undefined) return variant.decimals;
+    }
+    return type.decimals;
 }
 
 function applyVariant(thing, variant, plaintext, settings) {
