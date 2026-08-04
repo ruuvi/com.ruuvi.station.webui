@@ -5,11 +5,7 @@ import Graph from "../graphs/Graph";
 import BigValue from "../common/BigValue";
 import SmallStats from "./SensorCardStats";
 import "uplot/dist/uPlot.min.css";
-import {
-    getDisplayValue,
-    getUnitHelper,
-    localeNumber,
-} from "../../UnitHelper";
+import { getUnitHelper, localeNumber } from "../../UnitHelper";
 import bglayer from "../../img/bg-layer.png";
 
 const SensorCardDetailed = ({
@@ -42,11 +38,11 @@ const SensorCardDetailed = ({
     getAlertForGraph,
     dataFrom,
     t,
-    adaptiveLayout = true
+    adaptiveLayout = true,
 }) => {
     const isSmallCard = size === "mobile" && !showGraph;
 
-    let minHeight = showGraph ? size === "medium" ? 380 : 430 : 230;
+    let minHeight = showGraph ? (size === "medium" ? 380 : 430) : 230;
     let nonAdaptiveProps = adaptiveLayout ? {} : { height: "100%" };
     let boxProps = {};
     if (adaptiveLayout) {
@@ -55,13 +51,7 @@ const SensorCardDetailed = ({
     return (
         <Box {...nonAdaptiveProps}>
             {altFileUpload}
-            <Box
-                className="content sensorCard"
-                borderRadius="lg"
-                overflow="hidden"
-                {...boxProps}
-                {...nonAdaptiveProps}
-            >
+            <Box className="content sensorCard" borderRadius="lg" overflow="hidden" {...boxProps} {...nonAdaptiveProps}>
                 <Flex {...nonAdaptiveProps}>
                     {showImage && (
                         <Box
@@ -132,10 +122,7 @@ const SensorCardDetailed = ({
                                         let unit = unitHelper.unit;
                                         let label = unitHelper.shortLabel || unitHelper.label;
 
-                                        if (
-                                            mainStatUnitKey &&
-                                            unitHelper.valueWithUnit
-                                        ) {
+                                        if (mainStatUnitKey && unitHelper.valueWithUnit) {
                                             const unitKey = mainStatUnitKey;
                                             showValue = localeNumber(
                                                 unitHelper.valueWithUnit(
@@ -146,16 +133,10 @@ const SensorCardDetailed = ({
                                                 unitHelper.decimals,
                                             );
 
-                                            const unitDef = unitHelper.units?.find(
-                                                (u) => u.cloudStoreKey === unitKey,
-                                            );
+                                            const unitDef = unitHelper.units?.find((u) => u.cloudStoreKey === unitKey);
                                             if (unitDef) unit = unitDef.translationKey || unit;
 
-                                            const helperWithUnit = getUnitHelper(
-                                                mainStat,
-                                                true,
-                                                unitKey,
-                                            );
+                                            const helperWithUnit = getUnitHelper(mainStat, true, unitKey);
                                             if (helperWithUnit) {
                                                 showValue = localeNumber(
                                                     helperWithUnit.valueWithUnit(
@@ -172,9 +153,7 @@ const SensorCardDetailed = ({
                                             showValue = localeNumber(
                                                 unitHelper.value(
                                                     latestReading[mainStat],
-                                                    mainStat === "humidity"
-                                                        ? latestReading.temperature
-                                                        : undefined,
+                                                    mainStat === "humidity" ? latestReading.temperature : undefined,
                                                 ),
                                                 unitHelper.decimals,
                                             );
@@ -182,7 +161,7 @@ const SensorCardDetailed = ({
 
                                         return (
                                             <BigValue
-                                                value={getDisplayValue(mainStat, showValue)}
+                                                value={showValue}
                                                 unit={t(unit)}
                                                 alertActive={getAlertState(mainStat) > 0}
                                                 label={t(label)}
@@ -215,8 +194,8 @@ const SensorCardDetailed = ({
                                                 >
                                                     <div>
                                                         {data &&
-                                                            hasDataForTypes.includes(mainStat) &&
-                                                            data.measurements.length ? (
+                                                        hasDataForTypes.includes(mainStat) &&
+                                                        data.measurements.length ? (
                                                             <>
                                                                 {showGraph && (
                                                                     <div
@@ -232,13 +211,22 @@ const SensorCardDetailed = ({
                                                                             key={`${sensor.sensor}${showGraph}${showImage}${mainStatUnitKey || ""}`}
                                                                             alert={getAlertForGraph(mainStat)}
                                                                             unit={(() => {
-                                                                                const unitHelper = getUnitHelper(mainStat);
-                                                                                if (mainStatUnitKey && unitHelper?.units) {
-                                                                                    const unitDef = unitHelper.units.find(
-                                                                                        (u) => u.cloudStoreKey === mainStatUnitKey,
-                                                                                    );
+                                                                                const unitHelper =
+                                                                                    getUnitHelper(mainStat);
+                                                                                if (
+                                                                                    mainStatUnitKey &&
+                                                                                    unitHelper?.units
+                                                                                ) {
+                                                                                    const unitDef =
+                                                                                        unitHelper.units.find(
+                                                                                            (u) =>
+                                                                                                u.cloudStoreKey ===
+                                                                                                mainStatUnitKey,
+                                                                                        );
                                                                                     if (unitDef) {
-                                                                                        return t(unitDef.translationKey);
+                                                                                        return t(
+                                                                                            unitDef.translationKey,
+                                                                                        );
                                                                                     }
                                                                                 }
                                                                                 return unitHelper.unit;
@@ -246,14 +234,23 @@ const SensorCardDetailed = ({
                                                                             unitKey={mainStatUnitKey}
                                                                             dataKey={mainStat}
                                                                             dataName={(() => {
-                                                                                const unitHelper = getUnitHelper(mainStat);
+                                                                                const unitHelper =
+                                                                                    getUnitHelper(mainStat);
                                                                                 const baseLabel = t(unitHelper.label);
-                                                                                if (mainStatUnitKey && unitHelper?.units) {
-                                                                                    const unitDef = unitHelper.units.find(
-                                                                                        (u) => u.cloudStoreKey === mainStatUnitKey,
-                                                                                    );
+                                                                                if (
+                                                                                    mainStatUnitKey &&
+                                                                                    unitHelper?.units
+                                                                                ) {
+                                                                                    const unitDef =
+                                                                                        unitHelper.units.find(
+                                                                                            (u) =>
+                                                                                                u.cloudStoreKey ===
+                                                                                                mainStatUnitKey,
+                                                                                        );
                                                                                     if (unitDef) {
-                                                                                        const unitText = t(unitDef.translationKey);
+                                                                                        const unitText = t(
+                                                                                            unitDef.translationKey,
+                                                                                        );
                                                                                         return `${baseLabel} (${unitText || unitDef.translationKey})`;
                                                                                     }
                                                                                 }
@@ -300,7 +297,7 @@ const SensorCardDetailed = ({
                                                                                     errorFetchingData
                                                                                         ? t("network_error")
                                                                                         : noHistoryStr,
-                                                                                    { simpleView: false, showGraph }
+                                                                                    { simpleView: false, showGraph },
                                                                                 )}
                                                                             </Box>
                                                                         )}
@@ -313,9 +310,7 @@ const SensorCardDetailed = ({
                                                     <div
                                                         style={{
                                                             maxWidth:
-                                                                size === "mobile" && !showGraph
-                                                                    ? "300px"
-                                                                    : undefined,
+                                                                size === "mobile" && !showGraph ? "300px" : undefined,
                                                             minHeight: `${smallDataMinHeight}px`,
                                                         }}
                                                     >
@@ -333,10 +328,10 @@ const SensorCardDetailed = ({
                                         ) : (
                                             <Box pt={4} pb={4} mt={height / 4}>
                                                 {renderNoData(
-                                                    t("no_data").split("\n").map((line) => (
-                                                        <div key={line}>{line}</div>
-                                                    )),
-                                                    { simpleView: false, showGraph }
+                                                    t("no_data")
+                                                        .split("\n")
+                                                        .map((line) => <div key={line}>{line}</div>),
+                                                    { simpleView: false, showGraph },
                                                 )}
                                             </Box>
                                         )}
