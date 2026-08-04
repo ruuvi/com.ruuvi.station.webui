@@ -100,8 +100,9 @@ function Sensor(props) {
     const [editName, setEditName] = useState(false);
     const [offsetDialog, setOffsetDialog] = useState(null);
     const [loadingImage, setLoadingImage] = useState(false);
-    const [updateGraphKey, setUpdateGraphKey] = useState(0);
+    const [picture, setPicture] = useState(sensor.picture);
     const [graphPDFMode, setGraphPDFMode] = useState(false);
+    const [updateGraphKey, setUpdateGraphKey] = useState(0);
     const [sensorVisibilityDialog, setSensorVisibilityDialog] = useState(false);
     const [notesDialog, setNotesDialog] = useState(false);
     const [showRemoveSensor, setShowRemoveSensor] = useState(false);
@@ -295,10 +296,11 @@ function Sensor(props) {
 
     // componentDidUpdate: sensor change detection
     useEffect(() => {
+        setPicture(sensor.picture);
         isLoadingRef.current = false;
         loadDataRef.current(true, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sensor.sensor]);
-
     // document title
     useEffect(() => {
         document.title = "Ruuvi Sensor: " + sensor.name;
@@ -467,10 +469,13 @@ function Sensor(props) {
                         lastUpdateTime={lastReading.timestamp}
                         isAlertTriggered={isAlertTriggered}
                         loadingImage={loadingImage}
+                        picture={picture}
                         fileUploadChange={f => {
+                            const previousPicture = picture;
                             setLoadingImage(true);
-                            uploadBackgroundImage(sensor, f, t, _res => {
+                            uploadBackgroundImage(sensor, f, t, preview => setPicture(preview), result => {
                                 setLoadingImage(false);
+                                setPicture(result || previousPicture);
                             });
                         }}
                     />

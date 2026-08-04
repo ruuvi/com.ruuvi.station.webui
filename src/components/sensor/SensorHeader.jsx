@@ -2,7 +2,7 @@ import React from "react";
 import {
     Box,
     Avatar,
-    CircularProgress,
+    Spinner,
 } from "@chakra-ui/react"
 import DurationText from "../common/DurationText";
 import NavClose from "../common/NavClose";
@@ -15,9 +15,14 @@ function SensorHeader(props) {
         return <div style={{ display: "flex", justifyContent: "space-between" }}>
             <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
             <label htmlFor="avatarUpload">
-                {props.loadingImage ? <CircularProgress size={"96px"} isIndeterminate={true} color="primary" /> :
-                    <Avatar style={{ cursor: "pointer" }} size="xl" name={props.sensor.name} src={props.sensor.picture} />
-                }
+                <Box position="relative" display="inline-flex" cursor="pointer">
+                    <Avatar style={{ cursor: "pointer" }} size="xl" name={props.sensor.name} src={props.picture || props.sensor.picture} />
+                    {props.loadingImage && (
+                        <Box position="absolute" inset={0} display="flex" alignItems="center" justifyContent="center" backgroundColor="blackAlpha.400" borderRadius="full">
+                            <Spinner size="xl" color="white" />
+                        </Box>
+                    )}
+                </Box>
             </label>
             <span style={{ width: "calc(100% - 250px - 18px)", marginLeft: 18 }}>
                 <div className="pageTitle" style={{ textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden", }}>
@@ -44,9 +49,14 @@ function SensorHeader(props) {
                             <td width="33%" align="center">
                                 <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
                                 <label htmlFor="avatarUpload">
-                                    {props.loadingImage ? <CircularProgress mt="3" size={"64px"} isIndeterminate={true} color="primary" /> :
-                                        <Avatar mt="3" bg="primary" size="lg" name={props.sensor.name} src={props.sensor.picture} />
-                                    }
+                                    <Box position="relative" display="inline-flex" cursor="pointer">
+                                        <Avatar mt="3" bg="primary" size="lg" name={props.sensor.name} src={props.picture || props.sensor.picture} />
+                                        {props.loadingImage && (
+                                            <Box position="absolute" inset={0} mt="3" display="flex" alignItems="center" justifyContent="center" backgroundColor="blackAlpha.400" borderRadius="full">
+                                                <Spinner size="xl" color="white" />
+                                            </Box>
+                                        )}
+                                    </Box>
                                 </label>
                             </td>
                             <td width="33%" align="right" style={{ verticalAlign: "top" }}>

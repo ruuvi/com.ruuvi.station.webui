@@ -3,8 +3,12 @@ import notify from "./utils/notify";
 import logger from "./utils/logger";
 import pjson from '../package.json';
 
-let uploadBackgroundImage = (sensor, f, t, doneCB) => {
+let uploadBackgroundImage = (sensor, f, t, previewCB, doneCB) => {
     let file = f.target.files[0]
+    if (!file) {
+        doneCB(null)
+        return
+    }
     if (file.type.match(/image.*/)) {
         let reader = new FileReader();
         reader.onload = readerEvent => {
@@ -37,6 +41,7 @@ let uploadBackgroundImage = (sensor, f, t, doneCB) => {
                 canvas.height = height;
                 canvas.getContext('2d').drawImage(image, 0, 0, width, height);
                 let dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                previewCB(dataUrl.split("?")[0])
                 let api = new NetworkApi();
                 api.prepareUpload(sensor.sensor, 'image/jpeg', ya => {
                     if (ya.result === "success") {
@@ -49,6 +54,10 @@ let uploadBackgroundImage = (sensor, f, t, doneCB) => {
                             notify.error(t("something_went_wrong"))
                             doneCB(null)
                         })
+                    } else {
+                        logger.error("prepare upload returned an error", ya)
+                        notify.error(t("something_went_wrong"))
+                        doneCB(null)
                     }
                 }, err => {
                     logger.error("prepare upload failed", err)

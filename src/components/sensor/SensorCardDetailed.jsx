@@ -13,6 +13,8 @@ const SensorCardDetailed = ({
     settingsVersion,
     size,
     showImage,
+    picture,
+    uploadingImage,
     showGraph,
     alertIcon,
     moreMenu,
@@ -59,7 +61,7 @@ const SensorCardDetailed = ({
                             width="25%"
                             className="imageBackgroundColor"
                             position="relative"
-                            backgroundImage={sensor.picture}
+                            backgroundImage={picture}
                             backgroundSize="cover"
                             backgroundPosition="center"
                             display="flex"
@@ -75,6 +77,19 @@ const SensorCardDetailed = ({
                             >
                                 <div style={{ height: "100%" }} />
                             </Box>
+                            {uploadingImage && (
+                                <Box
+                                    position="absolute"
+                                    inset={0}
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    backgroundColor="blackAlpha.400"
+                                    zIndex={1}
+                                >
+                                    <Spinner size="xl" color="white" />
+                                </Box>
+                            )}
                         </Box>
                     )}
 
