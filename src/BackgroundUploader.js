@@ -47,8 +47,60 @@ let uploadBackgroundImage = (sensor, f, t, previewCB, doneCB) => {
                     if (ya.result === "success") {
                         let url = ya.data.uploadURL
                         api.uploadImage(url, 'image/jpeg', dataUrl, () => {
-                            sensor.picture = dataUrl.split("?")[0]
-                            doneCB(sensor.picture)
+                            // The image is stored by this point, so failing to resolve its
+                            // final URL is not an upload failure: keep showing the local
+                            // preview and let the next sensor refresh pick up the real URL.
+                            const keepLocalPreview = () => {
+                                sensor.picture = dataUrl
+                                doneCB(dataUrl)
+                            }
+                            api.user(userResponse => {
+                                const updatedSensor = userResponse.data?.sensors?.find(
+                                    current => current.sensor === sensor.sensor,
+                                )
+                                const pictureUrl = updatedSensor?.picture
+                                if (!pictureUrl) {
+                                    logger.error("uploaded image URL missing from user response", userResponse)
+                                    keepLocalPreview()
+                                    return
+                                }
+
+                                sensor.picture = pictureUrl
+
+                                // Keep the reload-time sensor snapshot in sync with the
+                                // URL returned by the backend after the upload.
+                                try {
+                                    const cachedSensors = JSON.parse(localStorage.getItem("sensors") || "[]")
+                                    const cachedSensor = cachedSensors.find(cached => cached.sensor === sensor.sensor)
+                                    if (cachedSensor) {
+                                        cachedSensor.picture = pictureUrl
+                                        localStorage.setItem("sensors", JSON.stringify(cachedSensors))
+                                    }
+                                } catch (err) {
+                                    logger.error("failed to update cached sensor image", err)
+                                }
+
+                                // Load the uploaded image into the browser cache before handing
+                                // the URL over, so the card swaps straight from the preview to
+                                // the real image instead of flashing an empty background.
+                                let handled = false
+                                const finish = () => {
+                                    if (handled) return
+                                    handled = true
+                                    clearTimeout(cacheTimeout)
+                                    doneCB(pictureUrl)
+                                }
+                                // Guard against a request that neither loads nor errors, which
+                                // would otherwise leave the caller's spinner running forever.
+                                const cacheTimeout = setTimeout(finish, pjson.settings.uploadImageCacheTimeoutMs)
+                                const cachedImage = new Image()
+                                cachedImage.onload = finish
+                                cachedImage.onerror = finish
+                                cachedImage.src = pictureUrl
+                            }, err => {
+                                logger.error("failed to refresh sensor image URL", err)
+                                keepLocalPreview()
+                            })
                         }, err => {
                             logger.error("upload image failed", err)
                             notify.error(t("something_went_wrong"))
