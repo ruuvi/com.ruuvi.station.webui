@@ -1,0 +1,20 @@
+name: Deploy Dev
+
+# Every push to master ships to devstation.
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: dev
+      make-target: dev
+    secrets: inherit

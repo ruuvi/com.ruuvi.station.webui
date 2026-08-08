@@ -1,19 +1,25 @@
-name: Deploy
+name: Deploy (reusable)
 
+# Shared implementation for the dev and prod deploys. Not triggerable on its
+# own -- see deploy-dev.yml (auto, on master) and deploy-prod.yml (manual).
 on:
-  push:
-    branches:
-      - master
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      make-target:
+        required: true
+        type: string
 
-concurrency:
-  group: deploy-${{ github.ref }}
-  cancel-in-progress: false
+permissions:
+  contents: read
 
 jobs:
-  deploy-dev:
+  deploy:
     runs-on: ubuntu-latest
-    environment: dev
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 20
 
     steps:
     - name: Checkout repository
@@ -38,40 +44,38 @@ jobs:
       run: pnpm run test
 
     - name: Build
-      run: make dev
+      env:
+        MAKE_TARGET: ${{ inputs.make-target }}
+      run: make "$MAKE_TARGET"
+
+    - name: Install sshpass
+      run: sudo apt-get update && sudo apt-get install -y sshpass
 
     - name: Deploy
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSHPASS: ${{ secrets.SSH_KEY_PASSPHRASE }}
+        SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
+        SERVER_HOST: ${{ secrets.SERVER_HOST }}
       run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key.pem
+        set -euo pipefail
+        printf '%s\n' "$SSH_PRIVATE_KEY" > ssh_key.pem
         chmod 600 ssh_key.pem
-        sshpass -Ppassphrase -p ${{ secrets.SSH_KEY_PASSPHRASE }} scp -i ssh_key.pem -o StrictHostKeyChecking=no -r build/* ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/var/www/html/
+        # Unlock the key once into an agent: sshpass needs a pty from the
+        # process it spawns, which is reliable for ssh-add but not for scp.
+        eval "$(ssh-agent -s)"
+        sshpass -Ppassphrase -e ssh-add ssh_key.pem
+        # scp rather than rsync: the target host has no rsync binary, and
+        # rsync needs one on both ends. Copying the contents of build/ also
+        # leaves everything else in the web root alone -- it holds server-only
+        # files (app link files etc.) and clients with a cached index.html
+        # still fetch old chunks.
+        scp -r -o StrictHostKeyChecking=no \
+          build/* "$SERVER_USERNAME@$SERVER_HOST:/var/www/html/"
 
-  deploy-prod:
-    runs-on: ubuntu-latest
-    needs: deploy-dev
-    environment: prod
+    - name: Clean up key
+      if: always()
+      run: rm -f ssh_key.pem
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-    - name: Set up pnpm
-      uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
-
-    - name: Set up Node
-      uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
-      with:
-        node-version: 24
-        cache: pnpm
-
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-
-    - name: Build
-      run: make prod
-
-    - name: Deploy
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key.pem
-        chmod 600 ssh_key.pem
-        sshpass -Ppassphrase -p ${{ secrets.SSH_KEY_PASSPHRASE }} scp -i ssh_key.pem -o StrictHostKeyChecking=no -r build/* ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/var/www/html/
+    - name: Summary
+      run: echo "Deployed \`${GITHUB_SHA::7}\` to **${{ inputs.environment }}**" >> "$GITHUB_STEP_SUMMARY"
