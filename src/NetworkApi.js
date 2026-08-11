@@ -216,8 +216,8 @@ class NetworkApi {
             });
         this.callback(promise, success);
     }
-    getSettings(success) {
-        this.callback(this.request("/settings"), success);
+    getSettings(success, fail) {
+        this.callback(this.request("/settings"), success, fail);
     }
     setSetting(name, value, success, error) {
         this.callback(this.request("/settings", { method: 'POST', body: { name, value }, strict: true }), success, error);

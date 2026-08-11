@@ -41,6 +41,10 @@ function getOrder() {
     return null
 }
 
+function orderKey(order) {
+    return order && order.length ? JSON.stringify(order) : null
+}
+
 function addRuuviLink(text) {
     var splitted = text.split("ruuvi.com")
     if (splitted.length === 1) return text;
@@ -72,12 +76,14 @@ function Dashboard(props) {
     const [rename, setRename] = useState(null);
     const [showResetOrderConfirmation, setShowResetOrderConfirmation] = useState(false);
     const [order, setOrder] = useState(getOrder);
+    const [orderSyncTick, setOrderSyncTick] = useState(0);
     const [disableAdaptiveLayout, setDisableAdaptiveLayout] = useState(Store.getDashboardDisableAdaptiveLayout());
 
     const isUnmountedRef = useRef(false);
     const fetchInProgressRef = useRef(false);
     const dataRefreshTimerRef = useRef(null);
-    const prevOrderStringRef = useRef(order ? JSON.stringify(order) : null);
+    // Order this client wrote and is still pushing to the server
+    const pendingOrderRef = useRef(undefined);
     const fetchDataRef = useRef(null);
     const reloadTagsRef = useRef(reloadTags);
     reloadTagsRef.current = reloadTags;
@@ -86,18 +92,26 @@ function Dashboard(props) {
         document.title = "Ruuvi Station";
     }, [params.id]);
 
-    // Detect external localStorage order changes (e.g. from another tab)
+    // Detect order changes made elsewhere (another device via the settings poll, or another tab)
     useEffect(() => {
-        const latestOrder = getOrder();
-        const latestOrderString = latestOrder ? JSON.stringify(latestOrder) : null;
-        const currentOrderString = order ? JSON.stringify(order) : null;
-        const previousOrderString = prevOrderStringRef.current;
-        prevOrderStringRef.current = currentOrderString;
+        const syncOrderFromSettings = () => {
+            // Settings read while our own write is in flight can predate it
+            if (pendingOrderRef.current !== undefined) return;
 
-        if (latestOrderString !== currentOrderString && latestOrderString !== previousOrderString) {
-            setOrder(latestOrder ? [...latestOrder] : null);
-        }
-    }, [order]);
+            const latestOrder = getOrder();
+            if (orderKey(latestOrder) !== orderKey(order)) {
+                setOrder(latestOrder ? [...latestOrder] : null);
+            }
+        };
+
+        syncOrderFromSettings();
+
+        const onStorage = e => {
+            if (e.key === null || e.key === "settings") syncOrderFromSettings();
+        };
+        window.addEventListener("storage", onStorage);
+        return () => window.removeEventListener("storage", onStorage);
+    }, [order, settingsVersion, orderSyncTick]);
 
     function getCurrentSensor() {
         return sensors.find(x => x.sensor === params.id);
@@ -109,7 +123,19 @@ function Dashboard(props) {
     }
 
     function updateOrder(newOrder) {
-        setOrder([...newOrder]);
+        const key = orderKey(newOrder);
+        pendingOrderRef.current = key;
+        let settleTimer;
+        // Only the newest write may lift the shield; the timer is a backstop for a request that never settles
+        const settle = () => {
+            clearTimeout(settleTimer);
+            if (pendingOrderRef.current !== key) return;
+            pendingOrderRef.current = undefined;
+            setOrderSyncTick(v => v + 1);
+        };
+        settleTimer = setTimeout(settle, 30_000);
+
+        setOrder(newOrder.length ? [...newOrder] : null);
         try {
             let settings = JSON.parse(localStorage.getItem("settings") || "{}");
             settings["SENSOR_ORDER"] = JSON.stringify(newOrder);
@@ -119,14 +145,25 @@ function Dashboard(props) {
             if (b.result === "success") {
                 new NetworkApi().getSettings(settings => {
                     if (settings.result === "success") {
-                        localStorage.setItem("settings", JSON.stringify(settings.data.settings));
+                        // Skip if a newer write has superseded this one
+                        if (pendingOrderRef.current === key) {
+                            localStorage.setItem("settings", JSON.stringify(settings.data.settings));
+                        }
+                        settle();
                         if (reloadTagsRef.current) reloadTagsRef.current();
+                    } else {
+                        settle();
                     }
+                }, error => {
+                    settle();
+                    logger.error(error);
                 });
-            } else if (b.result === "error") {
-                notify.error(`UserApiError.${t(b.code)}`);
+            } else {
+                settle();
+                if (b.result === "error") notify.error(`UserApiError.${t(b.code)}`);
             }
         }, error => {
+            settle();
             logger.error(error);
             notify.error(t("something_went_wrong"));
         });
