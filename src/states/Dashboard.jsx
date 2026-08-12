@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/sensor/SensorCard";
@@ -56,6 +56,25 @@ function addRuuviLink(text) {
     return out;
 }
 
+const DashboardSensorCard = React.memo(function DashboardSensorCard({
+    sensor, settingsVersion, size, adaptiveLayout, columnCount, dataFrom,
+    cardType, graphType, share, rename, remove, move
+}) {
+    return <SensorCard sensor={sensor}
+        settingsVersion={settingsVersion}
+        size={size}
+        adaptiveLayout={adaptiveLayout}
+        columnCount={columnCount}
+        dataFrom={dataFrom}
+        cardType={cardType}
+        graphType={graphType}
+        share={() => share(sensor.sensor)}
+        rename={() => rename(sensor)}
+        remove={() => remove(sensor.sensor)}
+        move={dir => move(sensor.sensor, dir)}
+    />;
+});
+
 function Dashboard(props) {
     const { t, params, location, navigate, reloadTags, settingsVersion } = props;
 
@@ -72,6 +91,7 @@ function Dashboard(props) {
     const [cardType, setCardTypeState] = useState(Store.getDashboardCardType());
     const [graphType, setGraphTypeState] = useState(null);
     const [search, setSearch] = useState("");
+    const deferredSearch = useDeferredValue(search);
     const [currSize, setCurrSize] = useState('');
     const [rename, setRename] = useState(null);
     const [showResetOrderConfirmation, setShowResetOrderConfirmation] = useState(false);
@@ -288,11 +308,11 @@ function Dashboard(props) {
         Store.setDashboardCardType(type);
     }
 
-    function getSensors() {
-        if (search === "") return sensors;
-        const searchTerm = search.toLowerCase();
-        return sensors.filter(x => x.name.toLowerCase().indexOf(searchTerm) !== -1);
-    }
+    const visibleSensorIds = useMemo(() => {
+        if (deferredSearch === "") return null;
+        const searchTerm = deferredSearch.toLowerCase();
+        return new Set(sensors.filter(x => x.name.toLowerCase().indexOf(searchTerm) !== -1).map(x => x.sensor));
+    }, [deferredSearch, sensors]);
 
     function shouldDurationBeDisabled() {
         const graphCardTypes = ['graph_view', 'image_graph_view'];
@@ -304,9 +324,42 @@ function Dashboard(props) {
         if (yes) updateOrder([]);
     }
 
-    function removeSensorFromState(mac) {
+    const removeSensorFromState = useCallback(mac => {
         setSensors(prev => prev.filter(x => x.sensor !== mac));
-    }
+    }, []);
+
+    const shareSensor = useCallback(mac => navigate('/shares?sensor=' + mac), [navigate]);
+
+    const moveRef = useRef(null);
+    moveRef.current = (mac, dir) => {
+        let currentOrder = order;
+        if (!currentOrder) {
+            currentOrder = sensors.map(y => y.sensor);
+        }
+
+        let idx = currentOrder.findIndex(y => y === mac);
+        let toIdx = idx - dir;
+
+        if (!currentOrder[toIdx]) return;
+
+        const sensorExistsAtIndex = (targetIndex) => {
+            return sensors.some(y => y.sensor === currentOrder[targetIndex]);
+        };
+
+        while (!sensorExistsAtIndex(toIdx)) {
+            if (dir && toIdx === currentOrder.length - 1) return;
+            if (!dir && toIdx === 0) return;
+            toIdx = toIdx - dir;
+        }
+
+        const newOrder = [...currentOrder];
+        const b = newOrder[idx];
+        newOrder[idx] = newOrder[toIdx];
+        newOrder[toIdx] = b;
+
+        updateOrder(newOrder);
+    };
+    const moveSensor = useCallback((mac, dir) => moveRef.current(mac, dir), []);
 
     const currentSensor = getCurrentSensor();
     if (params.id) SessionStore.setBackRoute(`/${params.id}`);
@@ -358,9 +411,9 @@ function Dashboard(props) {
         </InputGroup>
     );
 
-    const sensorCard = (x, size, sensorsInSearch, columnCount) => {
+    const sensorCard = (x, size, columnCount) => {
         if (!x) return null;
-        const hide = sensorsInSearch.find(y => y.sensor === x.sensor) === undefined;
+        const hide = visibleSensorIds !== null && !visibleSensorIds.has(x.sensor);
         const isAdaptive = !disableAdaptiveLayout;
         const wrapperStyle = isAdaptive
             ? { maxWidth: "100%", display: hide ? "none" : undefined }
@@ -371,7 +424,7 @@ function Dashboard(props) {
                 onClick={() => navigate('/' + x.sensor)}
                 style={{ cursor: 'pointer', display: isAdaptive ? undefined : "block", height: isAdaptive ? undefined : "100%", flex: isAdaptive ? undefined : 1 }}
             >
-                <SensorCard sensor={x}
+                <DashboardSensorCard sensor={x}
                     settingsVersion={settingsVersion}
                     size={size}
                     adaptiveLayout={!disableAdaptiveLayout}
@@ -379,37 +432,10 @@ function Dashboard(props) {
                     dataFrom={from}
                     cardType={cardType}
                     graphType={graphType}
-                    share={() => navigate('/shares?sensor=' + x.sensor)}
-                    rename={() => setRename(x)}
-                    remove={() => removeSensorFromState(x.sensor)}
-                    move={dir => {
-                        let currentOrder = order;
-                        if (!currentOrder) {
-                            currentOrder = sensors.map(y => y.sensor);
-                        }
-
-                        let idx = currentOrder.findIndex(y => y === x.sensor);
-                        let toIdx = idx - dir;
-
-                        if (!currentOrder[toIdx]) return;
-
-                        const sensorExistsAtIndex = (targetIndex) => {
-                            return sensors.some(y => y.sensor === currentOrder[targetIndex]);
-                        };
-
-                        while (!sensorExistsAtIndex(toIdx)) {
-                            if (dir && toIdx === currentOrder.length - 1) return;
-                            if (!dir && toIdx === 0) return;
-                            toIdx = toIdx - dir;
-                        }
-
-                        const newOrder = [...currentOrder];
-                        const b = newOrder[idx];
-                        newOrder[idx] = newOrder[toIdx];
-                        newOrder[toIdx] = b;
-
-                        updateOrder(newOrder);
-                    }}
+                    share={shareSensor}
+                    rename={setRename}
+                    remove={removeSensorFromState}
+                    move={moveSensor}
                 />
             </span>
         </span>
@@ -445,17 +471,16 @@ function Dashboard(props) {
                                 }
                                 <DashboardGrid showGraph={undefined} order={getOrder()} sensors={sensors} currSize={currSize} onSizeChange={s => setCurrSize(s)} disableAdaptiveLayout={disableAdaptiveLayout}>
                                     {(size, columnCount) => {
-                                        const sensorsInSearch = getSensors();
                                         if (order && order.length > 0) {
                                             return <>
                                                 {order.map(m => {
-                                                    return sensorCard(sensors.find(x => x.sensor === m), size, sensorsInSearch, columnCount);
+                                                    return sensorCard(sensors.find(x => x.sensor === m), size, columnCount);
                                                 })}
                                             </>
                                         }
                                         return <>
                                             {sensors.map(x => {
-                                                return sensorCard(x, size, sensorsInSearch, columnCount);
+                                                return sensorCard(x, size, columnCount);
                                             })}
                                         </>
                                     }}
