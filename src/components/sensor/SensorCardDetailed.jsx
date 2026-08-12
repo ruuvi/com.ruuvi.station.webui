@@ -93,7 +93,7 @@ const SensorCardDetailed = ({
                         </Box>
                     )}
 
-                    <Box flex={1} display="flex" flexDirection="column" minH={minHeight}>
+                    <Box flex={1} minWidth={0} display="flex" flexDirection="column" minH={minHeight}>
                         <Box flex={1} p={4} display="flex" flexDirection="column">
                             <Flex>
                                 <Flex grow={1} width="calc(100% - 40px)">

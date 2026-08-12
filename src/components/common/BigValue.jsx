@@ -111,14 +111,14 @@ export default function BigValue(props) {
     let alertColor = colorMode === "light" ? ruuviTheme.colors.sensorCardValueAlertStateLightTheme : ruuviTheme.colors.sensorCardValueAlertState;
     return (
         <div>
-            <div style={{ position: "relative" }}>
+            <div style={{ position: "relative", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                 <span style={{ ...valueStyle, color: alertActive ? alertColor : undefined, fontSize: isMobile ? 34 : 38 }}>
                     {value ?? "-"}
                 </span>
                 <span style={unitStyle}>
                     {unit}
                 </span>
-                {label && <span style={labelStyle}>
+                {label && <span style={labelStyle} title={label}>
                     {label}
                 </span>}
             </div>
