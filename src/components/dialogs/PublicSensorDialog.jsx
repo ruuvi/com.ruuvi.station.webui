@@ -34,7 +34,9 @@ const PublicSensorDialog = ({ open, onClose, t, sensor, updateSensor }) => {
         });
     };
 
-    const publicUrl = `${window.location.origin}/public/${sensor?.sensor}`;
+    // the link must target the environment the sensor was made public in
+    const publicPath = new NetworkApi().isStaging() ? "/public-dev" : "/public";
+    const publicUrl = `${window.location.origin}${publicPath}/${sensor?.sensor}`;
 
     return (
         <RDialog title={t("make_public")} isOpen={open} onClose={onClose} size="lg">

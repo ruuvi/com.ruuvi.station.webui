@@ -276,7 +276,7 @@ export default function App() {
 
   // public sensor pages have no plan and no menus in the header,
   // and are available without signing in
-  let isPublicRoute = window.location.pathname.startsWith("/public/")
+  let isPublicRoute = window.location.pathname.startsWith("/public/") || window.location.pathname.startsWith("/public-dev/")
 
   if (!user) {
     //goToLoginPage()
@@ -285,9 +285,13 @@ export default function App() {
         {isPublicRoute ? <>
           <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
             <Logo subscription="" />
+            <Text>
+              {new NetworkApi().isStaging() ? "(staging)" : ""}
+            </Text>
           </HStack>
           <Routes>
             <Route path="/public/:id" element={<PublicSensor />} />
+            <Route path="/public-dev/:id" element={<PublicSensor />} />
           </Routes>
           <Footer />
         </> :
@@ -313,6 +317,9 @@ export default function App() {
       <BrowserRouter basename={"/"}>
         {isPublicRoute ? <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
           <Logo subscription="" />
+          <Text>
+            {new NetworkApi().isStaging() ? "(staging)" : ""}
+          </Text>
         </HStack> : hideTopBar ? null : <>
           <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
             <Logo subscription={subscription?.subscriptionName || ""} />
@@ -341,6 +348,7 @@ export default function App() {
         <div>
           <Routes>
             <Route path="/public/:id" element={<PublicSensor />} />
+            <Route path="/public-dev/:id" element={<PublicSensor />} />
             <Route path="/shares" element={<ShareCenter showDialog={showDialog} closeDialog={() => setShowDialog("")} subscription={subscription} />} />
             <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} settingsVersion={settingsVersion} />} />
             <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} settingsVersion={settingsVersion} />} />

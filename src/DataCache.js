@@ -1,10 +1,13 @@
 import * as localForage from "localforage";
 import logger from "./utils/logger";
+import { isStagingEnv } from "./utils/env";
 
 const DB_VERSION = 2;
 
+// Staging data is cached under separate keys so it never mixes with
+// production data for the same sensor (e.g. via /public-dev/ pages).
 function getKey(sensor, mode) {
-    return `cache_${sensor}_${mode}`
+    return `${isStagingEnv() ? "staging_cache" : "cache"}_${sensor}_${mode}`
 }
 
 // Measurement data is cached per (sensor, mode) as an object of segments

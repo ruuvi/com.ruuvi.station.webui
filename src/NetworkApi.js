@@ -3,6 +3,7 @@ import cache from './DataCache';
 import parse from './decoder/parser';
 import { logout } from './utils/loginUtils';
 import logger from './utils/logger';
+import { isStagingEnv } from './utils/env';
 
 let GET_ALL_SENSORS_CACHE = { ts: 0, data: null };
 
@@ -73,7 +74,7 @@ class NetworkApi {
         document.cookie = `station_status=signedIn;domain=${domain};Max-Age=-99999999`
     }
     isStaging() {
-        return localStorage.getItem("env") === "staging"
+        return isStagingEnv()
     }
     setEnv(env) {
         cache.clear()
