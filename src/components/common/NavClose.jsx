@@ -25,7 +25,7 @@ function NavClose() {
     }, [clicked]);
 
     return (
-        <IconButton isRound={true} className="navButton" variant="nav" onClick={clicked} style={{ marginTop: "1px", marginRight: "5px" }}><MdClose /></IconButton>
+        <IconButton rounded="full" aria-label="close" className="navButton" variant="nav" onClick={clicked} style={{ marginTop: "1px", marginRight: "5px" }}><MdClose /></IconButton>
     )
 }
 

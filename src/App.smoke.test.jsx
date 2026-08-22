@@ -39,9 +39,7 @@ describe("App boot", () => {
         const realErrors = errors.filter(e =>
             !e.includes("Not implemented") && // jsdom navigation/canvas stubs
             !e.includes("act(") &&
-            !e.includes("fetch failed") && // sandboxed network
-            // pre-existing Chakra SlideFade dev warning on the sign-in page
-            !e.includes("initialScale")
+            !e.includes("fetch failed") // sandboxed network
         );
         expect(realErrors).toEqual([]);
 

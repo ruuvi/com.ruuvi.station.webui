@@ -1,4 +1,4 @@
-import { useColorMode } from "@chakra-ui/react"
+import { useColorMode } from "../components/ui/color-mode"
 
 export function withColorMode(Component) {
     return function Wrapped(props) {

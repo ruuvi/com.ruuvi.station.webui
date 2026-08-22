@@ -9,9 +9,7 @@ import 'typeface-oswald';
 import './i18n';
 import logo from './img/ruuvi-vector-logo.svg'
 import seriousPhone from './img/with-phone-serious-500.png'
-import { createStandaloneToast } from '@chakra-ui/toast'
 import { t } from 'i18next';
-const { ToastContainer } = createStandaloneToast()
 
 // Timer to make all alert bells pulse in sync
 setInterval(() => {
@@ -65,6 +63,5 @@ root.render(
     <ErrorView>
       <App />
     </ErrorView>
-    <ToastContainer />
   </Suspense>
 );

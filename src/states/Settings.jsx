@@ -4,14 +4,11 @@ import NetworkApi from "../NetworkApi";
 import RadioInput from "../components/common/RadioInput";
 import {
     Box,
-    Progress,
     HStack,
     Accordion,
-    AccordionItem,
-    AccordionButton,
-    AccordionPanel,
-    AccordionIcon,
 } from "@chakra-ui/react"
+import { ProgressBar } from "../components/ui/progress"
+import { ChevronDownIcon } from "../components/ui/chakra-icons"
 import { withTranslation } from 'react-i18next';
 import NavClose from "../components/common/NavClose";
 import notify from "../utils/notify";
@@ -147,10 +144,10 @@ class Settings extends Component {
         return JSON.parse(value) ? true : false
     }
     render() {
-        // in the modal, bleed the accordion through the ModalBody padding (24px)
+        // in the modal, bleed the accordion through the Dialog.Body padding (24px)
         // so the rows and dividers span the full dialog width; the same padding
         // is applied inside the button/panel to keep the content aligned.
-        // vertically, counter the ModalBody bottom padding (8px) + its mb="3"
+        // vertically, counter the Dialog.Body bottom padding (8px) + its mb="3"
         // (12px, set in RDialog) so the accordion sits flush with the dialog edge
         const accordionBleed = this.props.isModal ? -6 : 0;
         const accordionBleedBottom = this.props.isModal ? -5 : 0;
@@ -161,7 +158,7 @@ class Settings extends Component {
         var content = <>
             {this.state.loading ? (
                 <>
-                    <Progress isIndeterminate={true} colorScheme="primaryScheme" />
+                    <ProgressBar />
                 </>
             ) : (
                 <>
@@ -174,30 +171,34 @@ class Settings extends Component {
                     <RadioInput label={"settings_mobile_push_alerts"} value={!this.cloudBoolValue(this.state.settings.DISABLE_PUSH_NOTIFICATIONS)} options={boolOpt} onChange={v => this.updateSetting("DISABLE_PUSH_NOTIFICATIONS", JSON.parse(v) ? "0" : "1")} loading={this.state.savingSettings.indexOf("DISABLE_PUSH_NOTIFICATIONS") !== -1} />
                     <br /><br />
                     <Box mx={accordionBleed} mb={accordionBleedBottom} borderBottomRadius={this.props.isModal ? "md" : 0} overflow="hidden">
-                        <Accordion allowMultiple>
-                            <AccordionItem border="none">
-                                <AccordionButton style={accordionButtonStyle} _hover={{}}>
+                        <Accordion.Root multiple>
+                            <Accordion.Item value="units" border="none">
+                                <Accordion.ItemTrigger style={accordionButtonStyle} _hover={{}}>
                                     <Box flex="1" textAlign="left" style={accordionTitle}>
                                         {this.props.t("global_units")}
                                     </Box>
-                                    <AccordionIcon />
-                                </AccordionButton>
-                                <AccordionPanel style={accordionPanelStyle}>
-                                    <UnitSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
-                                </AccordionPanel>
-                            </AccordionItem>
-                            <AccordionItem border="none">
-                                <AccordionButton style={accordionButtonStyle} _hover={{}}>
+                                    <Accordion.ItemIndicator><ChevronDownIcon /></Accordion.ItemIndicator>
+                                </Accordion.ItemTrigger>
+                                <Accordion.ItemContent>
+                                    <Accordion.ItemBody style={accordionPanelStyle}>
+                                        <UnitSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
+                                    </Accordion.ItemBody>
+                                </Accordion.ItemContent>
+                            </Accordion.Item>
+                            <Accordion.Item value="resolution" border="none">
+                                <Accordion.ItemTrigger style={accordionButtonStyle} _hover={{}}>
                                     <Box flex="1" textAlign="left" style={accordionTitle}>
                                         {this.props.t("resolution_settings")}
                                     </Box>
-                                    <AccordionIcon />
-                                </AccordionButton>
-                                <AccordionPanel style={accordionPanelStyle}>
-                                    <ResolutionSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
-                                </AccordionPanel>
-                            </AccordionItem>
-                        </Accordion>
+                                    <Accordion.ItemIndicator><ChevronDownIcon /></Accordion.ItemIndicator>
+                                </Accordion.ItemTrigger>
+                                <Accordion.ItemContent>
+                                    <Accordion.ItemBody style={accordionPanelStyle}>
+                                        <ResolutionSettings settings={this.state.settings} savingSettings={this.state.savingSettings} updateSetting={(k, v) => this.updateSetting(k, v)} />
+                                    </Accordion.ItemBody>
+                                </Accordion.ItemContent>
+                            </Accordion.Item>
+                        </Accordion.Root>
                     </Box>
                 </>
             )}

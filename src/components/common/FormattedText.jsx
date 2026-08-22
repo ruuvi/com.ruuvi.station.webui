@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, Box, Heading, ListItem, UnorderedList, Link } from '@chakra-ui/react';
+import { Text, Box, Heading, List, Link } from '@chakra-ui/react';
 
 const FormattedText = ({ text, ...props }) => {
     if (!text) return null;
@@ -67,7 +67,8 @@ const FormattedText = ({ text, ...props }) => {
                 parts.push(
                     <Link 
                         href={url} 
-                        isExternal 
+                        target="_blank"
+                        rel="noopener noreferrer"
                         color="primary" 
                         textDecoration="underline"
                         key={`${keyPrefix}-link-${partIndex}`}
@@ -177,22 +178,22 @@ const FormattedText = ({ text, ...props }) => {
 
                 if (currentPrimaryList.length > 0) {
                     elements.push(
-                        <UnorderedList key={`element-${elementIndex}`} mb={2} ml={4}>
+                        <List.Root key={`element-${elementIndex}`} mb={2} ml={4}>
                             {currentPrimaryList.map((item, i) => (
-                                <ListItem key={i}>
+                                <List.Item key={i}>
                                     {parseInlineFormatting(item.content, `${elementIndex}-li-${i}`)}
                                     {item.nested && item.nested.length > 0 && (
-                                        <UnorderedList mt={1} ml={4} styleType="circle">
+                                        <List.Root mt={1} ml={4} listStyleType="circle">
                                             {item.nested.map((nestedItem, j) => (
-                                                <ListItem key={j}>
+                                                <List.Item key={j}>
                                                     {parseInlineFormatting(nestedItem, `${elementIndex}-li-${i}-nested-${j}`)}
-                                                </ListItem>
+                                                </List.Item>
                                             ))}
-                                        </UnorderedList>
+                                        </List.Root>
                                     )}
-                                </ListItem>
+                                </List.Item>
                             ))}
-                        </UnorderedList>
+                        </List.Root>
                     );
                     elementIndex++;
                 }
@@ -241,22 +242,22 @@ const FormattedText = ({ text, ...props }) => {
                     flushSecondaryList();
                     if (currentPrimaryList.length > 0) {
                         elements.push(
-                            <UnorderedList key={`element-${elementIndex}`} mb={2} ml={4}>
+                            <List.Root key={`element-${elementIndex}`} mb={2} ml={4}>
                                 {currentPrimaryList.map((item, i) => (
-                                    <ListItem key={i}>
+                                    <List.Item key={i}>
                                         {parseInlineFormatting(item.content, `${elementIndex}-li-${i}`)}
                                         {item.nested && item.nested.length > 0 && (
-                                            <UnorderedList mt={1} ml={4} styleType="circle">
+                                            <List.Root mt={1} ml={4} listStyleType="circle">
                                                 {item.nested.map((nestedItem, j) => (
-                                                    <ListItem key={j}>
+                                                    <List.Item key={j}>
                                                         {parseInlineFormatting(nestedItem, `${elementIndex}-li-${i}-nested-${j}`)}
-                                                    </ListItem>
+                                                    </List.Item>
                                                 ))}
-                                            </UnorderedList>
+                                            </List.Root>
                                         )}
-                                    </ListItem>
+                                    </List.Item>
                                 ))}
-                            </UnorderedList>
+                            </List.Root>
                         );
                         elementIndex++;
                         currentPrimaryList = [];

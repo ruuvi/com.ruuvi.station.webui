@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { useBreakpointValue, Box, Button, Flex, Grid, Heading, IconButton, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Progress, Spinner } from '@chakra-ui/react';
+import { useBreakpointValue, Box, Button, Dialog, Flex, Grid, Heading, IconButton, Input, Portal, Spinner } from '@chakra-ui/react';
+import { ProgressBar } from '../components/ui/progress';
 import NetworkApi from '../NetworkApi';
 import { MdClear } from 'react-icons/md';
 import notify from '../utils/notify';
@@ -18,10 +19,10 @@ const SensorSharedWithMeBox = ({ sensor, onRemove }) => {
                 <div style={{ fontWeight: 800, fontFamily: "mulish", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {sensor.name || sensor.sensor}
                 </div>
-                <IconButton variant="ghost" color={"primary"} margin={-2} icon={<MdClear size="13" />} onClick={e => {
+                <IconButton aria-label="remove" variant="ghost" color={"primary"} margin={-2} onClick={e => {
                     e.preventDefault()
                     setRemove(true)
-                }} />
+                }}><MdClear size="13" /></IconButton>
             </div>
                 <div style={{ fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {sensor.owner.toLowerCase()} | {sensor.subscription?.subscriptionName || JSON.stringify(sensor.subscription)}
@@ -81,6 +82,26 @@ const isEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
+// Owns the draft email so typing re-renders only this field, not the whole share
+// center (sensor picker plus one dialog per shared sensor).
+const AddEmailField = ({ onAdd }) => {
+    const [email, setEmail] = React.useState("")
+    const add = () => {
+        onAdd(email)
+        setEmail("")
+    }
+    return (
+        <Flex gap={2} wrap="wrap" align="center">
+            <Input className='shareEmail' autoCorrect="off" autoCapitalize="none" autoComplete="off" placeholder={i18next.t("email")} w={"250px"} value={email} onChange={e =>
+                setEmail(e.target.value.toLowerCase())
+            } />
+            <Button onClick={add} disabled={email.length === 0 || !isEmail(email)}>
+                {i18next.t("add")}
+            </Button>
+        </Flex>
+    )
+}
+
 const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, maxWidth: "800px" }
 const subTitleStyle = { fontFamily: "montserrat", fontSize: "24px", fontWeight: 800 }
 const subTitleDescriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, paddingBottom: 25, paddingTop: 5, maxWidth: "800px" }
@@ -89,7 +110,6 @@ const ShareCenter = ({ subscription }) => {
     const [sensors, setSensors] = React.useState([]);
     const [selectedSensors, setSelectedSensors] = React.useState([]);
     const [shareToEmails, setShareToEmails] = React.useState([]);
-    const [email, setEmail] = React.useState("");
     const [loading, setLoading] = React.useState(true);
     const [shareResult, setShareResult] = React.useState([]);
     const [shareLoading, setShareLoading] = React.useState(false);
@@ -147,22 +167,10 @@ const ShareCenter = ({ subscription }) => {
 
     const selectEmailTitle = <div style={{ marginTop: 8, paddingRight: 8, fontWeight: 800, fontFamily: "mulish" }}>{i18next.t("email")}</div>
     const selectEmail = <>
-        <Flex gap={2} wrap="wrap" align="center">
-            <Input className='shareEmail' autoCorrect="off" autoCapitalize="none" autoComplete="off" placeholder={i18next.t("email")} w={"250px"} value={email} onChange={e =>
-                setEmail(e.target.value.toLowerCase())
-            } />
-            <Button onClick={() => {
-                if (!shareToEmails.includes(email)) {
-                    setShareToEmails([...shareToEmails, email])
-                }
-                setEmail("");
-            }} isDisabled={email.length === 0 || !isEmail(email)}>
-                {i18next.t("add")}
-            </Button>
-        </Flex>
+        <AddEmailField onAdd={newEmail => setShareToEmails(prev => prev.includes(newEmail) ? prev : [...prev, newEmail])} />
         <Flex gap='2' wrap="wrap" mt={2.5} >
             {shareToEmails.map((email, index) => (
-                <EmailBox email={email.toLowerCase()} onRemove={() => {
+                <EmailBox key={email} email={email.toLowerCase()} onRemove={() => {
                     let newEmails = [...shareToEmails]
                     newEmails.splice(index, 1)
                     setShareToEmails(newEmails)
@@ -171,7 +179,7 @@ const ShareCenter = ({ subscription }) => {
         </Flex>
     </>
 
-    const shareButton = <Button isDisabled={selectedSensors.length === 0 || shareToEmails.length === 0 || shareLoading}
+    const shareButton = <Button disabled={selectedSensors.length === 0 || shareToEmails.length === 0 || shareLoading}
         onClick={async () => {
             setShareProgress([0, selectedSensors.length * shareToEmails.length])
             setShareResult([])
@@ -345,13 +353,15 @@ const ShareCenter = ({ subscription }) => {
 const ShareResultDialog = ({ isOpen, onClose, result, progress }) => {
     let isSharing = progress[0] !== progress[1]
     return (
-        <Modal isOpen={isOpen} onClose={onClose} size="xl">
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>{i18next.t("share_result")}</ModalHeader>
-                <ModalBody>
+        <Dialog.Root open={!!isOpen} onOpenChange={(e) => { if (!e.open) onClose() }} size="xl">
+            <Portal>
+            <Dialog.Backdrop />
+            <Dialog.Positioner>
+            <Dialog.Content>
+                <Dialog.Header>{i18next.t("share_result")}</Dialog.Header>
+                <Dialog.Body>
                     {isSharing && <Box>
-                        <Progress value={progress[0]} max={progress[1]} />
+                        <ProgressBar value={progress[0]} max={progress[1]} />
                         {addVariablesInString(i18next.t("sharing_progress"), [progress[0], progress[1]])}
                     </Box>
                     }
@@ -372,12 +382,14 @@ const ShareResultDialog = ({ isOpen, onClose, result, progress }) => {
                             </Box>
                         ))}
                     </Grid>
-                </ModalBody>
-                <ModalFooter>
+                </Dialog.Body>
+                <Dialog.Footer>
                     <Button onClick={onClose}>{i18next.t("close")}</Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
+                </Dialog.Footer>
+            </Dialog.Content>
+            </Dialog.Positioner>
+            </Portal>
+        </Dialog.Root>
     )
 }
 

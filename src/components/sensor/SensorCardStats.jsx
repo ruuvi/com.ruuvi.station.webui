@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, GridItem, SimpleGrid, useColorMode } from "@chakra-ui/react";
+import { Box, GridItem, SimpleGrid } from "@chakra-ui/react";
+import { useColorMode } from "../ui/color-mode";
 import i18next from "i18next";
 import { getUnitHelper, localeNumber } from "../../UnitHelper";
 import { ruuviTheme } from "../../themes";

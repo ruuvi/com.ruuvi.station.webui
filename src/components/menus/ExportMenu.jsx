@@ -1,11 +1,8 @@
 import React from "react";
 import {
     Menu,
-    MenuButton,
-    MenuList,
-    MenuItem,
     Button,
-    MenuDivider,
+    Portal,
 } from "@chakra-ui/react"
 import { MdArrowDropDown } from "react-icons/md"
 
@@ -17,24 +14,30 @@ const detailedSubText = {
 export default function ExportMenu(props) {
     let bottomStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
     return (
-        <Menu autoSelect={false}>
-            <MenuButton as={Button}
-                rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marginRight: -8 }} />}
-                variant="ddl"
-                className="durationPicker"
-                style={{ ...detailedSubText }}
-                borderRadius='4px'>
-                {props.buttonText}
-            </MenuButton>
-            <MenuList>
-                <MenuItem style={{ ...detailedSubText, borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => props.onClick("CSV")}>CSV</MenuItem>
-                <MenuDivider />
-                <MenuItem style={{ ...detailedSubText, ...(props.noPdf ? bottomStyle : {}) }} onClick={() => props.onClick("XLSX")}>XLSX</MenuItem>
-                {!props.noPdf && <>
-                    <MenuDivider />
-                    <MenuItem isDisabled={!props.enablePDF} style={{ ...detailedSubText, ...bottomStyle }} onClick={() => props.onClick("PDF")}>PDF {props.enablePDF ? "" : "(Business Starter Plan)"}</MenuItem>
-                </>}
-            </MenuList>
-        </Menu>
+        <Menu.Root>
+            <Menu.Trigger asChild>
+                <Button
+                    variant="ddl"
+                    className="durationPicker"
+                    style={{ ...detailedSubText }}
+                    borderRadius='4px'>
+                    {props.buttonText}
+                    <MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marginRight: -8 }} />
+                </Button>
+            </Menu.Trigger>
+            <Portal>
+                <Menu.Positioner>
+                    <Menu.Content>
+                        <Menu.Item value="CSV" style={{ ...detailedSubText, borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => props.onClick("CSV")}>CSV</Menu.Item>
+                        <Menu.Separator />
+                        <Menu.Item value="XLSX" style={{ ...detailedSubText, ...(props.noPdf ? bottomStyle : {}) }} onClick={() => props.onClick("XLSX")}>XLSX</Menu.Item>
+                        {!props.noPdf && <>
+                            <Menu.Separator />
+                            <Menu.Item value="PDF" disabled={!props.enablePDF} style={{ ...detailedSubText, ...bottomStyle }} onClick={() => props.onClick("PDF")}>PDF {props.enablePDF ? "" : "(Business Starter Plan)"}</Menu.Item>
+                        </>}
+                    </Menu.Content>
+                </Menu.Positioner>
+            </Portal>
+        </Menu.Root>
     )
 }

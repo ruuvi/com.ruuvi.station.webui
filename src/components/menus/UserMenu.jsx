@@ -1,11 +1,8 @@
 import React from "react";
 import {
     Menu,
-    MenuButton,
-    MenuList,
-    MenuItem,
     Button,
-    MenuDivider,
+    Portal,
 } from "@chakra-ui/react"
 import { FaUserAlt } from "react-icons/fa"
 import { MdArrowDropDown } from "react-icons/md"
@@ -15,16 +12,23 @@ import { logout } from "../../utils/loginUtils";
 function UserMenu({ myAccount }) {
     const { t } = useTranslation();
     return (
-        <Menu autoSelect={false}>
-            <MenuButton as={Button} variant="topbar" rightIcon={<MdArrowDropDown className="buttonSideIcon" size={26} style={{ marginLeft: -10, marignRight: -10 }} />} style={{ backgroundColor: "transparent", paddingRight: 0, paddingLeft: 10 }}>
-                <FaUserAlt />
-            </MenuButton>
-            <MenuList mt="2" zIndex={10}>
-                <MenuItem className="ddlItem" style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => myAccount()}>{t("my_ruuvi_account")}</MenuItem>
-                <MenuDivider />
-                <MenuItem className="ddlItem" style={{ borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => logout()}>{t("sign_out")}</MenuItem>
-            </MenuList>
-        </Menu>
+        <Menu.Root positioning={{ gutter: 16 }}>
+            <Menu.Trigger asChild>
+                <Button variant="topbar" style={{ backgroundColor: "transparent", paddingRight: 0, paddingLeft: 10 }}>
+                    <FaUserAlt />
+                    <MdArrowDropDown className="buttonSideIcon" size={26} style={{ marginLeft: -10 }} />
+                </Button>
+            </Menu.Trigger>
+            <Portal>
+                <Menu.Positioner zIndex={10}>
+                    <Menu.Content>
+                        <Menu.Item value="account" className="ddlItem" style={{ borderTopLeftRadius: 6, borderTopRightRadius: 6 }} onClick={() => myAccount()}>{t("my_ruuvi_account")}</Menu.Item>
+                        <Menu.Separator />
+                        <Menu.Item value="signout" className="ddlItem" style={{ borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => logout()}>{t("sign_out")}</Menu.Item>
+                    </Menu.Content>
+                </Menu.Positioner>
+            </Portal>
+        </Menu.Root>
     )
 }
 

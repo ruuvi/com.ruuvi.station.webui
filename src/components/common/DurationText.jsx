@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { durationToText, secondsToUserDateString } from '../../TimeHelper';
 import { ruuviTheme } from "../../themes";
-import { useColorMode } from "@chakra-ui/react";
+import { useColorMode } from "./../ui/color-mode";
 
 const DurationText = ({ from, isAlerting, t }) => {
     const [to, setTo] = useState(Math.floor(Date.now() / 1000));

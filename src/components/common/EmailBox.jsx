@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, IconButton, Tooltip } from '@chakra-ui/react';
+import { Box, IconButton } from '@chakra-ui/react';
+import { Tooltip } from '../ui/tooltip';
 import { MdClear } from 'react-icons/md';
 
 export const EmailBox = (props) => {
@@ -10,7 +11,7 @@ export const EmailBox = (props) => {
                     {props.email}
                 </Box>
             </Tooltip>
-            <IconButton variant="ghost" color={"primary"} mr={-3} icon={<MdClear size="13" />} onClick={props.onRemove} />
+            <IconButton aria-label="remove" variant="ghost" color={"primary"} mr={-3} onClick={props.onRemove}><MdClear size="13" /></IconButton>
         </Box>
     );
 };

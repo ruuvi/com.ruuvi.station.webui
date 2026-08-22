@@ -1,13 +1,101 @@
-import { Box, Button, PinInput, PinInputField, Progress, useColorModeValue, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import { Accordion, Box, Button, PinInput } from "@chakra-ui/react";
+import { ProgressBar } from "../ui/progress";
+import { useColorModeValue } from "../ui/color-mode";
+import { ChevronDownIcon } from "../ui/chakra-icons";
+import React, { useEffect, useMemo, useState } from "react";
 import { withTranslation } from 'react-i18next';
 import NetworkApi from "../../NetworkApi";
 import notify from "../../utils/notify";
 import RDialog from "./RDialog";
-import { ruuviTheme } from "../../themes";
+import { pinFieldProps } from "../ui/pin-field";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { addLink } from "../../TextHelper";
 import { logout } from "../../utils/loginUtils";
+
+const ACTIVATION_CODE_LENGTH = 8
+
+const sanitizeActivationCode = (code) => (code || "")
+    .replace(/-/g, "")
+    .slice(0, ACTIVATION_CODE_LENGTH)
+    .toUpperCase()
+
+function Title(props) {
+    return <div style={{ fontFamily: "mulish", fontSize: "16px", fontWeight: 800 }}>{props.children}</div>
+}
+
+function Content(props) {
+    return <div style={{ marginBottom: 8, marginTop: 2, fontFamily: "mulish", fontSize: "15px" }}>{props.children}</div>
+}
+
+// The fields only depend on their index, so they are built once instead of on every render.
+const activationCodeFields = Array.from({ length: ACTIVATION_CODE_LENGTH }, (_, i) => (
+    <PinInput.Input
+        key={`activation-${i}`}
+        index={i}
+        {...pinFieldProps}
+    />
+))
+
+// Owns the activation code state so typing re-renders only this section, not the
+// subscription info, the sessions accordion and the confirmation dialogs around it.
+function ActivationCodeForm({ t, onActivated }) {
+    const [activationCode, setActivationCode] = useState("")
+    const [isProcessingCode, setIsProcessingCode] = useState(false)
+    const [showActivationConfirmation, setShowActivationConfirmation] = useState(false)
+    const activationCodeChars = useMemo(
+        () => Array.from({ length: ACTIVATION_CODE_LENGTH }, (_, i) => activationCode[i] || ""),
+        [activationCode]
+    )
+    const activate = async () => {
+        setShowActivationConfirmation(false)
+        setIsProcessingCode(true)
+        let code = activationCode.length === 8 ? activationCode.slice(0, 4) + "-" + activationCode.slice(4) : activationCode;
+        let resp = await new NetworkApi().claimSubscription(code)
+        if (resp.result === "success") {
+            notify.success(resp.data.subscriptions[0].subscriptionName + " " + t("subscription_activated"))
+            onActivated(resp.data.subscriptions)
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000)
+        } else if (resp.result === "error") {
+            notify.error(t(`UserApiError.${resp.code}`))
+        } else {
+            notify.error(t("something_went_wrong"))
+        }
+        setActivationCode("")
+        setIsProcessingCode(false)
+    }
+    return (
+        <>
+            <Title>{t("enter_activation_code")}</Title>
+            <Box mt={2} />
+            <PinInput.Root
+                variant="subtle"
+                type="alphanumeric"
+                count={ACTIVATION_CODE_LENGTH}
+                value={activationCodeChars}
+                autoFocus={false}
+                sanitizeValue={sanitizeActivationCode}
+                onValueChange={e => setActivationCode(sanitizeActivationCode(e.value.join("")))}
+            >
+                <PinInput.Control display="inline-flex" alignItems="center" gap={0}>
+                    {activationCodeFields.slice(0, 4)}
+                    <span>-</span>
+                    {activationCodeFields.slice(4)}
+                </PinInput.Control>
+                <PinInput.HiddenInput />
+            </PinInput.Root>
+            <Box height={12} pt={4}>
+                {isProcessingCode ? (
+                    <ProgressBar />
+                ) : (
+                    <Button disabled={activationCode.length !== ACTIVATION_CODE_LENGTH} onClick={() => setShowActivationConfirmation(true)}>{t("activate")}</Button>
+                )}
+            </Box>
+            <ConfirmationDialog open={showActivationConfirmation} description="plan_activation_confirmation" onClose={(yes) => yes ? activate() : setShowActivationConfirmation(false)} />
+        </>
+    )
+}
 
 function MyAccountModal(props) {
     var { t, i18n } = props;
@@ -16,10 +104,7 @@ function MyAccountModal(props) {
     const sessionTextColor = useColorModeValue("#1b4847", "#ffffff");
     const sessionCurrentColor = useColorModeValue("#1f9385", "#44c9b9");
     const [subscriptions, setSubscriptions] = useState([])
-    const [activationCode, setActivationCode] = useState("")
-    const [isProcessingCode, setIsProcessingCode] = useState(false)
     const [showDeleteAccount, setShowDeleteAccount] = useState(false)
-    const [showActivationConfirmation, setShowActivationConfirmation] = useState(false)
     const [sessions, setSessions] = useState(null)
     const [sessionsLoading, setSessionsLoading] = useState(false)
     const [showSignOutAll, setShowSignOutAll] = useState(false)
@@ -39,40 +124,10 @@ function MyAccountModal(props) {
         }
         getSubs()
     }, [t])
-    const activate = async () => {
-        setShowActivationConfirmation(false)
-        //if (!window.confirm(t("plan_activation_confirmation"))) return
-        setIsProcessingCode(true)
-        let code = activationCode.length === 8 ? activationCode.slice(0, 4) + "-" + activationCode.slice(4) : activationCode;
-        let resp = await new NetworkApi().claimSubscription(code)
-        if (resp.result === "success") {
-            notify.success(resp.data.subscriptions[0].subscriptionName + " " + t("subscription_activated"))
-            setSubscriptions(resp.data.subscriptions)
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000)
-            //props.updateApp()
-        } else if (resp.result === "error") {
-            notify.error(t(`UserApiError.${resp.code}`))
-        } else {
-            notify.error(t("something_went_wrong"))
-        }
-        setActivationCode("")
-        setIsProcessingCode(false)
-    }
-    const updateValidationCode = (code) => {
-        code = code.replace("-", "")
-        code = code.slice(0, 8)
-        setActivationCode(code.toUpperCase())
-    }
-    let user = new NetworkApi().getUser()
-    let userEmail = user ? user.email : "-"
-    const Title = (props) => {
-        return <div style={{ fontFamily: "mulish", fontSize: "16px", fontWeight: 800 }}>{props.children}</div>
-    }
-    const Content = (props) => {
-        return <div style={{ marginBottom: 8, marginTop: 2, fontFamily: "mulish", fontSize: "15px" }}>{props.children}</div>
-    }
+    const userEmail = useMemo(() => {
+        let user = new NetworkApi().getUser()
+        return user ? user.email : "-"
+    }, [])
     const dateToText = (date) => {
         const month = date.toLocaleString(i18n.language || "en", { month: 'long' });
         switch (i18n.language) {
@@ -84,21 +139,6 @@ function MyAccountModal(props) {
     }
     const _cloudLink = () => {
         return <a href="https://cloud.ruuvi.com" target={"_blank"} style={{ textDecoration: "underline" }} rel="noreferrer">cloud.ruuvi.com ⇗</a>
-    }
-    const handleCodePaste = e => {
-        e.preventDefault();
-        
-        const plainText = e.clipboardData.getData('text/plain');
-        if (plainText) {
-            updateValidationCode(plainText);
-            return;
-        }
-        
-        if (e.clipboardData.items.length > 0) {
-            e.clipboardData.items[0].getAsString(code => {
-                updateValidationCode(code);
-            });
-        }
     }
     const deleteAccount = async () => {
         let resp = await new NetworkApi().requestDelete(userEmail)
@@ -171,7 +211,7 @@ function MyAccountModal(props) {
             </Content>
             <Box minHeight="250px" pb={12}>
                 {subscriptions.length < 1 ? (
-                    <Progress isIndeterminate />
+                    <ProgressBar />
                 ) : (
                     <>
                         <Title>{t("current_plan")}</Title>
@@ -191,44 +231,27 @@ function MyAccountModal(props) {
                             {addLink(t('my_account_information'), t("cloud_ruuvi_link"), t("cloud_ruuvi_link_url"), true, t('my_account_information_hightlighted_text'))}
                         </Content>
                         <Box mt="15px" />
-                        <Title>{t("enter_activation_code")}</Title>
-                        <Box mt={2} />
-                        <PinInput variant="filled" type="alphanumeric" value={activationCode} autoFocus={false} focusBorderColor="#1f938500" onChange={code => updateValidationCode(code)}>
-                            {Array(4).fill().map(() => {
-                                return <PinInputField bg={ruuviTheme.colors.pinFieldBgColor} _focus={{ backgroundColor: ruuviTheme.colors.pinFieldBgHoverColor }} _hover={{ backgroundColor: ruuviTheme.colors.pinFieldBgHoverColor }} color={"black"} height={12} style={{ margin: 5, fontWeight: 800, maxWidth: "9%" }} onPaste={handleCodePaste} />
-                            })}
-                            <span>-</span>
-                            {Array(4).fill().map(() => {
-                                return <PinInputField bg={ruuviTheme.colors.pinFieldBgColor} _focus={{ backgroundColor: ruuviTheme.colors.pinFieldBgHoverColor }} _hover={{ backgroundColor: ruuviTheme.colors.pinFieldBgHoverColor }} color={"black"} height={12} style={{ margin: 5, fontWeight: 800, maxWidth: "9%" }} onPaste={handleCodePaste} />
-                            })}
-                        </PinInput>
-                        <br />
-                        <Box height={12} pt={4}>
-                            {isProcessingCode ? (
-                                <Progress isIndeterminate />
-                            ) : (
-                                <Button disabled={activationCode.length !== 8} onClick={() => setShowActivationConfirmation(true)}>{t("activate")}</Button>
-                            )}
-                        </Box>
+                        <ActivationCodeForm t={t} onActivated={setSubscriptions} />
                     </>
                 )}
             </Box>
             <Box mx={-6} mb={12} borderBottomRadius="md" overflow="hidden">
-                <Accordion allowToggle onChange={(index) => {
-                    if (index === 0 && sessions === null) {
+                <Accordion.Root collapsible onValueChange={(details) => {
+                    if (details.value.includes("sessions") && sessions === null) {
                         loadSessions()
                     }
                 }}>
-                    <AccordionItem border="none">
-                        <AccordionButton style={{ paddingTop: 12, paddingBottom: 12, paddingLeft: 24, paddingRight: 24 }} _hover={{}}>
+                    <Accordion.Item value="sessions" border="none">
+                        <Accordion.ItemTrigger style={{ paddingTop: 12, paddingBottom: 12, paddingLeft: 24, paddingRight: 24 }} _hover={{}}>
                             <Box flex="1" textAlign="left" style={{ fontFamily: "mulish", fontSize: "16px", fontWeight: 800 }}>
                                 {t("sessions")}
                             </Box>
-                            <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel style={{ paddingTop: 16, paddingBottom: 16, paddingLeft: 24, paddingRight: 24, backgroundColor: "transparent" }}>
+                            <Accordion.ItemIndicator><ChevronDownIcon /></Accordion.ItemIndicator>
+                        </Accordion.ItemTrigger>
+                        <Accordion.ItemContent>
+                        <Accordion.ItemBody style={{ paddingTop: 16, paddingBottom: 16, paddingLeft: 24, paddingRight: 24, backgroundColor: "transparent" }}>
                             {sessionsLoading ? (
-                                <Progress isIndeterminate />
+                                <ProgressBar />
                             ) : sessions && sessions.length > 0 ? (
                                 <>
                                     {sessions.map(session => (
@@ -246,7 +269,7 @@ function MyAccountModal(props) {
                                                     </Box>
                                                 )}
                                                 {!session.current && (
-                                                    <Button size="xs" variant="link" fontWeight="bold" color={sessionCurrentColor} isLoading={deletingSessionId === session.id} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => deleteSession(session.id)}>
+                                                    <Button size="xs" variant="link" fontWeight="bold" color={sessionCurrentColor} loading={deletingSessionId === session.id} disabled={deletingSessionId !== null || signingOutAll} onClick={() => deleteSession(session.id)}>
                                                         {t("sessions_sign_out")}
                                                     </Button>
                                                 )}
@@ -254,22 +277,22 @@ function MyAccountModal(props) {
                                         </Box>
                                     ))}
                                     <Box mt={2}>
-                                        <Button size="sm" variant="link" fontWeight="bold" color={sessionCurrentColor} isLoading={signingOutAll} isDisabled={deletingSessionId !== null || signingOutAll} onClick={() => setShowSignOutAll(true)}>
+                                        <Button size="sm" variant="link" fontWeight="bold" color={sessionCurrentColor} loading={signingOutAll} disabled={deletingSessionId !== null || signingOutAll} onClick={() => setShowSignOutAll(true)}>
                                             {t("sessions_sign_out_all")}
                                         </Button>
                                     </Box>
                                 </>
                             ) : null}
-                        </AccordionPanel>
-                    </AccordionItem>
-                </Accordion>
+                        </Accordion.ItemBody>
+                        </Accordion.ItemContent>
+                    </Accordion.Item>
+                </Accordion.Root>
             </Box>
             <Button variant='link' onClick={async () => {
                 setShowDeleteAccount(true)
             }}>{t("delete_account")}</Button>
 
             <ConfirmationDialog open={showDeleteAccount} title="delete_account" loading={true} description='account_delete_description' onClose={(yes) => yes ? deleteAccount() : setShowDeleteAccount(false)} />
-            <ConfirmationDialog open={showActivationConfirmation} description="plan_activation_confirmation" onClose={(yes) => yes ? activate() : setShowActivationConfirmation(false)} />
             <ConfirmationDialog open={showSignOutAll} description="sessions_sign_out_all_confirmation" onClose={(yes) => yes ? signOutAll() : setShowSignOutAll(false)} />
         </RDialog>
     )

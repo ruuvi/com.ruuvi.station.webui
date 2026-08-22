@@ -7,8 +7,8 @@ import { MdArrowBack, MdArrowForward } from "react-icons/md";
 function NavPrevNext({ prev, next }) {
     return (
         <>
-            <IconButton isRound={true} className="navButton" variant="nav" onClick={prev} style={{ marginTop: "2px", marginRight: "5px" }}><MdArrowBack /></IconButton>
-            <IconButton isRound={true} className="navButton" variant="nav" onClick={next} style={{ marginTop: "1px", marginRight: "5px" }}><MdArrowForward /></IconButton>
+            <IconButton rounded="full" aria-label="previous" className="navButton" variant="nav" onClick={prev} style={{ marginTop: "2px", marginRight: "5px" }}><MdArrowBack /></IconButton>
+            <IconButton rounded="full" aria-label="next" className="navButton" variant="nav" onClick={next} style={{ marginTop: "1px", marginRight: "5px" }}><MdArrowForward /></IconButton>
         </>
     )
 }

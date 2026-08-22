@@ -21,6 +21,7 @@ vi.mock("../common/EditableText", () => ({ default: () => null }));
 vi.mock("./SensorNotesPreview", () => ({ default: () => null }));
 
 const SensorSettings = (await import("./SensorSettings")).default;
+const { Provider } = await import("../ui/provider");
 
 let container;
 let root;
@@ -50,6 +51,7 @@ const renderSettings = (settings, sensorOverrides = {}) => {
     };
     act(() =>
         root.render(
+            <Provider>
             <MemoryRouter>
                 <SensorSettings
                     t={(value) => value}
@@ -65,7 +67,8 @@ const renderSettings = (settings, sensorOverrides = {}) => {
                     onOffsetClick={() => {}}
                     onRemoveClick={() => {}}
                 />
-            </MemoryRouter>,
+            </MemoryRouter>
+            </Provider>,
         ),
     );
 };

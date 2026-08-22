@@ -18,7 +18,7 @@ const ZoomInfo = () => {
     return (
         <span>
             <span style={detailedSubText}>{`${uppercaseFirst('zoom')}`}</span>
-            <IconButton ml="-8px" variant="ghost" onClick={zoomInfo}>
+            <IconButton aria-label="zoom info" ml="-8px" variant="ghost" onClick={zoomInfo}>
                 <MdInfo size="16" className="buttonSideIcon" />
             </IconButton>
         </span>

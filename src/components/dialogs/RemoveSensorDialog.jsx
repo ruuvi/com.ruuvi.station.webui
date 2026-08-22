@@ -60,7 +60,10 @@ function RemoveSensorDialog(props) {
                 <Box>
                     <Flex justify="space-between">
                         <span style={{ fontWeight: 800 }}>{props.t("remove_cloud_history_switch")}</span>
-                        <Switch checked={deleteData} onChange={e => setdeleteData(e.target.checked)} colorScheme="buttonIconScheme" />
+                        <Switch.Root checked={deleteData} onCheckedChange={e => setdeleteData(e.checked)} colorPalette="ruuvi">
+                            <Switch.HiddenInput />
+                            <Switch.Control />
+                        </Switch.Root>
                     </Flex>
                 </Box>
             }

@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import {
     Button,
     Textarea,
-    Progress,
     Text,
 } from "@chakra-ui/react"
+import { ProgressBar } from "../ui/progress";
 import { useTranslation } from 'react-i18next';
 import NetworkApi from "../../NetworkApi";
 import notify from "../../utils/notify";
@@ -70,13 +70,13 @@ export default function NotesDialog({ open, onClose, sensor, updateSensor }) {
                 rows={6}
                 maxLength={MAX_LENGTH}
             />
-            <Text fontSize="sm" color="gray.500" textAlign="right" mt={1}>
+            <Text fontSize="sm" color="inactive" textAlign="right" mt={1}>
                 {description.length}/{MAX_LENGTH}
             </Text>
             <div style={{ textAlign: "right" }}>
                 <Button disabled={loading} onClick={save} mt="10px">{t("update")}</Button>
             </div>
-            {loading && <Progress isIndeterminate={true} color="#e6f6f2" mt={4} />}
+            {loading && <ProgressBar mt={4} />}
         </RDialog>
     );
 }

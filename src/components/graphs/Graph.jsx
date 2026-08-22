@@ -1,7 +1,8 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useRef } from "react";
 import 'uplot/dist/uPlot.min.css';
 import { useTranslation } from 'react-i18next';
-import { IconButton, useColorMode } from "@chakra-ui/react";
+import { IconButton } from "@chakra-ui/react";
+import { useColorMode } from "../ui/color-mode";
 import { MdInfo } from "react-icons/md";
 import { getDisplayValue, getUnitHelper, localeNumber } from "../../UnitHelper";
 import UplotTouchZoomPlugin from "./uplotPlugins/UplotTouchZoomPlugin";
@@ -314,7 +315,7 @@ function DataInfo({ graphData, zoom, t, type }) {
             <span className="graphLabel">
                 <b>{t("graph_stat_avg")}</b>: {getDisplayValue(type, avg)}
             </span>
-            <IconButton mt={"-3px"} variant="ghost" onClick={() => notify.info(t("graph_stats_info"))}>
+            <IconButton aria-label="stats info" mt={"-3px"} variant="ghost" onClick={() => notify.info(t("graph_stats_info"))}>
                 <MdInfo size="16" className="buttonSideIcon" />
             </IconButton>
         </>

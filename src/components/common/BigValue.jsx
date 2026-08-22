@@ -1,5 +1,5 @@
 import { ruuviTheme } from "../../themes";
-import { useColorMode } from "@chakra-ui/react";
+import { useColorMode } from "./../ui/color-mode";
 
 const valueStyle = {
     fontFamily: "oswald",

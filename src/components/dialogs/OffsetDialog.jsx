@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
     Button,
-    ModalFooter,
+    Dialog,
     Box,
     Spinner,
 } from "@chakra-ui/react"
@@ -84,7 +84,15 @@ function OffsetDialog(props) {
 
     return (
         <>
-            <RDialog title={t((props.open || "").toLowerCase() + "_offset")} isOpen={props.open} onClose={props.onClose}>
+            <RDialog title={t((props.open || "").toLowerCase() + "_offset")} isOpen={props.open} onClose={props.onClose}
+                footer={
+                    <Dialog.Footer display="flex" justifyContent="center">
+                        {saving ? <Spinner /> : <>
+                            <Button mr="2" onClick={() => setCorrectionInput(true)}>{t("calibrate")}</Button>
+                            {getOffset() !== 0 && <Button ml="2" onClick={() => clearCalibration()}>{t("clear")}</Button>}
+                        </>}
+                    </Dialog.Footer>
+                }>
                 <Box mb="8">
                     {t("calibration_description").replace(t("calibration_description_link"), "").split("\\n").map((x, i) => <div key={i}>{x}<br /></div>)} <a style={{ color: "teal" }} href={t("calibration_description_link_url")}>{t("calibration_description_link")}</a>
                 </Box>
@@ -100,12 +108,6 @@ function OffsetDialog(props) {
                     {format(getLastReading())} {getUnit()} {t("calibration_offset").replace("{%@^%1$s}", format(getOffset()) + " " + getUnit())}
                 </Box>
                 }
-                <ModalFooter display="flex" justifyContent="center">
-                    {saving ? <Spinner /> : <>
-                        <Button mr="2" onClick={() => setCorrectionInput(true)}>{t("calibrate")}</Button>
-                        {getOffset() !== 0 && <Button ml="2" onClick={() => clearCalibration()}>{t("clear")}</Button>}
-                    </>}
-                </ModalFooter>
             </RDialog>
             {
                 props.open && correctionInput && <InputDialog open={correctionInput} value={getLastReading()}

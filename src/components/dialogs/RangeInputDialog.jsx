@@ -3,8 +3,7 @@ import {
     Button,
     Input,
     SimpleGrid,
-    FormControl,
-    FormLabel,
+    Field,
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next";
 import RDialog from "./RDialog";
@@ -69,20 +68,18 @@ function RangeInputDialog(props) {
     const unit = props.unit();
     return (
         <RDialog title={props.title} isOpen={props.open} onClose={() => props.onClose(false)}>
-            <FormControl>
-                <SimpleGrid columns={2} spacing={4}>
-                    <span>
-                        <FormLabel>{t("min") + (unit ? ` (${acceptedMin} ${unit})` : "")}</FormLabel>
-                        <Input autoFocus value={value[0]} type={"number"} onChange={e => setValue([e.target.value, value[1]])} onKeyDown={keyDown} isInvalid={!isValid(0)} />
-                    </span>
-                    <span>
-                        <FormLabel>{t("max") + (unit ? ` (${acceptedMax} ${unit})` : "")}</FormLabel>
-                        <Input value={value[1]} type={"number"} onChange={e => setValue([value[0], e.target.value])} onKeyDown={keyDown} isInvalid={!isValid(1)} />
-                    </span>
-                </SimpleGrid>
-            </FormControl>
+            <SimpleGrid columns={2} gap={4}>
+                <Field.Root invalid={!isValid(0)}>
+                    <Field.Label>{t("min") + (unit ? ` (${acceptedMin} ${unit})` : "")}</Field.Label>
+                    <Input autoFocus value={value[0]} type={"number"} onChange={e => setValue([e.target.value, value[1]])} onKeyDown={keyDown} />
+                </Field.Root>
+                <Field.Root invalid={!isValid(1)}>
+                    <Field.Label>{t("max") + (unit ? ` (${acceptedMax} ${unit})` : "")}</Field.Label>
+                    <Input value={value[1]} type={"number"} onChange={e => setValue([value[0], e.target.value])} onKeyDown={keyDown} />
+                </Field.Root>
+            </SimpleGrid>
             <div style={{ textAlign: "right" }}>
-                <Button onClick={update} mt="17px" isDisabled={!isValid()}>{props.buttonText}</Button>
+                <Button onClick={update} mt="17px" disabled={!isValid()}>{props.buttonText}</Button>
             </div>
         </RDialog>
     )

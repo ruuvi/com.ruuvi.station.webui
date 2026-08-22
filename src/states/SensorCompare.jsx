@@ -229,7 +229,7 @@ function SensorCompare(_props) {
     </>
 
     const loadButton = <Button
-        isDisabled={!selectedSensors.length && !loading}
+        disabled={!selectedSensors.length && !loading}
         onClick={() => {
             if (loading) {
                 cancelRef.current = true;

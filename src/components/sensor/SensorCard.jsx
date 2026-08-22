@@ -1,5 +1,6 @@
 import React, { Fragment, useCallback, useMemo, useState } from "react";
-import { Box, Flex, useColorMode } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
+import { useColorMode } from "../ui/color-mode";
 import { useTranslation } from "react-i18next";
 import NetworkApi from "../../NetworkApi";
 import uploadBackgroundImage from "../../BackgroundUploader";

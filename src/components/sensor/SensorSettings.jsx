@@ -3,14 +3,10 @@ import {
     IconButton,
     Box,
     List,
-    ListItem,
     Accordion,
-    AccordionItem,
-    AccordionButton,
-    AccordionPanel,
-    AccordionIcon,
 } from "@chakra-ui/react"
 import { MdChevronRight } from "react-icons/md"
+import { ChevronDownIcon } from "../ui/chakra-icons";
 import Store from "../../Store";
 import withRouter from "../../utils/withRouter"
 import { alertTypes, getMaxDecimals, getUnitHelper, localeNumber } from "../../UnitHelper";
@@ -75,7 +71,8 @@ function AccordionText(props) {
 function SensorSettings(props) {
     const { t, sensor, router, latestReading, mainSensorFields, isShared, updateAlert, setGraphKey, onEditName, onEditNotes, onEditVisibility, onOffsetClick, onRemoveClick } = props;
 
-    const openAccordionsRef = useRef(Store.getOpenAccordions() || [0]);
+    // v3 accordions are keyed by string values; keep persisting plain indexes.
+    const openAccordionsRef = useRef((Store.getOpenAccordions() || [0]).map(String));
 
     const sensorSubscription = sensor?.subscription;
     const hasData = sensorHasData(sensor);
@@ -85,16 +82,17 @@ function SensorSettings(props) {
     return (
         <Box id="settings">
             <div style={{ height: "20px" }} />
-            <Accordion allowMultiple defaultIndex={openAccordionsRef.current} onChange={v => Store.setOpenAccordions(v)}>
-                <AccordionItem>
-                    <AccordionButton style={accordionButton} _hover={{}}>
+            <Accordion.Root multiple defaultValue={openAccordionsRef.current} onValueChange={d => Store.setOpenAccordions(d.value.map(Number))}>
+                <Accordion.Item value="0">
+                    <Accordion.ItemTrigger style={accordionButton} _hover={{}}>
                         <AccordionText>{t("general")}</AccordionText>
-                        <AccordionIcon />
-                    </AccordionButton>
+                        <Accordion.ItemIndicator><ChevronDownIcon /></Accordion.ItemIndicator>
+                    </Accordion.ItemTrigger>
                     <hr />
-                    <AccordionPanel style={accordionPanel}>
-                        <List>
-                            <ListItem>
+                    <Accordion.ItemContent>
+                        <Accordion.ItemBody style={accordionPanel}>
+                        <List.Root listStyleType="none" gap={0}>
+                            <List.Item>
                                 <table style={accordionContent}>
                                     <tbody>
                                         <tr>
@@ -105,9 +103,9 @@ function SensorSettings(props) {
                                         </tr>
                                     </tbody>
                                 </table>
-                            </ListItem>
+                            </List.Item>
                             <hr />
-                            <ListItem>
+                            <List.Item>
                                 <table style={accordionContent}>
                                     <tbody>
                                         <tr>
@@ -116,24 +114,24 @@ function SensorSettings(props) {
                                         </tr>
                                     </tbody>
                                 </table>
-                            </ListItem>
+                            </List.Item>
                             <hr />
                             {sensor.canShare ?
-                                <ListItem style={{ cursor: "pointer" }} onClick={() => router.navigate(`/shares?sensor=${sensor.sensor}`)}>
+                                <List.Item style={{ cursor: "pointer" }} onClick={() => router.navigate(`/shares?sensor=${sensor.sensor}`)}>
                                     <table style={accordionContent}>
                                         <tbody>
                                             <tr>
                                                 <td style={detailedTitle}>{t("share")}</td>
                                                 <td style={detailedText}>
                                                     {addVariablesInString(t("shared_to_x"), [sensor.sharedTo.length, sensor.subscription.maxSharesPerSensor])}
-                                                    <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
+                                                    <IconButton aria-label="open" variant="ghost" _hover={{}}><MdChevronRight /></IconButton>
                                                 </td>
                                             </tr>
                                         </tbody>
                                     </table>
-                                </ListItem>
+                                </List.Item>
                                 :
-                                <ListItem>
+                                <List.Item>
                                     <table style={accordionContent}>
                                         <tbody>
                                             <tr>
@@ -142,11 +140,11 @@ function SensorSettings(props) {
                                             </tr>
                                         </tbody>
                                     </table>
-                                </ListItem>
+                                </List.Item>
                             }
                             {!isShared && <>
                                 <hr />
-                                <ListItem style={{ cursor: "pointer" }} onClick={onEditVisibility}>
+                                <List.Item style={{ cursor: "pointer" }} onClick={onEditVisibility}>
                                     <table style={accordionContent}>
                                         <tbody>
                                             <tr>
@@ -164,15 +162,15 @@ function SensorSettings(props) {
                                                         }
                                                         return visibleFields.length > 0 ? `${visibleFields.length}/${maxAvailable || visibleFields.length}` : t("no_visible_measurements");
                                                     })()}
-                                                    <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
+                                                    <IconButton aria-label="open" variant="ghost" _hover={{}}><MdChevronRight /></IconButton>
                                                 </td>
                                             </tr>
                                         </tbody>
                                     </table>
-                                </ListItem>
+                                </List.Item>
                             </>}
                             <hr />
-                            <ListItem>
+                            <List.Item>
                                 <table style={accordionContent}>
                                     <tbody>
                                         <tr>
@@ -183,19 +181,21 @@ function SensorSettings(props) {
                                         </tr>
                                     </tbody>
                                 </table>
-                            </ListItem>
-                        </List>
+                            </List.Item>
+                        </List.Root>
                         <SensorNotesPreview text={sensor.settings?.description} t={t} />
-                    </AccordionPanel>
-                </AccordionItem>
-                <AccordionItem>
-                    <AccordionButton style={accordionButton} _hover={{}}>
+                    </Accordion.ItemBody>
+                        </Accordion.ItemContent>
+                </Accordion.Item>
+                <Accordion.Item value="1">
+                    <Accordion.ItemTrigger style={accordionButton} _hover={{}}>
                         <AccordionText>{t("alerts")}</AccordionText>
-                        <AccordionIcon />
-                    </AccordionButton>
+                        <Accordion.ItemIndicator><ChevronDownIcon /></Accordion.ItemIndicator>
+                    </Accordion.ItemTrigger>
                     <hr />
-                    <AccordionPanel style={accordionPanel}>
-                        <List style={accordionContent}>
+                    <Accordion.ItemContent>
+                        <Accordion.ItemBody style={accordionPanel}>
+                        <List.Root listStyleType="none" gap={0} style={accordionContent}>
                             {sensorSubscription.subscriptionName === "Free" && <Box pt={6} pb={6} style={detailedSubText}>
                                 {(() => {
                                     const text = t("sensor_alert_free_info");
@@ -216,7 +216,7 @@ function SensorSettings(props) {
                                 }
 
                                 const key = alert ? alert.min + "" + alert.max + "" + alert.enabled.toString() + "" + alert.description + x : x;
-                                return <ListItem key={key}>
+                                return <List.Item key={key}>
                                     <AlertItem alerts={sensor.alerts} alert={alert} sensor={sensor}
                                         latestValue={latestValue}
                                         noUpgradeButton={isShared || !hasData}
@@ -225,19 +225,21 @@ function SensorSettings(props) {
                                         detailedTitle={detailedTitle}
                                         detailedText={detailedText} detailedSubText={detailedSubText}
                                         type={x} dataKey={dataKey} onChange={updateAlert} />
-                                </ListItem>;
+                                </List.Item>;
                             })}
-                        </List>
-                    </AccordionPanel>
-                </AccordionItem>
-                <AccordionItem hidden={isShared}>
-                    <AccordionButton style={accordionButton} _hover={{}}>
+                        </List.Root>
+                    </Accordion.ItemBody>
+                        </Accordion.ItemContent>
+                </Accordion.Item>
+                <Accordion.Item value="2" hidden={isShared}>
+                    <Accordion.ItemTrigger style={accordionButton} _hover={{}}>
                         <AccordionText>{t("offset_correction")}</AccordionText>
-                        <AccordionIcon />
-                    </AccordionButton>
+                        <Accordion.ItemIndicator><ChevronDownIcon /></Accordion.ItemIndicator>
+                    </Accordion.ItemTrigger>
                     <hr />
-                    <AccordionPanel style={accordionPanel}>
-                        <List>
+                    <Accordion.ItemContent>
+                        <Accordion.ItemBody style={accordionPanel}>
+                        <List.Root listStyleType="none" gap={0}>
                             {["Temperature", "Humidity", "Pressure"].map(x => {
                                 if (latestReading[x.toLowerCase()] === undefined) return null;
                                 const uh = getUnitHelper(x.toLocaleLowerCase());
@@ -247,31 +249,33 @@ function SensorSettings(props) {
                                     value = sensor["offset" + x];
                                     unit = "%";
                                 }
-                                return <ListItem key={x} style={{ cursor: "pointer" }} onClick={() => onOffsetClick(x)}>
+                                return <List.Item key={x} style={{ cursor: "pointer" }} onClick={() => onOffsetClick(x)}>
                                     <table style={accordionContent}>
                                         <tbody>
                                             <tr>
                                                 <td style={detailedTitle}> {t(x.toLocaleLowerCase())}</td>
                                                 <td style={detailedText}>
-                                                    {localeNumber(value, getMaxDecimals(x.toLocaleLowerCase()))} {unit} <IconButton _hover={{}} variant="ghost" icon={<MdChevronRight />} />
+                                                    {localeNumber(value, getMaxDecimals(x.toLocaleLowerCase()))} {unit} <IconButton aria-label="open" _hover={{}} variant="ghost"><MdChevronRight /></IconButton>
                                                 </td>
                                             </tr>
                                         </tbody>
                                     </table>
                                     {x !== "Pressure" && <hr />}
-                                </ListItem>;
+                                </List.Item>;
                             })}
-                        </List>
-                    </AccordionPanel>
-                </AccordionItem>
-                <AccordionItem>
-                    <AccordionButton style={accordionButton} _hover={{}}>
+                        </List.Root>
+                    </Accordion.ItemBody>
+                        </Accordion.ItemContent>
+                </Accordion.Item>
+                <Accordion.Item value="3">
+                    <Accordion.ItemTrigger style={accordionButton} _hover={{}}>
                         <AccordionText>{uppercaseFirst(t("more_info"))}</AccordionText>
-                        <AccordionIcon />
-                    </AccordionButton>
+                        <Accordion.ItemIndicator><ChevronDownIcon /></Accordion.ItemIndicator>
+                    </Accordion.ItemTrigger>
                     <hr />
-                    <AccordionPanel style={accordionPanel}>
-                        <List>
+                    <Accordion.ItemContent>
+                        <Accordion.ItemBody style={accordionPanel}>
+                        <List.Root listStyleType="none" gap={0}>
                             {(() => {
                                 const readings = getLatestReading(sensor);
                                 if (!readings) return null;
@@ -285,7 +289,7 @@ function SensorSettings(props) {
                                     if (!x) return null;
                                     const uh = getUnitHelper(x.key);
                                     return (
-                                        <ListItem key={x.key}>
+                                        <List.Item key={x.key}>
                                             <table style={{ ...accordionContent, cursor: uh.graphable ? "pointer" : "" }} onClick={() => uh.graphable ? setGraphKey(x.key) : undefined}>
                                                 <tbody>
                                                     <tr>
@@ -297,38 +301,41 @@ function SensorSettings(props) {
                                                 </tbody>
                                             </table>
                                             {i !== moreInfoFields.length - 1 && <hr />}
-                                        </ListItem>
+                                        </List.Item>
                                     );
                                 });
                             })()}
-                        </List>
-                    </AccordionPanel>
-                </AccordionItem>
+                        </List.Root>
+                    </Accordion.ItemBody>
+                        </Accordion.ItemContent>
+                </Accordion.Item>
 
-                <AccordionItem>
-                    <AccordionButton style={accordionButton} _hover={{}}>
+                <Accordion.Item value="4">
+                    <Accordion.ItemTrigger style={accordionButton} _hover={{}}>
                         <AccordionText>{t("remove")}</AccordionText>
-                        <AccordionIcon />
-                    </AccordionButton>
+                        <Accordion.ItemIndicator><ChevronDownIcon /></Accordion.ItemIndicator>
+                    </Accordion.ItemTrigger>
                     <hr />
-                    <AccordionPanel style={accordionPanel}>
-                        <List>
-                            <ListItem style={{ cursor: "pointer" }} onClick={onRemoveClick}>
+                    <Accordion.ItemContent>
+                        <Accordion.ItemBody style={accordionPanel}>
+                        <List.Root listStyleType="none" gap={0}>
+                            <List.Item style={{ cursor: "pointer" }} onClick={onRemoveClick}>
                                 <table width="100%" style={accordionContent}>
                                     <tbody>
                                         <tr>
                                             <td style={detailedTitle}>{t("remove_this_sensor")}</td>
                                             <td style={detailedText}>
-                                                <IconButton variant="ghost" icon={<MdChevronRight />} _hover={{}} />
+                                                <IconButton aria-label="open" variant="ghost" _hover={{}}><MdChevronRight /></IconButton>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
-                            </ListItem>
-                        </List>
-                    </AccordionPanel>
-                </AccordionItem>
-            </Accordion>
+                            </List.Item>
+                        </List.Root>
+                    </Accordion.ItemBody>
+                        </Accordion.ItemContent>
+                </Accordion.Item>
+            </Accordion.Root>
         </Box>
     );
 }

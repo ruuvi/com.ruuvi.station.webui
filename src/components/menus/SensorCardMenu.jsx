@@ -2,15 +2,11 @@ import React, { Fragment, useCallback, useMemo } from "react";
 import {
     IconButton,
     Menu,
-    MenuButton,
-    MenuDivider,
-    MenuItem,
-    MenuList,
     Portal,
     useDisclosure,
 } from "@chakra-ui/react";
-import { ArrowDownIcon, ArrowUpIcon } from "@chakra-ui/icons";
 import { MdMoreVert } from "react-icons/md";
+import { ArrowDownIcon, ArrowUpIcon } from "../ui/chakra-icons";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
@@ -27,7 +23,7 @@ const SensorCardMenu = ({
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
-    const { isOpen, onOpen, onClose, onToggle } = useDisclosure();
+    const { open, onOpen, onClose } = useDisclosure();
 
     const menuItems = useMemo(
         () => [
@@ -45,14 +41,14 @@ const SensorCardMenu = ({
                 key: "moveUp",
                 label: "move_up",
                 action: "move",
-                icon: <ArrowUpIcon mr={2} />,
+                icon: <ArrowUpIcon style={{ marginInlineEnd: 8 }} />,
                 params: 1,
             },
             {
                 key: "moveDown",
                 label: "move_down",
                 action: "move",
-                icon: <ArrowDownIcon mr={2} />,
+                icon: <ArrowDownIcon style={{ marginInlineEnd: 8 }} />,
                 params: -1,
             },
             { key: "remove", label: "remove", action: "remove" },
@@ -94,53 +90,60 @@ const SensorCardMenu = ({
     );
 
     return (
-        <Menu autoSelect={false} isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
-            <MenuButton
-                as={IconButton}
-                onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onToggle();
-                }}
-                onPointerDown={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }}
-                icon={<MdMoreVert size={23} />}
-                variant="topbar"
-                style={{
-                    zIndex: 2,
-                    backgroundColor: "transparent",
-                    transition: "color 0.2s ease-in-out",
-                    cursor: disabled ? "default" : undefined,
-                }}
-                _hover={{ color: disabled ? undefined : "primary"}}
-                disabled={disabled}
-                top={-4}
-                right={0}
-                height={55}
-                mt={mt}
-            />
+        <Menu.Root
+            open={open}
+            onOpenChange={(e) => (e.open ? onOpen() : onClose())}
+            positioning={{ gutter: 16 }}
+        >
+            <Menu.Trigger asChild>
+                <IconButton
+                    aria-label="sensor menu"
+                    onClick={(event) => {
+                        event.stopPropagation();
+                    }}
+                    onPointerDown={(event) => {
+                        event.stopPropagation();
+                    }}
+                    variant="topbar"
+                    style={{
+                        zIndex: 2,
+                        backgroundColor: "transparent",
+                        transition: "color 0.2s ease-in-out",
+                        cursor: disabled ? "default" : undefined,
+                    }}
+                    _hover={{ color: disabled ? undefined : "primary" }}
+                    disabled={disabled}
+                    top={-4}
+                    right={0}
+                    height={55}
+                    mt={mt}
+                >
+                    <MdMoreVert size={23} />
+                </IconButton>
+            </Menu.Trigger>
 
             <Portal>
-                <MenuList mt="2" zIndex="popover">
-                    {menuItems
-                        .filter((item) => item.condition !== false)
-                        .map((item, index) => (
-                            <Fragment key={item.key}>
-                                {index > 0 && <MenuDivider />}
-                                <MenuItem
-                                    className="ddlItem"
-                                    onClick={(event) => handleAction(event, item)}
-                                >
-                                    {item.icon}
-                                    {t(item.label)}
-                                </MenuItem>
-                            </Fragment>
-                        ))}
-                </MenuList>
+                <Menu.Positioner zIndex="popover">
+                    <Menu.Content>
+                        {menuItems
+                            .filter((item) => item.condition !== false)
+                            .map((item, index) => (
+                                <Fragment key={item.key}>
+                                    {index > 0 && <Menu.Separator />}
+                                    <Menu.Item
+                                        value={item.key}
+                                        className="ddlItem"
+                                        onClick={(event) => handleAction(event, item)}
+                                    >
+                                        {item.icon}
+                                        {t(item.label)}
+                                    </Menu.Item>
+                                </Fragment>
+                            ))}
+                    </Menu.Content>
+                </Menu.Positioner>
             </Portal>
-        </Menu>
+        </Menu.Root>
     );
 };
 

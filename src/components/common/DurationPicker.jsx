@@ -1,15 +1,10 @@
 import {
     Menu,
-    MenuList,
-    MenuItem,
-    MenuButton,
     Button,
-    MenuDivider,
     Popover,
-    PopoverContent,
-    PopoverAnchor,
+    Portal,
     Box,
-    Divider,
+    Separator,
     Flex,
 } from "@chakra-ui/react"
 import { MdArrowDropDown } from "react-icons/md"
@@ -96,20 +91,21 @@ export default function DurationPicker(props) {
     return (
         <>
             <span>
-                <Popover isOpen={showPicker} placement="bottom-end">
-                    <Menu autoSelect={false} strategy="fixed" placement="bottom-end" isOpen={showDropdown} onClose={() => {
+                <Popover.Root open={showPicker} positioning={{ placement: "bottom-end" }} autoFocus={false}>
+                    <Menu.Root positioning={{ strategy: "fixed", placement: "bottom-end" }} open={showDropdown} onOpenChange={(e) => {
+                        if (e.open) return
                         wasInClose = true
                         setTimeout(() => {
                             wasInClose = false
                         }, 100)
                         setShowDropdown(false)
                     }}>
-                        <PopoverAnchor>
+                        <Popover.Anchor asChild>
                             <span className="durationPicker" style={{ height: "40px", display: "inline-block", borderRadius: "4px", opacity: disabled ? 0.5 : 1, cursor: disabled ? 'default' : 'pointer' }} aria-disabled={disabled} >
                                 <Flex>
                                     {!props.dashboard &&
                                         <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px', cursor: disabled ? 'default' : undefined }}
-                                            isDisabled={disabled}
+                                            disabled={disabled}
                                             onClick={_e => {
                                                 if (disabled) return
                                                 setDropdownFromClick(false)
@@ -119,7 +115,7 @@ export default function DurationPicker(props) {
                                         </Button>
                                     }
                                     {!props.dashboard ? (
-                                        <Divider orientation="vertical" height={"38px"} mt={"1px"} className="bodybg" width={"2px"} borderStyle="none" />
+                                        <Separator orientation="vertical" height={"38px"} mt={"1px"} className="bodybg" width={"2px"} borderStyle="none" />
                                     ) : (
                                         <Box width={"4px"} />
                                     )
@@ -135,9 +131,9 @@ export default function DurationPicker(props) {
                                             </>
                                         )}
                                     </span>
-                                    <Divider orientation="vertical" height={"38px"} mt={"1px"} className="bodybg" width={"2px"} borderStyle="none" />
+                                    <Separator orientation="vertical" height={"38px"} mt={"1px"} className="bodybg" width={"2px"} borderStyle="none" />
                                     <Button className="durationPicker" variant="imageToggle" style={{ borderRadius: '4px', cursor: disabled ? 'default' : undefined }}
-                                        isDisabled={disabled}
+                                        disabled={disabled}
                                         onClick={_e => {
                                             if (disabled) return
                                             if (wasInClose) {
@@ -149,51 +145,59 @@ export default function DurationPicker(props) {
                                         }}>
                                         <MdArrowDropDown {...iconProps} />
                                     </Button>
-                                    <MenuButton height={"40px"} style={{ cursor: disabled ? 'default' : undefined }}>
-                                    </MenuButton>
+                                    <Menu.Trigger height={"40px"} style={{ cursor: disabled ? 'default' : undefined }}>
+                                    </Menu.Trigger>
                                 </Flex>
                             </span>
 
-                        </PopoverAnchor>
+                        </Popover.Anchor>
 
-                        <MenuList zIndex={100}>
-                            {renderTimespans.map((x, i) => {
-                                let divider = <></>
-                                let borderStyle = {};
-                                if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
-                                if (i === renderTimespans.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
-                                else divider = <MenuDivider />
-                                return <div key={x.v + "p"}>
-                                    <MenuItem key={x.v} className={!custom && ts.v === x.v ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }}
-                                        onClick={() => {
-                                            if (disabled) return
-                                            setCustom(null)
-                                            props.onChange(x.v)
-                                        }}>
-                                        {x.k} {t(x.t).toLowerCase()}
-                                    </MenuItem>
-                                    {divider}
-                                </div>
-                            })}
-                        </MenuList>
-                    </Menu>
+                        <Portal>
+                            <Menu.Positioner zIndex={100}>
+                                <Menu.Content>
+                                    {renderTimespans.map((x, i) => {
+                                        let divider = <></>
+                                        let borderStyle = {};
+                                        if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
+                                        if (i === renderTimespans.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
+                                        else divider = <Menu.Separator />
+                                        return <div key={x.v + "p"}>
+                                            <Menu.Item value={String(x.v)} className={!custom && ts.v === x.v ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }}
+                                                onClick={() => {
+                                                    if (disabled) return
+                                                    setCustom(null)
+                                                    props.onChange(x.v)
+                                                }}>
+                                                {x.k} {t(x.t).toLowerCase()}
+                                            </Menu.Item>
+                                            {divider}
+                                        </div>
+                                    })}
+                                </Menu.Content>
+                            </Menu.Positioner>
+                        </Portal>
+                    </Menu.Root>
 
-                    <PopoverContent>
-                        <DatePicker onChange={setLastCustom} />
-                        <Box textAlign="right" pr={"20px"} pb={"20px"}>
-                            <Button variant='ghost' mr={3} onClick={() => setShowPicker(false)}>
-                                {t("close")}
-                            </Button>
-                            <Button isDisabled={!lastCustom || !lastCustom.from || !lastCustom.to} onClick={() => {
-                                setCustom(lastCustom)
-                                setShowPicker(false)
-                                lastCustom.from.setHours(0, 0, 0, 0)
-                                lastCustom.to.setHours(23, 59, 59, 999)
-                                props.onChange(lastCustom)
-                            }}>{t("set")}</Button>
-                        </Box>
-                    </PopoverContent>
-                </Popover>
+                    <Portal>
+                        <Popover.Positioner>
+                            <Popover.Content>
+                                <DatePicker onChange={setLastCustom} />
+                                <Box textAlign="right" pr={"20px"} pb={"20px"}>
+                                    <Button variant='ghost' mr={3} onClick={() => setShowPicker(false)}>
+                                        {t("close")}
+                                    </Button>
+                                    <Button disabled={!lastCustom || !lastCustom.from || !lastCustom.to} onClick={() => {
+                                        setCustom(lastCustom)
+                                        setShowPicker(false)
+                                        lastCustom.from.setHours(0, 0, 0, 0)
+                                        lastCustom.to.setHours(23, 59, 59, 999)
+                                        props.onChange(lastCustom)
+                                    }}>{t("set")}</Button>
+                                </Box>
+                            </Popover.Content>
+                        </Popover.Positioner>
+                    </Portal>
+                </Popover.Root>
             </span>
         </>
     )

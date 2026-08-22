@@ -16,7 +16,10 @@ function SensorHeader(props) {
             <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
             <label htmlFor="avatarUpload">
                 <Box position="relative" display="inline-flex" cursor="pointer">
-                    <Avatar style={{ cursor: "pointer" }} size="xl" name={props.sensor.name} src={props.picture || props.sensor.picture} />
+                    <Avatar.Root style={{ cursor: "pointer" }} size="xl">
+                        <Avatar.Fallback name={props.sensor.name} />
+                        <Avatar.Image src={props.picture || props.sensor.picture} />
+                    </Avatar.Root>
                     {props.loadingImage && (
                         <Box position="absolute" inset={0} display="flex" alignItems="center" justifyContent="center" backgroundColor="blackAlpha.400" borderRadius="full">
                             <Spinner size="xl" color="white" />
@@ -50,7 +53,10 @@ function SensorHeader(props) {
                                 <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
                                 <label htmlFor="avatarUpload">
                                     <Box position="relative" display="inline-flex" cursor="pointer">
-                                        <Avatar mt="3" bg="primary" size="lg" name={props.sensor.name} src={props.picture || props.sensor.picture} />
+                                        <Avatar.Root mt="3" bg="primary" size="lg">
+                                            <Avatar.Fallback name={props.sensor.name} />
+                                            <Avatar.Image src={props.picture || props.sensor.picture} />
+                                        </Avatar.Root>
                                         {props.loadingImage && (
                                             <Box position="absolute" inset={0} mt="3" display="flex" alignItems="center" justifyContent="center" backgroundColor="blackAlpha.400" borderRadius="full">
                                                 <Spinner size="xl" color="white" />

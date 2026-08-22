@@ -4,8 +4,8 @@ import debounce from "../../utils/debounce";
 import { computeGridDimensions, computeMasonryLayout } from "./masonryLayout";
 
 function DashboardGrid(props) {
-    const [isLargeDisplay] = useMediaQuery("(min-width: 1700px)", { ssr: false });
-    const [isMediumDisplay] = useMediaQuery("(min-width: 1024px)", { ssr: false });
+    const [isLargeDisplay] = useMediaQuery(["(min-width: 1700px)"], { ssr: false });
+    const [isMediumDisplay] = useMediaQuery(["(min-width: 1024px)"], { ssr: false });
     const gridRef = useRef(null);
     // Only the column count goes through React state — it is the one layout
     // value the cards render differently on. Everything else (widths,
@@ -146,7 +146,7 @@ function DashboardGrid(props) {
             key="adaptive"
             ref={gridRef}
             className="masonry-grid"
-            sx={{
+            css={{
                 marginBottom: "30px",
                 marginTop: "10px",
                 position: "relative",

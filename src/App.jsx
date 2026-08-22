@@ -9,13 +9,17 @@ import {
 import NetworkApi from "./NetworkApi";
 import logo from './img/ruuvi-vector-logo.svg'
 import logoDark from './img/ruuvi-vector-logo-dark.svg'
-import { ChakraProvider, Text, HStack, Image, useColorMode, IconButton, Tooltip, useMediaQuery, Box, useBreakpointValue, Button } from "@chakra-ui/react"
+import { Text, HStack, Image, IconButton, useMediaQuery, Box, useBreakpointValue, Button } from "@chakra-ui/react"
+import { Provider } from "./components/ui/provider";
+import { Toaster } from "./components/ui/toaster";
+import { Tooltip } from "./components/ui/tooltip";
+import { useColorMode } from "./components/ui/color-mode";
 import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
-import { SunIcon } from "@chakra-ui/icons";
 import { IoClose } from "react-icons/io5";
 import { MdOutlineNightlight } from "react-icons/md";
+import { SunIcon } from "./components/ui/chakra-icons";
 import cache from "./DataCache";
 import { useTranslation } from "react-i18next";
 import Store from "./Store";
@@ -77,7 +81,7 @@ let currColorMode;
 function ColorModeSwitch() {
   const { t } = useTranslation();
   const { colorMode, toggleColorMode } = useColorMode()
-  const [isMobile] = useMediaQuery("(max-width: 1023px)", { ssr: false })
+  const [isMobile] = useMediaQuery(["(max-width: 1023px)"], { ssr: false })
 
   if (currColorMode !== colorMode) {
     currColorMode = colorMode;
@@ -261,14 +265,15 @@ export default function App() {
   const [settingsVersion, setSettingsVersion] = React.useState(0);
   if (!user) {
     //goToLoginPage()
-    return <ChakraProvider theme={ruuviTheme} style={{ minHeight: "100%" }}>
+    return <Provider>
       <BrowserRouter>
         <SignIn loginSuccessful={_data => {
           forceUpdate()
           loadInitalSettings(forceUpdate, browserLanguage)
         }} />
       </BrowserRouter>
-    </ChakraProvider>
+      <Toaster />
+    </Provider>
   }
 
   let getBannerContent = (notification) => {
@@ -280,7 +285,7 @@ export default function App() {
   let hideTopBar = window.location.search.includes("minimalMode=true")
 
   return (
-    <ChakraProvider theme={ruuviTheme}>
+    <Provider>
       <BrowserRouter basename={"/"}>
         {hideTopBar ? null : <>
           <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
@@ -326,7 +331,8 @@ export default function App() {
       {showDialog === "myaccount" &&
         <MyAccountModal open={true} onClose={() => setShowDialog("")} updateApp={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />
       }
-    </ChakraProvider>
+      <Toaster />
+    </Provider>
   );
 }
 

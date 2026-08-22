@@ -3,11 +3,9 @@ import {
     Button,
     Input,
     List,
-    ListItem,
-    ListIcon,
-    Progress,
     Box,
 } from "@chakra-ui/react"
+import { ProgressBar } from "../ui/progress";
 import { useTranslation } from 'react-i18next';
 import { MdClear } from "react-icons/md";
 import NetworkApi from "../../NetworkApi";
@@ -92,17 +90,19 @@ function ShareDialog(props) {
                 </div>
                 {props.sensor.sharedTo.length > 0 && <>
                     <div style={{ fontWeight: "bold", marginTop: 8, marginBottom: 8 }}>{addVariablesInString(t("share_sensor_already_shared"), [props.sensor.sharedTo.length, props.sensor.subscription.maxSharesPerSensor])}</div>
-                    <List spacing={3}>
+                    <List.Root variant="plain" gap={3}>
                         {props.sensor.sharedTo.map(x => {
-                            return <ListItem key={x}>
-                                <ListIcon as={MdClear} color="gray" style={{ cursor: "pointer" }} onClick={() => unshare(x)} />
+                            return <List.Item key={x}>
+                                <List.Indicator asChild color="gray" style={{ cursor: "pointer" }} onClick={() => unshare(x)}>
+                                    <MdClear />
+                                </List.Indicator>
                                 {x}
-                            </ListItem>
+                            </List.Item>
                         })}
-                    </List>
+                    </List.Root>
                 </>
                 }
-                {loading && <Progress isIndeterminate={true} color="#e6f6f2" />}
+                {loading && <ProgressBar />}
             </RDialog>
             <RDialog title={t('share_pending')} isOpen={userInvited} onClose={() => setUserInvited(false)}>
                 {t('share_pending_message')}

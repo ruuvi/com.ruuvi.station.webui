@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import {
     Button,
     Input,
-    Progress,
 } from "@chakra-ui/react"
+import { ProgressBar } from "../ui/progress";
 import { useTranslation } from 'react-i18next';
 import NetworkApi from "../../NetworkApi";
 import pjson from "../../../package.json";
@@ -89,7 +89,7 @@ function EditNameDialog(props) {
             <div style={{ textAlign: "right" }}>
                 <Button disabled={loading} onClick={update} mt="17px">{t("update")}</Button>
             </div>
-            {loading && <Progress isIndeterminate={true} color="#e6f6f2" mt={4} />}
+            {loading && <ProgressBar mt={4} />}
         </RDialog>
     )
 }

@@ -61,7 +61,9 @@ const SensorCardDetailed = ({
                             width="25%"
                             className="imageBackgroundColor"
                             position="relative"
-                            backgroundImage={picture}
+                            backgroundImage={
+                                picture ? (picture.startsWith("url(") ? picture : `url(${picture})`) : undefined
+                            }
                             backgroundSize="cover"
                             backgroundPosition="center"
                             display="flex"
@@ -69,7 +71,9 @@ const SensorCardDetailed = ({
                         >
                             <Box
                                 className="imageBackgroundOverlay"
-                                backgroundImage={bglayer}
+                                backgroundImage={
+                                    bglayer ? (bglayer.startsWith("url(") ? bglayer : `url(${bglayer})`) : undefined
+                                }
                                 backgroundSize="cover"
                                 backgroundPosition="center"
                                 width="100%"

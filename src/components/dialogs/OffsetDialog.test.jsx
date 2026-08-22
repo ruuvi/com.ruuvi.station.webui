@@ -18,6 +18,7 @@ window.matchMedia =
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (v) => v }) }));
 
 const OffsetDialog = (await import("./OffsetDialog")).default;
+const { Provider } = await import("../ui/provider");
 
 let container;
 let root;
@@ -26,14 +27,16 @@ const renderDialog = (settings, open, offsets, lastReading) => {
     localStorage.setItem("settings", JSON.stringify(settings));
     act(() =>
         root.render(
-            <OffsetDialog
-                open={open}
-                onClose={() => {}}
-                sensor={{ sensor: "test-sensor" }}
-                offsets={offsets}
-                lastReading={lastReading}
-                updateSensor={() => {}}
-            />,
+            <Provider>
+                <OffsetDialog
+                    open={open}
+                    onClose={() => {}}
+                    sensor={{ sensor: "test-sensor" }}
+                    offsets={offsets}
+                    lastReading={lastReading}
+                    updateSensor={() => {}}
+                />
+            </Provider>,
         ),
     );
 };

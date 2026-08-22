@@ -1,5 +1,4 @@
-import { Box } from "@chakra-ui/layout";
-import { Switch } from "@chakra-ui/switch";
+import { Box, Switch } from "@chakra-ui/react";
 import React, { Component, Suspense } from "react";
 import { withTranslation } from 'react-i18next';
 import { getAlertRange, getDisplayValue, getUnitHelper, localeNumber, round } from "../../UnitHelper";
@@ -237,7 +236,10 @@ class AlertItem extends Component {
                             <span style={{ ...this.props.detailedSubText, fontWeight: 400, marginRight: 4 }}>
                                 {enabled ? t("on") : t("off")}
                             </span>
-                            <Switch isChecked={alert && alert.enabled && !(type === "offline" && !this.props.showOffline)} colorScheme="buttonIconScheme" onChange={e => this.setAlert(alert, type, e.target.checked)} />
+                            <Switch.Root checked={!!(alert && alert.enabled && !(type === "offline" && !this.props.showOffline))} colorPalette="ruuvi" onCheckedChange={e => this.setAlert(alert, type, e.checked)}>
+                                <Switch.HiddenInput />
+                                <Switch.Control />
+                            </Switch.Root>
                         </span>
                     </div>
                     <span style={gayedOutOffline()}>

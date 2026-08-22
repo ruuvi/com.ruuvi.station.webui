@@ -48,10 +48,6 @@ code {
   box-shadow: none !important;
 }
 
-#chakra-toast-manager-bottom {
-  bottom: 30px !important;
-}
-
 :focus {
   outline: none;
 }

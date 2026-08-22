@@ -1,11 +1,7 @@
 import {
     Menu,
-    MenuList,
-    MenuItem,
-    MenuButton,
     Button,
-    MenuDivider,
-    MenuGroup,
+    Portal,
 } from "@chakra-ui/react"
 import { MdArrowDropDown } from "react-icons/md"
 import { useTranslation } from 'react-i18next';
@@ -26,38 +22,44 @@ export default function DashboardViewType({ value, onChange, showResetOrder, res
     ]
 
     return (
-        <Menu autoSelect={false} strategy="fixed" placement="bottom-end">
-            <MenuButton as={Button}
-                rightIcon={<MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marginRight: -8 }} />}
-                variant="ddl"
-                className="durationPicker"
-                style={{ ...detailedSubText }}
-                borderRadius='4px'>
-                {t('view')}
-            </MenuButton>
-            <MenuList zIndex={100}>
-                <MenuGroup title={t('card_type')} style={{ paddingTop: 6 }}>
-                    {opts.map((x, i) => {
-                        let divider = <></>
-                        let borderStyle = {};
-                        if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
-                        if (i === opts.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
-                        return <div key={x.value + "p"}>
-                            <MenuItem key={x.value} className={value === x.value ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => onChange(x.value)}>{t(x.label)}</MenuItem>
-                            {divider}
-                        </div>
-                    })}
-                </MenuGroup>
-                <MenuDivider />
-                {showResetOrder && <>
-                    <MenuGroup title={t('ordering')}>
-                        <MenuItem style={{ ...detailedSubText }} onClick={() => resetOrder()}>{t("reset_order")}</MenuItem>
-                    </MenuGroup>
-                </>}
-                <MenuGroup>
-                    <MenuItem style={{ ...detailedSubText, borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => setAdaptiveLayout()}>{t(adaptiveLayout ? "disable_adaptive_layout" : "enable_adaptive_layout")}</MenuItem>
-                </MenuGroup>
-            </MenuList>
-        </Menu>
+        <Menu.Root positioning={{ strategy: "fixed", placement: "bottom-end" }}>
+            <Menu.Trigger asChild>
+                <Button
+                    variant="ddl"
+                    className="durationPicker"
+                    style={{ ...detailedSubText }}
+                    borderRadius='4px'>
+                    {t('view')}
+                    <MdArrowDropDown size={26} className="buttonSideIcon" style={{ marginLeft: -10, marginRight: -8 }} />
+                </Button>
+            </Menu.Trigger>
+            <Portal>
+                <Menu.Positioner zIndex={100}>
+                    <Menu.Content>
+                        <Menu.ItemGroup>
+                            <Menu.ItemGroupLabel style={{ paddingTop: 6 }}>{t('card_type')}</Menu.ItemGroupLabel>
+                            {opts.map((x, i) => {
+                                let borderStyle = {};
+                                if (i === 0) borderStyle = { borderTopLeftRadius: 6, borderTopRightRadius: 6 }
+                                if (i === opts.length - 1) borderStyle = { borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }
+                                return <div key={x.value + "p"}>
+                                    <Menu.Item value={x.value} className={value === x.value ? "menuActive" : undefined} style={{ ...detailedSubText, ...borderStyle }} onClick={() => onChange(x.value)}>{t(x.label)}</Menu.Item>
+                                </div>
+                            })}
+                        </Menu.ItemGroup>
+                        <Menu.Separator />
+                        {showResetOrder && <>
+                            <Menu.ItemGroup>
+                                <Menu.ItemGroupLabel>{t('ordering')}</Menu.ItemGroupLabel>
+                                <Menu.Item value="reset_order" style={{ ...detailedSubText }} onClick={() => resetOrder()}>{t("reset_order")}</Menu.Item>
+                            </Menu.ItemGroup>
+                        </>}
+                        <Menu.ItemGroup>
+                            <Menu.Item value="adaptive_layout" style={{ ...detailedSubText, borderBottomLeftRadius: 6, borderBottomRightRadius: 6 }} onClick={() => setAdaptiveLayout()}>{t(adaptiveLayout ? "disable_adaptive_layout" : "enable_adaptive_layout")}</Menu.Item>
+                        </Menu.ItemGroup>
+                    </Menu.Content>
+                </Menu.Positioner>
+            </Portal>
+        </Menu.Root>
     )
 }

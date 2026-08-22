@@ -3,7 +3,7 @@ import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/sensor/SensorCard";
 import Sensor from "./Sensor";
-import { Spinner, Box, Link, Flex, Input, InputGroup, InputRightElement, Show } from "@chakra-ui/react"
+import { Spinner, Box, Link, Flex, Input, InputGroup, useMediaQuery } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import DurationPicker from "../components/common/DurationPicker";
 import Store from "../Store";
@@ -13,7 +13,7 @@ import { withColorMode } from "../utils/withColorMode";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import SensorTypePicker from "../components/sensor/SensorTypePicker";
 import DashboardViewType from "../components/common/DashboardViewType";
-import { SearchIcon, CloseIcon } from "@chakra-ui/icons";
+import { CloseIcon, SearchIcon } from "../components/ui/chakra-icons";
 import { getSetting } from "../UnitHelper";
 import EditNameDialog from "../components/dialogs/EditNameDialog";
 import ConfirmationDialog from "../components/dialogs/ConfirmationDialog";
@@ -50,7 +50,7 @@ function addRuuviLink(text) {
     if (splitted.length === 1) return text;
     var out = [<span>{splitted[0]}</span>]
     for (var i = 1; i < splitted.length; i++) {
-        out.push(<Link href="https://ruuvi.com" isExternal color="primary">ruuvi.com</Link>)
+        out.push(<Link href="https://ruuvi.com" target="_blank" rel="noopener noreferrer" color="primary">ruuvi.com</Link>)
         out.push(<span>{splitted[i]}</span>);
     }
     return out;
@@ -98,6 +98,8 @@ function Dashboard(props) {
     const [order, setOrder] = useState(getOrder);
     const [orderSyncTick, setOrderSyncTick] = useState(0);
     const [disableAdaptiveLayout, setDisableAdaptiveLayout] = useState(Store.getDashboardDisableAdaptiveLayout());
+    // v3 dropped <Show breakpoint>; the search box is full width on narrow screens
+    const [isWideSearch] = useMediaQuery(["(min-width: 800px)"], { ssr: false });
 
     const isUnmountedRef = useRef(false);
     const fetchInProgressRef = useRef(false);
@@ -384,10 +386,45 @@ function Dashboard(props) {
     </>
 
     const renderSearch = width => (
-        <InputGroup width={width}>
-            <InputRightElement className="buttonSideIcon" style={{ cursor: search ? "pointer" : undefined }} onClick={() => setSearch("")}>
-                {search ? <CloseIcon /> : <SearchIcon />}
-            </InputRightElement>
+        <InputGroup
+            // v3's InputGroup is a Group, which defaults to align-items:center
+            // and passes width as a prop (so `undefined` clobbers its own
+            // "full"). v2's InputGroup was a plain flex box at 100% width.
+            alignItems="stretch"
+            width={width ?? "full"}
+            // v2's InputRightElement was a square the height of the input, sat
+            // at its top-right corner, with the input's own 16px font size and
+            // no padding — so the icon ended up centred in that square. v3's
+            // element is 14px text with 12px padding and no width of its own,
+            // and it cannot size itself off `--input-height`: that variable is
+            // set on the <input>, which is its sibling, not its parent.
+            endElementProps={{
+                onClick: () => setSearch(""),
+                style: { cursor: search ? "pointer" : undefined },
+                width: "10",
+                height: "10",
+                top: "0",
+                padding: 0,
+                fontSize: "md",
+            }}
+            // `buttonSideIcon` sits on a child, not on the element itself:
+            // v3's InputElement sets `color: fg.muted`, and recipe styles are
+            // in a later cascade layer than globalCss, so the class would lose.
+            endElement={
+                <span
+                    className="buttonSideIcon"
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "100%",
+                        height: "100%",
+                    }}
+                >
+                    {search ? <CloseIcon /> : <SearchIcon />}
+                </span>
+            }
+        >
             <Input placeholder={t("sensor_search_placeholder")}
                 className="searchInput"
                 borderRadius={5}
@@ -459,12 +496,7 @@ function Dashboard(props) {
                                 {sensors.length !== 0 &&
                                     <div style={{ paddingTop: 26 }}>
                                         <Flex flexFlow={"row wrap"} justifyContent={"flex-end"} gap={2}>
-                                            <Show breakpoint='(max-width: 799px)'>
-                                                {renderSearch(undefined)}
-                                            </Show>
-                                            <Show breakpoint='(min-width: 800px)'>
-                                                {renderSearch("300px")}
-                                            </Show>
+                                            {renderSearch(isWideSearch ? "300px" : undefined)}
                                             {dropdowns}
                                         </Flex>
                                     </div>
