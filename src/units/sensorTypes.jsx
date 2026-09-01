@@ -120,10 +120,12 @@ const sensorTypes = {
             }
         ],
         value: humidityToUserFormat,
-        valueWithUnit: (value, unitKey, temperature) => {
-            const stored = readSettings();
+        // `temperatureUnit` (C/F/K) pins the dewpoint unit; otherwise the
+        // stored temperature setting applies.
+        valueWithUnit: (value, unitKey, temperature, temperatureUnit) => {
             const settings = { UNIT_HUMIDITY: unitKey };
-            if (stored.UNIT_TEMPERATURE) settings.UNIT_TEMPERATURE = stored.UNIT_TEMPERATURE;
+            const tempUnit = temperatureUnit || readSettings().UNIT_TEMPERATURE;
+            if (tempUnit) settings.UNIT_TEMPERATURE = tempUnit;
             return humidityToUserFormat(value, temperature, settings);
         },
         decimals: 2

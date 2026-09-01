@@ -12,7 +12,7 @@ import { hasAlertBeenHit } from "./alertHelper";
 import { getTimestamp } from "../TimeHelper";
 import { ORDERED_VISIBILITY_CODES, visibilityFromCloudToWeb } from "./cloudTranslator";
 
-function processData(data, t) {
+export function processData(data, t) {
     // Determine available sensor types based on data format
     const availableSensorTypes = ["temperature", "humidity", "pressure", "rssi", "accelerationX", "accelerationY", "accelerationZ", "battery", "movementCounter", "measurementSequenceNumber"]
 
@@ -47,6 +47,28 @@ function processData(data, t) {
     const addedColumns = new Set()
     const addedSensorTypes = new Set()
 
+    // Dewpoint is exported in every temperature unit (like the mobile apps),
+    // not only in the globally selected one.
+    const DEWPOINT_TEMPERATURE_UNITS = ["C", "F", "K"]
+
+    const addColumn = (sensorType, unitKey) => {
+        const columnKey = `${sensorType}_${unitKey}`
+        if (addedColumns.has(columnKey)) return
+        addedColumns.add(columnKey)
+
+        if (sensorType === "humidity" && unitKey === "2") {
+            DEWPOINT_TEMPERATURE_UNITS.forEach(temperatureUnit => {
+                const helper = getUnitHelper(sensorType, true, unitKey)
+                helper.unit = getUnitHelper("temperature", true, temperatureUnit).unit
+                columnDefs.push({ sensorType, unitKey, temperatureUnit, helper })
+            })
+            return
+        }
+
+        const helper = unitKey === null ? getUnitHelper(sensorType, true) : getUnitHelper(sensorType, true, unitKey)
+        columnDefs.push({ sensorType, unitKey, helper })
+    }
+
     // Process visibility codes in order
     ORDERED_VISIBILITY_CODES.forEach(cloudCode => {
         const mapping = visibilityFromCloudToWeb(cloudCode)
@@ -57,11 +79,6 @@ function processData(data, t) {
         // Skip if sensor doesn't have this type
         if (!availableSensorTypes.includes(sensorType)) return
 
-        // Create unique key for this column
-        const columnKey = `${sensorType}_${unitKey}`
-        if (addedColumns.has(columnKey)) return
-        addedColumns.add(columnKey)
-
         // Track that we've seen this sensor type
         const baseHelper = getUnitHelper(sensorType, true)
         if (!baseHelper.units || baseHelper.units.length === 0) {
@@ -69,13 +86,7 @@ function processData(data, t) {
             addedSensorTypes.add(sensorType)
         }
 
-        // Get the helper for this specific unit variant
-        const helper = getUnitHelper(sensorType, true, unitKey)
-        columnDefs.push({
-            sensorType,
-            unitKey: unitKey || null,
-            helper
-        })
+        addColumn(sensorType, unitKey || null)
     })
 
     // Add any remaining sensor types not covered by visibility codes
@@ -85,32 +96,11 @@ function processData(data, t) {
 
         const baseHelper = getUnitHelper(sensorType, true)
 
-        // Check if we need to add this type
         if (baseHelper.units && baseHelper.units.length > 0) {
             // For types with multiple units, check each variant
-            baseHelper.units.forEach(unitDef => {
-                const columnKey = `${sensorType}_${unitDef.cloudStoreKey}`
-                if (!addedColumns.has(columnKey)) {
-                    addedColumns.add(columnKey)
-                    const helper = getUnitHelper(sensorType, true, unitDef.cloudStoreKey)
-                    columnDefs.push({
-                        sensorType,
-                        unitKey: unitDef.cloudStoreKey,
-                        helper
-                    })
-                }
-            })
+            baseHelper.units.forEach(unitDef => addColumn(sensorType, unitDef.cloudStoreKey))
         } else {
-            // Single unit type
-            const columnKey = `${sensorType}_null`
-            if (!addedColumns.has(columnKey)) {
-                addedColumns.add(columnKey)
-                columnDefs.push({
-                    sensorType,
-                    unitKey: null,
-                    helper: baseHelper
-                })
-            }
+            addColumn(sensorType, null)
         }
     })
 
@@ -138,7 +128,7 @@ function processData(data, t) {
             if (colDef.unitKey !== null && helper.valueWithUnit) {
                 // Use valueWithUnit for types with multiple units
                 if (sensorType === "humidity") {
-                    val = helper.valueWithUnit(rawValue, colDef.unitKey, x.parsed.temperature)
+                    val = helper.valueWithUnit(rawValue, colDef.unitKey, x.parsed.temperature, colDef.temperatureUnit)
                 } else {
                     val = helper.valueWithUnit(rawValue, colDef.unitKey)
                 }
