@@ -53,13 +53,26 @@ const PASCALS_PER_UNIT = {
     "3": 3386.388666
 };
 
+const RESOLUTION_DECIMALS_PER_UNIT = {
+    "0": 0,
+    "1": 2,
+    "2": 3,
+    "3": 3
+};
+
+function pressureUnitKey(settings) {
+    const key = settings.UNIT_PRESSURE;
+    return PASCALS_PER_UNIT[key] === undefined ? "1" : key;
+}
+
 function pascalsPerUnit(settings) {
-    return PASCALS_PER_UNIT[settings.UNIT_PRESSURE] ?? PASCALS_PER_UNIT["1"];
+    return PASCALS_PER_UNIT[pressureUnitKey(settings)];
 }
 
 export function pressureToUserFormat(pressure, settings) {
     if (!settings) settings = readSettings();
-    return round(pressure / pascalsPerUnit(settings), 2);
+    const unitKey = pressureUnitKey(settings);
+    return round(pressure / PASCALS_PER_UNIT[unitKey], RESOLUTION_DECIMALS_PER_UNIT[unitKey]);
 }
 
 export function pressureFromUserFormat(pressure, settings) {

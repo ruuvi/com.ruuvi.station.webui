@@ -102,8 +102,32 @@ describe("pressureToUserFormat / pressureFromUserFormat", () => {
     });
 
     it("converts inHg", () => {
-        expect(pressureToUserFormat(101325, { UNIT_PRESSURE: "3" })).toBe(29.92);
+        expect(pressureToUserFormat(101325, { UNIT_PRESSURE: "3" })).toBe(29.921);
         expect(pressureFromUserFormat(29.92, { UNIT_PRESSURE: "3" })).toBe(101320.75);
+    });
+
+    it.each([
+        ["Pa", "0"],
+        ["hPa", "1"],
+        ["mmHg", "2"],
+    ])("keeps 1 Pa steps distinct in %s", (_, UNIT_PRESSURE) => {
+        const settings = { UNIT_PRESSURE };
+        const converted = [];
+        for (let pa = 101300; pa <= 101400; pa++) {
+            converted.push(pressureToUserFormat(pa, settings));
+        }
+        expect(new Set(converted).size).toBe(converted.length);
+    });
+
+    it("keeps inHg at 3 decimals, ~3.4 Pa steps", () => {
+        expect(pressureToUserFormat(101326, { UNIT_PRESSURE: "3" })).toBe(29.922);
+        expect(pressureToUserFormat(101330, { UNIT_PRESSURE: "3" })).toBe(29.923);
+        expect(pressureToUserFormat(101325, { UNIT_PRESSURE: "3" }))
+            .not.toBe(pressureToUserFormat(101335, { UNIT_PRESSURE: "3" }));
+    });
+
+    it("rounds mmHg to 3 decimals", () => {
+        expect(pressureToUserFormat(101326, { UNIT_PRESSURE: "2" })).toBe(760.008);
     });
 });
 
