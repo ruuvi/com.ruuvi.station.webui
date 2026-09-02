@@ -3,7 +3,7 @@ import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
 import parse from "../decoder/parser";
 import Sensor from "./Sensor";
-import { Box, Spinner, Text } from "@chakra-ui/react";
+import { Box, Spinner, Text, Button } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import pjson from "../../package.json";
@@ -73,22 +73,70 @@ function PublicSensor() {
         return () => { cancelled = true; clearInterval(intervalId); };
     }, [id]);
 
+    useEffect(() => {
+        if (!sensor) return;
+
+        const previousTitle = document.title;
+        const sensorName = sensor.name || t("unnamed_sensor");
+
+        const latest = sensor.measurements?.[0]?.parsed;
+        let title = `${sensorName} | Ruuvi Station`;
+
+        if (latest) {
+            const parts = [];
+            if (latest.temperature !== undefined) parts.push(`${Number(latest.temperature).toFixed(1)}°C`);
+            if (latest.humidity !== undefined) parts.push(`${Number(latest.humidity).toFixed(1)}%`);
+            if (latest.pressure !== undefined) parts.push(`${Math.round(Number(latest.pressure) / 100)} hPa`);
+            if (parts.length > 0) {
+                title = `${sensorName} (${parts.slice(0, 2).join(", ")}) | Ruuvi Station`;
+            }
+        }
+
+        document.title = title;
+
+        return () => {
+            document.title = previousTitle;
+        };
+    }, [sensor, t]);
+
     if (errorKey) {
-        return <Box style={{ margin: 64 }} textAlign="center">
-            <Text fontFamily="mulish" fontSize="lg">{t(errorKey)}</Text>
-        </Box>;
+        return (
+            <Box maxW="500px" mx="auto" my={16} p={8} textAlign="center">
+                <Text fontFamily="mulish" fontSize="xl" fontWeight="bold" mb={2}>
+                    {t("error")}
+                </Text>
+                <Text fontFamily="mulish" fontSize="md" color="gray.500" mb={6}>
+                    {t(errorKey)}
+                </Text>
+                <Button onClick={() => window.location.href = "/"} colorPalette="ruuvi">
+                    {t("login_to_ruuvi_station")}
+                </Button>
+            </Box>
+        );
     }
 
     if (loading && !sensor) {
-        return <center style={{ margin: 64 }}>
-            <Spinner size="xl" />
-        </center>;
+        return (
+            <center style={{ margin: 96 }}>
+                <Spinner size="xl" />
+            </center>
+        );
     }
 
     if (!sensor) {
-        return <Box style={{ margin: 64 }} textAlign="center">
-            <Text fontFamily="mulish" fontSize="lg">{t("UserApiError.ER_SENSOR_NOT_FOUND")}</Text>
-        </Box>;
+        return (
+            <Box maxW="500px" mx="auto" my={16} p={8} textAlign="center">
+                <Text fontFamily="mulish" fontSize="xl" fontWeight="bold" mb={2}>
+                    {t("UserApiError.ER_SENSOR_NOT_FOUND")}
+                </Text>
+                <Text fontFamily="mulish" fontSize="md" color="gray.500" mb={6}>
+                    {t(errorKey || "network_error")}
+                </Text>
+                <Button onClick={() => window.location.href = "/"} colorPalette="ruuvi">
+                    {t("login_to_ruuvi_station")}
+                </Button>
+            </Box>
+        );
     }
 
     return <Sensor sensor={sensor} isPublic />;
