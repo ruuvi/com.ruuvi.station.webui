@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     Button,
     Switch,
@@ -13,6 +13,7 @@ import { MdContentCopy, MdCheck, MdFileDownload } from "react-icons/md";
 import NetworkApi from "../../NetworkApi";
 import notify from "../../utils/notify";
 import RDialog from "./RDialog";
+import { publicPathPrefix } from "../../utils/env";
 
 const PublicSensorDialog = ({ open, onClose, t, sensor, updateSensor }) => {
     const [isPublic, setIsPublic] = useState(false);
@@ -20,13 +21,19 @@ const PublicSensorDialog = ({ open, onClose, t, sensor, updateSensor }) => {
     const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
     const [copied, setCopied] = useState(false);
 
+    const sensorRef = useRef(sensor);
+    sensorRef.current = sensor;
+
+    // sync only on open; the dashboard poll replaces `sensor` every cycle
     useEffect(() => {
-        if (open) setIsPublic(!!sensor?.public);
-    }, [open, sensor]);
+        if (open) {
+            setIsPublic(!!sensorRef.current?.public);
+            setSaving(false);
+        }
+    }, [open]);
 
     // the link must target the environment the sensor was made public in
-    const publicPath = new NetworkApi().isStaging() ? "/public-dev" : "/public";
-    const publicUrl = `${window.location.origin}${publicPath}/${sensor?.sensor}`;
+    const publicUrl = `${window.location.origin}${publicPathPrefix(new NetworkApi().isStaging())}/${sensor?.sensor}`;
 
     useEffect(() => {
         let active = true;
@@ -52,11 +59,15 @@ const PublicSensorDialog = ({ open, onClose, t, sensor, updateSensor }) => {
             setSaving(false);
             if (resp.result === "success") {
                 notify.success(t("successfully_saved"));
-                if (updateSensor) updateSensor({ ...sensor, public: value });
+                if (updateSensor) updateSensor({ ...sensorRef.current, public: value });
             } else {
                 setIsPublic(!value);
                 notify.error(t(`UserApiError.${resp.code}`));
             }
+        }, () => {
+            setSaving(false);
+            setIsPublic(!value);
+            notify.error(t("internet_connection_problem"));
         });
     };
 

@@ -192,7 +192,7 @@ function Sensor(props) {
             const dataMode = "mixed";
             const thisFrom = fromRef.current;
 
-            async function load(until, initialLoad) {
+            async function loadPage(until, initialLoad) {
                 isLoadingRef.current = true;
 
                 let since = parseInt((new Date().getTime() / 1000) - 60 * 60 * fromRef.current);
@@ -216,7 +216,7 @@ function Sensor(props) {
 
                 const resp = await new NetworkApi().getAsync(
                     currentSensor.sensor, since, until,
-                    { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize }
+                    { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize, auth: !isPublic }
                 );
                 isLoadingRef.current = false;
 
@@ -264,8 +264,18 @@ function Sensor(props) {
                 }
             }
 
+            // pages aren't awaited, so catch here or the spinner never clears
+            function load(until, initialLoad) {
+                loadPage(until, initialLoad).catch(onLoadError);
+            }
+
             load(null, dataRef.current === null || showLoading);
         } catch (e) {
+            onLoadError(e);
+        }
+
+        function onLoadError(e) {
+            isLoadingRef.current = false;
             notify.error(propsRef.current.t("internet_connection_problem"));
             logger.error("err", e);
             setLoading(false);

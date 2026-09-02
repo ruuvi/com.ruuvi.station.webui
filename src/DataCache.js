@@ -2,7 +2,7 @@ import * as localForage from "localforage";
 import logger from "./utils/logger";
 import { isStagingEnv } from "./utils/env";
 
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 // Staging data is cached under separate keys so it never mixes with
 // production data for the same sensor (e.g. via /public-dev/ pages).
