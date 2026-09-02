@@ -109,7 +109,14 @@
     function getUserKey() {
       return isStaging() ? "staging_user" : "user"
     }
-    if (!isStaging() && !getUser()) {
+    // Public sensor pages (/public/ and /public-dev/) are available without
+    // signing in, so they must never be redirected to the login page or have
+    // their local storage cleared.
+    function isPublicRoute() {
+      let path = window.location.pathname
+      return path.startsWith("/public/") || path.startsWith("/public-dev/")
+    }
+    if (!isPublicRoute() && !isStaging() && !getUser()) {
       localStorage.removeItem(getUserKey())
       let domain = ".ruuvi.com"
       document.cookie = `station_status=signedIn;domain=${domain};Max-Age=-99999999`
