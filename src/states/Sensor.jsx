@@ -425,13 +425,15 @@ function Sensor(props) {
     const graphCtrl = () => (
         <>
             <ZoomInfo />
-            <ExportMenu buttonText={uppercaseFirst(t("export"))} enablePDF={sensorSubscription.pdfExportAllowed} onClick={val => {
-                switch (val) {
-                    case "XLSX": exportXLSXHandler(); break;
-                    case "PDF": exportPDFHandler(); break;
-                    default: exportCSVHandler();
-                }
-            }} />
+            {!isPublic && (
+                <ExportMenu buttonText={uppercaseFirst(t("export"))} enablePDF={sensorSubscription.pdfExportAllowed} onClick={val => {
+                    switch (val) {
+                        case "XLSX": exportXLSXHandler(); break;
+                        case "PDF": exportPDFHandler(); break;
+                        default: exportCSVHandler();
+                    }
+                }} />
+            )}
             <DurationPicker value={from} showMaxHours={sensor.subscription.maxHistoryDays * 24} onChange={v => updateFrom(v)} />
         </>
     );
@@ -461,7 +463,7 @@ function Sensor(props) {
 
     return (
         <Box>
-            <Box minHeight={1500}>
+            <Box minHeight={isPublic ? "auto" : 1500} pb={isPublic ? 8 : 0}>
                 <Box overflow="hidden" pt={{ base: "5px", md: "35px" }} backgroundPosition="center" paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
                     <SensorHeader
                         sensor={sensor}

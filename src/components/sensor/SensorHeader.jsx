@@ -3,6 +3,7 @@ import {
     Box,
     Avatar,
     Spinner,
+    Badge,
 } from "@chakra-ui/react"
 import DurationText from "../common/DurationText";
 import NavClose from "../common/NavClose";
@@ -40,14 +41,23 @@ function SensorHeader(props) {
                 <div className="pageTitle" style={{ textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden", }}>
                     {props.sensor.name}
                 </div>
-                <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }} className="subtitle">
+                <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic", display: "flex", alignItems: "center", gap: 6 }} className="subtitle">
+                    {props.isPublic && <span className="live-indicator-dot" />}
                     <DurationText from={props.lastUpdateTime} t={props.t} isAlerting={props.isAlertTriggered("offline")} />
                 </div>
             </span>
-            {!props.isPublic && <span style={{ minWidth: 135, justifyContent: "flex-end" }}>
-                <NavPrevNext prev={props.prev} next={props.next} />
-                <NavClose />
-            </span>}
+            {props.isPublic ? (
+                <span style={{ minWidth: 135, display: "flex", justifyContent: "flex-end", alignItems: "flex-start", paddingTop: 4 }}>
+                    <Badge colorPalette="teal" variant="subtle" size="sm" px={2.5} py={1} borderRadius="full">
+                        {props.t("public_sensor")}
+                    </Badge>
+                </span>
+            ) : (
+                <span style={{ minWidth: 135, justifyContent: "flex-end" }}>
+                    <NavPrevNext prev={props.prev} next={props.next} />
+                    <NavClose />
+                </span>
+            )}
         </div>
     } else {
         return <center>
@@ -84,9 +94,17 @@ function SensorHeader(props) {
                                 }
                             </td>
                             <td width="33%" align="right" style={{ verticalAlign: "top" }}>
-                                {!props.isPublic && <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
-                                    <NavPrevNext prev={props.prev} next={props.next} />
-                                </span>}
+                                {!props.isPublic ? (
+                                    <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
+                                        <NavPrevNext prev={props.prev} next={props.next} />
+                                    </span>
+                                ) : (
+                                    <span style={{ width: "100%", textAlign: "right", display: "inline-block", paddingTop: 8 }}>
+                                        <Badge colorPalette="teal" variant="subtle" size="xs" px={2} py={0.5} borderRadius="full">
+                                            {props.t("public_sensor")}
+                                        </Badge>
+                                    </span>
+                                )}
                             </td>
                         </tr>
                     </tbody>
@@ -95,7 +113,8 @@ function SensorHeader(props) {
                     <div className="mobilePageTitle">
                         {props.sensor.name}
                     </div>
-                    <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic" }} className="subtitle">
+                    <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic", display: "inline-flex", alignItems: "center", gap: 6 }} className="subtitle">
+                        {props.isPublic && <span className="live-indicator-dot" />}
                         <DurationText from={props.lastUpdateTime} t={props.t} isAlerting={props.isAlertTriggered("offline")} />
                     </div>
                 </div>

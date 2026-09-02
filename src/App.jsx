@@ -18,7 +18,7 @@ import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
 import { IoClose } from "react-icons/io5";
-import { MdOutlineNightlight } from "react-icons/md";
+import { MdOutlineNightlight, MdFullscreen, MdFullscreenExit } from "react-icons/md";
 import { SunIcon } from "./components/ui/chakra-icons";
 import cache from "./DataCache";
 import { useTranslation } from "react-i18next";
@@ -121,6 +121,50 @@ function Logo(props) {
       </span>
     </>
   )
+}
+
+function PublicTopBar() {
+  const { t } = useTranslation();
+  const [isFullscreen, setIsFullscreen] = React.useState(!!document.fullscreenElement);
+
+  React.useEffect(() => {
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handleFsChange);
+    return () => document.removeEventListener("fullscreenchange", handleFsChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  };
+
+  return (
+    <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px" justifyContent="space-between" width="100%">
+      <HStack gap={2}>
+        <Logo subscription="" />
+        {new NetworkApi().isStaging() && (
+          <Text fontSize="sm" opacity={0.7}>
+            (staging)
+          </Text>
+        )}
+      </HStack>
+      <HStack gap={2}>
+        <IconButton
+          aria-label={t("fullscreen")}
+          variant="ghost"
+          size="sm"
+          onClick={toggleFullscreen}
+          title={isFullscreen ? t("exit_fullscreen") : t("fullscreen")}
+        >
+          {isFullscreen ? <MdFullscreenExit size={20} /> : <MdFullscreen size={20} />}
+        </IconButton>
+        <ColorModeSwitch />
+      </HStack>
+    </HStack>
+  );
 }
 
 function loadInitalSettings(forceUpdate, browserLang) {
@@ -283,12 +327,7 @@ export default function App() {
     return <Provider>
       <BrowserRouter>
         {isPublicRoute ? <>
-          <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
-            <Logo subscription="" />
-            <Text>
-              {new NetworkApi().isStaging() ? "(staging)" : ""}
-            </Text>
-          </HStack>
+          <PublicTopBar />
           <Routes>
             <Route path="/public/:id" element={<PublicSensor />} />
             <Route path="/public-dev/:id" element={<PublicSensor />} />
@@ -315,12 +354,9 @@ export default function App() {
   return (
     <Provider>
       <BrowserRouter basename={"/"}>
-        {isPublicRoute ? <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
-          <Logo subscription="" />
-          <Text>
-            {new NetworkApi().isStaging() ? "(staging)" : ""}
-          </Text>
-        </HStack> : hideTopBar ? null : <>
+        {isPublicRoute ? (
+          <PublicTopBar />
+        ) : hideTopBar ? null : <>
           <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
             <Logo subscription={subscription?.subscriptionName || ""} />
             <Text>
