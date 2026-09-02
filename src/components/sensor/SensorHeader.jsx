@@ -37,7 +37,7 @@ function SensorHeader(props) {
                     </label>
                 </>
             }
-            <span style={{ width: props.isPublic ? "calc(100% - 96px - 18px)" : "calc(100% - 250px - 18px)", marginLeft: 18 }}>
+            <span style={{ width: "calc(100% - 96px - 18px - 135px)", marginLeft: 18 }}>
                 <div className="pageTitle" style={{ textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden", }}>
                     {props.sensor.name}
                 </div>
@@ -47,7 +47,7 @@ function SensorHeader(props) {
                 </div>
             </span>
             {props.isPublic ? (
-                <span style={{ minWidth: 135, display: "flex", justifyContent: "flex-end", alignItems: "flex-start", paddingTop: 4 }}>
+                <span style={{ minWidth: 135, flexShrink: 0, display: "flex", justifyContent: "flex-end", alignItems: "flex-start", paddingTop: 4 }}>
                     <Badge colorPalette="teal" variant="subtle" size="sm" px={2.5} py={1} borderRadius="full">
                         {props.t("public_sensor")}
                     </Badge>

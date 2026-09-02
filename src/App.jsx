@@ -30,6 +30,7 @@ import MyAccountModal from "./components/dialogs/MyAccountModal";
 import SettingsMenu from "./components/menus/SettingsMenu";
 import MobileMenu from "./components/menus/MobileMenu";
 import detectForceRefresh from "./utils/detectForceRefresh";
+import { isPublicRoute as isPublicRoutePath } from "./utils/env";
 const ShareCenter = React.lazy(() => import("./states/ShareCenter"));
 const SensorCompare = React.lazy(() => import("./states/SensorCompare"));
 const SignIn = React.lazy(() => import("./states/SignIn"));
@@ -194,7 +195,8 @@ function loadInitalSettings(forceUpdate, browserLang) {
         forceUpdate();
       }
     } else if (settings.result === "error" && settings.code === "ER_UNAUTHORIZED") {
-      logout(forceUpdate)
+      if (isPublicRoutePath()) new NetworkApi().removeToken()
+      else logout(forceUpdate)
     }
   })
 }
@@ -322,7 +324,7 @@ export default function App() {
 
   // public sensor pages have no plan and no menus in the header,
   // and are available without signing in
-  let isPublicRoute = window.location.pathname.startsWith("/public/") || window.location.pathname.startsWith("/public-dev/")
+  let isPublicRoute = isPublicRoutePath()
 
   if (!user) {
     //goToLoginPage()

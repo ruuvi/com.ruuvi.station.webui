@@ -2,7 +2,7 @@ import * as localForage from "localforage";
 import logger from "./utils/logger";
 import { isStagingEnv } from "./utils/env";
 
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 let initPromise;
 
 function trackInitialization(promise) {

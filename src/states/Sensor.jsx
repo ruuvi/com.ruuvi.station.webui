@@ -229,7 +229,7 @@ function Sensor(props) {
 
                 const resp = await new NetworkApi().getAsync(
                     currentSensor.sensor, since, until,
-                    { mode: "mixed", limit: pjson.settings.dataFetchPaginationSize },
+                    { mode: "mixed", limit: pjson.settings.dataFetchPaginationSize, auth: !isPublic },
                     controller.signal
                 );
                 // Some async operations may finish despite cancellation.

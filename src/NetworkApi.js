@@ -3,7 +3,7 @@ import cache from './DataCache';
 import parse from './decoder/parser';
 import { logout } from './utils/loginUtils';
 import logger from './utils/logger';
-import { isStagingEnv } from './utils/env';
+import { isStagingEnv, isPublicRoute } from './utils/env';
 
 let GET_ALL_SENSORS_CACHE = { ts: 0, data: null };
 
@@ -53,10 +53,10 @@ class NetworkApi {
             }
             if (body !== undefined) options.body = JSON.stringify(body);
             const response = await fetch(this.url + path, options);
-            // Only force a logout for an expired session; unauthenticated requests
-            // (e.g. public sensor pages) report the error to the caller instead.
+            // Only force a logout for an expired session; public pages just drop the stale token.
             if (auth && response.status === 401 && this.getUser()) {
-                logout()
+                if (isPublicRoute()) this.removeToken()
+                else logout()
                 throw new Error("Unauthorized")
             }
             if (strict && !response.ok) throw response;
@@ -127,6 +127,7 @@ class NetworkApi {
         };
         checkAborted();
         const mode = settings?.mode || "mixed";
+        const auth = settings?.auth !== false;
         const limit = settings?.limit || 100000;
         const paginationSize = pjson.settings.dataFetchPaginationSize;
 
@@ -160,7 +161,7 @@ class NetworkApi {
 
         let respData;
         try {
-            respData = await this.request(`/get${query}`, { timeout: 30000, signal });
+            respData = await this.request(`/get${query}`, { timeout: 30000, signal, auth });
         } catch (error) {
             checkAborted();
             logger.error("Error fetching data from API", error);
@@ -174,9 +175,7 @@ class NetworkApi {
 
         // Cache in the background (don't await — avoids Safari IndexedDB
         // hangs blocking the return of already-fetched data)
-        if (respData.result === "success") {
-            cache.saveSegment(mac, mode, until, respData.data).catch(() => {});
-        }
+        cache.saveSegment(mac, mode, until, respData.data).catch(() => {});
 
         // If fetched data is smaller than the pagination size, indicate that fetching should stop
         if (closestCache && respData.data.measurements.length < paginationSize) {
@@ -219,8 +218,8 @@ class NetworkApi {
     update(mac, name, success) {
         this.callback(this.request("/update", { method: 'POST', body: { sensor: mac, name }, strict: true }), success);
     }
-    updateSensorData(mac, data, success) {
-        this.callback(this.request("/update", { method: 'POST', body: { ...data, sensor: mac } }), success);
+    updateSensorData(mac, data, success, fail) {
+        this.callback(this.request("/update", { method: 'POST', body: { ...data, sensor: mac } }), success, fail);
     }
     async claim(sensor, name) {
         return this.request("/claim", { method: 'POST', body: { sensor, name } });

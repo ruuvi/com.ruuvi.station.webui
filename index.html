@@ -109,12 +109,9 @@
     function getUserKey() {
       return isStaging() ? "staging_user" : "user"
     }
-    // Public sensor pages (/public/ and /public-dev/) are available without
-    // signing in, so they must never be redirected to the login page or have
-    // their local storage cleared.
+    // public sensor pages work without signing in; keep in sync with src/utils/env.js
     function isPublicRoute() {
-      let path = window.location.pathname
-      return path.startsWith("/public/") || path.startsWith("/public-dev/")
+      return /^\/public(-dev)?\/[^/]+\/?$/.test(window.location.pathname)
     }
     if (!isPublicRoute() && !isStaging() && !getUser()) {
       localStorage.removeItem(getUserKey())
