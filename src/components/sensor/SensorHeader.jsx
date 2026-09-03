@@ -9,6 +9,7 @@ import DurationText from "../common/DurationText";
 import NavClose from "../common/NavClose";
 import NavPrevNext from "../common/NavPrevNext";
 import useIsLargeDisplay from "../hooks/useIsLargeDisplay";
+import { hyphenateSensorName } from "../../TextHelper";
 
 function SensorHeader(props) {
     const isLargeDisplay = useIsLargeDisplay();
@@ -109,9 +110,18 @@ function SensorHeader(props) {
                         </tr>
                     </tbody>
                 </table>
-                <div style={{ width: "65%", marginTop: "5px" }}>
-                    <div className="mobilePageTitle">
-                        {props.sensor.name}
+                <div style={{ width: props.isPublic ? "100%" : "65%", marginTop: "5px", paddingLeft: props.isPublic ? 8 : undefined, paddingRight: props.isPublic ? 8 : undefined }}>
+                    <div
+                        className="mobilePageTitle"
+                        style={{
+                            overflowWrap: "break-word",
+                            wordBreak: "break-word",
+                            hyphens: "auto",
+                            WebkitHyphens: "auto",
+                            msHyphens: "auto",
+                        }}
+                    >
+                        {hyphenateSensorName(props.sensor.name)}
                     </div>
                     <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic", display: "inline-flex", alignItems: "center", gap: 6 }} className="subtitle">
                         {props.isPublic && <span className="live-indicator-dot" />}
