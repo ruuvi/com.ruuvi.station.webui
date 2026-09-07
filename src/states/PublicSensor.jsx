@@ -108,9 +108,11 @@ function PublicSensor() {
                 <Text fontFamily="mulish" fontSize="md" color="gray.500" mb={6}>
                     {t(errorKey)}
                 </Text>
-                <Button onClick={() => window.location.href = "/"} colorPalette="ruuvi">
-                    {t("login_to_ruuvi_station")}
-                </Button>
+                {FINAL_ERROR_CODES.some(code => errorKey === `UserApiError.${code}`) && (
+                    <Button onClick={() => window.location.href = "/"} colorPalette="ruuvi">
+                        {t("login_to_ruuvi_station")}
+                    </Button>
+                )}
             </Box>
         );
     }
