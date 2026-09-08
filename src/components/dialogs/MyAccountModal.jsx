@@ -1,9 +1,10 @@
-import { Accordion, Box, Button, PinInput } from "@chakra-ui/react";
+import { Accordion, Box, Button, PinInput, Separator } from "@chakra-ui/react";
 import { ProgressBar } from "../ui/progress";
 import { useColorModeValue } from "../ui/color-mode";
 import { ChevronDownIcon } from "../ui/chakra-icons";
 import React, { useEffect, useMemo, useState } from "react";
 import { withTranslation } from 'react-i18next';
+import NewsletterConsent from "./NewsletterConsent";
 import NetworkApi from "../../NetworkApi";
 import notify from "../../utils/notify";
 import RDialog from "./RDialog";
@@ -209,6 +210,15 @@ function MyAccountModal(props) {
             <Content>
                 {addLink(t("my_account_change_email"), t("my_account_change_email_link_markup"), t("my_account_change_email_link"))}
             </Content>
+            <Separator mt={6} mb={6} />
+            {props.open && (
+                <>
+                    <Title>{t("communication_channels")}</Title>
+                    <Content>{t("communication_channels_description")}</Content>
+                    <NewsletterConsent t={t} language={i18n.language} />
+                    <Separator mt={6} mb={6} />
+                </>
+            )}
             <Box minHeight="250px" pb={12}>
                 {subscriptions.length < 1 ? (
                     <ProgressBar />

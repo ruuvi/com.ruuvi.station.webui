@@ -35,7 +35,7 @@ class NetworkApi {
     // The backend reports errors as JSON bodies with non-2xx statuses, so
     // by default those are parsed and returned like any other response;
     // `strict` restores the old behavior of throwing the Response instead.
-    async request(path, { method = 'GET', body, signal, timeout, strict, auth = true } = {}) {
+    async request(path, { method = 'GET', body, signal, timeout, strict, auth = true, headers } = {}) {
         const controller = timeout === undefined ? null : new AbortController();
         const onAbort = () => controller.abort(signal.reason);
         let timeoutId;
@@ -46,6 +46,10 @@ class NetworkApi {
         }
         try {
             const options = { ...(auth ? this.authOptions() : {}), method, signal: controller?.signal || signal };
+            if (headers) {
+                options.headers = new Headers(options.headers);
+                new Headers(headers).forEach((value, key) => options.headers.set(key, value));
+            }
             if (body !== undefined) options.body = JSON.stringify(body);
             const response = await fetch(this.url + path, options);
             if (auth && response.status === 401) {
@@ -291,6 +295,37 @@ class NetworkApi {
     }
     async deleteAllSessions() {
         return this.request("/sessions", { method: 'DELETE', strict: true });
+    }
+    async marketingConsentRequest(options = {}) {
+        if (!this.getUser()) throw new Error("Not signed in");
+        const response = await this.request("/marketing-consent", {
+            ...options, strict: true, timeout: 30000,
+            headers: { "Content-Type": "application/json" },
+        });
+        const { data } = response;
+        const statuses = ["subscribed", "unconfirmed", "unsubscribed", "not_found", "bounced", "soft_bounced", "complained"];
+        if (response.result !== "success" || typeof data?.consent !== "boolean" ||
+            !statuses.includes(data.status) || data.consent !== (data.status === "subscribed")) {
+            throw new Error("Invalid marketing consent response");
+        }
+        return response;
+    }
+    async getNewsletterSubscription() {
+        return this.marketingConsentRequest();
+    }
+    async setNewsletterSubscription(consent, language = "en") {
+        if (typeof consent !== "boolean") throw new TypeError("Consent must be a boolean");
+        const languageCode = language.trim().split(/[-_]/)[0].toUpperCase();
+        // Normal settings flows must not bypass double opt-in with silent: true.
+        return this.marketingConsentRequest({
+            method: 'POST',
+            body: {
+                consent,
+                silent: false,
+                joiningSource: "web",
+                language: /^[A-Z]{2}$/.test(languageCode) ? languageCode : "EN",
+            },
+        });
     }
     async requestDelete(email) {
         return this.request("/request-delete", { method: 'POST', body: { email } });
