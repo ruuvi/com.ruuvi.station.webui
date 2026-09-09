@@ -121,6 +121,7 @@ function Sensor(props) {
     const chartRef = useRef(null);
     const latestDataUpdateRef = useRef(null);
     const loadDataRef = useRef(null);
+    const historyControllerRef = useRef(null);
 
     function isAlertTriggered(type) {
         if (type === "movementCounter") type = "movement";
@@ -169,104 +170,106 @@ function Sensor(props) {
         return new Date().getTime();
     }
 
-    async function loadData(showLoading, _clearLast) {
+    async function loadData(showLoading) {
+        // A new sensor/range supersedes the entire previous pagination chain.
+        if (showLoading !== undefined) {
+            historyControllerRef.current?.abort();
+            isLoadingRef.current = false;
+        }
+        if (isLoadingRef.current) return;
+        clearTimeout(latestDataUpdateRef.current);
+
         const currentSensor = propsRef.current.sensor;
         if (currentSensor.subscription.maxHistoryDays === 0) {
-            isLoadingRef.current = false;
+            dataRef.current = null;
+            setData(null);
+            setLoading(false);
             return;
         }
-        clearTimeout(latestDataUpdateRef.current);
-        latestDataUpdateRef.current = setTimeout(() => loadDataRef.current(), 60 * 1000);
 
-        if (isLoadingRef.current) return;
+        const controller = new AbortController();
+        historyControllerRef.current = controller;
+        isLoadingRef.current = true;
+        const rangeFrom = fromRef.current;
+        const rangeTo = toRef.current;
+        const getRangeStart = () => typeof rangeFrom === "object"
+            ? rangeFrom.getTime() / 1000
+            : Math.floor(Date.now() / 1000 - 60 * 60 * rangeFrom);
+        const getRangeEnd = () => Math.floor((rangeTo?.getTime() ?? Date.now()) / 1000);
+        const trimMeasurements = measurements => {
+            const start = getRangeStart();
+            const end = getRangeEnd();
+            return measurements.filter(measurement => measurement.timestamp >= start && measurement.timestamp <= end);
+        };
 
         if (showLoading !== undefined) setLoading(true);
         if (showLoading) {
             dataRef.current = null;
             setData(null);
+        } else if (dataRef.current) {
+            // Prune even when the sensor is offline or the next request fails.
+            const measurements = trimMeasurements(dataRef.current.measurements);
+            if (measurements.length !== dataRef.current.measurements.length) {
+                dataRef.current = { ...dataRef.current, measurements };
+                setData(dataRef.current);
+            }
         }
 
         try {
-            const dataMode = "mixed";
-            const thisFrom = fromRef.current;
-
-            async function load(until, initialLoad) {
-                isLoadingRef.current = true;
-
-                let since = parseInt((new Date().getTime() / 1000) - 60 * 60 * fromRef.current);
-                if (typeof fromRef.current === "object") {
-                    since = fromRef.current.getTime() / 1000;
-                }
-
-                if (!until) {
-                    if (toRef.current) until = Math.floor(toRef.current.getTime() / 1000);
-                    else until = Math.floor(new Date().getTime() / 1000);
-                }
-
+            const initialLoad = dataRef.current === null || showLoading;
+            async function load(until = getRangeEnd()) {
+                if (controller.signal.aborted) return;
+                let since = getRangeStart();
                 if (!initialLoad && dataRef.current?.measurements?.length) {
-                    since = dataRef.current.measurements[0].timestamp + 1;
+                    since = Math.max(since, dataRef.current.measurements[0].timestamp + 1);
                 }
-
-                if (until <= since) {
-                    isLoadingRef.current = false;
-                    return;
-                }
+                if (until <= since) return;
 
                 const resp = await new NetworkApi().getAsync(
                     currentSensor.sensor, since, until,
-                    { mode: dataMode, limit: pjson.settings.dataFetchPaginationSize }
+                    { mode: "mixed", limit: pjson.settings.dataFetchPaginationSize },
+                    controller.signal
                 );
-                isLoadingRef.current = false;
-
-                // stop fetching if time range has changed
-                if (fromRef.current !== thisFrom) return;
+                // Some async operations may finish despite cancellation.
+                if (controller.signal.aborted) return;
 
                 if (resp.result === "success") {
                     if (currentSensor.sensor !== resp.data.sensor) return;
                     const returnedDataLength = resp.data.measurements.length;
-
                     Object.keys(currentSensor).filter(x => x.startsWith("offset")).forEach(x => {
                         resp.data[x] = currentSensor[x];
                     });
-
-                    let d = parse(resp.data);
-                    let stateData = dataRef.current;
-
-                    if (!stateData && !d.nextUp && d.measurements.length === 0) {
-                        dataRef.current = d;
-                        setData(d);
-                        setLoading(false);
-                        return;
-                    }
-
-                    let newData;
-                    if (!stateData) {
-                        newData = d;
-                    } else if (initialLoad && stateData.measurements.length) {
-                        newData = { ...stateData, measurements: [...stateData.measurements, ...d.measurements] };
-                    } else {
-                        newData = { ...stateData, measurements: [...d.measurements, ...stateData.measurements] };
-                    }
-
+                    const d = parse(resp.data);
+                    const stateData = dataRef.current;
+                    const measurements = !stateData ? d.measurements
+                        : initialLoad ? [...stateData.measurements, ...d.measurements]
+                            : [...d.measurements, ...stateData.measurements];
+                    const newData = { ...(stateData || d), measurements: trimMeasurements(measurements) };
                     dataRef.current = newData;
                     setData(newData);
                     setLoading(false);
 
                     if (initialLoad && (d.nextUp || d.fromCache || returnedDataLength >= pjson.settings.dataFetchPaginationSize)) {
                         const nextUntil = d.nextUp || d.measurements[d.measurements.length - 1]?.timestamp;
-                        if (nextUntil) load(nextUntil, initialLoad);
+                        if (nextUntil && nextUntil < until) await load(nextUntil);
                     }
                 } else if (resp.result === "error") {
                     notify.error(propsRef.current.t(`UserApiError.${resp.code}`));
-                    setLoading(false);
                 }
             }
-
-            load(null, dataRef.current === null || showLoading);
+            await load();
         } catch (e) {
-            notify.error(propsRef.current.t("internet_connection_problem"));
-            logger.error("err", e);
-            setLoading(false);
+            if (!controller.signal.aborted) {
+                notify.error(propsRef.current.t("internet_connection_problem"));
+                logger.error("err", e);
+            }
+        } finally {
+            // An old request must not change the new load's state or timer.
+            if (!controller.signal.aborted) {
+                isLoadingRef.current = false;
+                setLoading(false);
+                latestDataUpdateRef.current = setTimeout(() => loadDataRef.current(), 60 * 1000);
+            }
         }
     }
     loadDataRef.current = loadData;
@@ -275,8 +278,9 @@ function Sensor(props) {
     useEffect(() => {
         const queryParams = new URLSearchParams(router.location.search);
         const paramValue = queryParams.get('scrollTo');
+        let scrollTimeout;
         if (paramValue) {
-            setTimeout(() => {
+            scrollTimeout = setTimeout(() => {
                 const targetElement = document.getElementById(paramValue);
                 if (targetElement) {
                     window.scrollTo({ top: targetElement.offsetTop, behavior: 'smooth' });
@@ -286,21 +290,19 @@ function Sensor(props) {
             window.scrollTo(0, 0);
         }
 
-        if (sensor) loadDataRef.current(true);
-
-        return () => {
-            clearTimeout(latestDataUpdateRef.current);
-        };
+        return () => clearTimeout(scrollTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // componentDidUpdate: sensor change detection
+    // One initial load per sensor, with cleanup for all outstanding pages.
     useEffect(() => {
-        setPicture(sensor.picture);
-        isLoadingRef.current = false;
-        loadDataRef.current(true, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [sensor.sensor]);
+        setPicture(propsRef.current.sensor.picture);
+        loadDataRef.current(true);
+        return () => {
+            historyControllerRef.current?.abort();
+            clearTimeout(latestDataUpdateRef.current);
+        };
+    }, [sensor.sensor, sensor.subscription.maxHistoryDays]);
     // document title
     useEffect(() => {
         document.title = "Ruuvi Sensor: " + sensor.name;
