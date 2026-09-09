@@ -394,13 +394,19 @@ function Sensor(props) {
         exportCSV(dataRef.current, sensor.name, t);
     }
 
-    function exportPDFHandler() {
+    async function exportPDFHandler() {
+        if (graphPDFMode) return;
         setGraphPDFMode(true);
         const fromTime = getFrom();
         const toTime = to || new Date().getTime();
-        exportPDF(sensor, dataRef.current, graphData, graphKey, fromTime, toTime, chartRef.current, t, () => {
-            setGraphPDFMode(false);
-        });
+        try {
+            await exportPDF(sensor, dataRef.current, graphData, graphKey, fromTime, toTime, chartRef.current, t, () => {
+                setGraphPDFMode(false);
+            });
+        } catch (error) {
+            logger.error("PDF export failed", error);
+            notify.error(t("something_went_wrong"));
+        }
     }
 
     function exportXLSXHandler() {

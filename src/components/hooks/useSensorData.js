@@ -97,6 +97,7 @@ const useSensorData = (sensor, dataFrom, options = {}) => {
                     controller.signal,
                 );
 
+                if (controller.signal.aborted) return;
                 if (graphData.result === "success") {
                     Object.keys(currentSensor)
                         .filter((key) => key.startsWith("offset"))
@@ -118,7 +119,7 @@ const useSensorData = (sensor, dataFrom, options = {}) => {
                     setErrorFetchingData(true);
                 }
             } catch (error) {
-                if (error.name === "AbortError") return;
+                if (controller.signal.aborted || error.name === "AbortError") return;
                 logger.error("Error fetching graph data:", error);
                 setErrorFetchingData(true);
             } finally {

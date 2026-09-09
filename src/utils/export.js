@@ -1,10 +1,6 @@
 import { getDisplayValue, getUnitHelper, round } from "../UnitHelper";
 import * as XLSX from 'xlsx';
 import { calculateAverage } from "./dataMath";
-import montserratFont from "./fonts/Montserrat";
-import oswaldFont from "./fonts/Oswald";
-import mulishFont from "./fonts/Mulish";
-import jsPDF from "jspdf";
 import ruuviLogo from '../img/pdf/ruuvi-logo.png'
 import checkOK from '../img/pdf/check-02.png'
 import checkNOK from '../img/pdf/check-01.png'
@@ -389,7 +385,24 @@ export function exportXLSX(dataIn, sensorName, t) {
     XLSX.writeFile(wb, exportedFilename);
 }
 
-export function exportPDF(sensor, data, graphData, type, from, to, chartRef, t, done) {
+export async function exportPDF(sensor, data, graphData, type, from, to, chartRef, t, done) {
+    try {
+        await generatePDFReport(sensor, data, graphData, type, from, to, chartRef, t);
+    } finally {
+        done?.();
+    }
+}
+
+let pdfFontsRegistered = false;
+
+async function generatePDFReport(sensor, data, graphData, type, from, to, chartRef, t) {
+    // Keep both jsPDF and its embedded fonts out of the normal page download.
+    const [{ default: jsPDF }, { default: montserratFont }, { default: oswaldFont }, { default: mulishFont }] = await Promise.all([
+        import("jspdf"),
+        import("./fonts/Montserrat"),
+        import("./fonts/Oswald"),
+        import("./fonts/Mulish"),
+    ]);
     let ezdata = [];
     for (let i = 0; i < graphData.length; i++) {
         if (graphData[i].parsed === null) continue
@@ -415,12 +428,16 @@ export function exportPDF(sensor, data, graphData, type, from, to, chartRef, t, 
     const width = 210
     const height = 297
 
-    montserratFont()
-    oswaldFont()
-    mulishFont()
+    if (!pdfFontsRegistered) {
+        montserratFont();
+        oswaldFont();
+        mulishFont();
+        pdfFontsRegistered = true;
+    }
 
-    setTimeout(() => generatePDF(), 500);
-    const generatePDF = () => {
+    // Allow the graph to render in its PDF size and color mode before capture.
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const generatePDF = async () => {
         const doc = new jsPDF();
 
         const logodownsize = 70
@@ -524,12 +541,13 @@ export function exportPDF(sensor, data, graphData, type, from, to, chartRef, t, 
         const pngDataUrl = canvas.toDataURL('image/png');
         const img = new Image();
 
-        img.onload = () => {
-            doc.addImage(img, 'PNG', padding - 1, linePos + 35, width - padding * 2, 75);
-            doc.save(getFilename(sensor.name, "pdf"));
-            done()
-        };
-
-        img.src = pngDataUrl;
-    }
+        await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = () => reject(new Error("Could not load the graph image for PDF export"));
+            img.src = pngDataUrl;
+        });
+        doc.addImage(img, 'PNG', padding - 1, linePos + 35, width - padding * 2, 75);
+        doc.save(getFilename(sensor.name, "pdf"));
+    };
+    await generatePDF();
 }

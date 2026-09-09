@@ -36,17 +36,29 @@ class NetworkApi {
     // by default those are parsed and returned like any other response;
     // `strict` restores the old behavior of throwing the Response instead.
     async request(path, { method = 'GET', body, signal, timeout, strict, auth = true } = {}) {
-        const options = { ...(auth ? this.authOptions() : {}), method };
-        if (body !== undefined) options.body = JSON.stringify(body);
-        const response = timeout !== undefined
-            ? await this.fetchWithTimeout(this.url + path, options, timeout, signal)
-            : await fetch(this.url + path, options);
-        if (auth && response.status === 401) {
-            logout()
-            throw new Error("Unauthorized")
+        const controller = timeout === undefined ? null : new AbortController();
+        const onAbort = () => controller.abort(signal.reason);
+        let timeoutId;
+        if (controller) {
+            timeoutId = setTimeout(() => controller.abort(), timeout);
+            if (signal?.aborted) onAbort();
+            else signal?.addEventListener('abort', onAbort, { once: true });
         }
-        if (strict && !response.ok) throw response;
-        return response.json();
+        try {
+            const options = { ...(auth ? this.authOptions() : {}), method, signal: controller?.signal || signal };
+            if (body !== undefined) options.body = JSON.stringify(body);
+            const response = await fetch(this.url + path, options);
+            if (auth && response.status === 401) {
+                logout()
+                throw new Error("Unauthorized")
+            }
+            if (strict && !response.ok) throw response;
+            // Keep cancellation and the deadline active through body consumption.
+            return await response.json();
+        } finally {
+            clearTimeout(timeoutId);
+            if (controller) signal?.removeEventListener('abort', onAbort);
+        }
     }
     // Bridges a request promise to the older (success, fail) callback style.
     callback(promise, success, fail) {
@@ -102,25 +114,17 @@ class NetworkApi {
         });
         this.callback(promise, success, fail);
     }
-    async fetchWithTimeout(resource, options = {}, timeout = 30000, signal) {
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), timeout);
-        if (signal) {
-            signal.addEventListener('abort', () => controller.abort(), { once: true });
-        }
-        const response = await fetch(resource, {
-            ...options,
-            signal: controller.signal
-        });
-        clearTimeout(id);
-        return response;
-    }
     async getAsync(mac, since, until, settings, signal) {
+        const checkAborted = () => {
+            if (signal?.aborted) throw signal.reason || new DOMException("Aborted", "AbortError");
+        };
+        checkAborted();
         const mode = settings?.mode || "mixed";
         const limit = settings?.limit || 100000;
         const paginationSize = pjson.settings.dataFetchPaginationSize;
 
         const closestCache = await cache.getClosestSegment(mac, mode, since, until);
+        checkAborted();
 
         // Cache fully covers the request
         if (closestCache && closestCache.until === until) {
@@ -151,8 +155,14 @@ class NetworkApi {
         try {
             respData = await this.request(`/get${query}`, { timeout: 30000, signal });
         } catch (error) {
+            checkAborted();
             logger.error("Error fetching data from API", error);
             return { result: "error", message: "Failed to fetch data", error };
+        }
+
+        checkAborted();
+        if (respData.result !== "success" || !respData.data?.measurements) {
+            return respData;
         }
 
         // Cache in the background (don't await — avoids Safari IndexedDB

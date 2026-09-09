@@ -24,14 +24,14 @@ import cache from "./DataCache";
 import { useTranslation } from "react-i18next";
 import Store from "./Store";
 import { logout } from "./utils/loginUtils";
-import ShareCenter from "./states/ShareCenter";
 import AddSensorModal from "./components/dialogs/AddSensorModal";
 import SettingsModal from "./components/dialogs/SettingsModal";
 import MyAccountModal from "./components/dialogs/MyAccountModal";
 import SettingsMenu from "./components/menus/SettingsMenu";
 import MobileMenu from "./components/menus/MobileMenu";
-import SensorCompare from "./states/SensorCompare";
 import detectForceRefresh from "./utils/detectForceRefresh";
+const ShareCenter = React.lazy(() => import("./states/ShareCenter"));
+const SensorCompare = React.lazy(() => import("./states/SensorCompare"));
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
 const UserMenu = React.lazy(() => import("./components/menus/UserMenu"));
@@ -146,7 +146,9 @@ function loadInitalSettings(forceUpdate, browserLang) {
 }
 
 export default function App() {
-  cache.init()
+  useEffect(() => {
+    cache.init().catch(error => logger.error("Could not initialize cache", error));
+  }, []);
   try {
     let cookie = document.cookie;
     if (cookie) {

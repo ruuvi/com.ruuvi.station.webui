@@ -24,6 +24,8 @@ describe("App boot", () => {
         });
 
         const { default: App } = await import("./App");
+        const { default: cache } = await import("./DataCache");
+        const initSpy = vi.spyOn(cache, "init").mockResolvedValue();
 
         const container = document.createElement("div");
         document.body.appendChild(container);
@@ -43,7 +45,12 @@ describe("App boot", () => {
         );
         expect(realErrors).toEqual([]);
 
+        root.render(<App />);
+        await new Promise(r => setTimeout(r, 100));
+        expect(initSpy).toHaveBeenCalledTimes(1);
+
         root.unmount();
+        initSpy.mockRestore();
         errSpy.mockRestore();
     }, 15000);
 });

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import cache from "./DataCache";
 import { sortSensors } from "./NetworkApi";
 
@@ -70,5 +70,34 @@ describe("sortSensors", () => {
     it("truncates names to the configured maximum length", () => {
         const [sensor] = sortSensors([{ sensor: "CB:B8:33:4C:88:4F", name: "x".repeat(100) }]);
         expect(sensor.name).toHaveLength(32);
+    });
+});
+
+
+describe("cache lookup deadlines", () => {
+    afterEach(() => {
+        vi.useRealTimers();
+        vi.restoreAllMocks();
+    });
+
+    it("clears the deadline after a successful lookup and skips invalid segments", async () => {
+        vi.useFakeTimers();
+        vi.spyOn(cache, "getData").mockResolvedValue({
+            500: { measurements: [] },
+            800: null,
+            invalid: { measurements: [] },
+            2000: { measurements: [] },
+        });
+        expect((await cache.getClosestSegment("sensor", "mixed", 100, 1000)).until).toBe(500);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it("returns null when storage hangs", async () => {
+        vi.useFakeTimers();
+        vi.spyOn(cache, "getData").mockReturnValue(new Promise(() => {}));
+        const lookup = cache.getClosestSegment("sensor", "mixed", 0, 1000, 100);
+        await vi.advanceTimersByTimeAsync(100);
+        expect(await lookup).toBeNull();
+        expect(vi.getTimerCount()).toBe(0);
     });
 });
