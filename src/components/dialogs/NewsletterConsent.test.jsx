@@ -38,6 +38,10 @@ it("disables overlapping saves and applies pending confirmation as a successful 
     await act(async () => { toggle().click(); finish(state("unconfirmed")); });
     expect(api.set).toHaveBeenCalledTimes(1);
     expect(api.set).toHaveBeenCalledWith(true, "fi");
+    expect(toggle().getAttribute("aria-checked")).toBe("false");
+    expect(toggle().disabled).toBe(true);
+    await act(async () => toggle().click());
+    expect(api.set).toHaveBeenCalledTimes(1);
     expect(container.textContent).toContain("newsletter_subscription_confirmation");
     expect(container.querySelector('[role="alert"]')).toBeNull();
 });
@@ -70,8 +74,10 @@ it("keeps an unavailable endpoint separate from declined consent", async () => {
     expect(container.querySelector("button:not([data-switch])")).toBeNull();
     expect(container.querySelector('[role="status"]')).toBeNull();
 });
-it.each(["subscribed", "unsubscribed", "not_found", "bounced", "soft_bounced", "complained"])("shows the existing on/off label for %s", async status => {
+it.each(["subscribed", "unconfirmed", "unsubscribed", "not_found", "bounced", "soft_bounced", "complained"])("shows the existing on/off label for %s", async status => {
     api.get.mockResolvedValue(state(status));
     await render();
     expect(container.querySelector('[role="status"]').textContent).toBe(status === "subscribed" ? "on" : "off");
+    expect(toggle().getAttribute("aria-checked")).toBe(String(status === "subscribed"));
+    expect(toggle().disabled).toBe(status === "unconfirmed");
 });

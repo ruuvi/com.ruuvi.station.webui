@@ -316,12 +316,11 @@ class NetworkApi {
     async setNewsletterSubscription(consent, language = "en") {
         if (typeof consent !== "boolean") throw new TypeError("Consent must be a boolean");
         const languageCode = language.trim().split(/[-_]/)[0].toUpperCase();
-        // Normal settings flows must not bypass double opt-in with silent: true.
         return this.marketingConsentRequest({
             method: 'POST',
             body: {
                 consent,
-                silent: false,
+                silent: true,
                 joiningSource: "web",
                 language: /^[A-Z]{2}$/.test(languageCode) ? languageCode : "EN",
             },

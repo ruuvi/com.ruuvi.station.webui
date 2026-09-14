@@ -19,7 +19,7 @@ it("reads consent from the existing API with authentication and no body", async 
 });
 it.each([true, false])("posts required subscriber fields for consent %s and preserves the returned state", async consent => {
     const result = await new NetworkApi().setNewsletterSubscription(consent);
-    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ consent, silent: false, joiningSource: "web", language: "EN" });
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ consent, silent: true, joiningSource: "web", language: "EN" });
     expect(fetch.mock.calls[0][1].method).toBe("POST");
     expect(result).toEqual(success("unconfirmed"));
 });

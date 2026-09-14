@@ -8,6 +8,8 @@ export default function NewsletterConsent({ t, language }) {
     const [error, setError] = useState(null);
     const pending = useRef(false);
     const active = useRef(false);
+    const unconfirmed = data?.status === "unconfirmed";
+    const enabled = !unconfirmed && (data?.consent ?? false);
 
     useEffect(() => {
         active.current = true;
@@ -23,7 +25,7 @@ export default function NewsletterConsent({ t, language }) {
     }, []);
 
     const update = async (consent) => {
-        if (pending.current || busy || data === null) return;
+        if (pending.current || busy || data === null || unconfirmed) return;
         pending.current = true;
         setBusy(true);
         setError(null);
@@ -56,10 +58,10 @@ export default function NewsletterConsent({ t, language }) {
                 <Box fontFamily="mulish" fontWeight={800}>{t("newsletter_subscription")}</Box>
                 <Flex align="center" gap={3}>
                     {!busy && data !== null && (
-                        <Box role="status">{t(data.consent ? "on" : "off")}</Box>
+                        <Box role="status">{t(enabled ? "on" : "off")}</Box>
                     )}
-                    <Switch.Root size="md" colorPalette="ruuvi" checked={data?.consent ?? false}
-                        disabled={busy || data === null} onCheckedChange={e => update(e.checked)}>
+                    <Switch.Root size="md" colorPalette="ruuvi" checked={enabled}
+                        disabled={busy || data === null || unconfirmed} onCheckedChange={e => update(e.checked)}>
                         <Switch.HiddenInput aria-label={t("newsletter_subscription")} />
                         <Switch.Control />
                     </Switch.Root>
