@@ -1,17 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-    FiAlertTriangle,
-    FiArrowRight,
-    FiArrowUpRight,
-    FiCheck,
-    FiHelpCircle,
-    FiLink,
-    FiRadio,
-    FiShare2,
-    FiTrash2,
-    FiUser,
-} from "react-icons/fi";
-import logo from "../img/ruuvi-vector-logo.svg";
+import { FiCheck, FiHelpCircle, FiLink, FiRadio, FiShare2, FiUser } from "react-icons/fi";
 import mascot from "../img/with-phone-serious-500.png";
 import { getDeletionToken, verifyAccountDeletion } from "../utils/verifyAccountDeletion";
 import "./DeleteAccount.css";
@@ -58,18 +46,14 @@ function Outcome({ status, headingRef }) {
             <span className={`delete-account-status-icon delete-account-status-icon--${status}`}>
                 <Icon aria-hidden="true" />
             </span>
-            <p className="delete-account-eyebrow">YOUR RUUVI ACCOUNT</p>
             <h1 id="delete-account-title" ref={headingRef} tabIndex={-1}>
                 {title}
             </h1>
             <p className="delete-account-intro">{description}</p>
             <p className="delete-account-outcome-detail">{detail}</p>
             <a className="delete-account-button delete-account-button--return" href="/" rel="noreferrer">
-                Back to Ruuvi Station <FiArrowRight aria-hidden="true" />
+                Back to Ruuvi Station
             </a>
-            <p className="delete-account-help">
-                Need a hand? <a href="mailto:support@ruuvi.com">Contact our team</a>
-            </p>
         </div>
     );
 }
@@ -106,51 +90,26 @@ export default function DeleteAccount() {
 
     return (
         <div className="delete-account-page">
-            <header className="delete-account-header">
-                <a className="delete-account-brand" href="/" aria-label="Ruuvi Station" rel="noreferrer">
-                    <img src={logo} alt="Ruuvi" width="104" height="28" />
-                    <span>Station</span>
-                </a>
-                <a className="delete-account-support" href="mailto:support@ruuvi.com">
-                    <FiHelpCircle aria-hidden="true" /> <span>Here to help</span>
-                </a>
-            </header>
-
             <main className="delete-account-main">
-                <section className="delete-account-card" aria-labelledby="delete-account-title">
-                    <aside className="delete-account-aside">
-                        <div className="delete-account-aside-copy">
-                            <span className="delete-account-aside-line" aria-hidden="true" />
-                            <h2>
-                                A little pause.
-                                <br />A thoughtful goodbye.
-                            </h2>
-                            <p>
-                                Whatever comes next,
-                                <br />
-                                thanks for being part of Ruuvi.
-                            </p>
-                        </div>
-                        <div className="delete-account-mascot">
-                            <div className="delete-account-mascot-circle" aria-hidden="true" />
-                            <img src={mascot} alt="The Ruuvi beaver holding a phone" width="500" height="466" />
-                        </div>
-                        <span className="delete-account-aside-note">Little sensors. Meaningful moments.</span>
-                    </aside>
-
+                <section aria-labelledby="delete-account-title">
                     <div className="delete-account-content">
                         {outcome ? (
                             <Outcome status={status} headingRef={headingRef} />
                         ) : (
                             <>
-                                <p className="delete-account-eyebrow">YOUR RUUVI ACCOUNT</p>
                                 <h1 id="delete-account-title">Delete your account?</h1>
                                 <p className="delete-account-intro">
                                     Before you go, here’s what will happen to the Ruuvi account associated with your
                                     email link.
                                 </p>
-
-                                <ul className="delete-account-consequences">
+                                <img
+                                    className="delete-account-mascot"
+                                    src={mascot}
+                                    alt="The Ruuvi beaver holding a phone"
+                                    width="500"
+                                    height="466"
+                                />
+                                <ul className="delete-account-consequences" role="list">
                                     <li>
                                         <span className="delete-account-list-icon">
                                             <FiShare2 aria-hidden="true" />
@@ -179,13 +138,9 @@ export default function DeleteAccount() {
                                         </div>
                                     </li>
                                 </ul>
-
                                 <div className="delete-account-warning" id="delete-account-warning">
-                                    <FiAlertTriangle aria-hidden="true" />
-                                    <div>
-                                        <strong>This can’t be undone</strong>
-                                        <p>Account deletion is permanent.</p>
-                                    </div>
+                                    <strong>This can’t be undone</strong>
+                                    <p>Account deletion is permanent.</p>
                                 </div>
 
                                 <form onSubmit={handleDelete} aria-busy={isSubmitting}>
@@ -218,10 +173,8 @@ export default function DeleteAccount() {
                                             type="submit"
                                             disabled={!confirmed || isSubmitting}
                                         >
-                                            {isSubmitting ? (
+                                            {isSubmitting && (
                                                 <span className="delete-account-spinner" aria-hidden="true" />
-                                            ) : (
-                                                <FiTrash2 aria-hidden="true" />
                                             )}
                                             {isSubmitting
                                                 ? "Deleting account…"
@@ -246,14 +199,10 @@ export default function DeleteAccount() {
                         )}
                     </div>
                 </section>
-                <p className="delete-account-reassurance">A little care for your data. Always.</p>
             </main>
 
             <footer className="delete-account-footer">
-                <span>© {new Date().getFullYear()} Ruuvi Innovations Ltd.</span>
-                <a href="https://ruuvi.com" rel="noreferrer">
-                    Discover Ruuvi <FiArrowUpRight aria-hidden="true" />
-                </a>
+                <a href="mailto:support@ruuvi.com">Contact support</a>
             </footer>
         </div>
     );
