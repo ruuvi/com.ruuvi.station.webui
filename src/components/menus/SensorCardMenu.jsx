@@ -3,7 +3,6 @@ import {
     IconButton,
     Menu,
     Portal,
-    useDisclosure,
 } from "@chakra-ui/react";
 import { MdMoreVert } from "react-icons/md";
 import { ArrowDownIcon, ArrowUpIcon } from "../ui/chakra-icons";
@@ -23,7 +22,6 @@ const SensorCardMenu = ({
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
-    const { open, onOpen, onClose } = useDisclosure();
 
     const menuItems = useMemo(
         () => [
@@ -57,10 +55,7 @@ const SensorCardMenu = ({
     );
 
     const handleAction = useCallback(
-        (event, item) => {
-            event.preventDefault();
-            event.stopPropagation();
-
+        (item) => {
             switch (item.action) {
                 case "navigate":
                     navigate(`/${sensor.sensor}?scrollTo=${item.key}`);
@@ -83,18 +78,12 @@ const SensorCardMenu = ({
                 default:
                     break;
             }
-
-            onClose();
         },
-        [move, navigate, onClose, remove, rename, sensor.sensor, share, uploadBg],
+        [move, navigate, remove, rename, sensor.sensor, share, uploadBg],
     );
 
     return (
-        <Menu.Root
-            open={open}
-            onOpenChange={(e) => (e.open ? onOpen() : onClose())}
-            positioning={{ gutter: 16 }}
-        >
+        <Menu.Root positioning={{ gutter: 16 }}>
             <Menu.Trigger asChild>
                 <IconButton
                     aria-label="sensor menu"
@@ -133,7 +122,9 @@ const SensorCardMenu = ({
                                     <Menu.Item
                                         value={item.key}
                                         className="ddlItem"
-                                        onClick={(event) => handleAction(event, item)}
+                                        // Selection closes the menu before opening a dialog.
+                                        onSelect={() => handleAction(item)}
+                                        onClick={(event) => event.stopPropagation()}
                                     >
                                         {item.icon}
                                         {t(item.label)}

@@ -39,10 +39,8 @@ function EditNameDialog(props) {
         new NetworkApi().update(props.sensor.sensor, newName, resp => {
             switch (resp.result) {
                 case "success":
-                    var sensor = props.sensor;
-                    sensor.name = newName;
                     notify.success(t("successfully_saved"))
-                    props.updateSensor(sensor)
+                    props.updateSensor({ ...props.sensor, name: newName })
                     break
                 case "error":
                     notify.error(t(`UserApiError.${resp.code}`))
@@ -85,7 +83,7 @@ function EditNameDialog(props) {
                     {t("rename_sensor_message")}
                 </p>
             }
-            <Input autoFocus placeholder={getDefaultName()} value={name} onChange={e => updateName(e.target.value)} onKeyDown={keyDown} />
+            <Input data-autofocus placeholder={getDefaultName()} value={name} onChange={e => updateName(e.target.value)} onKeyDown={keyDown} />
             <div style={{ textAlign: "right" }}>
                 <Button disabled={loading} onClick={update} mt="17px">{t("update")}</Button>
             </div>

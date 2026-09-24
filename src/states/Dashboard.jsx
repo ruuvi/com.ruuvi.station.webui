@@ -458,7 +458,10 @@ function Dashboard(props) {
         return <span className={isAdaptive ? "masonry-item" : undefined} key={x.sensor} style={wrapperStyle}>
             <span
                 role="link"
-                onClick={() => navigate('/' + x.sensor)}
+                onClick={event => {
+                    // Portalled menus and dialogs also bubble through this card in React.
+                    if (event.currentTarget.contains(event.target)) navigate('/' + x.sensor);
+                }}
                 style={{ cursor: 'pointer', display: isAdaptive ? undefined : "block", height: isAdaptive ? undefined : "100%", flex: isAdaptive ? undefined : 1 }}
             >
                 <DashboardSensorCard sensor={x}
