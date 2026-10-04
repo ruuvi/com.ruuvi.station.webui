@@ -7,6 +7,7 @@ import SmallStats from "./SensorCardStats";
 import "uplot/dist/uPlot.min.css";
 import { getUnitHelper, localeNumber } from "../../UnitHelper";
 import bglayer from "../../img/bg-layer.png";
+import { getDefaultSensorPicture } from "../../utils/sensorPicture";
 
 const SensorCardDetailed = ({
     sensor,
@@ -43,6 +44,10 @@ const SensorCardDetailed = ({
     adaptiveLayout = true,
 }) => {
     const isSmallCard = size === "mobile" && !showGraph;
+    const fallbackPicture = `url(${getDefaultSensorPicture(sensor)})`;
+    const backgroundPicture = picture
+        ? `${picture.startsWith("url(") ? picture : `url(${picture})`}, ${fallbackPicture}`
+        : fallbackPicture;
 
     let minHeight = showGraph ? (size === "medium" ? 380 : 430) : 230;
     let nonAdaptiveProps = adaptiveLayout ? {} : { height: "100%" };
@@ -61,9 +66,7 @@ const SensorCardDetailed = ({
                             width="25%"
                             className="imageBackgroundColor"
                             position="relative"
-                            backgroundImage={
-                                picture ? (picture.startsWith("url(") ? picture : `url(${picture})`) : undefined
-                            }
+                            backgroundImage={backgroundPicture}
                             backgroundSize="cover"
                             backgroundPosition="center"
                             display="flex"

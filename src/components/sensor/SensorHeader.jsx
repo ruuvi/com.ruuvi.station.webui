@@ -8,6 +8,22 @@ import DurationText from "../common/DurationText";
 import NavClose from "../common/NavClose";
 import NavPrevNext from "../common/NavPrevNext";
 import useIsLargeDisplay from "../hooks/useIsLargeDisplay";
+import { getDefaultSensorPicture } from "../../utils/sensorPicture";
+
+function SensorAvatar({ sensor, picture, ...props }) {
+    return (
+        <Avatar.Root {...props} shape="full" overflow="hidden">
+            <Avatar.Fallback boxSize="100%">
+                <img
+                    src={getDefaultSensorPicture(sensor)}
+                    alt=""
+                    style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
+                />
+            </Avatar.Fallback>
+            <Avatar.Image src={picture || sensor.picture} alt={sensor.name} />
+        </Avatar.Root>
+    );
+}
 
 function SensorHeader(props) {
     const isLargeDisplay = useIsLargeDisplay();
@@ -16,10 +32,7 @@ function SensorHeader(props) {
             <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
             <label htmlFor="avatarUpload">
                 <Box position="relative" display="inline-flex" cursor="pointer">
-                    <Avatar.Root style={{ cursor: "pointer" }} size="xl">
-                        <Avatar.Fallback name={props.sensor.name} />
-                        <Avatar.Image src={props.picture || props.sensor.picture} />
-                    </Avatar.Root>
+                    <SensorAvatar sensor={props.sensor} picture={props.picture} style={{ cursor: "pointer" }} size="xl" />
                     {props.loadingImage && (
                         <Box position="absolute" inset={0} display="flex" alignItems="center" justifyContent="center" backgroundColor="blackAlpha.400" borderRadius="full">
                             <Spinner size="xl" color="white" />
@@ -53,10 +66,7 @@ function SensorHeader(props) {
                                 <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
                                 <label htmlFor="avatarUpload">
                                     <Box position="relative" display="inline-flex" cursor="pointer">
-                                        <Avatar.Root mt="3" bg="primary" size="lg">
-                                            <Avatar.Fallback name={props.sensor.name} />
-                                            <Avatar.Image src={props.picture || props.sensor.picture} />
-                                        </Avatar.Root>
+                                        <SensorAvatar sensor={props.sensor} picture={props.picture} mt="3" bg="primary" size="lg" />
                                         {props.loadingImage && (
                                             <Box position="absolute" inset={0} mt="3" display="flex" alignItems="center" justifyContent="center" backgroundColor="blackAlpha.400" borderRadius="full">
                                                 <Spinner size="xl" color="white" />

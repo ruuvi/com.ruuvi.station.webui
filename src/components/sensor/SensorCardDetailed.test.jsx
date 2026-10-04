@@ -2,6 +2,8 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import airBackground from "../../img/new_bg_air.jpg";
+import tagBackground from "../../img/new_bg2.jpg";
 
 vi.mock("../graphs/Graph", () => ({ default: () => null }));
 vi.mock("./SensorCardStats", () => ({ default: () => null }));
@@ -119,15 +121,27 @@ describe("SensorCardDetailed main value", () => {
         expect(overlayEl).toBeTruthy();
 
         const imageStyle = window.getComputedStyle(imageEl);
-        expect(imageStyle.backgroundImage).toBe(`url("${pictureUrl}")`);
+        expect(imageStyle.backgroundImage).toBe(`url("${pictureUrl}"), url("${tagBackground}")`);
 
         const overlayStyle = window.getComputedStyle(overlayEl);
         expect(overlayStyle.backgroundImage).toContain("url(");
     });
 
-    it("renders fallback overlay when showImage is true but sensor has no picture", () => {
+    it.each([
+        [5, tagBackground],
+        ["c5", tagBackground],
+        ["e0", airBackground],
+        ["e1", airBackground],
+        ["f0", airBackground],
+        [6, airBackground],
+        [undefined, tagBackground],
+    ])("renders the default background for format %s when there is no picture", (dataFormat, background) => {
         const t = (value) => value;
-        const sensor = { sensor: "test-sensor", name: "Test sensor" };
+        const sensor = {
+            sensor: "test-sensor",
+            name: "Test sensor",
+            measurements: dataFormat === undefined ? [] : [{ parsed: { dataFormat } }],
+        };
 
         act(() =>
             root.render(
@@ -168,7 +182,7 @@ describe("SensorCardDetailed main value", () => {
         expect(overlayEl).toBeTruthy();
 
         const imageStyle = window.getComputedStyle(imageEl);
-        expect(["", "none"]).toContain(imageStyle.backgroundImage);
+        expect(imageStyle.backgroundImage).toBe(`url("${background}")`);
 
         const overlayStyle = window.getComputedStyle(overlayEl);
         expect(overlayStyle.backgroundImage).toContain("url(");
