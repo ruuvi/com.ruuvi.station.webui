@@ -3,11 +3,13 @@ import {
     Box,
     Avatar,
     Spinner,
+    Badge,
 } from "@chakra-ui/react"
 import DurationText from "../common/DurationText";
 import NavClose from "../common/NavClose";
 import NavPrevNext from "../common/NavPrevNext";
 import useIsLargeDisplay from "../hooks/useIsLargeDisplay";
+import { hyphenateSensorName } from "../../TextHelper";
 import { getDefaultSensorPicture } from "../../utils/sensorPicture";
 
 function SensorAvatar({ sensor, picture, ...props }) {
@@ -29,29 +31,44 @@ function SensorHeader(props) {
     const isLargeDisplay = useIsLargeDisplay();
     if (isLargeDisplay) {
         return <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
-            <label htmlFor="avatarUpload">
-                <Box position="relative" display="inline-flex" cursor="pointer">
-                    <SensorAvatar sensor={props.sensor} picture={props.picture} style={{ cursor: "pointer" }} size="xl" />
-                    {props.loadingImage && (
-                        <Box position="absolute" inset={0} display="flex" alignItems="center" justifyContent="center" backgroundColor="blackAlpha.400" borderRadius="full">
-                            <Spinner size="xl" color="white" />
+            {props.isPublic ?
+                <SensorAvatar sensor={props.sensor} style={{ cursor: "default" }} size="xl" />
+                :
+                <>
+                    <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
+                    <label htmlFor="avatarUpload">
+                        <Box position="relative" display="inline-flex" cursor="pointer">
+                            <SensorAvatar sensor={props.sensor} picture={props.picture} style={{ cursor: "pointer" }} size="xl" />
+                            {props.loadingImage && (
+                                <Box position="absolute" inset={0} display="flex" alignItems="center" justifyContent="center" backgroundColor="blackAlpha.400" borderRadius="full">
+                                    <Spinner size="xl" color="white" />
+                                </Box>
+                            )}
                         </Box>
-                    )}
-                </Box>
-            </label>
-            <span style={{ width: "calc(100% - 250px - 18px)", marginLeft: 18 }}>
+                    </label>
+                </>
+            }
+            <span style={{ width: "calc(100% - 96px - 18px - 135px)", marginLeft: 18 }}>
                 <div className="pageTitle" style={{ textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden", }}>
                     {props.sensor.name}
                 </div>
-                <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic" }} className="subtitle">
+                <div style={{ fontFamily: "mulish", fontSize: 18, fontWeight: 600, fontStyle: "italic", display: "flex", alignItems: "center", gap: 6 }} className="subtitle">
+                    {props.isPublic && <span className="live-indicator-dot" />}
                     <DurationText from={props.lastUpdateTime} t={props.t} isAlerting={props.isAlertTriggered("offline")} />
                 </div>
             </span>
-            <span style={{ minWidth: 135, justifyContent: "flex-end" }}>
-                <NavPrevNext prev={props.prev} next={props.next} />
-                <NavClose />
-            </span>
+            {props.isPublic ? (
+                <span style={{ minWidth: 135, flexShrink: 0, display: "flex", justifyContent: "flex-end", alignItems: "flex-start", paddingTop: 4 }}>
+                    <Badge colorPalette="teal" variant="subtle" size="sm" px={2.5} py={1} borderRadius="full">
+                        {props.t("public_sensor")}
+                    </Badge>
+                </span>
+            ) : (
+                <span style={{ minWidth: 135, justifyContent: "flex-end" }}>
+                    <NavPrevNext prev={props.prev} next={props.next} />
+                    <NavClose />
+                </span>
+            )}
         </div>
     } else {
         return <center>
@@ -60,34 +77,58 @@ function SensorHeader(props) {
                     <tbody>
                         <tr>
                             <td width="33%" style={{ verticalAlign: "top" }}>
-                                <NavClose />
+                                {!props.isPublic && <NavClose />}
                             </td>
                             <td width="33%" align="center">
-                                <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
-                                <label htmlFor="avatarUpload">
-                                    <Box position="relative" display="inline-flex" cursor="pointer">
-                                        <SensorAvatar sensor={props.sensor} picture={props.picture} mt="3" bg="primary" size="lg" />
-                                        {props.loadingImage && (
-                                            <Box position="absolute" inset={0} mt="3" display="flex" alignItems="center" justifyContent="center" backgroundColor="blackAlpha.400" borderRadius="full">
-                                                <Spinner size="xl" color="white" />
+                                {props.isPublic ?
+                                    <SensorAvatar sensor={props.sensor} mt="3" bg="primary" size="lg" />
+                                    :
+                                    <>
+                                        <input type="file" accept="image/*" style={{ display: "none" }} id="avatarUpload" onChange={props.fileUploadChange} />
+                                        <label htmlFor="avatarUpload">
+                                            <Box position="relative" display="inline-flex" cursor="pointer">
+                                                <SensorAvatar sensor={props.sensor} picture={props.picture} mt="3" bg="primary" size="lg" />
+                                                {props.loadingImage && (
+                                                    <Box position="absolute" inset={0} mt="3" display="flex" alignItems="center" justifyContent="center" backgroundColor="blackAlpha.400" borderRadius="full">
+                                                        <Spinner size="xl" color="white" />
+                                                    </Box>
+                                                )}
                                             </Box>
-                                        )}
-                                    </Box>
-                                </label>
+                                        </label>
+                                    </>
+                                }
                             </td>
                             <td width="33%" align="right" style={{ verticalAlign: "top" }}>
-                                <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
-                                    <NavPrevNext prev={props.prev} next={props.next} />
-                                </span>
+                                {!props.isPublic ? (
+                                    <span style={{ width: "100%", textAlign: "right", height: "100%" }}>
+                                        <NavPrevNext prev={props.prev} next={props.next} />
+                                    </span>
+                                ) : (
+                                    <span style={{ width: "100%", textAlign: "right", display: "inline-block", paddingTop: 8 }}>
+                                        <Badge colorPalette="teal" variant="subtle" size="xs" px={2} py={0.5} borderRadius="full">
+                                            {props.t("public_sensor")}
+                                        </Badge>
+                                    </span>
+                                )}
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <div style={{ width: "65%", marginTop: "5px" }}>
-                    <div className="mobilePageTitle">
-                        {props.sensor.name}
+                <div style={{ width: props.isPublic ? "100%" : "65%", marginTop: "5px", paddingLeft: props.isPublic ? 8 : undefined, paddingRight: props.isPublic ? 8 : undefined }}>
+                    <div
+                        className="mobilePageTitle"
+                        style={{
+                            overflowWrap: "break-word",
+                            wordBreak: "break-word",
+                            hyphens: "auto",
+                            WebkitHyphens: "auto",
+                            msHyphens: "auto",
+                        }}
+                    >
+                        {hyphenateSensorName(props.sensor.name)}
                     </div>
-                    <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic" }} className="subtitle">
+                    <div style={{ fontFamily: "mulish", fontSize: 16, fontWeight: 600, fontStyle: "italic", display: "inline-flex", alignItems: "center", gap: 6 }} className="subtitle">
+                        {props.isPublic && <span className="live-indicator-dot" />}
                         <DurationText from={props.lastUpdateTime} t={props.t} isAlerting={props.isAlertTriggered("offline")} />
                     </div>
                 </div>

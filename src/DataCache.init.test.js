@@ -29,12 +29,12 @@ describe("cache initialization barrier", () => {
         finishClear();
         await expect(read).resolves.toBe("fresh");
         await write;
-        expect(storage.setItem.mock.calls[0]).toEqual(["cacheVersion", 2]);
+        expect(storage.setItem.mock.calls[0]).toEqual(["cacheVersion", 3]);
         expect(storage.setItem.mock.calls[1][0]).toBe("cache_sensor_mixed");
     });
 
     it("retries initialization after a storage failure", async () => {
-        storage.getItem.mockRejectedValueOnce(new Error("storage unavailable")).mockResolvedValue(2);
+        storage.getItem.mockRejectedValueOnce(new Error("storage unavailable")).mockResolvedValue(3);
         await expect(cache.init()).rejects.toThrow("storage unavailable");
         await cache.init();
         expect(storage.getItem).toHaveBeenCalledTimes(2);
@@ -42,7 +42,7 @@ describe("cache initialization barrier", () => {
     });
 
     it("holds new reads until an explicit clear finishes", async () => {
-        storage.getItem.mockResolvedValue(2);
+        storage.getItem.mockResolvedValue(3);
         await cache.init();
         storage.getItem.mockClear();
         let finishClear;

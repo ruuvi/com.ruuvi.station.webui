@@ -18,7 +18,7 @@ import { ruuviTheme } from "./themes";
 import pjson from "./../package.json"
 import i18next from "i18next";
 import { IoClose } from "react-icons/io5";
-import { MdOutlineNightlight } from "react-icons/md";
+import { MdOutlineNightlight, MdFullscreen, MdFullscreenExit } from "react-icons/md";
 import { SunIcon } from "./components/ui/chakra-icons";
 import cache from "./DataCache";
 import { useTranslation } from "react-i18next";
@@ -30,10 +30,12 @@ import MyAccountModal from "./components/dialogs/MyAccountModal";
 import SettingsMenu from "./components/menus/SettingsMenu";
 import MobileMenu from "./components/menus/MobileMenu";
 import detectForceRefresh from "./utils/detectForceRefresh";
+import { isPublicRoute as isPublicRoutePath } from "./utils/env";
 const ShareCenter = React.lazy(() => import("./states/ShareCenter"));
 const SensorCompare = React.lazy(() => import("./states/SensorCompare"));
 const SignIn = React.lazy(() => import("./states/SignIn"));
 const Dashboard = React.lazy(() => import("./states/Dashboard"));
+const PublicSensor = React.lazy(() => import("./states/PublicSensor"));
 const UserMenu = React.lazy(() => import("./components/menus/UserMenu"));
 const SensorMenu = React.lazy(() => import("./components/menus/SensorMenu"));
 
@@ -100,6 +102,15 @@ function ColorModeSwitch() {
   )
 }
 
+function Footer() {
+  const { t, i18n } = useTranslation()
+  return <>
+    <div style={bottomText}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi" : "https://ruuvi.com/"} target="_blank" rel="noreferrer">ruuvi.com</a></div>
+    <div style={supportLink}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi/tuki" : "https://ruuvi.com/support"}>{t("support")}</a></div>
+    <div style={versionText}>v{pjson.version} <a href="https://f.ruuvi.com/t/5039/9999" target="_blank" rel="noreferrer">{t("changelog")}</a></div>
+  </>
+}
+
 function Logo(props) {
   const { colorMode } = useColorMode()
   let ruuviLogo = colorMode === "light" ? logo : logoDark
@@ -111,6 +122,50 @@ function Logo(props) {
       </span>
     </>
   )
+}
+
+function PublicTopBar() {
+  const { t } = useTranslation();
+  const [isFullscreen, setIsFullscreen] = React.useState(!!document.fullscreenElement);
+
+  React.useEffect(() => {
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handleFsChange);
+    return () => document.removeEventListener("fullscreenchange", handleFsChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  };
+
+  return (
+    <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px" justifyContent="space-between" width="100%">
+      <HStack gap={2}>
+        <Logo subscription="" />
+        {new NetworkApi().isStaging() && (
+          <Text fontSize="sm" opacity={0.7}>
+            (staging)
+          </Text>
+        )}
+      </HStack>
+      <HStack gap={2}>
+        <IconButton
+          aria-label={t("fullscreen")}
+          variant="ghost"
+          size="sm"
+          onClick={toggleFullscreen}
+          title={isFullscreen ? t("exit_fullscreen") : t("fullscreen")}
+        >
+          {isFullscreen ? <MdFullscreenExit size={20} /> : <MdFullscreen size={20} />}
+        </IconButton>
+        <ColorModeSwitch />
+      </HStack>
+    </HStack>
+  );
 }
 
 function loadInitalSettings(forceUpdate, browserLang) {
@@ -140,7 +195,8 @@ function loadInitalSettings(forceUpdate, browserLang) {
         forceUpdate();
       }
     } else if (settings.result === "error" && settings.code === "ER_UNAUTHORIZED") {
-      logout(forceUpdate)
+      if (isPublicRoutePath()) new NetworkApi().removeToken()
+      else logout(forceUpdate)
     }
   })
 }
@@ -186,7 +242,7 @@ export default function App() {
   let browserLanguage = navigator.language || navigator.userLanguage;
   browserLanguage = browserLanguage.substring(0, 2)
 
-  let { t, i18n } = useTranslation()
+  let { i18n } = useTranslation()
 
   useEffect(() => {
     const cleanup = detectForceRefresh();
@@ -265,14 +321,27 @@ export default function App() {
 
   const [, updateState] = React.useState();
   const [settingsVersion, setSettingsVersion] = React.useState(0);
+
+  // public sensor pages have no plan and no menus in the header,
+  // and are available without signing in
+  let isPublicRoute = isPublicRoutePath()
+
   if (!user) {
     //goToLoginPage()
     return <Provider>
       <BrowserRouter>
-        <SignIn loginSuccessful={_data => {
-          forceUpdate()
-          loadInitalSettings(forceUpdate, browserLanguage)
-        }} />
+        {isPublicRoute ? <>
+          <PublicTopBar />
+          <Routes>
+            <Route path="/public/:id" element={<PublicSensor />} />
+            <Route path="/public-dev/:id" element={<PublicSensor />} />
+          </Routes>
+          <Footer />
+        </> :
+          <SignIn loginSuccessful={_data => {
+            forceUpdate()
+            loadInitalSettings(forceUpdate, browserLanguage)
+          }} />}
       </BrowserRouter>
       <Toaster />
     </Provider>
@@ -289,7 +358,9 @@ export default function App() {
   return (
     <Provider>
       <BrowserRouter basename={"/"}>
-        {hideTopBar ? null : <>
+        {isPublicRoute ? (
+          <PublicTopBar />
+        ) : hideTopBar ? null : <>
           <HStack className="topbar" style={{ paddingLeft: "14px", paddingRight: "14px" }} height="60px">
             <Logo subscription={subscription?.subscriptionName || ""} />
             <Text>
@@ -316,16 +387,14 @@ export default function App() {
         </>}
         <div>
           <Routes>
+            <Route path="/public/:id" element={<PublicSensor />} />
+            <Route path="/public-dev/:id" element={<PublicSensor />} />
             <Route path="/shares" element={<ShareCenter showDialog={showDialog} closeDialog={() => setShowDialog("")} subscription={subscription} />} />
             <Route path="/:id" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} settingsVersion={settingsVersion} />} />
             <Route path="/" element={<Dashboard reloadTags={() => { setReloadSub(reloadSub + 1); forceUpdate() }} showDialog={showDialog} closeDialog={() => setShowDialog("")} settingsVersion={settingsVersion} />} />
             <Route path="/compare" element={<SensorCompare />} />
           </Routes>
-          {hideTopBar ? <div style={{ paddingBottom: 20 }} /> : <>
-            <div style={bottomText}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi" : "https://ruuvi.com/"} target="_blank" rel="noreferrer">ruuvi.com</a></div>
-            <div style={supportLink}><a href={i18n.language === "fi" ? "https://ruuvi.com/fi/tuki" : "https://ruuvi.com/support"}>{t("support")}</a></div>
-            <div style={versionText}>v{pjson.version} <a href="https://f.ruuvi.com/t/5039/9999" target="_blank" rel="noreferrer">{t("changelog")}</a></div>
-          </>}
+          {hideTopBar ? <div style={{ paddingBottom: 20 }} /> : <Footer />}
         </div>
       </BrowserRouter>
       <AddSensorModal open={showDialog === "addsensor"} onClose={() => setShowDialog("")} updateApp={() => { setReloadSub(reloadSub + 1); forceUpdate() }} />

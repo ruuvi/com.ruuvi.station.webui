@@ -29,3 +29,8 @@ export function addVariablesInString(str, variables) {
     }
     return str
 }
+
+export function hyphenateSensorName(name) {
+    if (typeof name !== "string") return "";
+    return name.replace(/([a-z])([A-Z])/g, "$1\u00AD$2");
+}

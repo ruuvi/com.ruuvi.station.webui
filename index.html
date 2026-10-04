@@ -8,6 +8,13 @@
   <meta name="description" content="Ruuvi Station" />
   <meta name="robots" content="noindex">
 
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Ruuvi Station" />
+  <meta property="og:title" content="Ruuvi Station" />
+  <meta property="og:description" content="Live environmental monitoring with Ruuvi Station." />
+  <meta property="og:image" content="https://station.ruuvi.com/android-chrome-512x512.png" />
+
   <link rel="icon" href="/favicon-32x32.png" sizes="32x32" />
   <link rel="icon" href="/android-chrome-192x192.png" sizes="192x192" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -102,7 +109,11 @@
     function getUserKey() {
       return isStaging() ? "staging_user" : "user"
     }
-    if (!isStaging() && !getUser()) {
+    // public sensor pages work without signing in; keep in sync with src/utils/env.js
+    function isPublicRoute() {
+      return /^\/public(-dev)?\/[^/]+\/?$/.test(window.location.pathname)
+    }
+    if (!isPublicRoute() && !isStaging() && !getUser()) {
       localStorage.removeItem(getUserKey())
       let domain = ".ruuvi.com"
       document.cookie = `station_status=signedIn;domain=${domain};Max-Age=-99999999`
