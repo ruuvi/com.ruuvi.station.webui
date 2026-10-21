@@ -33,6 +33,8 @@ import PublicSensorDialog from "../components/dialogs/PublicSensorDialog";
 import SensorHeader from "../components/sensor/SensorHeader";
 import SensorReadingGrid from "../components/sensor/SensorReadingGrid";
 import SensorSettings from "../components/sensor/SensorSettings";
+import ThrottleWarning from "../components/common/ThrottleWarning";
+import { isThrottled, throttleRetryDelay } from "../utils/requestThrottle";
 import {
     getAlert,
     getLatestReading,
@@ -108,6 +110,7 @@ function Sensor(props) {
     const [notesDialog, setNotesDialog] = useState(false);
     const [showRemoveSensor, setShowRemoveSensor] = useState(false);
     const [publicDialog, setPublicDialog] = useState(false);
+    const [historyThrottled, setHistoryThrottled] = useState(false);
 
     // Refs for values accessed inside async functions to avoid stale closures
     const dataRef = useRef(null);
@@ -124,6 +127,7 @@ function Sensor(props) {
     const latestDataUpdateRef = useRef(null);
     const loadDataRef = useRef(null);
     const historyControllerRef = useRef(null);
+    const historyResumeRef = useRef(null);
 
     function isAlertTriggered(type) {
         if (type === "movementCounter") type = "movement";
@@ -177,6 +181,8 @@ function Sensor(props) {
         if (showLoading !== undefined) {
             historyControllerRef.current?.abort();
             isLoadingRef.current = false;
+            historyResumeRef.current = null;
+            setHistoryThrottled(false);
         }
         if (isLoadingRef.current) return;
         clearTimeout(latestDataUpdateRef.current);
@@ -190,6 +196,10 @@ function Sensor(props) {
         }
 
         const controller = new AbortController();
+        let refreshDelay = 60000;
+        const paginationSize = isPublic
+            ? pjson.settings.publicSensorDataFetchPaginationSize
+            : pjson.settings.dataFetchPaginationSize;
         historyControllerRef.current = controller;
         isLoadingRef.current = true;
         const rangeFrom = fromRef.current;
@@ -218,7 +228,8 @@ function Sensor(props) {
         }
 
         try {
-            const initialLoad = dataRef.current === null || showLoading;
+            const resumeUntil = historyResumeRef.current;
+            const initialLoad = dataRef.current === null || showLoading || resumeUntil !== null;
             async function load(until = getRangeEnd()) {
                 if (controller.signal.aborted) return;
                 let since = getRangeStart();
@@ -229,14 +240,22 @@ function Sensor(props) {
 
                 const resp = await new NetworkApi().getAsync(
                     currentSensor.sensor, since, until,
-                    { mode: "mixed", limit: pjson.settings.dataFetchPaginationSize, auth: !isPublic },
+                    { mode: "mixed", limit: paginationSize, auth: !isPublic },
                     controller.signal
                 );
                 // Some async operations may finish despite cancellation.
                 if (controller.signal.aborted) return;
 
-                if (resp.result === "success") {
+                if (isThrottled(resp)) {
+                    setHistoryThrottled(true);
+                    refreshDelay = throttleRetryDelay(resp);
+                    // Resume the interrupted page, rather than skipping older
+                    // history when the automatic refresh runs.
+                    if (initialLoad) historyResumeRef.current = until;
+                } else if (resp.result === "success") {
                     if (currentSensor.sensor !== resp.data.sensor) return;
+                    setHistoryThrottled(false);
+                    historyResumeRef.current = null;
                     const returnedDataLength = resp.data.measurements.length;
                     Object.keys(currentSensor).filter(x => x.startsWith("offset")).forEach(x => {
                         resp.data[x] = currentSensor[x];
@@ -251,7 +270,7 @@ function Sensor(props) {
                     setData(newData);
                     setLoading(false);
 
-                    if (initialLoad && (d.nextUp || d.fromCache || returnedDataLength >= pjson.settings.dataFetchPaginationSize)) {
+                    if (initialLoad && (d.nextUp || d.fromCache || returnedDataLength >= paginationSize)) {
                         const nextUntil = d.nextUp || d.measurements[d.measurements.length - 1]?.timestamp;
                         if (nextUntil && nextUntil < until) await load(nextUntil);
                     }
@@ -259,7 +278,7 @@ function Sensor(props) {
                     notify.error(propsRef.current.t(`UserApiError.${resp.code}`));
                 }
             }
-            await load();
+            await load(resumeUntil ?? getRangeEnd());
         } catch (e) {
             if (!controller.signal.aborted) {
                 notify.error(propsRef.current.t("internet_connection_problem"));
@@ -270,7 +289,7 @@ function Sensor(props) {
             if (!controller.signal.aborted) {
                 isLoadingRef.current = false;
                 setLoading(false);
-                latestDataUpdateRef.current = setTimeout(() => loadDataRef.current(), 60 * 1000);
+                latestDataUpdateRef.current = setTimeout(() => loadDataRef.current(), refreshDelay);
             }
         }
     }
@@ -473,6 +492,7 @@ function Sensor(props) {
         <Box>
             <Box minHeight={isPublic ? "auto" : 1500} pb={isPublic ? 8 : 0}>
                 <Box overflow="hidden" pt={{ base: "5px", md: "35px" }} backgroundPosition="center" paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
+                    {(props.throttled || historyThrottled) && <ThrottleWarning />}
                     <SensorHeader
                         sensor={sensor}
                         t={t}

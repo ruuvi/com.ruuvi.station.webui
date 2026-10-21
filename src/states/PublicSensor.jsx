@@ -6,6 +6,8 @@ import Sensor from "./Sensor";
 import { Box, Spinner, Text, Button } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
+import ThrottleWarning from "../components/common/ThrottleWarning";
+import { isThrottled, throttleRetryDelay } from "../utils/requestThrottle";
 
 // /get does not include the owner's plan details, so assume a history window
 // here; the backend enforces the real limit on the history requests anyway.
@@ -18,26 +20,33 @@ const PUBLIC_SENSOR_DEFAULTS = {
 // other errors on a refresh are treated as transient and keep the view mounted
 const FINAL_ERROR_CODES = ["ER_FORBIDDEN", "ER_SENSOR_NOT_FOUND"];
 
-function PublicSensor() {
-    const { id } = useParams();
+function PublicSensorView({ id }) {
     const { t } = useTranslation();
     const [sensor, setSensor] = useState(null);
     const [errorKey, setErrorKey] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [throttled, setThrottled] = useState(false);
     const hasSensorRef = useRef(false);
 
     useEffect(() => {
         let cancelled = false;
+        let refreshId;
+        const controller = new AbortController();
         async function load() {
+            let refreshDelay = 60000;
             try {
                 // Public sensors are served by /get without authentication;
                 // non-public sensors return ER_FORBIDDEN.
                 const resp = await new NetworkApi().request(
                     `/get?sensor=${encodeURIComponent(id)}&mode=dense&limit=1`,
-                    { timeout: 30000, auth: false }
+                    { timeout: 30000, auth: false, signal: controller.signal }
                 );
                 if (cancelled) return;
-                if (resp.result === "success") {
+                if (isThrottled(resp)) {
+                    setThrottled(true);
+                    setErrorKey(null);
+                    refreshDelay = throttleRetryDelay(resp);
+                } else if (resp.result === "success") {
                     const sensorObj = {
                         ...PUBLIC_SENSOR_DEFAULTS,
                         ...resp.data,
@@ -55,22 +64,29 @@ function PublicSensor() {
                     hasSensorRef.current = true;
                     setSensor(sensorObj);
                     setErrorKey(null);
+                    setThrottled(false);
                 } else if (!hasSensorRef.current || FINAL_ERROR_CODES.includes(resp.code)) {
                     setErrorKey(resp.code ? `UserApiError.${resp.code}` : "network_error");
                 } else {
                     logger.warn("public sensor refresh failed, keeping current view", resp);
                 }
             } catch (e) {
+                if (cancelled) return;
                 logger.error("failed to load public sensor", e);
                 if (!cancelled && !hasSensorRef.current) setErrorKey("internet_connection_problem");
             } finally {
-                if (!cancelled) setLoading(false);
+                if (!cancelled) {
+                    setLoading(false);
+                    refreshId = setTimeout(load, refreshDelay);
+                }
             }
         }
         load();
-        // keep the latest reading fresh; the Sensor view refreshes history itself
-        const intervalId = setInterval(load, 60 * 1000);
-        return () => { cancelled = true; clearInterval(intervalId); };
+        return () => {
+            cancelled = true;
+            controller.abort();
+            clearTimeout(refreshId);
+        };
     }, [id]);
 
     useEffect(() => {
@@ -117,6 +133,10 @@ function PublicSensor() {
         );
     }
 
+    if (throttled && !sensor) {
+        return <Box maxW="600px" mx="auto" my={16} p={8}><ThrottleWarning /></Box>;
+    }
+
     if (loading && !sensor) {
         return (
             <center style={{ margin: 96 }}>
@@ -125,7 +145,12 @@ function PublicSensor() {
         );
     }
 
-    return <Sensor sensor={sensor} isPublic />;
+    return <Sensor sensor={sensor} isPublic throttled={throttled} />;
+}
+
+function PublicSensor() {
+    const { id } = useParams();
+    return <PublicSensorView key={id} id={id} />;
 }
 
 export default PublicSensor;

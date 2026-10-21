@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import NetworkApi from "../NetworkApi";
+import pjson from "../../package.json";
+import notify from "../utils/notify";
 
 const observed = vi.hoisted(() => ({ graph: null, changeRange: null }));
 vi.mock("../components/graphs/Graph", () => ({ default: (props) => {
@@ -26,9 +28,9 @@ const response = (timestamps, extra = {}) => ({ result: "success", data: {
     sensor: "test-sensor", measurements: timestamps.map(reading), ...extra,
 } });
 let root, container, api, sensor;
-const render = async () => {
+const render = async (props = {}) => {
     await act(async () => {
-        root.render(<MemoryRouter><Provider><Sensor sensor={sensor} /></Provider></MemoryRouter>);
+        root.render(<MemoryRouter><Provider><Sensor sensor={sensor} {...props} /></Provider></MemoryRouter>);
     });
 };
 const flush = async () => { await act(async () => {}); };
@@ -171,4 +173,51 @@ it("assembles paginated history through a cached segment before resuming polling
     await act(async () => vi.advanceTimersByTimeAsync(60000));
     expect(api).toHaveBeenCalledTimes(4);
     expect(timestamps()).toEqual([now + 59, now - 1, now - 120, now - 180]);
+});
+
+it("uses the configured larger public batch without paginating at the private page size", async () => {
+    api.mockResolvedValue(response(Array.from({ length: pjson.settings.dataFetchPaginationSize }, (_, i) => now - i - 1)));
+    await render({ isPublic: true });
+    expect(api).toHaveBeenCalledTimes(1);
+    expect(api.mock.calls[0][3]).toEqual({ mode: "mixed", limit: pjson.settings.publicSensorDataFetchPaginationSize, auth: false });
+    await act(async () => vi.advanceTimersByTimeAsync(60000));
+    expect(api.mock.calls[1][3].limit).toBe(pjson.settings.publicSensorDataFetchPaginationSize);
+});
+
+it("warns on throttling and resumes the interrupted history page after Retry-After", async () => {
+    const errorToast = vi.spyOn(notify, "error");
+    api.mockResolvedValueOnce(response([now - 1], { nextUp: now - 60 }))
+        .mockResolvedValueOnce({ result: "error", code: "ER_THROTTLED", retryAfterMs: 120000 })
+        .mockResolvedValueOnce(response([now - 120]));
+    await render({ isPublic: true });
+    expect(timestamps()).toEqual([now - 1]);
+    expect(container.querySelector('[role="status"]')?.textContent).toBe("Too many requests");
+    expect(errorToast).not.toHaveBeenCalled();
+    await act(async () => vi.advanceTimersByTimeAsync(119999));
+    expect(api).toHaveBeenCalledTimes(2);
+    await act(async () => vi.advanceTimersByTimeAsync(1));
+    expect(api.mock.calls[2][2]).toBe(now - 60);
+    expect(api.mock.calls[2][1]).toBeLessThan(now - 120);
+    expect(timestamps()).toEqual([now - 1, now - 120]);
+    expect(container.querySelector('[role="status"]')).toBeNull();
+});
+
+it("keeps graph data and clears a throttle warning after a successful refresh", async () => {
+    const errorToast = vi.spyOn(notify, "error");
+    await render({ isPublic: true });
+    api.mockResolvedValueOnce({ result: "error", code: "ER_THROTTLED" });
+    await act(async () => vi.advanceTimersByTimeAsync(60000));
+    expect(timestamps()).toEqual([now - 1]);
+    expect(container.querySelector('[role="status"]')).not.toBeNull();
+    expect(errorToast).not.toHaveBeenCalled();
+    await act(async () => vi.advanceTimersByTimeAsync(60000));
+    expect(container.querySelector('[role="status"]')).toBeNull();
+});
+
+it("still shows real API failures as errors", async () => {
+    const errorToast = vi.spyOn(notify, "error");
+    api.mockResolvedValue({ result: "error", code: "ER_FORBIDDEN" });
+    await render({ isPublic: true });
+    expect(errorToast).toHaveBeenCalledTimes(1);
+    expect(container.querySelector('[role="status"]')).toBeNull();
 });

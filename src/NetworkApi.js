@@ -4,8 +4,27 @@ import parse from './decoder/parser';
 import { logout } from './utils/loginUtils';
 import logger from './utils/logger';
 import { isStagingEnv, isPublicRoute } from './utils/env';
+import { isThrottled, retryAfterMs } from './utils/requestThrottle';
 
 let GET_ALL_SENSORS_CACHE = { ts: 0, data: null };
+
+// The server limits public requests per IP, across all sensors. This page's
+// budget is shared by latest-reading and history requests, API instances, and
+// sensor navigation. Other tabs/devices on the same IP can still trigger server
+// throttling. Production and staging have separate budgets.
+const publicRequestWindows = new Map();
+function reservePublicRequest(url) {
+    const now = Date.now();
+    const window = publicRequestWindows.get(url) || { timestamps: [], retryAt: 0 };
+    publicRequestWindows.set(url, window);
+    window.timestamps = window.timestamps.filter(timestamp => timestamp > now - 60000);
+    const nextSlot = window.timestamps.length >= pjson.settings.publicSensorRequestsPerMinute
+        ? window.timestamps[0] + 60000 : now;
+    const delay = Math.max(nextSlot, window.retryAt) - now;
+    if (delay > 0) return { result: "error", code: "ER_THROTTLED", retryAfterMs: delay };
+    window.timestamps.push(now);
+    return null;
+}
 
 // api docs: https://docs.ruuvi.com/communication/ruuvi-network/backends/serverless/user-api
 
@@ -37,6 +56,12 @@ class NetworkApi {
     // by default those are parsed and returned like any other response;
     // `strict` restores the old behavior of throwing the Response instead.
     async request(path, { method = 'GET', body, signal, timeout, strict, auth = true, headers } = {}) {
+        if (signal?.aborted) throw signal.reason || new DOMException("Aborted", "AbortError");
+        const publicSensorRequest = !auth && path.startsWith('/get?');
+        if (publicSensorRequest) {
+            const throttled = reservePublicRequest(this.url);
+            if (throttled) return throttled;
+        }
         const controller = timeout === undefined ? null : new AbortController();
         const onAbort = () => controller.abort(signal.reason);
         let timeoutId;
@@ -61,7 +86,19 @@ class NetworkApi {
             }
             if (strict && !response.ok) throw response;
             // Keep cancellation and the deadline active through body consumption.
-            return await response.json();
+            // Gateways may return a non-JSON 429 body. Preserve it as a throttle
+            // response so callers can show a warning and retry normally.
+            const result = response.status === 429
+                ? { result: "error", code: "ER_THROTTLED" }
+                : await response.json();
+            if (isThrottled(result)) {
+                result.retryAfterMs = retryAfterMs(response.headers);
+                if (publicSensorRequest) {
+                    const window = publicRequestWindows.get(this.url);
+                    window.retryAt = Math.max(window.retryAt, Date.now() + result.retryAfterMs);
+                }
+            }
+            return result;
         } finally {
             clearTimeout(timeoutId);
             if (controller) signal?.removeEventListener('abort', onAbort);
@@ -129,7 +166,7 @@ class NetworkApi {
         const mode = settings?.mode || "mixed";
         const auth = settings?.auth !== false;
         const limit = settings?.limit || 100000;
-        const paginationSize = pjson.settings.dataFetchPaginationSize;
+        const paginationSize = settings?.limit || pjson.settings.dataFetchPaginationSize;
 
         const closestCache = await cache.getClosestSegment(mac, mode, since, until);
         checkAborted();
