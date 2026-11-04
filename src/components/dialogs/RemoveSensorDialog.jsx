@@ -71,7 +71,14 @@ function RemoveSensorDialog(props) {
             <div style={{ textAlign: "center" }}>
                 <Box mt={100} height={"40px"}>
                     {loading ? <Spinner size="xl" /> :
-                        <Button onClick={() => setConfirmOpen(true)}>{props.t("remove")}</Button>
+                        <Button
+                            bg="red.600 !important"
+                            _hover={{
+                                backgroundColor: "red.700 !important",
+                                borderColor: "red.700 !important",
+                            }}
+                            onClick={() => setConfirmOpen(true)}
+                        >{props.t("remove")}</Button>
                     }
                 </Box>
             </div>

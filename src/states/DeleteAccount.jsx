@@ -59,7 +59,7 @@ function Outcome({ status, headingRef }) {
 }
 
 export default function DeleteAccount() {
-    const [token] = useState(() => getDeletionToken(window.location.search));
+    const [token] = useState(() => getDeletionToken(window.location.search, window.location.hash));
     const [status, setStatus] = useState(token ? "ready" : "missing");
     const [confirmed, setConfirmed] = useState(false);
     const submitting = useRef(false);

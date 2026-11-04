@@ -50,26 +50,30 @@ afterEach(() => {
     delete globalThis.IS_REACT_ACT_ENVIRONMENT;
 });
 
-it("makes no request on load or acknowledgement and requires an explicit confirmation", async () => {
-    await render();
-    expect(fetch).not.toHaveBeenCalled();
-    expect(submit().disabled).toBe(true);
-    // Even a manually dispatched submit cannot bypass the acknowledgement.
-    await act(async () =>
-        container.querySelector("form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
-    );
-    expect(fetch).not.toHaveBeenCalled();
-    await click(checkbox());
-    expect(submit().disabled).toBe(false);
-    expect(fetch).not.toHaveBeenCalled();
-    expect(container.textContent).not.toContain("another-account@example.com");
-    await click(submit());
-    expect(fetch.mock.calls[0][0]).toBe("https://network.ruuvi.com/verify-delete?token=email-token");
-    expect(fetch.mock.calls[0][1].credentials).toBe("omit");
-    expect(container.querySelector("h1").textContent).toBe("Account deletion has started");
-    expect(submit()).toBeNull();
-    expect(document.activeElement).toBe(container.querySelector("h1"));
-});
+it.each(["/delete-account?token=email-token&lng=fi", "/delete-account?lng=fi#token=email-token"])(
+    "makes no request until explicit confirmation for %s",
+    async (path) => {
+        window.history.replaceState(null, "", path);
+        await render();
+        expect(fetch).not.toHaveBeenCalled();
+        expect(submit().disabled).toBe(true);
+        // Even a manually dispatched submit cannot bypass the acknowledgement.
+        await act(async () =>
+            container.querySelector("form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+        );
+        expect(fetch).not.toHaveBeenCalled();
+        await click(checkbox());
+        expect(submit().disabled).toBe(false);
+        expect(fetch).not.toHaveBeenCalled();
+        expect(container.textContent).not.toContain("another-account@example.com");
+        await click(submit());
+        expect(fetch.mock.calls[0][0]).toBe("https://network.ruuvi.com/verify-delete?token=email-token");
+        expect(fetch.mock.calls[0][1].credentials).toBe("omit");
+        expect(container.querySelector("h1").textContent).toBe("Account deletion has started");
+        expect(submit()).toBeNull();
+        expect(document.activeElement).toBe(container.querySelector("h1"));
+    },
+);
 
 it("blocks duplicate submissions and cancel while the request is in flight", async () => {
     let finish;
@@ -94,17 +98,21 @@ it("blocks duplicate submissions and cancel while the request is in flight", asy
     expect(container.querySelector("h1").textContent).toBe("Account deletion has started");
 });
 
-it.each(["/delete-account", "/delete-account?token=", "/delete-account?token=a&token=b"])(
-    "offers a recovery path without deletion for %s",
-    async (path) => {
-        window.history.replaceState(null, "", path);
-        await render();
-        expect(container.querySelector("h1").textContent).toBe("Your deletion link is incomplete");
-        expect(submit()).toBeNull();
-        expect(container.querySelector('a[href="mailto:support@ruuvi.com"]')).not.toBeNull();
-        expect(fetch).not.toHaveBeenCalled();
-    },
-);
+it.each([
+    "/delete-account",
+    "/delete-account?token=",
+    "/delete-account?token=a&token=b",
+    "/delete-account#token=",
+    "/delete-account#token=a&token=b",
+    "/delete-account?token=a#token=b",
+])("offers a recovery path without deletion for %s", async (path) => {
+    window.history.replaceState(null, "", path);
+    await render();
+    expect(container.querySelector("h1").textContent).toBe("Your deletion link is incomplete");
+    expect(submit()).toBeNull();
+    expect(container.querySelector('a[href="mailto:support@ruuvi.com"]')).not.toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
+});
 
 it("explains a rejected link without retrying or changing authentication", async () => {
     fetch.mockResolvedValue({ status: 403 });

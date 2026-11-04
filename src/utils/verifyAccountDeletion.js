@@ -1,5 +1,8 @@
-export function getDeletionToken(search) {
-    const tokens = new URLSearchParams(search).getAll("token");
+export function getDeletionToken(search, hash = "") {
+    const tokens = [
+        ...new URLSearchParams(search).getAll("token"),
+        ...new URLSearchParams(hash.replace(/^#/, "")).getAll("token"),
+    ];
     // Ambiguous and empty links cannot identify an account for deletion.
     return tokens.length === 1 && tokens[0].trim() ? tokens[0] : null;
 }

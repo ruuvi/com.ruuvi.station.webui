@@ -20,6 +20,19 @@ describe("deletion email token", () => {
     it("reads only the email token and preserves opaque characters", () => {
         expect(getDeletionToken("?token=a%2Bb%26c%3Dd&accessToken=other&lng=fi")).toBe("a+b&c=d");
     });
+
+    it("reads the email token from the hash alongside unrelated query parameters", () => {
+        expect(getDeletionToken("?lng=fi", "#token=a%2Bb%26c%3Dd&accessToken=other")).toBe("a+b&c=d");
+    });
+
+    it.each(["#token=", "#token=%20%20", "#token=one&token=two", "#accessToken=session-token"])(
+        "rejects a missing or ambiguous hash token in %s",
+        (hash) => expect(getDeletionToken("", hash)).toBeNull(),
+    );
+
+    it("rejects tokens supplied in both the query and hash", () => {
+        expect(getDeletionToken("?token=one", "#token=two")).toBeNull();
+    });
 });
 
 describe("account deletion request", () => {
