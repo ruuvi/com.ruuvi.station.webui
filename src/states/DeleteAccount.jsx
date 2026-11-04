@@ -134,7 +134,10 @@ export default function DeleteAccount() {
                                         </span>
                                         <div>
                                             <h2>Your account data will be deleted</h2>
-                                            <p>This includes your sensor claims and settings.</p>
+                                            <p>
+                                                This includes your sensor claims and settings. Data for all sensors
+                                                in your account will also be deleted from the cloud.
+                                            </p>
                                         </div>
                                     </li>
                                 </ul>
