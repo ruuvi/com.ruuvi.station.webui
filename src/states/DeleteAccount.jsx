@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { FiCheck, FiHelpCircle, FiLink, FiRadio, FiShare2, FiUser } from "react-icons/fi";
+import { FiCheck, FiHelpCircle, FiLink, FiX } from "react-icons/fi";
 import mascot from "../img/with-phone-serious-500.png";
 import { getDeletionToken, verifyAccountDeletion } from "../utils/verifyAccountDeletion";
 import "./DeleteAccount.css";
@@ -112,7 +112,7 @@ export default function DeleteAccount() {
                                 <ul className="delete-account-consequences" role="list">
                                     <li>
                                         <span className="delete-account-list-icon">
-                                            <FiShare2 aria-hidden="true" />
+                                            <FiX aria-hidden="true" />
                                         </span>
                                         <div>
                                             <h2>Sensor sharing will stop</h2>
@@ -121,7 +121,7 @@ export default function DeleteAccount() {
                                     </li>
                                     <li>
                                         <span className="delete-account-list-icon">
-                                            <FiRadio aria-hidden="true" />
+                                            <FiX aria-hidden="true" />
                                         </span>
                                         <div>
                                             <h2>Shared sensors will be removed</h2>
@@ -130,7 +130,7 @@ export default function DeleteAccount() {
                                     </li>
                                     <li>
                                         <span className="delete-account-list-icon">
-                                            <FiUser aria-hidden="true" />
+                                            <FiX aria-hidden="true" />
                                         </span>
                                         <div>
                                             <h2>Your account data will be deleted</h2>
