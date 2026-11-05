@@ -114,6 +114,7 @@
 }
 
 .delete-account-consequences p {
+    max-width: 52ch;
     color: var(--delete-muted);
     font-size: 13px;
     line-height: 1.6;
@@ -192,6 +193,15 @@
     background: #e1eeeb;
     color: #617772;
     cursor: not-allowed;
+}
+
+.delete-account-button--delete:not(:disabled) {
+    background: #b42318;
+    color: #fff;
+}
+
+.delete-account-button--delete:hover:not(:disabled) {
+    background: #912018;
 }
 
 .delete-account-cancel {
