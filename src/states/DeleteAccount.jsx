@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FiCheck, FiHelpCircle, FiLink, FiX } from "react-icons/fi";
 import mascot from "../img/with-phone-serious-500.png";
-import { getDeletionToken, verifyAccountDeletion } from "../utils/verifyAccountDeletion";
+import { getDeletionEnvironment, getDeletionToken, verifyAccountDeletion } from "../utils/verifyAccountDeletion";
 import "./DeleteAccount.css";
 
 const outcomes = {
@@ -23,6 +23,12 @@ const outcomes = {
         title: "This link is no longer valid",
         description: "Your deletion link may have expired or already been used.",
         detail: "To continue, request a new deletion email from your Ruuvi account settings and open the latest link. If you’ve already confirmed deletion, no further action is needed.",
+    },
+    invalidEnvironment: {
+        icon: FiLink,
+        title: "Your deletion link has an invalid environment",
+        description: "We couldn’t determine where to send your deletion request.",
+        detail: "Please open the original link from your email or request a new deletion email from your account settings.",
     },
     cancelled: {
         icon: FiCheck,
@@ -60,7 +66,8 @@ function Outcome({ status, headingRef }) {
 
 export default function DeleteAccount() {
     const [token] = useState(() => getDeletionToken(window.location.search, window.location.hash));
-    const [status, setStatus] = useState(token ? "ready" : "missing");
+    const [environment] = useState(() => getDeletionEnvironment(window.location.search));
+    const [status, setStatus] = useState(!environment ? "invalidEnvironment" : token ? "ready" : "missing");
     const [confirmed, setConfirmed] = useState(false);
     const submitting = useRef(false);
     const headingRef = useRef(null);
@@ -75,12 +82,12 @@ export default function DeleteAccount() {
 
     async function handleDelete(event) {
         event.preventDefault();
-        if (!token || !confirmed || submitting.current || outcome) return;
+        if (!token || !environment || !confirmed || submitting.current || outcome) return;
         // Lock immediately, including clicks before React commits the disabled state.
         submitting.current = true;
         setStatus("submitting");
         try {
-            setStatus(await verifyAccountDeletion(token));
+            setStatus(await verifyAccountDeletion(token, environment));
         } catch {
             setStatus("error");
         } finally {
@@ -93,6 +100,9 @@ export default function DeleteAccount() {
             <main className="delete-account-main">
                 <section aria-labelledby="delete-account-title">
                     <div className="delete-account-content">
+                        {environment === "dev" && (
+                            <p className="delete-account-environment">Development environment</p>
+                        )}
                         {outcome ? (
                             <Outcome status={status} headingRef={headingRef} />
                         ) : (

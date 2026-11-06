@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getDeletionToken, verifyAccountDeletion } from "./verifyAccountDeletion";
+import { getDeletionEnvironment, getDeletionToken, verifyAccountDeletion } from "./verifyAccountDeletion";
 
 beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ status: 200 }));
@@ -35,6 +35,18 @@ describe("deletion email token", () => {
     });
 });
 
+describe("deletion environment", () => {
+    it("defaults to production and accepts an explicit dev selector", () => {
+        expect(getDeletionEnvironment("?lng=fi")).toBe("production");
+        expect(getDeletionEnvironment("?env=dev&lng=fi")).toBe("dev");
+    });
+
+    it.each(["?env=", "?env=staging", "?env=DEV", "?env=dev&env=dev", "?env=dev&env=production"])(
+        "rejects unknown or ambiguous environments in %s",
+        (search) => expect(getDeletionEnvironment(search)).toBeNull(),
+    );
+});
+
 describe("account deletion request", () => {
     it("encodes only the supplied token without reading or changing the current session", async () => {
         const storage = ["getItem", "setItem", "removeItem", "clear"].map((method) =>
@@ -61,6 +73,21 @@ describe("account deletion request", () => {
     it.each([null, undefined, "", "   "])("does not send a request without a token (%s)", async (token) => {
         expect(await verifyAccountDeletion(token)).toBe("invalid");
         expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it.each([null, "", "staging", "https://example.com"])(
+        "does not send a request for an invalid environment (%s)",
+        async (environment) => {
+            expect(await verifyAccountDeletion("email-token", environment)).toBe("invalid");
+            expect(fetch).not.toHaveBeenCalled();
+        },
+    );
+
+    it("does not fall back to production when dev fails", async () => {
+        fetch.mockRejectedValue(new TypeError("Failed to fetch"));
+        await expect(verifyAccountDeletion("email-token", "dev")).rejects.toThrow("Failed to fetch");
+        expect(fetch).toHaveBeenCalledTimes(1);
+        expect(fetch.mock.calls[0][0]).toBe("https://testnet.ruuvi.com/verify-delete?token=email-token");
     });
 
     it("treats HTTP 403 as an invalid deletion link", async () => {

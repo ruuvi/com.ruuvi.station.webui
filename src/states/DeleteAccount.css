@@ -64,6 +64,17 @@
     text-wrap: balance;
 }
 
+.delete-account-content .delete-account-environment {
+    width: fit-content;
+    margin: 0 auto 24px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: #fff8f2;
+    color: #965634;
+    font-size: 14px;
+    font-weight: 800;
+}
+
 .delete-account-mascot {
     display: block;
     width: min(260px, 65%);
@@ -261,6 +272,7 @@
 
 .delete-account-status-icon--missing,
 .delete-account-status-icon--invalid,
+.delete-account-status-icon--invalidEnvironment,
 .delete-account-status-icon--unconfirmed {
     color: #965634;
     background: #fff8f2;

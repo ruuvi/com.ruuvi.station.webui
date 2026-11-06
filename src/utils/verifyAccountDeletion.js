@@ -7,10 +7,20 @@ export function getDeletionToken(search, hash = "") {
     return tokens.length === 1 && tokens[0].trim() ? tokens[0] : null;
 }
 
-export async function verifyAccountDeletion(token) {
+export function getDeletionEnvironment(search) {
+    const environments = new URLSearchParams(search).getAll("env");
+    // The link selects the backend, independently of the browser's session.
+    if (environments.length === 0) return "production";
+    return environments.length === 1 && environments[0] === "dev" ? "dev" : null;
+}
+
+export async function verifyAccountDeletion(token, environment = "production") {
     if (typeof token !== "string" || !token.trim()) return "invalid";
 
-    const url = new URL("https://network.ruuvi.com/verify-delete");
+    const origin = environment === "dev" ? "https://testnet.ruuvi.com"
+        : environment === "production" ? "https://network.ruuvi.com" : null;
+    if (!origin) return "invalid";
+    const url = new URL("/verify-delete", origin);
     url.searchParams.set("token", token);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);

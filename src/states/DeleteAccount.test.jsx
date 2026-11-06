@@ -66,12 +66,44 @@ it.each(["/delete-account?token=email-token&lng=fi", "/delete-account?lng=fi#tok
         expect(submit().disabled).toBe(false);
         expect(fetch).not.toHaveBeenCalled();
         expect(container.textContent).not.toContain("another-account@example.com");
+        expect(container.textContent).not.toContain("Development environment");
         await click(submit());
         expect(fetch.mock.calls[0][0]).toBe("https://network.ruuvi.com/verify-delete?token=email-token");
         expect(fetch.mock.calls[0][1].credentials).toBe("omit");
         expect(container.querySelector("h1").textContent).toBe("Account deletion has started");
         expect(submit()).toBeNull();
         expect(document.activeElement).toBe(container.querySelector("h1"));
+    },
+);
+
+it.each([
+    "/delete-account?env=dev&token=email-token",
+    "/delete-account?env=dev#token=email-token",
+])("confirms dev deletion only on the dev backend for %s", async (path) => {
+    localStorage.removeItem("env");
+    storedSession = { ...localStorage };
+    window.history.replaceState(null, "", path);
+    await render();
+    expect(container.textContent).toContain("Development environment");
+    expect(fetch).not.toHaveBeenCalled();
+    expect(submit().disabled).toBe(true);
+    await click(checkbox());
+    await click(submit());
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch.mock.calls[0][0]).toBe("https://testnet.ruuvi.com/verify-delete?token=email-token");
+    expect(fetch.mock.calls[0][1].credentials).toBe("omit");
+    expect(container.querySelector("h1").textContent).toBe("Account deletion has started");
+    expect(container.textContent).toContain("Development environment");
+});
+
+it.each(["env=", "env=staging", "env=dev&env=dev", "env=dev&env=production"])(
+    "blocks deletion for an invalid environment (%s)",
+    async (query) => {
+        window.history.replaceState(null, "", `/delete-account?${query}#token=email-token`);
+        await render();
+        expect(container.querySelector("h1").textContent).toBe("Your deletion link has an invalid environment");
+        expect(submit()).toBeNull();
+        expect(fetch).not.toHaveBeenCalled();
     },
 );
 
