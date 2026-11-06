@@ -1,122 +1,167 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getDeletionEnvironment, getDeletionToken, verifyAccountDeletion } from "./verifyAccountDeletion";
+import {
+    getDeletionEnvironment,
+    getDeletionToken,
+    readDeletionLink,
+    verifyAccountDeletion,
+} from "./verifyAccountDeletion";
 
-beforeEach(() => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ status: 200 }));
+const token = "a".repeat(43);
+const progress = {
+    status: "completed",
+    account: "deleted",
+    history: "in_progress",
+    notifications: "completed",
+    overall: "in_progress",
+};
+const response = (status, data, headers = {}) => ({
+    status,
+    headers: new Headers(headers),
+    json: async () => ({ result: status < 400 ? "success" : "error", data }),
 });
-
+beforeEach(() => vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response(200, progress))));
 afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
     vi.useRealTimers();
+    window.history.replaceState(null, "", "/");
 });
 
-describe("deletion email token", () => {
+describe("deletion link", () => {
     it.each(["", "?token=", "?token=%20%20", "?token=one&token=two", "?accessToken=session-token"])(
-        "rejects a missing or ambiguous token in %s",
+        "rejects missing or ambiguous tokens in %s",
         (search) => expect(getDeletionToken(search)).toBeNull(),
     );
-
-    it("reads only the email token and preserves opaque characters", () => {
-        expect(getDeletionToken("?token=a%2Bb%26c%3Dd&accessToken=other&lng=fi")).toBe("a+b&c=d");
-    });
-
-    it("reads the email token from the hash alongside unrelated query parameters", () => {
-        expect(getDeletionToken("?lng=fi", "#token=a%2Bb%26c%3Dd&accessToken=other")).toBe("a+b&c=d");
-    });
-
-    it.each(["#token=", "#token=%20%20", "#token=one&token=two", "#accessToken=session-token"])(
-        "rejects a missing or ambiguous hash token in %s",
-        (hash) => expect(getDeletionToken("", hash)).toBeNull(),
-    );
-
-    it("rejects tokens supplied in both the query and hash", () => {
+    it("reads an opaque token from either query or fragment, but not both", () => {
+        expect(getDeletionToken("?token=a%2Bb%26c%3Dd")).toBe("a+b&c=d");
+        expect(getDeletionToken("?lng=fi", "#token=" + token)).toBe(token);
         expect(getDeletionToken("?token=one", "#token=two")).toBeNull();
+        expect(getDeletionToken("", "#token=one&token=two")).toBeNull();
     });
-});
-
-describe("deletion environment", () => {
-    it("defaults to production and accepts an explicit dev selector", () => {
-        expect(getDeletionEnvironment("?lng=fi")).toBe("production");
-        expect(getDeletionEnvironment("?env=dev&lng=fi")).toBe("dev");
+    it.each(["?lng=fi#token=", "?lng=fi&token="])(
+        "removes the token from history and preserves unrelated parameters (%s)",
+        (prefix) => {
+            window.history.replaceState({ keep: true }, "", "/delete-account/" + prefix + token);
+            expect(readDeletionLink()).toEqual({ token, environment: "production" });
+            expect(window.location.search).toBe("?lng=fi");
+            expect(window.location.hash).toBe("");
+            expect(window.history.state).toEqual({ keep: true });
+        },
+    );
+    it("selects the backend from the email destination, independently of stored session preferences", () => {
+        expect(getDeletionEnvironment("", "devstation.ruuvi.com")).toBe("dev");
+        expect(getDeletionEnvironment("", "station.ruuvi.com")).toBe("production");
+        expect(getDeletionEnvironment("?env=dev", "localhost")).toBe("dev");
     });
-
     it.each(["?env=", "?env=staging", "?env=DEV", "?env=dev&env=dev", "?env=dev&env=production"])(
         "rejects unknown or ambiguous environments in %s",
         (search) => expect(getDeletionEnvironment(search)).toBeNull(),
     );
 });
 
-describe("account deletion request", () => {
-    it("encodes only the supplied token without reading or changing the current session", async () => {
-        const storage = ["getItem", "setItem", "removeItem", "clear"].map((method) =>
+describe("deletion API contract", () => {
+    it.each(["status", "confirm"])("uses anonymous JSON POST for %s without touching storage", async (action) => {
+        const spies = ["getItem", "setItem", "removeItem", "clear"].map((method) =>
             vi.spyOn(Storage.prototype, method).mockImplementation(() => {
-                throw new Error("The deletion request must not access session storage");
+                throw new Error("Unexpected session access");
             }),
         );
-
-        expect(await verifyAccountDeletion("a+b&c=d")).toBe("started");
+        expect(await verifyAccountDeletion(token, "production", action)).toEqual(progress);
         const [url, options] = fetch.mock.calls[0];
-        expect(url).toBe("https://network.ruuvi.com/verify-delete?token=a%2Bb%26c%3Dd");
+        expect(url).toBe("https://network.ruuvi.com/verify-delete" + (action === "status" ? "/status" : ""));
         expect(options).toMatchObject({
-            method: "GET",
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token }),
             credentials: "omit",
             cache: "no-store",
             referrerPolicy: "no-referrer",
             redirect: "error",
         });
-        expect(options.headers).toBeUndefined();
-        expect(options.body).toBeUndefined();
-        for (const spy of storage) expect(spy).not.toHaveBeenCalled();
+        expect(url).not.toContain(token);
+        for (const spy of spies) expect(spy).not.toHaveBeenCalled();
     });
-
-    it.each([null, undefined, "", "   "])("does not send a request without a token (%s)", async (token) => {
-        expect(await verifyAccountDeletion(token)).toBe("invalid");
-        expect(fetch).not.toHaveBeenCalled();
+    it("never falls back from dev to production", async () => {
+        fetch.mockRejectedValue(new TypeError("Failed to fetch"));
+        await expect(verifyAccountDeletion(token, "dev")).rejects.toThrow();
+        expect(fetch).toHaveBeenCalledTimes(1);
+        expect(fetch.mock.calls[0][0]).toBe("https://testnet.ruuvi.com/verify-delete");
     });
-
-    it.each([null, "", "staging", "https://example.com"])(
-        "does not send a request for an invalid environment (%s)",
-        async (environment) => {
-            expect(await verifyAccountDeletion("email-token", environment)).toBe("invalid");
+    it.each([null, undefined, "", "short-token", "a".repeat(44), "+".repeat(43)])(
+        "rejects malformed tokens (%s) locally",
+        async (value) => {
+            expect(await verifyAccountDeletion(value, "production")).toEqual({ status: "invalid_request" });
             expect(fetch).not.toHaveBeenCalled();
         },
     );
-
-    it("does not fall back to production when dev fails", async () => {
-        fetch.mockRejectedValue(new TypeError("Failed to fetch"));
-        await expect(verifyAccountDeletion("email-token", "dev")).rejects.toThrow("Failed to fetch");
-        expect(fetch).toHaveBeenCalledTimes(1);
-        expect(fetch.mock.calls[0][0]).toBe("https://testnet.ruuvi.com/verify-delete?token=email-token");
+    it("accepts base64url tokens", async () => {
+        expect(await verifyAccountDeletion("_-" + "a".repeat(41), "production")).toEqual(progress);
     });
-
-    it("treats HTTP 403 as an invalid deletion link", async () => {
-        fetch.mockResolvedValue({ status: 403 });
-        expect(await verifyAccountDeletion("email-token")).toBe("invalid");
+    it.each([
+        [400, "invalid_request"],
+        [404, "invalid"],
+        [410, "expired"],
+        [503, "temporarily_failed"],
+    ])("handles HTTP %s", async (http, status) => {
+        fetch.mockResolvedValue(response(http, { status }));
+        expect(await verifyAccountDeletion(token, "production")).toEqual({ status });
     });
-
-    it.each([401, 429, 500, 204])("does not report success for HTTP %s", async (status) => {
-        fetch.mockResolvedValue({ status });
-        await expect(verifyAccountDeletion("email-token")).rejects.toThrow("could not be confirmed");
+    it("accepts pending only from the status endpoint", async () => {
+        fetch.mockResolvedValue(response(200, { status: "pending" }));
+        expect(await verifyAccountDeletion(token, "production", "status")).toEqual({ status: "pending" });
+        await expect(verifyAccountDeletion(token, "production")).rejects.toThrow();
     });
-
-    it("propagates a network error without retrying a destructive request", async () => {
-        fetch.mockRejectedValue(new TypeError("Failed to fetch"));
-        await expect(verifyAccountDeletion("email-token")).rejects.toThrow("Failed to fetch");
-        expect(fetch).toHaveBeenCalledTimes(1);
+    it("honors processing Retry-After", async () => {
+        fetch.mockResolvedValue(response(202, { status: "processing" }, { "Retry-After": "7" }));
+        expect(await verifyAccountDeletion(token, "production")).toEqual({ status: "processing", retryAfterMs: 7000 });
     });
-
-    it("ends a stalled request after 30 seconds without retrying", async () => {
+    it.each([undefined, "garbage", ""])(
+        "defaults rate limits to one minute with header %s, including non-JSON errors",
+        async (header) => {
+            fetch.mockResolvedValue({
+                status: 429,
+                headers: new Headers(header ? { "Retry-After": header } : {}),
+                json: async () => {
+                    throw new Error("Not JSON");
+                },
+            });
+            expect(await verifyAccountDeletion(token, "production")).toEqual({
+                status: "rate_limited",
+                retryAfterMs: 60000,
+            });
+        },
+    );
+    it("honors rate limits even without data.status", async () => {
+        fetch.mockResolvedValue(response(429, undefined, { "Retry-After": "90" }));
+        expect(await verifyAccountDeletion(token, "production")).toEqual({
+            status: "rate_limited",
+            retryAfterMs: 90000,
+        });
+    });
+    it.each([200, 204, 401, 403, 404, 500, 502, 503])(
+        "does not interpret an empty or unexpected HTTP %s as success or an invalid token",
+        async (http) => {
+            fetch.mockResolvedValue(response(http, undefined));
+            await expect(verifyAccountDeletion(token, "production")).rejects.toThrow();
+        },
+    );
+    it("rejects incomplete progress", async () => {
+        fetch.mockResolvedValue(response(200, { status: "completed", account: "deleted" }));
+        await expect(verifyAccountDeletion(token, "production")).rejects.toThrow();
+    });
+    it("aborts stalled body consumption after 30 seconds", async () => {
         vi.useFakeTimers();
-        fetch.mockImplementation(
-            (_url, { signal }) =>
-                new Promise((_resolve, reject) => {
-                    signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
-                }),
-        );
-        const request = expect(verifyAccountDeletion("email-token")).rejects.toMatchObject({ name: "AbortError" });
+        fetch.mockImplementation(async (_url, { signal }) => ({
+            status: 200,
+            headers: new Headers(),
+            json: () =>
+                new Promise((_resolve, reject) =>
+                    signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError"))),
+                ),
+        }));
+        const assertion = expect(verifyAccountDeletion(token, "production")).rejects.toThrow();
         await vi.advanceTimersByTimeAsync(30000);
-        await request;
+        await assertion;
         expect(fetch).toHaveBeenCalledTimes(1);
         expect(vi.getTimerCount()).toBe(0);
     });

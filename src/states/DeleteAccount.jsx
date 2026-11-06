@@ -1,17 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { FiCheck, FiHelpCircle, FiLink, FiX } from "react-icons/fi";
+import { FiCheck, FiLink, FiX } from "react-icons/fi";
 import mascot from "../img/with-phone-serious-500.png";
-import { getDeletionEnvironment, getDeletionToken, verifyAccountDeletion } from "../utils/verifyAccountDeletion";
+import useAccountDeletion, { deletionNeedsAttention } from "../hooks/useAccountDeletion";
 import "./DeleteAccount.css";
 
 const outcomes = {
-    started: {
-        icon: FiCheck,
-        title: "Account deletion has started",
-        description:
-            "We’ve received your confirmation and started deleting the Ruuvi account associated with your email link.",
-        detail: "Your sensor sharing, sensor claims and account settings will be removed. You can now close this page.",
-    },
     missing: {
         icon: FiLink,
         title: "Your deletion link is incomplete",
@@ -21,7 +14,7 @@ const outcomes = {
     invalid: {
         icon: FiLink,
         title: "This link is no longer valid",
-        description: "Your deletion link may have expired or already been used.",
+        description: "Your deletion link was not found or has been replaced by a newer link.",
         detail: "To continue, request a new deletion email from your Ruuvi account settings and open the latest link. If you’ve already confirmed deletion, no further action is needed.",
     },
     invalidEnvironment: {
@@ -38,10 +31,16 @@ const outcomes = {
         detail: "Thanks for being part of Ruuvi.",
     },
     unconfirmed: {
-        icon: FiHelpCircle,
+        icon: FiLink,
         title: "Deletion status unconfirmed",
-        description: "We couldn’t confirm whether your deletion request was received.",
-        detail: "Deletion may already be in progress. Please contact our team if you need help checking.",
+        description: "Your earlier confirmation may still be processing.",
+        detail: "Closing this page does not cancel a submitted deletion. Reopen your email link to check progress, or contact support.",
+    },
+    expired: {
+        icon: FiLink,
+        title: "Your deletion link has expired",
+        description: "This link expired before account deletion was confirmed.",
+        detail: "Request a new deletion email from your Ruuvi account settings and open the latest link.",
     },
 };
 
@@ -64,35 +63,122 @@ function Outcome({ status, headingRef }) {
     );
 }
 
-export default function DeleteAccount() {
-    const [token] = useState(() => getDeletionToken(window.location.search, window.location.hash));
-    const [environment] = useState(() => getDeletionEnvironment(window.location.search));
-    const [status, setStatus] = useState(!environment ? "invalidEnvironment" : token ? "ready" : "missing");
+function Progress({ progress, status, headingRef }) {
+    const attention = deletionNeedsAttention(progress);
+    const finished = progress.overall === "completed" && !attention;
+    const labels = { in_progress: "In progress", completed: "Completed", needs_attention: "Needs support" };
+    return (
+        <div className="delete-account-outcome">
+            <h1 id="delete-account-title" ref={headingRef} tabIndex={-1}>
+                {attention
+                    ? "Cleanup needs attention"
+                    : finished
+                      ? "Account deletion completed"
+                      : "Your account is deleted"}
+            </h1>
+            <p className="delete-account-intro">Your account, sensor claims, shares and settings have been removed.</p>
+            <dl className="delete-account-progress" aria-live="polite">
+                <div>
+                    <dt>Account</dt>
+                    <dd>Deleted</dd>
+                </div>
+                <div>
+                    <dt>Measurement history</dt>
+                    <dd>{labels[progress.history]}</dd>
+                </div>
+                <div>
+                    <dt>Share notifications</dt>
+                    <dd>{labels[progress.notifications]}</dd>
+                </div>
+                <div>
+                    <dt>All cleanup</dt>
+                    <dd>{labels[progress.overall]}</dd>
+                </div>
+            </dl>
+            <p className="delete-account-outcome-detail">
+                {attention ? (
+                    <>
+                        Some cleanup could not finish. Please{" "}
+                        <a href="mailto:support@ruuvi.com">contact Ruuvi support</a>.
+                    </>
+                ) : finished ? (
+                    "All cleanup is complete. You can close this page."
+                ) : (
+                    "Cleanup continues in the background and may take a few days. You can close it and reopen your email link later."
+                )}
+            </p>
+            {!attention && !finished && status === "completed" && (
+                <p className="delete-account-outcome-detail">This page checks progress every 10 seconds.</p>
+            )}
+            <p className="delete-account-outcome-detail">
+                Completed share notifications have been accepted by the email service; delivery to recipients is not
+                confirmed.
+            </p>
+            <a className="delete-account-button delete-account-button--return" href="/" rel="noreferrer">
+                Back to Ruuvi Station
+            </a>
+        </div>
+    );
+}
+
+function RequestStatus({ status, retry, hasProgress, headingRef }) {
+    const failed = status === "error" || status === "temporarily_failed";
+    const messages = {
+        checking: ["Checking deletion status…", "Please wait while we check your email link."],
+        processing: [
+            "Processing your confirmation…",
+            "Another confirmation is being processed. We’ll try again shortly.",
+        ],
+        rate_limited: [
+            "Please wait before trying again",
+            "Too many requests were made. We’ll retry automatically once you can continue.",
+        ],
+        temporarily_failed: [
+            "Please try again later",
+            "The service is temporarily unavailable. Check the status again before continuing.",
+        ],
+        error: [
+            "Deletion status unconfirmed",
+            "We couldn’t check the latest status. If you confirmed deletion, it may already be in progress. Check again or contact support.",
+        ],
+    };
+    const message = messages[status];
+    if (!message || (hasProgress && status === "checking")) return null;
+    return (
+        <div className={failed ? "delete-account-error" : "delete-account-outcome"} role={failed ? "alert" : "status"}>
+            {hasProgress ? (
+                <strong>{message[0]}</strong>
+            ) : (
+                <h1 id="delete-account-title" ref={headingRef} tabIndex={-1}>
+                    {message[0]}
+                </h1>
+            )}
+            <p className="delete-account-outcome-detail">{message[1]}</p>
+            {failed && (
+                <button className="delete-account-button delete-account-button--return" onClick={retry}>
+                    Check status again
+                </button>
+            )}
+        </div>
+    );
+}
+
+export default function DeleteAccount({ link }) {
+    const { status, progress, confirm, retry, cancel } = useAccountDeletion(link);
     const [confirmed, setConfirmed] = useState(false);
-    const submitting = useRef(false);
     const headingRef = useRef(null);
-    const errorRef = useRef(null);
     const isSubmitting = status === "submitting";
-    const outcome = outcomes[status];
+    const outcomeStatus = status === "invalid_request" ? "invalid" : status;
+    const outcome = outcomes[outcomeStatus];
+    const view = progress ? progress.overall : status;
 
     useEffect(() => {
-        if (outcomes[status]) headingRef.current?.focus();
-        if (status === "error") errorRef.current?.focus();
-    }, [status]);
+        headingRef.current?.focus();
+    }, [view]);
 
-    async function handleDelete(event) {
+    function handleDelete(event) {
         event.preventDefault();
-        if (!token || !environment || !confirmed || submitting.current || outcome) return;
-        // Lock immediately, including clicks before React commits the disabled state.
-        submitting.current = true;
-        setStatus("submitting");
-        try {
-            setStatus(await verifyAccountDeletion(token, environment));
-        } catch {
-            setStatus("error");
-        } finally {
-            submitting.current = false;
-        }
+        if (confirmed) confirm();
     }
 
     return (
@@ -100,14 +186,23 @@ export default function DeleteAccount() {
             <main className="delete-account-main">
                 <section aria-labelledby="delete-account-title">
                     <div className="delete-account-content">
-                        {environment === "dev" && (
+                        {link.environment === "dev" && (
                             <p className="delete-account-environment">Development environment</p>
                         )}
                         {outcome ? (
-                            <Outcome status={status} headingRef={headingRef} />
+                            <Outcome status={outcomeStatus} headingRef={headingRef} />
+                        ) : progress ? (
+                            <>
+                                <Progress progress={progress} status={status} headingRef={headingRef} />
+                                <RequestStatus status={status} retry={retry} hasProgress />
+                            </>
+                        ) : !["ready", "submitting"].includes(status) ? (
+                            <RequestStatus status={status} retry={retry} headingRef={headingRef} />
                         ) : (
                             <>
-                                <h1 id="delete-account-title">Delete your account?</h1>
+                                <h1 id="delete-account-title" ref={headingRef} tabIndex={-1}>
+                                    Delete your account?
+                                </h1>
                                 <p className="delete-account-intro">
                                     Before you go, here’s what will happen to the Ruuvi account associated with your
                                     email link.
@@ -145,8 +240,8 @@ export default function DeleteAccount() {
                                         <div>
                                             <h2>Your account data will be deleted</h2>
                                             <p>
-                                                This includes your sensor claims and settings. Data for all sensors
-                                                in your account will also be deleted from the cloud.
+                                                This includes your sensor claims and settings. Measurement history for
+                                                sensors you own will also be deleted from the cloud.
                                             </p>
                                         </div>
                                     </li>
@@ -169,17 +264,6 @@ export default function DeleteAccount() {
                                         <span>I understand and want to permanently delete this account.</span>
                                     </label>
 
-                                    {status === "error" && (
-                                        <div className="delete-account-error" role="alert" ref={errorRef} tabIndex={-1}>
-                                            <strong>We couldn’t confirm deletion</strong>
-                                            <p>
-                                                The request may not have reached us. Please try again, or{" "}
-                                                <a href="mailto:support@ruuvi.com">contact support</a> if this
-                                                continues.
-                                            </p>
-                                        </div>
-                                    )}
-
                                     <div className="delete-account-actions">
                                         <button
                                             className="delete-account-button delete-account-button--delete"
@@ -189,19 +273,15 @@ export default function DeleteAccount() {
                                             {isSubmitting && (
                                                 <span className="delete-account-spinner" aria-hidden="true" />
                                             )}
-                                            {isSubmitting
-                                                ? "Deleting account…"
-                                                : status === "error"
-                                                  ? "Try again"
-                                                  : "Delete account"}
+                                            {isSubmitting ? "Deleting account…" : "Delete account"}
                                         </button>
                                         <button
                                             className="delete-account-cancel"
                                             type="button"
                                             disabled={isSubmitting}
-                                            onClick={() => setStatus(status === "error" ? "unconfirmed" : "cancelled")}
+                                            onClick={cancel}
                                         >
-                                            {status === "error" ? "Close" : "Cancel"}
+                                            Cancel
                                         </button>
                                     </div>
                                     <span className="delete-account-sr-only" role="status">

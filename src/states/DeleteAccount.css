@@ -272,6 +272,7 @@
 
 .delete-account-status-icon--missing,
 .delete-account-status-icon--invalid,
+.delete-account-status-icon--expired,
 .delete-account-status-icon--invalidEnvironment,
 .delete-account-status-icon--unconfirmed {
     color: #965634;
@@ -343,4 +344,27 @@
     .delete-account-spinner {
         animation: none;
     }
+}
+
+.delete-account-progress {
+    width: min(100%, 480px);
+    margin: 28px 0 0;
+    text-align: left;
+}
+
+.delete-account-progress div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 20px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e1eeeb;
+}
+
+.delete-account-progress dt {
+    font-weight: 800;
+}
+
+.delete-account-progress dd {
+    margin: 0;
 }
