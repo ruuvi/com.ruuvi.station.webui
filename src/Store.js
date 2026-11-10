@@ -1,3 +1,5 @@
+import { normalizeHistoryHours } from "./utils/historyRange";
+
 const GRAPH_FROM_KEY = "graph_from";
 const DASHBOARD_FROM_KEY = "dashboard_from";
 const SENSOR_OPEN_ACCORDIONS = "sensor_open_accordions";
@@ -11,7 +13,7 @@ const Store = {
         localStorage.setItem(GRAPH_FROM_KEY, v)
     },
     getGraphFrom() {
-        return parseInt(localStorage.getItem(GRAPH_FROM_KEY))
+        return normalizeHistoryHours(parseInt(localStorage.getItem(GRAPH_FROM_KEY)))
     },
     setDashboardFrom(v) {
         localStorage.setItem(DASHBOARD_FROM_KEY, v)

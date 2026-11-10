@@ -19,6 +19,21 @@ describe("DatePicker", () => {
         vi.useRealTimers();
     });
 
+    it("disables dates before the available history while allowing its first partial day", async () => {
+        const container = document.createElement("div");
+        document.body.appendChild(container);
+        const root = createRoot(container);
+        root.render(<DatePicker minDate={new Date(2026, 0, 10, 12)} onChange={() => {}} />);
+        await tick();
+        const buttons = [...container.querySelectorAll("button.rdp-day_button")];
+        expect(buttons.find(button => button.textContent === "9").disabled).toBe(true);
+        expect(buttons.find(button => button.textContent === "10").disabled).toBe(false);
+        expect(buttons.find(button => button.textContent === "20").disabled).toBe(false);
+        expect(buttons.find(button => button.textContent === "21").disabled).toBe(true);
+        root.unmount();
+        container.remove();
+    });
+
     it("selects a range and applies modifier classes to day cells", async () => {
         const changes = [];
         const container = document.createElement("div");

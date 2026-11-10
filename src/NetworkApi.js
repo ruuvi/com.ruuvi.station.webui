@@ -171,9 +171,11 @@ class NetworkApi {
         const closestCache = await cache.getClosestSegment(mac, mode, since, until);
         checkAborted();
 
-        // Cache fully covers the request
+        // Serve the cached page ending at this cursor; older pages may remain.
         if (closestCache && closestCache.until === until) {
-            const { data } = closestCache;
+            const data = { ...closestCache.data };
+            // Cached continuation hints describe an older request, not this one.
+            if (!auth) delete data.nextUp;
             const originalLength = data.measurements.length;
             data.measurements = data.measurements.filter(x => x.timestamp >= since);
             // Some cached measurements fell outside the request -> mark incomplete
@@ -183,8 +185,10 @@ class NetworkApi {
             return { result: "success", data };
         }
 
-        // Partial hit: continue fetching from where the cache ends
-        if (closestCache) {
+        // Public pages can be short regardless of coverage. Keep their selected
+        // lower bound and paginate by timestamp; only exact cached pages above
+        // can safely replace a public request.
+        if (closestCache && auth) {
             since = closestCache.until;
         }
 
@@ -214,8 +218,7 @@ class NetworkApi {
         // hangs blocking the return of already-fetched data)
         cache.saveSegment(mac, mode, until, respData.data).catch(() => {});
 
-        // If fetched data is smaller than the pagination size, indicate that fetching should stop
-        if (closestCache && respData.data.measurements.length < paginationSize) {
+        if (closestCache && auth && respData.data.measurements.length < paginationSize) {
             respData.data.nextUp = since;
         }
 

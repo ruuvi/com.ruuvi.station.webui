@@ -14,10 +14,12 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 await import("../i18n");
 const { Provider } = await import("../components/ui/provider");
 const PublicSensor = (await import("./PublicSensor")).default;
-const response = () => ({ result: "success", data: {
+const response = (overrides = {}) => ({ result: "success", data: {
     sensor: "test-sensor", name: "Garden", measurements: [{
         timestamp: 1792540800, data: "0201061BFF99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", rssi: -60,
     }],
+    maxHistoryDays: 92, maxResolutionMinutes: 5,
+    ...overrides,
 } });
 let root, container, request;
 const render = async () => act(async () => {
@@ -51,6 +53,35 @@ it("fetches limit=1 before mounting the sensor and starting history", async () =
     await act(async () => resolve(response()));
     expect(observed.props.isPublic).toBe(true);
     expect(observed.props.sensor.measurements).toHaveLength(1);
+});
+
+it.each([[0, 10], [92, 5], [731, 1], [1096, 1]])(
+    "uses the owner's API limits: %i days at %i-minute resolution",
+    async (maxHistoryDays, maxResolutionMinutes) => {
+        request.mockResolvedValueOnce(response({ maxHistoryDays, maxResolutionMinutes }));
+        await render();
+        expect(observed.props.sensor.subscription).toEqual({
+            maxHistoryDays, maxResolutionMinutes, pdfExportAllowed: false,
+        });
+        expect(observed.props.sensor.measurements).toHaveLength(1);
+    }
+);
+
+it("keeps the previous history fallback when an older API omits the limits", async () => {
+    request.mockResolvedValueOnce(response({ maxHistoryDays: undefined, maxResolutionMinutes: undefined }));
+    await render();
+    expect(observed.props.sensor.subscription.maxHistoryDays).toBe(90);
+});
+
+it("updates the limits and latest reading when the owner's history becomes zero", async () => {
+    await render();
+    const next = response({ maxHistoryDays: 0, maxResolutionMinutes: 10 });
+    next.data.measurements[0].timestamp += 60;
+    request.mockResolvedValueOnce(next);
+    await act(async () => vi.advanceTimersByTimeAsync(60000));
+    expect(observed.props.sensor.subscription.maxHistoryDays).toBe(0);
+    expect(observed.props.sensor.subscription.maxResolutionMinutes).toBe(10);
+    expect(observed.props.sensor.measurements[0].timestamp).toBe(1792540860);
 });
 
 it("shows a friendly warning when the first reading is throttled, then retries", async () => {

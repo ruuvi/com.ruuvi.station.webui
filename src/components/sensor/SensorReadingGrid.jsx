@@ -6,9 +6,12 @@ import { isBatteryLow } from "../../utils/battery";
 import useIsLargeDisplay from "../hooks/useIsLargeDisplay";
 
 function SensorReadingGrid(props) {
-    const { fields, latestReading, graphKey, graphUnitKey, isAlertTriggered, onFieldClick } = props;
+    const { fields, latestReading, graphKey, graphUnitKey, isAlertTriggered, onFieldClick, readOnly = false } = props;
     const isLargeDisplay = useIsLargeDisplay();
-    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems="start" display="grid" gap="10px" gridTemplateColumns={`repeat(auto-fit, minmax(${isLargeDisplay ? "220px" : "45%"}, max-content))`}>
+    const columns = readOnly
+        ? `repeat(auto-fit, minmax(min(100%, ${isLargeDisplay ? "200px" : "140px"}), 1fr))`
+        : `repeat(auto-fit, minmax(${isLargeDisplay ? "220px" : "45%"}, max-content))`;
+    return <Box style={{ marginBottom: 30, marginTop: 30 }} justifyItems={readOnly ? "stretch" : "start"} display="grid" gap="10px" gridTemplateColumns={columns}>
         {latestReading && fields.map(field => {
             let sensorType = field;
             let unitKey = null;
@@ -59,8 +62,8 @@ function SensorReadingGrid(props) {
                     infoLabel={infoLabel}
                     sensorType={sensorType}
                     unit={unitDisplay}
-                    selected={selected}
-                    onClick={() => onFieldClick([sensorType, unitKey])}
+                    selected={!readOnly && selected}
+                    onClick={readOnly ? undefined : () => onFieldClick([sensorType, unitKey])}
                 />
             );
         })}

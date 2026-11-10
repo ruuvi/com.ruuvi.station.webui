@@ -9,8 +9,8 @@ import { useParams } from "react-router-dom";
 import ThrottleWarning from "../components/common/ThrottleWarning";
 import { isThrottled, throttleRetryDelay } from "../utils/requestThrottle";
 
-// /get does not include the owner's plan details, so assume a history window
-// here; the backend enforces the real limit on the history requests anyway.
+// Keep the history fallback for older API versions that omit the limits.
+// Current /get responses return the owner's limits directly in data.
 const PUBLIC_SENSOR_DEFAULTS = {
     alerts: [],
     settings: null,
@@ -50,7 +50,11 @@ function PublicSensorView({ id }) {
                     const sensorObj = {
                         ...PUBLIC_SENSOR_DEFAULTS,
                         ...resp.data,
-                        subscription: { ...PUBLIC_SENSOR_DEFAULTS.subscription, ...resp.data.subscription },
+                        subscription: {
+                            ...PUBLIC_SENSOR_DEFAULTS.subscription,
+                            maxHistoryDays: resp.data.maxHistoryDays ?? PUBLIC_SENSOR_DEFAULTS.subscription.maxHistoryDays,
+                            maxResolutionMinutes: resp.data.maxResolutionMinutes,
+                        },
                         offsetTemperature: resp.data.offsetTemperature || 0,
                         offsetHumidity: resp.data.offsetHumidity || 0,
                         offsetPressure: resp.data.offsetPressure || 0,

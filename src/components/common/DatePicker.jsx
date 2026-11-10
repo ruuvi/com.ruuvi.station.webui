@@ -38,6 +38,8 @@ function ddmm(ts) {
 }
 
 export default function DatePicker(props) {
+  const firstDay = props.minDate ? new Date(props.minDate) : null;
+  firstDay?.setHours(0, 0, 0, 0);
   const lng = i18next.language
   const [locale, setLocale] = useState(enGB);
   useEffect(() => {
@@ -90,7 +92,7 @@ export default function DatePicker(props) {
           props.onChange(val)
         }}
         defaultMonth={new Date()}
-        disabled={d => d.getTime() > new Date().getTime()}
+        disabled={d => d.getTime() > Date.now() || (firstDay !== null && d < firstDay)}
       />
     </>
   );

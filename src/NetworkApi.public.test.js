@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import pjson from "../package.json";
+import { nextHistoryPage } from "./utils/historyPagination";
 
 let NetworkApi, fetchMock;
 const success = () => ({ status: 200, json: async () => ({ result: "success" }) });
@@ -74,7 +75,7 @@ it("backs off across sensors for the backend's ER_THROTTLED code even without HT
     expect(fetchMock).toHaveBeenCalledTimes(1);
 });
 
-it("uses the requested page size to continue through a partial cache hit", async () => {
+it("does not jump over uncached history when the server returns a short page", async () => {
     const cache = (await import("./DataCache")).default;
     vi.spyOn(cache, "getClosestSegment").mockResolvedValue({ until: 100, data: {} });
     vi.spyOn(cache, "saveSegment").mockResolvedValue();
@@ -84,6 +85,70 @@ it("uses the requested page size to continue through a partial cache hit", async
     const result = await new NetworkApi().getAsync("test", 0, 200, {
         limit: pjson.settings.publicSensorDataFetchPaginationSize, auth: false,
     });
-    expect(result.data.nextUp).toBe(100);
+    expect(result.data.nextUp).toBeUndefined();
     expect(fetchMock.mock.calls[0][0]).toContain(`limit=${pjson.settings.publicSensorDataFetchPaginationSize}`);
+    expect(new URL(fetchMock.mock.calls[0][0]).searchParams.get("since")).toBe("0");
+});
+
+it.each([{ measurements: [] }, { measurements: [{ timestamp: 100 }] }])("keeps the selected public range even when a page reaches a partial cache hit: %j", async ({ measurements }) => {
+    const cache = (await import("./DataCache")).default;
+    vi.spyOn(cache, "getClosestSegment").mockResolvedValue({ until: 100, data: {} });
+    vi.spyOn(cache, "saveSegment").mockResolvedValue();
+    fetchMock.mockResolvedValueOnce({ status: 200, json: async () => ({
+        result: "success", data: { measurements },
+    }) });
+    const result = await new NetworkApi().getAsync("test", 0, 200, { auth: false });
+    expect(result.data.nextUp).toBeUndefined();
+    expect(new URL(fetchMock.mock.calls[0][0]).searchParams.get("since")).toBe("0");
+});
+
+it("still joins authenticated requests to a partially cached range", async () => {
+    const cache = (await import("./DataCache")).default;
+    vi.spyOn(cache, "getClosestSegment").mockResolvedValue({ until: 100, data: {} });
+    vi.spyOn(cache, "saveSegment").mockResolvedValue();
+    fetchMock.mockResolvedValueOnce({ status: 200, json: async () => ({
+        result: "success", data: { measurements: [{ timestamp: 150 }] },
+    }) });
+    const result = await new NetworkApi().getAsync("test", 0, 200);
+    expect(result.data.nextUp).toBe(100);
+    expect(new URL(fetchMock.mock.calls[0][0]).searchParams.get("since")).toBe("100");
+});
+
+it("discards stale cached continuation hints without modifying the cached segment", async () => {
+    const cache = (await import("./DataCache")).default;
+    const cached = { measurements: [{ timestamp: 190 }, { timestamp: 150 }], fromCache: true, nextUp: 50 };
+    vi.spyOn(cache, "getClosestSegment").mockResolvedValue({ until: 200, data: cached });
+    const result = await new NetworkApi().getAsync("test", 175, 200, { auth: false });
+    expect(result.data.measurements).toEqual([{ timestamp: 190 }]);
+    expect(result.data.nextUp).toBeUndefined();
+    expect(cached.measurements).toHaveLength(2);
+    expect(cached.nextUp).toBe(50);
+    expect(fetchMock).not.toHaveBeenCalled();
+});
+
+it("fills the entire range through short network pages, a cached segment, and older readings", async () => {
+    const cache = (await import("./DataCache")).default;
+    vi.spyOn(cache, "getClosestSegment").mockImplementation(async (_mac, _mode, since, until) =>
+        since < 599 && until >= 599 ? { until: 599, data: {
+            measurements: [{ timestamp: 190 }, { timestamp: 150 }], fromCache: true, nextUp: 50,
+        } } : null);
+    vi.spyOn(cache, "saveSegment").mockResolvedValue();
+    for (const timestamps of [[900, 800], [700, 600], [100, 50], []]) {
+        fetchMock.mockResolvedValueOnce({ status: 200, json: async () => ({ result: "success", data: {
+            measurements: timestamps.map(timestamp => ({ timestamp })),
+        } }) });
+    }
+    let until = 1000;
+    const readings = [];
+    while (until !== null) {
+        const response = await new NetworkApi().getAsync("test", 0, until, { auth: false });
+        expect(response.result).toBe("success");
+        readings.push(...response.data.measurements.map(reading => reading.timestamp));
+        until = nextHistoryPage(response.data, 0, until, 100000, true);
+    }
+    expect(readings).toEqual([900, 800, 700, 600, 190, 150, 100, 50]);
+    expect(fetchMock.mock.calls.map(([url]) => Number(new URL(url).searchParams.get("until"))))
+        .toEqual([1000, 799, 149, 49]);
+    expect(fetchMock.mock.calls.map(([url]) => Number(new URL(url).searchParams.get("since"))))
+        .toEqual([0, 0, 0, 0]);
 });

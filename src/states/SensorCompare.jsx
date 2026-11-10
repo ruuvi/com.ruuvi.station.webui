@@ -15,6 +15,7 @@ import { exportMuliSensorCSV, exportMuliSensorXLSX } from "../utils/export";
 import ScreenSizeWrapper from "../components/common/ScreenSizeWrapper";
 import { getSensorTypeOnly, getUnitHelper, getUnitOnly } from "../UnitHelper";
 import { useLocation, useNavigate } from "react-router-dom";
+import { normalizeHistoryHours } from "../utils/historyRange";
 
 const descriptionStyle = { fontFamily: "mulish", fontSize: "14px", fontWeight: 400, maxWidth: "800px" }
 
@@ -52,7 +53,7 @@ function SensorCompare(_props) {
         const urlTo = params.get("to");
         const urlFromHours = params.get("fromHours");
         if (urlFromHours) {
-            const hours = Number(urlFromHours);
+            const hours = normalizeHistoryHours(Number(urlFromHours));
             setDurationPickerValue(hours);
             const now = Math.floor(new Date().getTime() / 1000);
             setFrom(now - 60 * 60 * hours);

@@ -35,6 +35,8 @@ import SensorReadingGrid from "../components/sensor/SensorReadingGrid";
 import SensorSettings from "../components/sensor/SensorSettings";
 import ThrottleWarning from "../components/common/ThrottleWarning";
 import { isThrottled, throttleRetryDelay } from "../utils/requestThrottle";
+import { clampHistoryRange } from "../utils/historyRange";
+import { mergeHistoryMeasurements, nextHistoryPage } from "../utils/historyPagination";
 import {
     getAlert,
     getLatestReading,
@@ -98,7 +100,7 @@ function Sensor(props) {
     const [loading, setLoading] = useState(true);
     const [graphKey, setGraphKeyState] = useState(initial.graphKey);
     const [graphUnitKey, setGraphUnitKey] = useState(initial.graphUnitKey);
-    const [from, setFrom] = useState(Store.getGraphFrom() || 24);
+    const [from, setFrom] = useState(() => clampHistoryRange(Store.getGraphFrom() || 24, sensor.subscription.maxHistoryDays * 24));
     const [to, setTo] = useState(null);
     const [editName, setEditName] = useState(false);
     const [offsetDialog, setOffsetDialog] = useState(null);
@@ -168,17 +170,17 @@ function Sensor(props) {
     function getFrom() {
         let since = new Date().getTime() - from * 60 * 60 * 1000;
         if (typeof from === "object") since = from.getTime();
-        return since;
+        return Math.max(since, Date.now() - sensor.subscription.maxHistoryDays * 86400000);
     }
 
     function getTo() {
-        if (to !== null) return to.getTime();
+        if (to !== null) return Math.min(to.getTime(), Date.now());
         return new Date().getTime();
     }
 
-    async function loadData(showLoading) {
+    async function loadData(restartHistory = false) {
         // A new sensor/range supersedes the entire previous pagination chain.
-        if (showLoading !== undefined) {
+        if (restartHistory) {
             historyControllerRef.current?.abort();
             isLoadingRef.current = false;
             historyResumeRef.current = null;
@@ -204,18 +206,19 @@ function Sensor(props) {
         isLoadingRef.current = true;
         const rangeFrom = fromRef.current;
         const rangeTo = toRef.current;
-        const getRangeStart = () => typeof rangeFrom === "object"
+        const getRangeStart = () => Math.max(typeof rangeFrom === "object"
             ? rangeFrom.getTime() / 1000
-            : Math.floor(Date.now() / 1000 - 60 * 60 * rangeFrom);
-        const getRangeEnd = () => Math.floor((rangeTo?.getTime() ?? Date.now()) / 1000);
+            : Math.floor(Date.now() / 1000 - 60 * 60 * rangeFrom),
+        Math.floor(Date.now() / 1000 - currentSensor.subscription.maxHistoryDays * 86400));
+        const getRangeEnd = () => Math.floor(Math.min(rangeTo?.getTime() ?? Date.now(), Date.now()) / 1000);
         const trimMeasurements = measurements => {
             const start = getRangeStart();
             const end = getRangeEnd();
             return measurements.filter(measurement => measurement.timestamp >= start && measurement.timestamp <= end);
         };
 
-        if (showLoading !== undefined) setLoading(true);
-        if (showLoading) {
+        if (restartHistory) {
+            setLoading(true);
             dataRef.current = null;
             setData(null);
         } else if (dataRef.current) {
@@ -228,15 +231,22 @@ function Sensor(props) {
         }
 
         try {
-            const resumeUntil = historyResumeRef.current;
-            const initialLoad = dataRef.current === null || showLoading || resumeUntil !== null;
+            const resume = historyResumeRef.current;
+            const initialLoad = dataRef.current === null || restartHistory || resume !== null;
+            // Keep the lower bound fixed across pages, including a refresh that
+            // needs several pages after the tab has been asleep.
+            const since = Math.max(getRangeStart(), resume?.since ??
+                (!initialLoad && dataRef.current?.measurements?.length
+                    ? dataRef.current.measurements[0].timestamp + 1 : getRangeStart()));
             async function load(until = getRangeEnd()) {
                 if (controller.signal.aborted) return;
-                let since = getRangeStart();
-                if (!initialLoad && dataRef.current?.measurements?.length) {
-                    since = Math.max(since, dataRef.current.measurements[0].timestamp + 1);
+                if (until < since) {
+                    historyResumeRef.current = null;
+                    return;
                 }
-                if (until <= since) return;
+                // Keep unfinished history for retries after throttling, network
+                // failures, or API errors instead of switching to latest-only polling.
+                if (isPublic || initialLoad) historyResumeRef.current = { since, until };
 
                 const resp = await new NetworkApi().getAsync(
                     currentSensor.sensor, since, until,
@@ -249,36 +259,28 @@ function Sensor(props) {
                 if (isThrottled(resp)) {
                     setHistoryThrottled(true);
                     refreshDelay = throttleRetryDelay(resp);
-                    // Resume the interrupted page, rather than skipping older
-                    // history when the automatic refresh runs.
-                    if (initialLoad) historyResumeRef.current = until;
                 } else if (resp.result === "success") {
                     if (currentSensor.sensor !== resp.data.sensor) return;
                     setHistoryThrottled(false);
-                    historyResumeRef.current = null;
-                    const returnedDataLength = resp.data.measurements.length;
+                    const nextUntil = (isPublic || initialLoad)
+                        ? nextHistoryPage(resp.data, since, until, paginationSize, isPublic) : null;
                     Object.keys(currentSensor).filter(x => x.startsWith("offset")).forEach(x => {
                         resp.data[x] = currentSensor[x];
                     });
                     const d = parse(resp.data);
                     const stateData = dataRef.current;
-                    const measurements = !stateData ? d.measurements
-                        : initialLoad ? [...stateData.measurements, ...d.measurements]
-                            : [...d.measurements, ...stateData.measurements];
+                    const measurements = mergeHistoryMeasurements(stateData?.measurements || [], d.measurements);
                     const newData = { ...(stateData || d), measurements: trimMeasurements(measurements) };
                     dataRef.current = newData;
                     setData(newData);
-                    setLoading(false);
 
-                    if (initialLoad && (d.nextUp || d.fromCache || returnedDataLength >= paginationSize)) {
-                        const nextUntil = d.nextUp || d.measurements[d.measurements.length - 1]?.timestamp;
-                        if (nextUntil && nextUntil < until) await load(nextUntil);
-                    }
+                    if (nextUntil !== null) await load(nextUntil);
+                    else historyResumeRef.current = null;
                 } else if (resp.result === "error") {
                     notify.error(propsRef.current.t(`UserApiError.${resp.code}`));
                 }
             }
-            await load(resumeUntil ?? getRangeEnd());
+            await load(resume?.until ?? getRangeEnd());
         } catch (e) {
             if (!controller.signal.aborted) {
                 notify.error(propsRef.current.t("internet_connection_problem"));
@@ -318,12 +320,19 @@ function Sensor(props) {
     // One initial load per sensor, with cleanup for all outstanding pages.
     useEffect(() => {
         setPicture(propsRef.current.sensor.picture);
+        const selection = typeof fromRef.current === "object"
+            ? { from: fromRef.current, to: toRef.current || new Date() } : fromRef.current;
+        const range = clampHistoryRange(selection, sensor.subscription.maxHistoryDays * 24);
+        fromRef.current = typeof range === "object" ? range.from : range;
+        toRef.current = typeof range === "object" ? range.to : null;
+        setFrom(fromRef.current);
+        setTo(toRef.current);
         loadDataRef.current(true);
         return () => {
             historyControllerRef.current?.abort();
             clearTimeout(latestDataUpdateRef.current);
         };
-    }, [sensor.sensor, sensor.subscription.maxHistoryDays]);
+    }, [sensor.sensor, sensor.subscription.maxHistoryDays, sensor.subscription.maxResolutionMinutes]);
     // document title
     useEffect(() => {
         document.title = "Ruuvi Sensor: " + sensor.name;
@@ -356,21 +365,20 @@ function Sensor(props) {
     }
 
     function updateFrom(v) {
-        isLoadingRef.current = false;
-        dataRef.current = null;
-
-        if (typeof v === "object") {
-            if (v.from !== undefined) { fromRef.current = v.from; setFrom(v.from); }
-            if (v.to !== undefined) { toRef.current = v.to; setTo(v.to); }
+        const range = clampHistoryRange(v, sensor.subscription.maxHistoryDays * 24);
+        if (typeof range === "object") {
+            fromRef.current = range.from;
+            setFrom(range.from);
+            toRef.current = range.to;
+            setTo(range.to);
         } else {
-            fromRef.current = v;
+            fromRef.current = range;
             toRef.current = null;
-            setFrom(v);
+            setFrom(range);
             setTo(null);
         }
-        setData(null);
-        Store.setGraphFrom(v);
-        loadDataRef.current(false);
+        Store.setGraphFrom(range);
+        loadDataRef.current(true);
     }
 
     function updateAlert(alert, prevEnabled) {
@@ -440,6 +448,7 @@ function Sensor(props) {
     const shared = isSharedSensor(sensor);
     const sensorSubscription = sensor?.subscription;
     const freeMode = sensor?.subscription.maxHistoryDays === 0;
+    const publicReadingsOnly = isPublic && freeMode;
     const noHistoryStrKey = freeMode ? "no_data_free_mode" : "no_data_in_range";
     const noHistoryStr = t(noHistoryStrKey).split("\n").map(x => <div key={x}>{x}</div>);
 
@@ -461,7 +470,7 @@ function Sensor(props) {
                     }
                 }} />
             )}
-            <DurationPicker value={from} showMaxHours={sensor.subscription.maxHistoryDays * 24} onChange={v => updateFrom(v)} />
+            <DurationPicker value={typeof from === "object" ? { from, to } : from} showMaxHours={sensor.subscription.maxHistoryDays * 24} onChange={v => updateFrom(v)} />
         </>
     );
 
@@ -490,7 +499,7 @@ function Sensor(props) {
 
     return (
         <Box>
-            <Box minHeight={isPublic ? "auto" : 1500} pb={isPublic ? 8 : 0}>
+            <Box minHeight={isPublic || freeMode ? "auto" : 1500} maxW={publicReadingsOnly ? "1000px" : undefined} mx="auto" pb={isPublic ? 8 : 0}>
                 <Box overflow="hidden" pt={{ base: "5px", md: "35px" }} backgroundPosition="center" paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
                     {(props.throttled || historyThrottled) && <ThrottleWarning />}
                     <SensorHeader
@@ -520,6 +529,7 @@ function Sensor(props) {
                             graphUnitKey={graphUnitKey}
                             isAlertTriggered={isAlertTriggered}
                             onFieldClick={setGraphKey}
+                            readOnly={freeMode}
                         />
 
                         {sensor.subscription.maxHistoryDays !== 0 &&
@@ -557,14 +567,17 @@ function Sensor(props) {
                                     </div>
                                 </ScreenSizeWrapper>
                             </>}
-                        <Box height={520}>
+                        {freeMode ? (
+                            (!isPublic || !sensorHasData(sensor)) && <Box py={8} textAlign="center" className="nodatatext">
+                                {sensorHasData(sensor) ? noHistoryStr : t("no_data")}
+                                {!shared && !isPublic && sensorHasData(sensor) && <Box mt={2}>
+                                    <UpgradePlanButton />
+                                </Box>}
+                            </Box>
+                        ) : <Box height={520}>
                             <> {!loading && (!data || !data?.measurements?.length) ? (
                                 <>
                                     <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">{noHistoryStr}
-                                        {freeMode && !shared && !isPublic && sensorHasData(sensor) && <>
-                                            <Box mt={2} />
-                                            <UpgradePlanButton />
-                                        </>}
                                     </center>
                                 </>
                             ) : (
@@ -608,7 +621,7 @@ function Sensor(props) {
                                 </Box>
                             )}
                             </>
-                        </Box>
+                        </Box>}
                     </div>
                 </Box>
                 {!isPublic && <SensorSettings

@@ -12,25 +12,7 @@ import { AiOutlineCalendar } from "react-icons/ai"
 import { useTranslation } from 'react-i18next';
 import DatePicker from "./DatePicker";
 import { useState, useEffect } from "react";
-
-var timespans = [
-    { k: "1", t: "hour", v: 1 },
-    { k: "2", t: "hours", v: 2 },
-    { k: "3", t: "hours", v: 3 },
-    { k: "6", t: "hours", v: 6 },
-    { k: "12", t: "hours", v: 12 },
-    { k: "1", t: "day", v: 24 },
-    { k: "2", t: "days", v: 24 * 2 },
-    { k: "3", t: "days", v: 24 * 3 },
-    { k: "1", t: "week", v: 24 * 7 },
-    { k: "2", t: "weeks", v: 24 * 7 * 2 },
-    { k: "1", t: "month", v: 24 * 7 * 4 },
-    { k: "3", t: "months", v: 24 * 7 * 4 * 3 },
-    { k: "6", t: "months", v: 24 * 7 * 4 * 6 },
-    { k: "1", t: "year", v: 24 * 7 * 4 * 12 },
-    { k: "2", t: "years", v: 24 * 7 * 4 * 12 * 2 },
-    { k: "3", t: "years", v: 24 * 7 * 4 * 12 * 3 }
-]
+import { clampHistoryRange, historyTimespans as timespans } from "../../utils/historyRange";
 
 export function getTimespans() { return timespans };
 export function getTimespan(value) {
@@ -73,7 +55,7 @@ export default function DurationPicker(props) {
         if (typeof props.value === "object" && props.value && props.value.from && props.value.to) {
             setCustom(props.value)
             setLastCustom(props.value)
-        }
+        } else setCustom(null)
     }, [props.value])
 
     const setDropdownFromClick = (state) => {
@@ -82,7 +64,7 @@ export default function DurationPicker(props) {
         setShowDropdown(state)
     }
 
-    var ts = getTimespan(props.value)
+    var ts = getTimespan(clampHistoryRange(props.value, props.showMaxHours))
     var renderTimespans = timespans;
 
     if (props.dashboard) renderTimespans = renderTimespans.filter(x => x.v <= 24 * 7)
@@ -181,17 +163,21 @@ export default function DurationPicker(props) {
                     <Portal>
                         <Popover.Positioner>
                             <Popover.Content>
-                                <DatePicker onChange={setLastCustom} />
+                                <DatePicker onChange={setLastCustom} minDate={Number.isFinite(props.showMaxHours)
+                                    ? new Date(Date.now() - props.showMaxHours * 3600000) : undefined} />
                                 <Box textAlign="right" pr={"20px"} pb={"20px"}>
                                     <Button variant='ghost' mr={3} onClick={() => setShowPicker(false)}>
                                         {t("close")}
                                     </Button>
                                     <Button disabled={!lastCustom || !lastCustom.from || !lastCustom.to} onClick={() => {
-                                        setCustom(lastCustom)
+                                        const from = new Date(lastCustom.from);
+                                        const to = new Date(lastCustom.to);
+                                        from.setHours(0, 0, 0, 0)
+                                        to.setHours(23, 59, 59, 999)
+                                        const range = clampHistoryRange({ from, to }, props.showMaxHours);
+                                        setCustom(range)
                                         setShowPicker(false)
-                                        lastCustom.from.setHours(0, 0, 0, 0)
-                                        lastCustom.to.setHours(23, 59, 59, 999)
-                                        props.onChange(lastCustom)
+                                        props.onChange(range)
                                     }}>{t("set")}</Button>
                                 </Box>
                             </Popover.Content>
