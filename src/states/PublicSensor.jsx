@@ -8,13 +8,13 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import ThrottleWarning from "../components/common/ThrottleWarning";
 import { isThrottled, throttleRetryDelay } from "../utils/requestThrottle";
+import pjson from "../../package.json";
 
-// Keep the history fallback for older API versions that omit the limits.
-// Current /get responses return the owner's limits directly in data.
+// Public sharing shows at most seven days, subject to the owner's history limit.
 const PUBLIC_SENSOR_DEFAULTS = {
     alerts: [],
     settings: null,
-    subscription: { maxHistoryDays: 90, pdfExportAllowed: false },
+    subscription: { maxHistoryDays: pjson.settings.publicSensorMaxHistoryDays, pdfExportAllowed: false },
 };
 
 // other errors on a refresh are treated as transient and keep the view mounted
@@ -52,7 +52,10 @@ function PublicSensorView({ id }) {
                         ...resp.data,
                         subscription: {
                             ...PUBLIC_SENSOR_DEFAULTS.subscription,
-                            maxHistoryDays: resp.data.maxHistoryDays ?? PUBLIC_SENSOR_DEFAULTS.subscription.maxHistoryDays,
+                            maxHistoryDays: Math.min(
+                                pjson.settings.publicSensorMaxHistoryDays,
+                                resp.data.maxHistoryDays ?? PUBLIC_SENSOR_DEFAULTS.subscription.maxHistoryDays
+                            ),
                             maxResolutionMinutes: resp.data.maxResolutionMinutes,
                         },
                         offsetTemperature: resp.data.offsetTemperature || 0,

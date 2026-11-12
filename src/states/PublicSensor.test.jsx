@@ -55,22 +55,22 @@ it("fetches limit=1 before mounting the sensor and starting history", async () =
     expect(observed.props.sensor.measurements).toHaveLength(1);
 });
 
-it.each([[0, 10], [92, 5], [731, 1], [1096, 1]])(
-    "uses the owner's API limits: %i days at %i-minute resolution",
+it.each([[0, 10], [3, 5], [7, 1], [92, 5], [731, 1], [1096, 1]])(
+    "caps the owner's %i-day history at seven days and retains %i-minute resolution",
     async (maxHistoryDays, maxResolutionMinutes) => {
         request.mockResolvedValueOnce(response({ maxHistoryDays, maxResolutionMinutes }));
         await render();
         expect(observed.props.sensor.subscription).toEqual({
-            maxHistoryDays, maxResolutionMinutes, pdfExportAllowed: false,
+            maxHistoryDays: Math.min(maxHistoryDays, 7), maxResolutionMinutes, pdfExportAllowed: false,
         });
         expect(observed.props.sensor.measurements).toHaveLength(1);
     }
 );
 
-it("keeps the previous history fallback when an older API omits the limits", async () => {
+it("uses seven days as the history fallback when an older API omits the limits", async () => {
     request.mockResolvedValueOnce(response({ maxHistoryDays: undefined, maxResolutionMinutes: undefined }));
     await render();
-    expect(observed.props.sensor.subscription.maxHistoryDays).toBe(90);
+    expect(observed.props.sensor.subscription.maxHistoryDays).toBe(7);
 });
 
 it("updates the limits and latest reading when the owner's history becomes zero", async () => {

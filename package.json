@@ -5,6 +5,7 @@
     "sensorNameMaxLength": 32,
     "alertDescriptionMaxLength": 100,
     "dataFetchPaginationSize": 1500,
+    "publicSensorMaxHistoryDays": 7,
     "publicSensorDataFetchPaginationSize": 100000,
     "publicSensorRequestsPerMinute": 5,
     "dataCacheLengthInDays": 730,

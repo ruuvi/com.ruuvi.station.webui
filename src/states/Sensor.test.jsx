@@ -94,10 +94,10 @@ it("shows a compact empty state for a public zero-history sensor without reading
     expect(api).not.toHaveBeenCalled();
 });
 
-it("offers the public sensor owner's full history window", async () => {
+it("caps the public history picker at seven days even with a longer owner plan", async () => {
     sensor.subscription.maxHistoryDays = 731;
     await render({ isPublic: true });
-    expect(container.querySelector('[data-testid="duration-picker"]').dataset.maxHours).toBe(String(731 * 24));
+    expect(container.querySelector('[data-testid="duration-picker"]').dataset.maxHours).toBe(String(7 * 24));
     expect(container.querySelector('[data-testid="sensor-graph"]')).not.toBeNull();
     expect(container.querySelector(".sensorValueBox").style.cursor).toBe("pointer");
 });
@@ -122,7 +122,7 @@ it("cancels history when its limit becomes zero and resumes after an upgrade", a
     await render({ isPublic: true });
     expect(api).toHaveBeenCalledTimes(calls + 2);
     expect(container.querySelector('[data-testid="sensor-graph"]')).not.toBeNull();
-    expect(container.querySelector('[data-testid="duration-picker"]').dataset.maxHours).toBe(String(731 * 24));
+    expect(container.querySelector('[data-testid="duration-picker"]').dataset.maxHours).toBe(String(7 * 24));
 });
 
 it("aborts pending history on unmount and ignores a late paginated response", async () => {
@@ -244,17 +244,17 @@ it("keeps the large public request limit but checks beyond a short page", async 
     expect(api.mock.calls[2][3].limit).toBe(pjson.settings.publicSensorDataFetchPaginationSize);
 });
 
-it("fetches the selected three months across short public pages without repeating their boundaries", async () => {
+it("fetches the selected seven days across short public pages without repeating their boundaries", async () => {
     sensor.subscription.maxHistoryDays = 92;
-    localStorage.setItem("graph_from", String(90 * 24));
+    localStorage.setItem("graph_from", String(7 * 24));
     const day = 86400;
-    api.mockResolvedValueOnce(response([now - 1, now - 30 * day]))
-        .mockResolvedValueOnce(response([now - 50 * day, now - 70 * day]))
-        .mockResolvedValueOnce(response([now - 89 * day, now - 90 * day]));
+    api.mockResolvedValueOnce(response([now - 1, now - 2 * day]))
+        .mockResolvedValueOnce(response([now - 4 * day, now - 5 * day]))
+        .mockResolvedValueOnce(response([now - 6 * day, now - 7 * day]));
     await render({ isPublic: true });
-    expect(api.mock.calls.map(call => call[1])).toEqual(Array(3).fill(now - 90 * day));
-    expect(api.mock.calls.map(call => call[2])).toEqual([now, now - 30 * day - 1, now - 70 * day - 1]);
-    expect(timestamps()).toEqual([now - 1, now - 30 * day, now - 50 * day, now - 70 * day, now - 89 * day, now - 90 * day]);
+    expect(api.mock.calls.map(call => call[1])).toEqual(Array(3).fill(now - 7 * day));
+    expect(api.mock.calls.map(call => call[2])).toEqual([now, now - 2 * day - 1, now - 5 * day - 1]);
+    expect(timestamps()).toEqual([now - 1, now - 2 * day, now - 4 * day, now - 5 * day, now - 6 * day, now - 7 * day]);
 });
 
 it("continues past a page whose readings cannot be decoded", async () => {
@@ -298,41 +298,41 @@ it("fetches every page of new readings after the public page has been asleep", a
     expect(timestamps()).toEqual([now + 7000, now + 5000, now + 3000, now + 1000, now - 1]);
 });
 
-it("clamps a saved multi-year selection to the three-month public sensor preset", async () => {
+it("clamps a saved multi-year selection to the seven-day public sensor preset", async () => {
     sensor.subscription.maxHistoryDays = 92;
     localStorage.setItem("graph_from", String(24 * 365 * 2));
     await render({ isPublic: true });
-    expect(observed.range).toBe(90 * 24);
-    expect(api.mock.calls[0][1]).toBe(now - 90 * 86400);
+    expect(observed.range).toBe(7 * 24);
+    expect(api.mock.calls[0][1]).toBe(now - 7 * 86400);
 });
 
-it("clamps the selected range when the owner downgrades to three months", async () => {
+it("clamps the selected range when the owner downgrades to three days", async () => {
     sensor.subscription.maxHistoryDays = 731;
     localStorage.setItem("graph_from", String(24 * 168));
     await render({ isPublic: true });
-    sensor = { ...sensor, subscription: { ...sensor.subscription, maxHistoryDays: 92 } };
+    sensor = { ...sensor, subscription: { ...sensor.subscription, maxHistoryDays: 3 } };
     const calls = api.mock.calls.length;
     await render({ isPublic: true });
-    expect(observed.range).toBe(90 * 24);
-    expect(api.mock.calls[calls][1]).toBe(now - 90 * 86400);
+    expect(observed.range).toBe(3 * 24);
+    expect(api.mock.calls[calls][1]).toBe(now - 3 * 86400);
 });
 
 it("bounds custom dates and cached readings to the owner's available history", async () => {
-    sensor.subscription.maxHistoryDays = 92;
+    sensor.subscription.maxHistoryDays = 3;
     await render({ isPublic: true });
     const calls = api.mock.calls.length;
-    api.mockResolvedValueOnce(response([now - 1, now - 92 * 86400, now - 100 * 86400], { fromCache: true }));
+    api.mockResolvedValueOnce(response([now - 1, now - 3 * 86400, now - 100 * 86400], { fromCache: true }));
     await act(async () => observed.changeRange({
         from: new Date((now - 365 * 86400) * 1000),
         to: new Date((now + 86400) * 1000),
     }));
-    expect(api.mock.calls[calls].slice(1, 3)).toEqual([now - 92 * 86400, now]);
+    expect(api.mock.calls[calls].slice(1, 3)).toEqual([now - 3 * 86400, now]);
     const endOfToday = new Date(now * 1000);
     endOfToday.setHours(23, 59, 59, 999);
-    expect(observed.range).toEqual({ from: new Date((now - 92 * 86400) * 1000), to: endOfToday });
-    expect(observed.graph.from).toBe((now - 92 * 86400) * 1000);
+    expect(observed.range).toEqual({ from: new Date((now - 3 * 86400) * 1000), to: endOfToday });
+    expect(observed.graph.from).toBe((now - 3 * 86400) * 1000);
     expect(observed.graph.to).toBe(now * 1000);
-    expect(timestamps()).toEqual([now - 1, now - 92 * 86400]);
+    expect(timestamps()).toEqual([now - 1, now - 3 * 86400]);
 });
 
 it("keeps a custom range ending today live while requesting no future readings", async () => {
@@ -384,4 +384,27 @@ it("still shows real API failures as errors", async () => {
     await render({ isPublic: true });
     expect(errorToast).toHaveBeenCalledTimes(1);
     expect(container.querySelector('[role="status"]')).toBeNull();
+});
+
+
+it("preserves longer saved history ranges in the signed-in sensor view", async () => {
+    sensor.subscription.maxHistoryDays = 92;
+    localStorage.setItem("graph_from", String(90 * 24));
+    await render();
+    expect(observed.range).toBe(90 * 24);
+    expect(api.mock.calls[0][1]).toBe(now - 90 * 86400);
+    expect(container.querySelector('[data-testid="duration-picker"]').dataset.maxHours).toBe(String(92 * 24));
+});
+
+it("trims custom public ranges and older cached readings to seven days", async () => {
+    await render({ isPublic: true });
+    const calls = api.mock.calls.length;
+    api.mockResolvedValueOnce(response([now - 1, now - 7 * 86400, now - 8 * 86400], { fromCache: true }));
+    await act(async () => observed.changeRange({
+        from: new Date((now - 30 * 86400) * 1000),
+        to: new Date(now * 1000),
+    }));
+    expect(api.mock.calls[calls].slice(1, 3)).toEqual([now - 7 * 86400, now]);
+    expect(observed.graph.from).toBe((now - 7 * 86400) * 1000);
+    expect(timestamps()).toEqual([now - 1, now - 7 * 86400]);
 });

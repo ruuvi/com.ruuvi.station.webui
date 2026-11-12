@@ -65,6 +65,9 @@ let alertDebouncer = {}
 
 function Sensor(props) {
     const { t, sensor, router, isPublic } = props;
+    const maxHistoryDays = isPublic
+        ? Math.min(pjson.settings.publicSensorMaxHistoryDays, sensor.subscription.maxHistoryDays)
+        : sensor.subscription.maxHistoryDays;
 
     const getInitialGraphKey = () => {
         const queryParams = new URLSearchParams(router.location.search);
@@ -100,7 +103,7 @@ function Sensor(props) {
     const [loading, setLoading] = useState(true);
     const [graphKey, setGraphKeyState] = useState(initial.graphKey);
     const [graphUnitKey, setGraphUnitKey] = useState(initial.graphUnitKey);
-    const [from, setFrom] = useState(() => clampHistoryRange(Store.getGraphFrom() || 24, sensor.subscription.maxHistoryDays * 24));
+    const [from, setFrom] = useState(() => clampHistoryRange(Store.getGraphFrom() || 24, maxHistoryDays * 24));
     const [to, setTo] = useState(null);
     const [editName, setEditName] = useState(false);
     const [offsetDialog, setOffsetDialog] = useState(null);
@@ -170,7 +173,7 @@ function Sensor(props) {
     function getFrom() {
         let since = new Date().getTime() - from * 60 * 60 * 1000;
         if (typeof from === "object") since = from.getTime();
-        return Math.max(since, Date.now() - sensor.subscription.maxHistoryDays * 86400000);
+        return Math.max(since, Date.now() - maxHistoryDays * 86400000);
     }
 
     function getTo() {
@@ -209,7 +212,7 @@ function Sensor(props) {
         const getRangeStart = () => Math.max(typeof rangeFrom === "object"
             ? rangeFrom.getTime() / 1000
             : Math.floor(Date.now() / 1000 - 60 * 60 * rangeFrom),
-        Math.floor(Date.now() / 1000 - currentSensor.subscription.maxHistoryDays * 86400));
+        Math.floor(Date.now() / 1000 - maxHistoryDays * 86400));
         const getRangeEnd = () => Math.floor(Math.min(rangeTo?.getTime() ?? Date.now(), Date.now()) / 1000);
         const trimMeasurements = measurements => {
             const start = getRangeStart();
@@ -322,7 +325,7 @@ function Sensor(props) {
         setPicture(propsRef.current.sensor.picture);
         const selection = typeof fromRef.current === "object"
             ? { from: fromRef.current, to: toRef.current || new Date() } : fromRef.current;
-        const range = clampHistoryRange(selection, sensor.subscription.maxHistoryDays * 24);
+        const range = clampHistoryRange(selection, maxHistoryDays * 24);
         fromRef.current = typeof range === "object" ? range.from : range;
         toRef.current = typeof range === "object" ? range.to : null;
         setFrom(fromRef.current);
@@ -332,7 +335,7 @@ function Sensor(props) {
             historyControllerRef.current?.abort();
             clearTimeout(latestDataUpdateRef.current);
         };
-    }, [sensor.sensor, sensor.subscription.maxHistoryDays, sensor.subscription.maxResolutionMinutes]);
+    }, [sensor.sensor, maxHistoryDays, sensor.subscription.maxResolutionMinutes]);
     // document title
     useEffect(() => {
         document.title = "Ruuvi Sensor: " + sensor.name;
@@ -365,7 +368,7 @@ function Sensor(props) {
     }
 
     function updateFrom(v) {
-        const range = clampHistoryRange(v, sensor.subscription.maxHistoryDays * 24);
+        const range = clampHistoryRange(v, maxHistoryDays * 24);
         if (typeof range === "object") {
             fromRef.current = range.from;
             setFrom(range.from);
@@ -470,7 +473,7 @@ function Sensor(props) {
                     }
                 }} />
             )}
-            <DurationPicker value={typeof from === "object" ? { from, to } : from} showMaxHours={sensor.subscription.maxHistoryDays * 24} onChange={v => updateFrom(v)} />
+            <DurationPicker value={typeof from === "object" ? { from, to } : from} showMaxHours={maxHistoryDays * 24} onChange={v => updateFrom(v)} />
         </>
     );
 

@@ -37,7 +37,7 @@ beforeEach(() => {
         unobserve() {}
         disconnect() {}
     });
-    const history = [now - 1, now - 1800, now - 2 * day, now - 200 * day, now - 500 * day, now - 729 * day, now - 731 * day];
+    const history = [now - 1, now - 1800, now - 2 * day, now - 3 * day, now - 5 * day, now - 6 * day, now - 8 * day];
     fetchMock = vi.fn(async url => {
         const query = new URL(url).searchParams;
         if (query.get("limit") === "1") return response([Math.floor(Date.now() / 1000) - 1]);
@@ -66,7 +66,7 @@ afterEach(() => {
     localStorage.clear();
 });
 
-it("fetches two years in seconds after changing the real dropdown, despite a recent cache and throttling", async () => {
+it("fetches seven days in seconds after changing the real dropdown, despite a recent cache and throttling", async () => {
     await act(async () => {
         root.render(<MemoryRouter initialEntries={["/public/test-sensor"]}><Provider><Routes>
             <Route path="/public/:id" element={<PublicSensor />} />
@@ -75,29 +75,32 @@ it("fetches two years in seconds after changing the real dropdown, despite a rec
     expect(observed.graph.data.map(reading => reading.timestamp)).toEqual([now - 1, now - 1800]);
     const previousRequests = historyRequests().length;
     await act(async () => container.querySelectorAll("button.durationPicker")[1].click());
-    const twoYears = Array.from(document.querySelectorAll('[role="menuitem"]')).find(item => item.textContent === "2 years");
-    expect(twoYears).toBeDefined();
-    await act(async () => twoYears.click());
+    const oneWeek = Array.from(document.querySelectorAll('[role="menuitem"]')).find(item => item.textContent === "1 week");
+    expect(oneWeek).toBeDefined();
+    const options = Array.from(document.querySelectorAll('[role="menuitem"]')).map(item => item.textContent);
+    expect(options).not.toContain("2 weeks");
+    expect(options).not.toContain("2 years");
+    await act(async () => oneWeek.click());
 
-    const since = now - 730 * day;
+    const since = now - 7 * day;
     expect(historyRequests().slice(previousRequests)).toEqual([
         { since, until: now },
         { since, until: now - 1801 },
     ]);
     expect(container.querySelector('[role="status"]')?.textContent).toBe("Too many requests");
-    expect(localStorage.getItem("graph_from")).toBe(String(730 * 24));
+    expect(localStorage.getItem("graph_from")).toBe(String(7 * 24));
 
     await act(async () => vi.advanceTimersByTimeAsync(60000));
     expect(historyRequests().slice(previousRequests)).toEqual([
         { since, until: now },
         { since, until: now - 1801 },
-        { since: since + 60, until: now - 200 * day - 1 },
-        { since: since + 60, until: now - 729 * day - 1 },
+        { since: since + 60, until: now - 3 * day - 1 },
+        { since: since + 60, until: now - 6 * day - 1 },
     ]);
     const timestamps = observed.graph.data.map(reading => reading.timestamp);
-    expect(timestamps).toContain(now - 500 * day);
-    expect(timestamps.at(-1)).toBe(now - 729 * day);
-    expect(timestamps).not.toContain(now - 731 * day);
+    expect(timestamps).toContain(now - 5 * day);
+    expect(timestamps.at(-1)).toBe(now - 6 * day);
+    expect(timestamps).not.toContain(now - 8 * day);
     expect(observed.graph.from).toBe((since + 60) * 1000);
     expect(container.querySelector('[role="status"]')).toBeNull();
 });
