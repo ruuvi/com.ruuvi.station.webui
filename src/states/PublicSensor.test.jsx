@@ -2,7 +2,7 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import NetworkApi from "../NetworkApi";
+import PublicSensorApi from "../PublicSensorApi";
 
 const observed = vi.hoisted(() => ({ props: null }));
 vi.mock("./Sensor", () => ({ default: props => {
@@ -31,7 +31,7 @@ const render = async () => act(async () => {
 beforeEach(() => {
     vi.useFakeTimers();
     observed.props = null;
-    request = vi.spyOn(NetworkApi.prototype, "request").mockImplementation(async () => response());
+    request = vi.spyOn(PublicSensorApi.prototype, "getLatest").mockImplementation(async () => response());
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -47,8 +47,8 @@ it("fetches limit=1 before mounting the sensor and starting history", async () =
     let resolve;
     request.mockImplementationOnce(() => new Promise(r => { resolve = r; }));
     await render();
-    expect(request.mock.calls[0][0]).toBe("/get?sensor=test-sensor&mode=dense&limit=1");
-    expect(request.mock.calls[0][1].auth).toBe(false);
+    expect(request.mock.calls[0][0]).toBe("test-sensor");
+    expect(request.mock.calls[0][1]).toBeInstanceOf(AbortSignal);
     expect(observed.props).toBeNull();
     await act(async () => resolve(response()));
     expect(observed.props.isPublic).toBe(true);
@@ -113,7 +113,7 @@ it("cancels an in-flight reading and stops retrying when unmounted", async () =>
     let resolve;
     request.mockImplementationOnce(() => new Promise(r => { resolve = r; }));
     await render();
-    const signal = request.mock.calls[0][1].signal;
+    const signal = request.mock.calls[0][1];
     act(() => root.unmount());
     root = createRoot(container);
     expect(signal.aborted).toBe(true);

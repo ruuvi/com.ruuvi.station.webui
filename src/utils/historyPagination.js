@@ -4,10 +4,10 @@ export function oldestMeasurementTimestamp(measurements) {
     Infinity);
 }
 
-export function nextHistoryPage(data, since, until, pageSize, isPublic) {
+export function nextHistoryPage(data, since, until, pageSize) {
     let next = data.nextUp;
     if (!Number.isFinite(next)) {
-        if (!isPublic && !data.fromCache && data.measurements.length < pageSize) return null;
+        if (!data.fromCache && data.measurements.length < pageSize) return null;
         // The API's until bound is inclusive. Step past the oldest raw reading,
         // even if the decoder cannot display it, to avoid repeating a page.
         next = oldestMeasurementTimestamp(data.measurements) - 1;

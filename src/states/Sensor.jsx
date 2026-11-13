@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import logger from "../utils/logger";
 import NetworkApi from '../NetworkApi'
+import PublicSensorApi from '../PublicSensorApi';
 import {
     Box,
     Spinner,
@@ -202,9 +203,7 @@ function Sensor(props) {
 
         const controller = new AbortController();
         let refreshDelay = 60000;
-        const paginationSize = isPublic
-            ? pjson.settings.publicSensorDataFetchPaginationSize
-            : pjson.settings.dataFetchPaginationSize;
+        const paginationSize = pjson.settings.dataFetchPaginationSize;
         historyControllerRef.current = controller;
         isLoadingRef.current = true;
         const rangeFrom = fromRef.current;
@@ -233,11 +232,47 @@ function Sensor(props) {
             }
         }
 
+        function applyResponse(resp) {
+            if (controller.signal.aborted) return false;
+            if (isThrottled(resp)) {
+                setHistoryThrottled(true);
+                refreshDelay = throttleRetryDelay(resp);
+            } else if (resp.result === "success") {
+                if (currentSensor.sensor !== resp.data.sensor) return false;
+                setHistoryThrottled(false);
+                Object.keys(currentSensor).filter(x => x.startsWith("offset")).forEach(x => {
+                    resp.data[x] = currentSensor[x];
+                });
+                const d = parse(resp.data);
+                const stateData = dataRef.current;
+                const measurements = mergeHistoryMeasurements(stateData?.measurements || [], d.measurements);
+                const newData = { ...(stateData || d), measurements: trimMeasurements(measurements) };
+                dataRef.current = newData;
+                setData(newData);
+                return true;
+            } else if (resp.result === "error") {
+                notify.error(propsRef.current.t(`UserApiError.${resp.code}`));
+            }
+            return false;
+        }
+
         try {
+            if (isPublic) {
+                const since = getRangeStart();
+                const until = getRangeEnd();
+                if (until < since) return;
+                const resp = await new PublicSensorApi().getHistory(
+                    currentSensor.sensor, since, until,
+                    [rangeFrom, rangeTo, maxHistoryDays, currentSensor.subscription.maxResolutionMinutes],
+                    controller.signal
+                );
+                applyResponse(resp);
+                return;
+            }
+
             const resume = historyResumeRef.current;
             const initialLoad = dataRef.current === null || restartHistory || resume !== null;
-            // Keep the lower bound fixed across pages, including a refresh that
-            // needs several pages after the tab has been asleep.
+            // Keep the lower bound fixed across authenticated history pages.
             const since = Math.max(getRangeStart(), resume?.since ??
                 (!initialLoad && dataRef.current?.measurements?.length
                     ? dataRef.current.measurements[0].timestamp + 1 : getRangeStart()));
@@ -247,40 +282,19 @@ function Sensor(props) {
                     historyResumeRef.current = null;
                     return;
                 }
-                // Keep unfinished history for retries after throttling, network
-                // failures, or API errors instead of switching to latest-only polling.
-                if (isPublic || initialLoad) historyResumeRef.current = { since, until };
-
+                // Resume unfinished history after throttling or network errors.
+                if (initialLoad) historyResumeRef.current = { since, until };
                 const resp = await new NetworkApi().getAsync(
                     currentSensor.sensor, since, until,
-                    { mode: "mixed", limit: paginationSize, auth: !isPublic },
-                    controller.signal
+                    { mode: "mixed", limit: paginationSize }, controller.signal
                 );
-                // Some async operations may finish despite cancellation.
                 if (controller.signal.aborted) return;
-
-                if (isThrottled(resp)) {
-                    setHistoryThrottled(true);
-                    refreshDelay = throttleRetryDelay(resp);
-                } else if (resp.result === "success") {
-                    if (currentSensor.sensor !== resp.data.sensor) return;
-                    setHistoryThrottled(false);
-                    const nextUntil = (isPublic || initialLoad)
-                        ? nextHistoryPage(resp.data, since, until, paginationSize, isPublic) : null;
-                    Object.keys(currentSensor).filter(x => x.startsWith("offset")).forEach(x => {
-                        resp.data[x] = currentSensor[x];
-                    });
-                    const d = parse(resp.data);
-                    const stateData = dataRef.current;
-                    const measurements = mergeHistoryMeasurements(stateData?.measurements || [], d.measurements);
-                    const newData = { ...(stateData || d), measurements: trimMeasurements(measurements) };
-                    dataRef.current = newData;
-                    setData(newData);
-
+                // Use raw timestamps before decoding can remove invalid readings.
+                const nextUntil = initialLoad && resp.result === "success" && resp.data.sensor === currentSensor.sensor
+                    ? nextHistoryPage(resp.data, since, until, paginationSize) : null;
+                if (applyResponse(resp)) {
                     if (nextUntil !== null) await load(nextUntil);
                     else historyResumeRef.current = null;
-                } else if (resp.result === "error") {
-                    notify.error(propsRef.current.t(`UserApiError.${resp.code}`));
                 }
             }
             await load(resume?.until ?? getRangeEnd());

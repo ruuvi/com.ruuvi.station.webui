@@ -17,7 +17,7 @@ const { Provider } = await import("../components/ui/provider");
 const PublicSensor = (await import("./PublicSensor")).default;
 
 const cachedUntil = 1794337491;
-const now = cachedUntil + 60;
+let now = cachedUntil + 60;
 const day = 86400;
 const reading = timestamp => ({ timestamp, data: "0201061BFF99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", rssi: -60 });
 const response = timestamps => ({ status: 200, json: async () => ({ result: "success", data: {
@@ -30,6 +30,7 @@ const historyRequests = () => fetchMock.mock.calls.map(([url]) => new URL(url).s
     .map(query => ({ since: Number(query.get("since")), until: Number(query.get("until")) }));
 
 beforeEach(() => {
+    now += 120;
     vi.useFakeTimers();
     vi.setSystemTime(now * 1000);
     vi.stubGlobal("ResizeObserver", class {
@@ -64,9 +65,10 @@ afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
     localStorage.clear();
+    sessionStorage.clear();
 });
 
-it("fetches seven days in seconds after changing the real dropdown, despite a recent cache and throttling", async () => {
+it("fetches the seven-day selection once even when the response only covers 30 minutes", async () => {
     await act(async () => {
         root.render(<MemoryRouter initialEntries={["/public/test-sensor"]}><Provider><Routes>
             <Route path="/public/:id" element={<PublicSensor />} />
@@ -83,24 +85,78 @@ it("fetches seven days in seconds after changing the real dropdown, despite a re
     await act(async () => oneWeek.click());
 
     const since = now - 7 * day;
-    expect(historyRequests().slice(previousRequests)).toEqual([
-        { since, until: now },
-        { since, until: now - 1801 },
-    ]);
-    expect(container.querySelector('[role="status"]')?.textContent).toBe("Too many requests");
+    expect(historyRequests().slice(previousRequests)).toEqual([{ since, until: now }]);
+    expect(container.querySelector('[role="status"]')).toBeNull();
     expect(localStorage.getItem("graph_from")).toBe(String(7 * 24));
 
     await act(async () => vi.advanceTimersByTimeAsync(60000));
     expect(historyRequests().slice(previousRequests)).toEqual([
         { since, until: now },
-        { since, until: now - 1801 },
-        { since: since + 60, until: now - 3 * day - 1 },
-        { since: since + 60, until: now - 6 * day - 1 },
+        { since: since + 60, until: now + 60 },
     ]);
-    const timestamps = observed.graph.data.map(reading => reading.timestamp);
-    expect(timestamps).toContain(now - 5 * day);
-    expect(timestamps.at(-1)).toBe(now - 6 * day);
-    expect(timestamps).not.toContain(now - 8 * day);
+    expect(observed.graph.data.map(reading => reading.timestamp)).toEqual([now + 59, now - 1, now - 1800]);
     expect(observed.graph.from).toBe((since + 60) * 1000);
     expect(container.querySelector('[role="status"]')).toBeNull();
+});
+
+
+it("reloads both the reading and history from cache until they are 30 seconds old", async () => {
+    const render = () => act(async () => {
+        root.render(<MemoryRouter initialEntries={["/public/test-sensor"]}><Provider><Routes>
+            <Route path="/public/:id" element={<PublicSensor />} />
+        </Routes></Provider></MemoryRouter>);
+    });
+    const reload = async () => {
+        act(() => root.unmount());
+        root = createRoot(container);
+        await render();
+    };
+    await render();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(historyRequests()).toHaveLength(1);
+    await act(async () => vi.advanceTimersByTimeAsync(29999));
+    await reload();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(observed.graph.data.map(reading => reading.timestamp)).toEqual([now - 1, now - 1800]);
+    await act(async () => vi.advanceTimersByTimeAsync(1));
+    await reload();
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(historyRequests()).toHaveLength(2);
+});
+
+it("changes the duration using fresh wider history without fetching or losing the original range", async () => {
+    localStorage.setItem("graph_from", String(7 * 24));
+    const timestamps = [now - 1, now - 1800, now - 2 * day];
+    fetchMock.mockImplementation(async url => {
+        const query = new URL(url).searchParams;
+        return query.get("limit") === "1" ? response([now - 1]) : response(timestamps.filter(
+            timestamp => timestamp >= Number(query.get("since")) && timestamp <= Number(query.get("until"))
+        ));
+    });
+    await act(async () => {
+        root.render(<MemoryRouter initialEntries={["/public/test-sensor"]}><Provider><Routes>
+            <Route path="/public/:id" element={<PublicSensor />} />
+        </Routes></Provider></MemoryRouter>);
+    });
+    const chooseDuration = async label => {
+        await act(async () => container.querySelectorAll("button.durationPicker")[1].click());
+        const option = Array.from(document.querySelectorAll('[role="menuitem"]')).find(item => item.textContent === label);
+        expect(option).toBeDefined();
+        await act(async () => option.click());
+    };
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(observed.graph.data.map(reading => reading.timestamp)).toEqual(timestamps);
+    await act(async () => vi.advanceTimersByTimeAsync(10000));
+    await chooseDuration("1 day");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(observed.graph.data.map(reading => reading.timestamp)).toEqual(timestamps.slice(0, 2));
+    expect(observed.graph.from).toBe((now + 10 - day) * 1000);
+    await act(async () => vi.advanceTimersByTimeAsync(10000));
+    await chooseDuration("1 week");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(observed.graph.data.map(reading => reading.timestamp)).toEqual(timestamps);
+    await act(async () => vi.advanceTimersByTimeAsync(10000));
+    await chooseDuration("1 hour");
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(historyRequests()).toHaveLength(2);
 });

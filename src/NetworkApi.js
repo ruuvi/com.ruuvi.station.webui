@@ -8,24 +8,6 @@ import { isThrottled, retryAfterMs } from './utils/requestThrottle';
 
 let GET_ALL_SENSORS_CACHE = { ts: 0, data: null };
 
-// The server limits public requests per IP, across all sensors. This page's
-// budget is shared by latest-reading and history requests, API instances, and
-// sensor navigation. Other tabs/devices on the same IP can still trigger server
-// throttling. Production and staging have separate budgets.
-const publicRequestWindows = new Map();
-function reservePublicRequest(url) {
-    const now = Date.now();
-    const window = publicRequestWindows.get(url) || { timestamps: [], retryAt: 0 };
-    publicRequestWindows.set(url, window);
-    window.timestamps = window.timestamps.filter(timestamp => timestamp > now - 60000);
-    const nextSlot = window.timestamps.length >= pjson.settings.publicSensorRequestsPerMinute
-        ? window.timestamps[0] + 60000 : now;
-    const delay = Math.max(nextSlot, window.retryAt) - now;
-    if (delay > 0) return { result: "error", code: "ER_THROTTLED", retryAfterMs: delay };
-    window.timestamps.push(now);
-    return null;
-}
-
 // api docs: https://docs.ruuvi.com/communication/ruuvi-network/backends/serverless/user-api
 
 export function sortSensors(sensors) {
@@ -57,11 +39,6 @@ class NetworkApi {
     // `strict` restores the old behavior of throwing the Response instead.
     async request(path, { method = 'GET', body, signal, timeout, strict, auth = true, headers } = {}) {
         if (signal?.aborted) throw signal.reason || new DOMException("Aborted", "AbortError");
-        const publicSensorRequest = !auth && path.startsWith('/get?');
-        if (publicSensorRequest) {
-            const throttled = reservePublicRequest(this.url);
-            if (throttled) return throttled;
-        }
         const controller = timeout === undefined ? null : new AbortController();
         const onAbort = () => controller.abort(signal.reason);
         let timeoutId;
@@ -93,10 +70,6 @@ class NetworkApi {
                 : await response.json();
             if (isThrottled(result)) {
                 result.retryAfterMs = retryAfterMs(response.headers);
-                if (publicSensorRequest) {
-                    const window = publicRequestWindows.get(this.url);
-                    window.retryAt = Math.max(window.retryAt, Date.now() + result.retryAfterMs);
-                }
             }
             return result;
         } finally {
@@ -164,7 +137,6 @@ class NetworkApi {
         };
         checkAborted();
         const mode = settings?.mode || "mixed";
-        const auth = settings?.auth !== false;
         const limit = settings?.limit || 100000;
         const paginationSize = settings?.limit || pjson.settings.dataFetchPaginationSize;
 
@@ -174,8 +146,6 @@ class NetworkApi {
         // Serve the cached page ending at this cursor; older pages may remain.
         if (closestCache && closestCache.until === until) {
             const data = { ...closestCache.data };
-            // Cached continuation hints describe an older request, not this one.
-            if (!auth) delete data.nextUp;
             const originalLength = data.measurements.length;
             data.measurements = data.measurements.filter(x => x.timestamp >= since);
             // Some cached measurements fell outside the request -> mark incomplete
@@ -185,10 +155,8 @@ class NetworkApi {
             return { result: "success", data };
         }
 
-        // Public pages can be short regardless of coverage. Keep their selected
-        // lower bound and paginate by timestamp; only exact cached pages above
-        // can safely replace a public request.
-        if (closestCache && auth) {
+        // Join the next network page to the closest cached segment.
+        if (closestCache) {
             since = closestCache.until;
         }
 
@@ -202,7 +170,9 @@ class NetworkApi {
 
         let respData;
         try {
-            respData = await this.request(`/get${query}`, { timeout: 30000, signal, auth });
+            respData = await this.request(`/get${query}`, {
+                timeout: 30000, signal,
+            });
         } catch (error) {
             checkAborted();
             logger.error("Error fetching data from API", error);
@@ -218,7 +188,7 @@ class NetworkApi {
         // hangs blocking the return of already-fetched data)
         cache.saveSegment(mac, mode, until, respData.data).catch(() => {});
 
-        if (closestCache && auth && respData.data.measurements.length < paginationSize) {
+        if (closestCache && respData.data.measurements.length < paginationSize) {
             respData.data.nextUp = since;
         }
 

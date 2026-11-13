@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import NetworkApi from "../NetworkApi";
+import PublicSensorApi from "../PublicSensorApi";
 import pjson from "../../package.json";
 import notify from "../utils/notify";
 
@@ -49,8 +50,10 @@ beforeEach(() => {
         subscription: { subscriptionName: "Pro", maxHistoryDays: 30 },
         measurements: [{ timestamp: now - 1, parsed: { temperature: 24.3 } }],
     };
-    api = vi.spyOn(NetworkApi.prototype, "getAsync").mockImplementation(async (_mac, since, until) =>
+    api = vi.fn(async (_mac, since, until) =>
         response([now - 1].filter(timestamp => timestamp >= since && timestamp <= until)));
+    vi.spyOn(NetworkApi.prototype, "getAsync").mockImplementation(api);
+    vi.spyOn(PublicSensorApi.prototype, "getHistory").mockImplementation(api);
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -65,6 +68,7 @@ afterEach(() => {
 
 it("loads initial history once without duplicating readings", async () => {
     await render();
+    expect(PublicSensorApi.prototype.getHistory).not.toHaveBeenCalled();
     expect(api).toHaveBeenCalledTimes(1);
     expect(timestamps()).toEqual([now - 1]);
 });
@@ -120,7 +124,7 @@ it("cancels history when its limit becomes zero and resumes after an upgrade", a
 
     sensor = { ...sensor, subscription: { ...sensor.subscription, maxHistoryDays: 731 } };
     await render({ isPublic: true });
-    expect(api).toHaveBeenCalledTimes(calls + 2);
+    expect(api).toHaveBeenCalledTimes(calls + 1);
     expect(container.querySelector('[data-testid="sensor-graph"]')).not.toBeNull();
     expect(container.querySelector('[data-testid="duration-picker"]').dataset.maxHours).toBe(String(7 * 24));
 });
@@ -234,68 +238,64 @@ it("assembles paginated history through a cached segment before resuming polling
     expect(timestamps()).toEqual([now + 59, now - 1, now - 120, now - 180]);
 });
 
-it("keeps the large public request limit but checks beyond a short page", async () => {
+it("uses only the public API and stops after a short page", async () => {
     api.mockResolvedValueOnce(response(Array.from({ length: pjson.settings.dataFetchPaginationSize }, (_, i) => now - i - 1)));
     await render({ isPublic: true });
-    expect(api).toHaveBeenCalledTimes(2);
-    expect(api.mock.calls[0][3]).toEqual({ mode: "mixed", limit: pjson.settings.publicSensorDataFetchPaginationSize, auth: false });
-    expect(api.mock.calls[1][2]).toBe(now - pjson.settings.dataFetchPaginationSize - 1);
+    expect(api).toHaveBeenCalledTimes(1);
+    expect(NetworkApi.prototype.getAsync).not.toHaveBeenCalled();
+    expect(PublicSensorApi.prototype.getHistory).toHaveBeenCalledTimes(1);
     await act(async () => vi.advanceTimersByTimeAsync(60000));
-    expect(api.mock.calls[2][3].limit).toBe(pjson.settings.publicSensorDataFetchPaginationSize);
+    expect(api).toHaveBeenCalledTimes(2);
+    expect(api.mock.calls[1][3]).toEqual(api.mock.calls[0][3]);
 });
 
-it("fetches the selected seven days across short public pages without repeating their boundaries", async () => {
+it("accepts less than 30 minutes of data for a seven-day public window", async () => {
     sensor.subscription.maxHistoryDays = 92;
     localStorage.setItem("graph_from", String(7 * 24));
-    const day = 86400;
-    api.mockResolvedValueOnce(response([now - 1, now - 2 * day]))
-        .mockResolvedValueOnce(response([now - 4 * day, now - 5 * day]))
-        .mockResolvedValueOnce(response([now - 6 * day, now - 7 * day]));
+    api.mockResolvedValueOnce(response([now - 1, now - 60]));
     await render({ isPublic: true });
-    expect(api.mock.calls.map(call => call[1])).toEqual(Array(3).fill(now - 7 * day));
-    expect(api.mock.calls.map(call => call[2])).toEqual([now, now - 2 * day - 1, now - 5 * day - 1]);
-    expect(timestamps()).toEqual([now - 1, now - 2 * day, now - 4 * day, now - 5 * day, now - 6 * day, now - 7 * day]);
+    expect(api).toHaveBeenCalledTimes(1);
+    expect(api.mock.calls[0].slice(1, 3)).toEqual([now - 7 * 86400, now]);
+    expect(timestamps()).toEqual([now - 1, now - 60]);
 });
 
-it("continues past a page whose readings cannot be decoded", async () => {
-    api.mockResolvedValueOnce(response([], { measurements: [{ timestamp: now - 60, data: "00" }] }))
-        .mockResolvedValueOnce(response([now - 120]));
+it("stops after a public response whose readings cannot be decoded", async () => {
+    api.mockResolvedValueOnce(response([], { measurements: [{ timestamp: now - 60, data: "00" }] }));
     await render({ isPublic: true });
-    expect(api.mock.calls[1][2]).toBe(now - 61);
-    expect(timestamps()).toContain(now - 120);
+    expect(api).toHaveBeenCalledTimes(1);
+    expect(observed.graph).toBeNull();
 });
 
-it("deduplicates the shared boundary when continuing into cached public history", async () => {
-    api.mockResolvedValueOnce(response([now - 1, now - 60], { nextUp: now - 60 }))
-        .mockResolvedValueOnce(response([now - 60, now - 120], { fromCache: true }));
+it("ignores public continuation hints and deduplicates overlapping refreshes", async () => {
+    api.mockResolvedValueOnce(response([now - 1, now - 60], { nextUp: now - 60 }));
     await render({ isPublic: true });
+    expect(api).toHaveBeenCalledTimes(1);
+    api.mockResolvedValueOnce(response([now - 60, now - 120], { fromCache: true }));
+    await act(async () => vi.advanceTimersByTimeAsync(60000));
+    expect(api).toHaveBeenCalledTimes(2);
     expect(timestamps()).toEqual([now - 1, now - 60, now - 120]);
-    expect(api.mock.calls.map(call => call[2])).toEqual([now, now - 60, now - 121]);
 });
 
-it.each(["network", "api"])("retries unfinished public history after a %s failure", async (failure) => {
-    api.mockResolvedValueOnce(response([now - 60]));
+it.each(["network", "api"])("retries the public range after a %s failure", async (failure) => {
     if (failure === "network") api.mockRejectedValueOnce(new Error("offline"));
     else api.mockResolvedValueOnce({ result: "error", code: "ER_INTERNAL" });
     api.mockResolvedValueOnce(response([now - 7200]));
     await render({ isPublic: true });
-    expect(api.mock.calls[1][2]).toBe(now - 61);
+    expect(api).toHaveBeenCalledTimes(1);
     await act(async () => vi.advanceTimersByTimeAsync(60000));
-    expect(api.mock.calls[2][2]).toBe(now - 61);
-    expect(api.mock.calls[2][1]).toBeLessThan(now - 7200);
+    expect(api).toHaveBeenCalledTimes(2);
+    expect(api.mock.calls[1].slice(1, 3)).toEqual([now + 60 - 86400, now + 60]);
     expect(timestamps()).toContain(now - 7200);
 });
 
-it("fetches every page of new readings after the public page has been asleep", async () => {
+it("fetches one full-range response after the public page has been asleep", async () => {
     await render({ isPublic: true });
-    const initialCalls = api.mock.calls.length;
     vi.setSystemTime((now + 7200) * 1000);
-    api.mockResolvedValueOnce(response([now + 7000, now + 5000]))
-        .mockResolvedValueOnce(response([now + 3000, now + 1000]))
-        .mockResolvedValueOnce(response([]));
+    api.mockResolvedValueOnce(response([now + 7000, now + 5000]));
     await act(async () => vi.advanceTimersByTimeAsync(60000));
-    expect(api.mock.calls.slice(initialCalls).map(call => call[1])).toEqual([now, now, now]);
-    expect(timestamps()).toEqual([now + 7000, now + 5000, now + 3000, now + 1000, now - 1]);
+    expect(api).toHaveBeenCalledTimes(2);
+    expect(api.mock.calls[1].slice(1, 3)).toEqual([now + 7260 - 86400, now + 7260]);
+    expect(timestamps()).toEqual([now + 7000, now + 5000, now - 1]);
 });
 
 it("clamps a saved multi-year selection to the seven-day public sensor preset", async () => {
@@ -343,26 +343,24 @@ it("keeps a custom range ending today live while requesting no future readings",
     const calls = api.mock.calls.length;
     api.mockResolvedValueOnce(response([now + 30])).mockResolvedValueOnce(response([]));
     await act(async () => vi.advanceTimersByTimeAsync(60000));
-    expect(api.mock.calls[calls].slice(1, 3)).toEqual([now, now + 60]);
+    expect(api.mock.calls[calls].slice(1, 3)).toEqual([now - 3600, now + 60]);
     expect(timestamps()).toContain(now + 30);
     expect(observed.graph.to).toBe((now + 60) * 1000);
 });
 
-it("warns on throttling and resumes the interrupted history page after Retry-After", async () => {
+it("warns on throttling and retries the public range after Retry-After", async () => {
     const errorToast = vi.spyOn(notify, "error");
-    api.mockResolvedValueOnce(response([now - 1], { nextUp: now - 60 }))
-        .mockResolvedValueOnce({ result: "error", code: "ER_THROTTLED", retryAfterMs: 120000 })
+    api.mockResolvedValueOnce({ result: "error", code: "ER_THROTTLED", retryAfterMs: 120000 })
         .mockResolvedValueOnce(response([now - 120]));
     await render({ isPublic: true });
-    expect(timestamps()).toEqual([now - 1]);
     expect(container.querySelector('[role="status"]')?.textContent).toBe("Too many requests");
     expect(errorToast).not.toHaveBeenCalled();
     await act(async () => vi.advanceTimersByTimeAsync(119999));
-    expect(api).toHaveBeenCalledTimes(2);
+    expect(api).toHaveBeenCalledTimes(1);
     await act(async () => vi.advanceTimersByTimeAsync(1));
-    expect(api.mock.calls[2][2]).toBe(now - 60);
-    expect(api.mock.calls[2][1]).toBeLessThan(now - 120);
-    expect(timestamps()).toEqual([now - 1, now - 120]);
+    expect(api).toHaveBeenCalledTimes(2);
+    expect(api.mock.calls[1].slice(1, 3)).toEqual([now + 120 - 86400, now + 120]);
+    expect(timestamps()).toContain(now - 120);
     expect(container.querySelector('[role="status"]')).toBeNull();
 });
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import logger from "../utils/logger";
-import NetworkApi, { sortSensors } from "../NetworkApi";
+import { sortSensors } from "../NetworkApi";
+import PublicSensorApi from "../PublicSensorApi";
 import parse from "../decoder/parser";
 import Sensor from "./Sensor";
 import { Box, Spinner, Text, Button } from "@chakra-ui/react";
@@ -37,10 +38,7 @@ function PublicSensorView({ id }) {
             try {
                 // Public sensors are served by /get without authentication;
                 // non-public sensors return ER_FORBIDDEN.
-                const resp = await new NetworkApi().request(
-                    `/get?sensor=${encodeURIComponent(id)}&mode=dense&limit=1`,
-                    { timeout: 30000, auth: false, signal: controller.signal }
-                );
+                const resp = await new PublicSensorApi().getLatest(id, controller.signal);
                 if (cancelled) return;
                 if (isThrottled(resp)) {
                     setThrottled(true);
