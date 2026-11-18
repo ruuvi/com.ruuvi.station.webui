@@ -34,7 +34,7 @@ import PublicSensorDialog from "../components/dialogs/PublicSensorDialog";
 import SensorHeader from "../components/sensor/SensorHeader";
 import SensorReadingGrid from "../components/sensor/SensorReadingGrid";
 import SensorSettings from "../components/sensor/SensorSettings";
-import ThrottleWarning from "../components/common/ThrottleWarning";
+import SensorRefreshNotice from "../components/common/SensorRefreshNotice";
 import { isThrottled, throttleRetryDelay } from "../utils/requestThrottle";
 import { clampHistoryRange } from "../utils/historyRange";
 import { mergeHistoryMeasurements, nextHistoryPage } from "../utils/historyPagination";
@@ -116,7 +116,7 @@ function Sensor(props) {
     const [notesDialog, setNotesDialog] = useState(false);
     const [showRemoveSensor, setShowRemoveSensor] = useState(false);
     const [publicDialog, setPublicDialog] = useState(false);
-    const [historyThrottled, setHistoryThrottled] = useState(false);
+    const [historyStatus, setHistoryStatus] = useState(null);
 
     // Refs for values accessed inside async functions to avoid stale closures
     const dataRef = useRef(null);
@@ -188,7 +188,7 @@ function Sensor(props) {
             historyControllerRef.current?.abort();
             isLoadingRef.current = false;
             historyResumeRef.current = null;
-            setHistoryThrottled(false);
+            setHistoryStatus(null);
         }
         if (isLoadingRef.current) return;
         clearTimeout(latestDataUpdateRef.current);
@@ -235,11 +235,11 @@ function Sensor(props) {
         function applyResponse(resp) {
             if (controller.signal.aborted) return false;
             if (isThrottled(resp)) {
-                setHistoryThrottled(true);
+                setHistoryStatus("throttled");
                 refreshDelay = throttleRetryDelay(resp);
             } else if (resp.result === "success") {
                 if (currentSensor.sensor !== resp.data.sensor) return false;
-                setHistoryThrottled(false);
+                setHistoryStatus(null);
                 Object.keys(currentSensor).filter(x => x.startsWith("offset")).forEach(x => {
                     resp.data[x] = currentSensor[x];
                 });
@@ -251,7 +251,12 @@ function Sensor(props) {
                 setData(newData);
                 return true;
             } else if (resp.result === "error") {
-                notify.error(propsRef.current.t(`UserApiError.${resp.code}`));
+                if (resp.code) {
+                    setHistoryStatus(null);
+                    notify.error(propsRef.current.t([`UserApiError.${resp.code}`, "something_went_wrong"]));
+                } else {
+                    setHistoryStatus("unavailable");
+                }
             }
             return false;
         }
@@ -300,7 +305,7 @@ function Sensor(props) {
             await load(resume?.until ?? getRangeEnd());
         } catch (e) {
             if (!controller.signal.aborted) {
-                notify.error(propsRef.current.t("internet_connection_problem"));
+                setHistoryStatus("unavailable");
                 logger.error("err", e);
             }
         } finally {
@@ -518,7 +523,7 @@ function Sensor(props) {
         <Box>
             <Box minHeight={isPublic || freeMode ? "auto" : 1500} maxW={publicReadingsOnly ? "1000px" : undefined} mx="auto" pb={isPublic ? 8 : 0}>
                 <Box overflow="hidden" pt={{ base: "5px", md: "35px" }} backgroundPosition="center" paddingLeft={{ base: "10px", md: "20px", lg: "50px" }} paddingRight={{ base: "10px", md: "20px", lg: "50px" }}>
-                    {(props.throttled || historyThrottled) && <ThrottleWarning />}
+                    <SensorRefreshNotice status={historyStatus || props.refreshStatus} />
                     <SensorHeader
                         sensor={sensor}
                         t={t}
@@ -593,10 +598,7 @@ function Sensor(props) {
                             </Box>
                         ) : <Box height={520}>
                             <> {!loading && (!data || !data?.measurements?.length) ? (
-                                <>
-                                    <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">{noHistoryStr}
-                                    </center>
-                                </>
+                                !historyStatus && <center style={{ paddingTop: 240, height: 450 }} className="nodatatext">{noHistoryStr}</center>
                             ) : (
                                 <Box ml={-5} mr={-5}>
                                     {loading &&

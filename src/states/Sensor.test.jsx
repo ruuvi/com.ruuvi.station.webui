@@ -21,7 +21,7 @@ vi.mock("../components/common/DurationPicker", () => ({ default: (props) => {
 window.matchMedia = () => ({ matches: true, addEventListener() {}, removeEventListener() {} });
 window.scrollTo = () => {};
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-await import("../i18n");
+const { default: i18n } = await import("../i18n");
 const { Provider } = await import("../components/ui/provider");
 const Sensor = (await import("./Sensor")).default;
 const now = Date.UTC(2026, 8, 10, 12) / 1000;
@@ -216,13 +216,22 @@ it("retains only 24 hours of one-minute readings after seven hours of refreshes"
     expect(api).toHaveBeenCalledTimes(421);
 });
 
-it("still prunes expired readings when the refresh fails", async () => {
-    api.mockImplementation(async () => response([now - 1, now - 86400]));
+it("keeps current readings and a single connection notice until a refresh succeeds", async () => {
+    const errorToast = vi.spyOn(notify, "error");
+    api.mockResolvedValueOnce(response([now - 1, now - 86400]));
     await render();
-    // Network failures leave the remaining history available.
-    api.mockImplementation(async () => ({ result: "error", message: "Failed to fetch data" }));
-    await act(async () => vi.advanceTimersByTimeAsync(60000));
+    const failure = { result: "error", message: "Failed to fetch data", error: new TypeError("Failed to fetch") };
+    api.mockResolvedValueOnce(failure).mockResolvedValueOnce(failure);
+    await act(async () => vi.advanceTimersByTimeAsync(120000));
     expect(timestamps()).toEqual([now - 1]);
+    expect(container.querySelectorAll('[role="status"]')).toHaveLength(1);
+    const messages = i18n.getResourceBundle("en", "translation");
+    expect(container.querySelector('[role="status"]').textContent).toBe(messages.sensor_refresh_unavailable ?? messages.internet_connection_problem);
+    expect(errorToast).not.toHaveBeenCalled();
+    api.mockResolvedValueOnce(response([now + 179]));
+    await act(async () => vi.advanceTimersByTimeAsync(60000));
+    expect(timestamps()).toEqual([now + 179, now - 1]);
+    expect(container.querySelector('[role="status"]')).toBeNull();
 });
 
 it("assembles paginated history through a cached segment before resuming polling", async () => {
@@ -376,11 +385,11 @@ it("keeps graph data and clears a throttle warning after a successful refresh", 
     expect(container.querySelector('[role="status"]')).toBeNull();
 });
 
-it("still shows real API failures as errors", async () => {
+it.each([["ER_FORBIDDEN", "Forbidden"], ["ER_NEW_CODE", "Something went wrong"]])("shows readable text for API error %s", async (code, message) => {
     const errorToast = vi.spyOn(notify, "error");
-    api.mockResolvedValue({ result: "error", code: "ER_FORBIDDEN" });
+    api.mockResolvedValue({ result: "error", code });
     await render({ isPublic: true });
-    expect(errorToast).toHaveBeenCalledTimes(1);
+    expect(errorToast).toHaveBeenCalledWith(message);
     expect(container.querySelector('[role="status"]')).toBeNull();
 });
 

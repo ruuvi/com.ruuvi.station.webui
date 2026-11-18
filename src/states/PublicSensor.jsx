@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import logger from "../utils/logger";
 import { sortSensors } from "../NetworkApi";
 import PublicSensorApi from "../PublicSensorApi";
@@ -7,7 +7,7 @@ import Sensor from "./Sensor";
 import { Box, Spinner, Text, Button } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import ThrottleWarning from "../components/common/ThrottleWarning";
+import SensorRefreshNotice from "../components/common/SensorRefreshNotice";
 import { isThrottled, throttleRetryDelay } from "../utils/requestThrottle";
 import pjson from "../../package.json";
 
@@ -24,13 +24,12 @@ const FINAL_ERROR_CODES = ["ER_FORBIDDEN", "ER_SENSOR_NOT_FOUND"];
 function PublicSensorView({ id }) {
     const { t } = useTranslation();
     const [sensor, setSensor] = useState(null);
-    const [errorKey, setErrorKey] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [throttled, setThrottled] = useState(false);
-    const hasSensorRef = useRef(false);
+    const [errorCode, setErrorCode] = useState(null);
+    const [refreshStatus, setRefreshStatus] = useState(null);
 
     useEffect(() => {
         let cancelled = false;
+        let hasSensor = false;
         let refreshId;
         const controller = new AbortController();
         async function load() {
@@ -41,8 +40,7 @@ function PublicSensorView({ id }) {
                 const resp = await new PublicSensorApi().getLatest(id, controller.signal);
                 if (cancelled) return;
                 if (isThrottled(resp)) {
-                    setThrottled(true);
-                    setErrorKey(null);
+                    setRefreshStatus("throttled");
                     refreshDelay = throttleRetryDelay(resp);
                 } else if (resp.result === "success") {
                     const sensorObj = {
@@ -66,22 +64,26 @@ function PublicSensorView({ id }) {
                     // history is fetched separately by the Sensor view.
                     sensorObj.measurements = sensorObj.measurements.slice(0, 1);
                     sortSensors([sensorObj]);
-                    hasSensorRef.current = true;
+                    hasSensor = true;
                     setSensor(sensorObj);
-                    setErrorKey(null);
-                    setThrottled(false);
-                } else if (!hasSensorRef.current || FINAL_ERROR_CODES.includes(resp.code)) {
-                    setErrorKey(resp.code ? `UserApiError.${resp.code}` : "network_error");
+                    setErrorCode(null);
+                    setRefreshStatus(null);
+                } else if (!resp.code) {
+                    setRefreshStatus("unavailable");
                 } else {
-                    logger.warn("public sensor refresh failed, keeping current view", resp);
+                    setRefreshStatus(null);
+                    if (!hasSensor || FINAL_ERROR_CODES.includes(resp.code)) {
+                        setErrorCode(resp.code);
+                    } else {
+                        logger.warn("public sensor refresh failed, keeping current view", resp);
+                    }
                 }
             } catch (e) {
                 if (cancelled) return;
                 logger.error("failed to load public sensor", e);
-                if (!cancelled && !hasSensorRef.current) setErrorKey("internet_connection_problem");
+                setRefreshStatus("unavailable");
             } finally {
                 if (!cancelled) {
-                    setLoading(false);
                     refreshId = setTimeout(load, refreshDelay);
                 }
             }
@@ -120,16 +122,16 @@ function PublicSensorView({ id }) {
         };
     }, [sensor, t]);
 
-    if (errorKey) {
+    if (errorCode && (FINAL_ERROR_CODES.includes(errorCode) || !refreshStatus)) {
         return (
             <Box maxW="500px" mx="auto" my={16} p={8} textAlign="center">
                 <Text fontFamily="mulish" fontSize="xl" fontWeight="bold" mb={2}>
                     {t("error")}
                 </Text>
                 <Text fontFamily="mulish" fontSize="md" color="gray.500" mb={6}>
-                    {t(errorKey)}
+                    {t([`UserApiError.${errorCode}`, "something_went_wrong"])}
                 </Text>
-                {FINAL_ERROR_CODES.some(code => errorKey === `UserApiError.${code}`) && (
+                {FINAL_ERROR_CODES.includes(errorCode) && (
                     <Button onClick={() => window.location.href = "/"} colorPalette="ruuvi">
                         {t("login_to_ruuvi_station")}
                     </Button>
@@ -138,11 +140,11 @@ function PublicSensorView({ id }) {
         );
     }
 
-    if (throttled && !sensor) {
-        return <Box maxW="600px" mx="auto" my={16} p={8}><ThrottleWarning /></Box>;
+    if (refreshStatus && !sensor) {
+        return <Box maxW="600px" mx="auto" my={16} p={8}><SensorRefreshNotice status={refreshStatus} /></Box>;
     }
 
-    if (loading && !sensor) {
+    if (!sensor) {
         return (
             <center style={{ margin: 96 }}>
                 <Spinner size="xl" />
@@ -150,7 +152,7 @@ function PublicSensorView({ id }) {
         );
     }
 
-    return <Sensor sensor={sensor} isPublic throttled={throttled} />;
+    return <Sensor sensor={sensor} isPublic refreshStatus={refreshStatus} />;
 }
 
 function PublicSensor() {

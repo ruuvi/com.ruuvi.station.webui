@@ -11,7 +11,7 @@ vi.mock("./Sensor", () => ({ default: props => {
 } }));
 window.matchMedia = () => ({ matches: true, addEventListener() {}, removeEventListener() {} });
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-await import("../i18n");
+const { default: i18n } = await import("../i18n");
 const { Provider } = await import("../components/ui/provider");
 const PublicSensor = (await import("./PublicSensor")).default;
 const response = (overrides = {}) => ({ result: "success", data: {
@@ -94,7 +94,7 @@ it("shows a friendly warning when the first reading is throttled, then retries",
     expect(request).toHaveBeenCalledTimes(1);
     await act(async () => vi.advanceTimersByTimeAsync(1));
     expect(observed.props.sensor.name).toBe("Garden");
-    expect(observed.props.throttled).toBe(false);
+    expect(observed.props.refreshStatus).toBeNull();
 });
 
 it("keeps the latest sensor mounted while a refresh is throttled", async () => {
@@ -103,10 +103,20 @@ it("keeps the latest sensor mounted while a refresh is throttled", async () => {
     request.mockResolvedValueOnce({ result: "error", code: "ER_THROTTLED" });
     await act(async () => vi.advanceTimersByTimeAsync(60000));
     expect(observed.props.sensor).toBe(sensor);
-    expect(observed.props.throttled).toBe(true);
+    expect(observed.props.refreshStatus).toBe("throttled");
     expect(container.querySelector('[data-sensor]').textContent).toBe("Garden");
     await act(async () => vi.advanceTimersByTimeAsync(60000));
-    expect(observed.props.throttled).toBe(false);
+    expect(observed.props.refreshStatus).toBeNull();
+});
+
+it("shows a connection notice until the first public reading arrives", async () => {
+    request.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    await render();
+    const messages = i18n.getResourceBundle("en", "translation");
+    expect(container.querySelector('[role="status"]').textContent).toBe(messages.sensor_refresh_unavailable ?? messages.internet_connection_problem);
+    await act(async () => vi.advanceTimersByTimeAsync(60000));
+    expect(observed.props.sensor.name).toBe("Garden");
+    expect(observed.props.refreshStatus).toBeNull();
 });
 
 it("cancels an in-flight reading and stops retrying when unmounted", async () => {

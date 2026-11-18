@@ -21,6 +21,7 @@ window.ResizeObserver = window.ResizeObserver || class {
 };
 
 const { Provider } = await import("../components/ui/provider");
+const { default: i18n } = await import("../i18n");
 const Dashboard = (await import("./Dashboard")).default;
 
 let container;
@@ -62,6 +63,24 @@ afterEach(() => {
 function LocationProbe() {
     return <output data-testid="location">{useLocation().pathname}</output>;
 }
+
+it("keeps cached sensor cards visible during a disconnect and clears the notice on retry", async () => {
+    vi.useFakeTimers();
+    try {
+        NetworkApi.prototype.getAllSensorsAsync.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+        await act(async () => {
+            root.render(<MemoryRouter><Provider><Dashboard /></Provider></MemoryRouter>);
+        });
+        expect(container.querySelector(".sensorCard").textContent).toContain("Sensor 1");
+        const messages = i18n.getResourceBundle("en", "translation");
+        expect(container.querySelector('[role="status"]').textContent).toBe(messages.sensor_refresh_unavailable ?? messages.internet_connection_problem);
+        await act(async () => vi.advanceTimersByTimeAsync(2000));
+        expect(container.querySelector('[role="status"]')).toBeNull();
+        expect(container.querySelector(".sensorCard").textContent).toContain("Sensor 1");
+    } finally {
+        vi.useRealTimers();
+    }
+});
 
 async function openSensorMenu(action, inputMode = "pointer") {
     await act(async () => {

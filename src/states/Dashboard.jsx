@@ -3,6 +3,7 @@ import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
 import SensorCard from "../components/sensor/SensorCard";
 import Sensor from "./Sensor";
+import SensorRefreshNotice from "../components/common/SensorRefreshNotice";
 import { Spinner, Box, Link, Flex, Input, InputGroup, useMediaQuery } from "@chakra-ui/react"
 import { withTranslation } from 'react-i18next';
 import DurationPicker from "../components/common/DurationPicker";
@@ -79,6 +80,7 @@ function Dashboard(props) {
     const { t, params, location, navigate, reloadTags, settingsVersion } = props;
 
     const [loading, setLoading] = useState(() => getSensorCache().length === 0);
+    const [refreshStatus, setRefreshStatus] = useState(null);
     const [sensors, setSensors] = useState(getSensorCache);
     const [from, setFrom] = useState(() => {
         let f = Store.getDashboardFrom();
@@ -182,7 +184,7 @@ function Dashboard(props) {
                 });
             } else {
                 settle();
-                if (b.result === "error") notify.error(`UserApiError.${t(b.code)}`);
+                if (b.result === "error") notify.error(t([`UserApiError.${b.code}`, "something_went_wrong"]));
             }
         }, error => {
             settle();
@@ -215,17 +217,18 @@ function Dashboard(props) {
         let success = false;
         try {
             const resp = await api.getAllSensorsAsync(true);
-            if (!isUnmountedRef.current && resp.result === "success") {
+            if (isUnmountedRef.current) return;
+            setRefreshStatus(resp.result === "error" && !resp.code ? "unavailable" : null);
+            if (resp.result === "success") {
                 success = true;
                 const newSensors = resp.data.sensors;
-                if (!isUnmountedRef.current) {
-                    setSensors(newSensors);
-                    setLoading(false);
-                    localStorage.setItem("sensors", JSON.stringify(newSensors));
-                    checkSensorOrder(newSensors);
-                }
+                setSensors(newSensors);
+                setLoading(false);
+                localStorage.setItem("sensors", JSON.stringify(newSensors));
+                checkSensorOrder(newSensors);
             }
         } catch (e) {
+            if (!isUnmountedRef.current) setRefreshStatus("unavailable");
             logger.error("failed to load sensors", e);
         } finally {
             fetchInProgressRef.current = false;
@@ -488,6 +491,7 @@ function Dashboard(props) {
                     <Box backgroundSize="cover" backgroundPosition="top" >
                         {currentSensor ? (
                             <Sensor key={currentSensor.sensor} sensor={currentSensor}
+                                refreshStatus={refreshStatus}
                                 close={() => navigate('/')}
                                 next={() => nextIndex(1)}
                                 prev={() => nextIndex(-1)}
@@ -496,6 +500,7 @@ function Dashboard(props) {
                             />
                         ) : (
                             <Box paddingLeft={{ base: "10px", lg: "50px" }} paddingRight={{ base: "10px", lg: "50px" }}>
+                                <SensorRefreshNotice status={refreshStatus} />
                                 {sensors.length !== 0 &&
                                     <div style={{ paddingTop: 26 }}>
                                         <Flex flexFlow={"row wrap"} justifyContent={"flex-end"} gap={2}>
@@ -522,12 +527,12 @@ function Dashboard(props) {
                                 </DashboardGrid>
                             </Box>
                         )}
-                        {loading &&
+                        {loading && !refreshStatus &&
                             <center>
                                 <Spinner size="xl" />
                             </center>
                         }
-                        {!loading && !sensors.length &&
+                        {!loading && !refreshStatus && !sensors.length &&
                             <center style={{ margin: 32, ...infoText }}>
                                 {t("dashboard_no_sensors").split("\\n").map((x, i) => <div key={i}>{addRuuviLink(x)}<br /></div>)}
                             </center>
