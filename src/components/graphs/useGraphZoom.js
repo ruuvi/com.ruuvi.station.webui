@@ -50,6 +50,8 @@ export default function useGraphZoom({ dataKey, getXRange, hasFixedRange = true 
     const xRange = useCallback((_u, fromX, toX) => {
         const fullRange = s.getXRange();
         if (!s.hasFixedRange) return fullRange;
+        // uPlot passes null extents for empty data, including while older pages load.
+        if (!Number.isFinite(fromX) || !Number.isFinite(toX)) return s.zoom || fullRange;
 
         if (s.isTouchZooming) {
             // if zoom is close enough to the full x range, assume fully zoomed out
