@@ -1,3 +1,4 @@
+import storage from "./utils/storage";
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
@@ -33,7 +34,7 @@ class ErrorView extends React.Component {
   render() {
     if (this.state.hasError) {
       let isDarkMode = true
-      if (localStorage.getItem("chakra-ui-color-mode") === "light") {
+      if (storage.getItem("chakra-ui-color-mode") === "light") {
         isDarkMode = false
       }
       return (

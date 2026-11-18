@@ -8,6 +8,7 @@ import notify from "../../utils/notify";
 import RDialog from "./RDialog";
 import { pinFieldProps } from "../ui/pin-field";
 import { addNewlines } from "../../TextHelper";
+import { appPath } from "../../utils/env";
 
 const MAC_LENGTH = 12
 
@@ -68,7 +69,7 @@ function MacAddressForm({ t, open }) {
             if (res.result === "success") {
                 notify.success(t("sensor_added_successfully"))
                 setTimeout(() => {
-                    window.location.href = "/" + addr
+                    window.location.href = appPath("/" + addr)
                     window.location.reload();
                 }, 1000)
                 return

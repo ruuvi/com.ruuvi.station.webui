@@ -12,6 +12,7 @@ import { pinFieldProps } from "../ui/pin-field";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { addLink } from "../../TextHelper";
 import { logout } from "../../utils/loginUtils";
+import { isDemoRoute } from "../../utils/env";
 
 const ACTIVATION_CODE_LENGTH = 8
 
@@ -241,7 +242,7 @@ function MyAccountModal(props) {
                             {addLink(t('my_account_information'), t("cloud_ruuvi_link"), t("cloud_ruuvi_link_url"), true, t('my_account_information_hightlighted_text'))}
                         </Content>
                         <Box mt="15px" />
-                        <ActivationCodeForm t={t} onActivated={setSubscriptions} />
+                        {isDemoRoute() ? <Content>{t("demo_account_actions", "Account deletion and plan activation are unavailable in demo mode.")}</Content> : <ActivationCodeForm t={t} onActivated={setSubscriptions} />}
                     </>
                 )}
             </Box>
@@ -298,7 +299,7 @@ function MyAccountModal(props) {
                     </Accordion.Item>
                 </Accordion.Root>
             </Box>
-            <Button variant='link' onClick={async () => {
+            <Button variant='link' disabled={isDemoRoute()} onClick={async () => {
                 setShowDeleteAccount(true)
             }}>{t("delete_account")}</Button>
 

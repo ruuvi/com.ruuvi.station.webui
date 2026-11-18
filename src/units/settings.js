@@ -1,7 +1,8 @@
+import storage from "../utils/storage";
 // Access to user settings stored in localStorage under "settings".
 
 export function readSettings() {
-    try { return JSON.parse(localStorage.getItem("settings")) ?? {}; } catch { return {}; }
+    try { return JSON.parse(storage.getItem("settings")) ?? {}; } catch { return {}; }
 }
 
 // Settings key per sensor type, for types with selectable units.

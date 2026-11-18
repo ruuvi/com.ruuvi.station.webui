@@ -1,5 +1,7 @@
+import storage from "./storage";
 import cache from "../DataCache"
 import NetworkApi from "../NetworkApi"
+import { isDemoRoute } from "./env"
 
 export function goToLoginPage() {
     if (window.location.href.indexOf("loginmethod=legacy") !== -1) {
@@ -19,8 +21,12 @@ export function goToLoginPage() {
 }
 
 export function logout(updateCb) {
+    if (isDemoRoute()) {
+        window.location.assign("/")
+        return
+    }
     new NetworkApi().removeToken()
-    localStorage.clear();
+    storage.clear();
     cache.clear();
     if (!goToLoginPage()) {
         window.location.replace("/")

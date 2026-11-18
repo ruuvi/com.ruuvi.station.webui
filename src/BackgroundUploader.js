@@ -1,3 +1,4 @@
+import storage from "./utils/storage";
 import NetworkApi from "./NetworkApi";
 import notify from "./utils/notify";
 import logger from "./utils/logger";
@@ -70,11 +71,11 @@ let uploadBackgroundImage = (sensor, f, t, previewCB, doneCB) => {
                                 // Keep the reload-time sensor snapshot in sync with the
                                 // URL returned by the backend after the upload.
                                 try {
-                                    const cachedSensors = JSON.parse(localStorage.getItem("sensors") || "[]")
+                                    const cachedSensors = JSON.parse(storage.getItem("sensors") || "[]")
                                     const cachedSensor = cachedSensors.find(cached => cached.sensor === sensor.sensor)
                                     if (cachedSensor) {
                                         cachedSensor.picture = pictureUrl
-                                        localStorage.setItem("sensors", JSON.stringify(cachedSensors))
+                                        storage.setItem("sensors", JSON.stringify(cachedSensors))
                                     }
                                 } catch (err) {
                                     logger.error("failed to update cached sensor image", err)

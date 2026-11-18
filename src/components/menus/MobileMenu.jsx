@@ -3,7 +3,7 @@ import { Button, Menu, Portal, useDisclosure } from '@chakra-ui/react';
 import { MdArrowDropDown, MdMenu, MdOpenInNew } from "react-icons/md"
 import i18next from 'i18next';
 import { logout } from '../../utils/loginUtils';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useColorMode } from '../ui/color-mode';
 
 const MobileMenu = ({ openSettings, myAccount }) => {
@@ -22,6 +22,7 @@ const MobileMenu = ({ openSettings, myAccount }) => {
         e.nativeEvent.stopImmediatePropagation();
     }
     const nav = useNavigate()
+    const location = useLocation()
     const navigateTo = (path) => {
         onClose();
         nav(path);
@@ -43,11 +44,11 @@ const MobileMenu = ({ openSettings, myAccount }) => {
             <Portal>
                 <Menu.Positioner zIndex={10}>
                     <Menu.Content>
-                        <Menu.Item value="home" className={(window.location.href.endsWith("/") ? "menuActive" : "") + " ddlItem"} onClick={() => navigateTo("/")}>{t("home")}</Menu.Item>
+                        <Menu.Item value="home" className={(location.pathname === "/" ? "menuActive" : "") + " ddlItem"} onClick={() => navigateTo("/")}>{t("home")}</Menu.Item>
                         <Menu.Separator />
-                        <Menu.Item value="shares" className={(window.location.href.endsWith("/shares") ? "menuActive" : "") + " ddlItem"} onClick={() => navigateTo("/shares")}>{t("share_sensors")}</Menu.Item>
+                        <Menu.Item value="shares" className={(location.pathname === "/shares" ? "menuActive" : "") + " ddlItem"} onClick={() => navigateTo("/shares")}>{t("share_sensors")}</Menu.Item>
                         <Menu.Separator />
-                        <Menu.Item value="compare" className={(window.location.href.endsWith("/compare") ? "menuActive" : "") + " ddlItem"} onClick={() => navigateTo("/compare")}>{t("compare")}</Menu.Item>
+                        <Menu.Item value="compare" className={(location.pathname === "/compare" ? "menuActive" : "") + " ddlItem"} onClick={() => navigateTo("/compare")}>{t("compare")}</Menu.Item>
                         <Menu.Separator />
                         <Menu.Item value="app-settings" className="ddlItem" onClick={handleToggle} display={"flex"} justifyContent={"space-between"}>
                             <span>

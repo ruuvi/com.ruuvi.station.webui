@@ -1,3 +1,4 @@
+import storage from "../../utils/storage";
 import React from "react";
 import { useTranslation } from 'react-i18next';
 import { uppercaseFirst } from "../../TextHelper";
@@ -17,7 +18,7 @@ function LanguageMenu(props) {
     const { i18n } = useTranslation();
 
     const langChange = (lng) => {
-        localStorage.setItem("selected_language", lng)
+        storage.setItem("selected_language", lng)
         i18n.changeLanguage(lng);
         props.onChange(lng)
     }

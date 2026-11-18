@@ -10,6 +10,7 @@ import { useParams } from "react-router-dom";
 import SensorRefreshNotice from "../components/common/SensorRefreshNotice";
 import { isThrottled, throttleRetryDelay } from "../utils/requestThrottle";
 import pjson from "../../package.json";
+import { appPath } from "../utils/env";
 
 // Public sharing shows at most seven days, subject to the owner's history limit.
 const PUBLIC_SENSOR_DEFAULTS = {
@@ -132,7 +133,7 @@ function PublicSensorView({ id }) {
                     {t([`UserApiError.${errorCode}`, "something_went_wrong"])}
                 </Text>
                 {FINAL_ERROR_CODES.includes(errorCode) && (
-                    <Button onClick={() => window.location.href = "/"} colorPalette="ruuvi">
+                    <Button onClick={() => window.location.href = appPath()} colorPalette="ruuvi">
                         {t("login_to_ruuvi_station")}
                     </Button>
                 )}

@@ -1,9 +1,10 @@
+import storage from "./utils/storage";
 import pjson from '../package.json';
 import cache from './DataCache';
 import parse from './decoder/parser';
 import { logout } from './utils/loginUtils';
 import logger from './utils/logger';
-import { isStagingEnv, isPublicRoute } from './utils/env';
+import { isStagingEnv, isPublicRoute, isDemoRoute } from './utils/env';
 import { isThrottled, retryAfterMs } from './utils/requestThrottle';
 
 let GET_ALL_SENSORS_CACHE = { ts: 0, data: null };
@@ -39,6 +40,10 @@ class NetworkApi {
     // `strict` restores the old behavior of throwing the Response instead.
     async request(path, { method = 'GET', body, signal, timeout, strict, auth = true, headers } = {}) {
         if (signal?.aborted) throw signal.reason || new DOMException("Aborted", "AbortError");
+        if (isDemoRoute()) {
+            const { demoRequest } = await import('./demo/DemoApi');
+            return demoRequest(path, { method, body, signal });
+        }
         const controller = timeout === undefined ? null : new AbortController();
         const onAbort = () => controller.abort(signal.reason);
         let timeoutId;
@@ -88,14 +93,17 @@ class NetworkApi {
         return this.isStaging() ? "staging_user" : "user"
     }
     getUser() {
-        var user = localStorage.getItem(this.getUserKey());
+        if (isDemoRoute()) return { email: "demo@example.com", accessToken: "local-demo" };
+        var user = storage.getItem(this.getUserKey());
         return user ? JSON.parse(user) : null;
     }
     setUser(user) {
-        localStorage.setItem(this.getUserKey(), JSON.stringify(user))
+        if (isDemoRoute()) return;
+        storage.setItem(this.getUserKey(), JSON.stringify(user))
     }
     removeToken() {
-        localStorage.removeItem(this.getUserKey())
+        if (isDemoRoute()) return;
+        storage.removeItem(this.getUserKey())
         let domain = ".ruuvi.com"
         document.cookie = `station_status=signedIn;domain=${domain};Max-Age=-99999999`
     }
@@ -103,10 +111,11 @@ class NetworkApi {
         return isStagingEnv()
     }
     setEnv(env) {
+        if (isDemoRoute()) return;
         cache.clear()
-        localStorage.removeItem("sensors")
-        localStorage.removeItem("settings")
-        localStorage.setItem("env", env)
+        storage.removeItem("sensors")
+        storage.removeItem("settings")
+        storage.setItem("env", env)
     }
     register(email, success, fail) {
         this.callback(this.request("/register", { method: 'POST', body: { email }, strict: true, auth: false }), success, fail);
@@ -136,6 +145,11 @@ class NetworkApi {
             if (signal?.aborted) throw signal.reason || new DOMException("Aborted", "AbortError");
         };
         checkAborted();
+        if (isDemoRoute()) {
+            const { demoHistory } = await import('./demo/DemoApi');
+            checkAborted();
+            return demoHistory(mac, since, until, settings);
+        }
         const mode = settings?.mode || "mixed";
         const limit = settings?.limit || 100000;
         const paginationSize = settings?.limit || pjson.settings.dataFetchPaginationSize;
@@ -197,7 +211,7 @@ class NetworkApi {
     async getAllSensorsAsync(noCache) {
         const now = Date.now();
         const cacheTTL = 65_000;
-        if (!noCache && GET_ALL_SENSORS_CACHE.data && (now - GET_ALL_SENSORS_CACHE.ts) < cacheTTL) {
+        if (!isDemoRoute() && !noCache && GET_ALL_SENSORS_CACHE.data && (now - GET_ALL_SENSORS_CACHE.ts) < cacheTTL) {
             return GET_ALL_SENSORS_CACHE.data;
         }
 
@@ -213,7 +227,7 @@ class NetworkApi {
         if (respData.data && respData.data.sensors.length > 0) {
             respData.data.sensors = sortSensors(respData.data.sensors);
         }
-        GET_ALL_SENSORS_CACHE = { ts: now, data: respData };
+        if (!isDemoRoute()) GET_ALL_SENSORS_CACHE = { ts: now, data: respData };
         return respData;
     }
     share(mac, email, success) {
@@ -237,7 +251,7 @@ class NetworkApi {
     unclaim(mac, deleteData, success) {
         const promise = this.request("/unclaim", { method: 'POST', body: { sensor: mac, deleteData }, strict: true })
             .then(response => {
-                cache.removeData(mac)
+                if (!isDemoRoute()) cache.removeData(mac)
                 return response
             });
         this.callback(promise, success);
@@ -280,6 +294,12 @@ class NetworkApi {
             return new Blob([ia], { type: mimeString });
         }
         try {
+            if (isDemoRoute()) {
+                const { demoUpload } = await import('./demo/DemoApi');
+                demoUpload(url, file);
+                success();
+                return;
+            }
             const blob = dataURItoBlob(file);
             const response = await fetch(url, {
                 headers: new Headers({ "Content-Type": blob.type || type }),
@@ -342,6 +362,7 @@ class NetworkApi {
         return this.request("/request-delete", { method: 'POST', body: { email } });
     }
     async getBanners() {
+        if (isDemoRoute()) return [];
         let url = "https://raw.githubusercontent.com/ruuvi/station.localization/master/web_banners.json"
         const resp = await fetch(url, { cache: "no-store" })
         return await resp.json()

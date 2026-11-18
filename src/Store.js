@@ -1,3 +1,5 @@
+import storage from "./utils/storage";
+import { isDemoRoute } from "./utils/env";
 import { normalizeHistoryHours } from "./utils/historyRange";
 
 const GRAPH_FROM_KEY = "graph_from";
@@ -10,49 +12,49 @@ const DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY = "dashboard_disable_adaptive_layout
 
 const Store = {
     setGraphFrom(v) {
-        localStorage.setItem(GRAPH_FROM_KEY, v)
+        storage.setItem(GRAPH_FROM_KEY, v)
     },
     getGraphFrom() {
-        return normalizeHistoryHours(parseInt(localStorage.getItem(GRAPH_FROM_KEY)))
+        return normalizeHistoryHours(parseInt(storage.getItem(GRAPH_FROM_KEY)))
     },
     setDashboardFrom(v) {
-        localStorage.setItem(DASHBOARD_FROM_KEY, v)
+        storage.setItem(DASHBOARD_FROM_KEY, v)
     },
     getDashboardFrom() {
-        return parseInt(localStorage.getItem(DASHBOARD_FROM_KEY))
+        return parseInt(storage.getItem(DASHBOARD_FROM_KEY))
     },
     setOpenAccordions(v) {
-        localStorage.setItem(SENSOR_OPEN_ACCORDIONS, JSON.stringify(v))
+        storage.setItem(SENSOR_OPEN_ACCORDIONS, JSON.stringify(v))
     },
     getOpenAccordions() {
-        var cache = localStorage.getItem(SENSOR_OPEN_ACCORDIONS);
+        var cache = storage.getItem(SENSOR_OPEN_ACCORDIONS);
         return cache ? JSON.parse(cache) : cache;
     },
     setDashboardCardType(v) {
-        localStorage.setItem(DASHBOARD_CARD_TYPE_KEY, v)
+        storage.setItem(DASHBOARD_CARD_TYPE_KEY, v)
     },
     getDashboardCardType() {
-        return localStorage.getItem(DASHBOARD_CARD_TYPE_KEY) || "image_view"
+        return storage.getItem(DASHBOARD_CARD_TYPE_KEY) || (isDemoRoute() ? "graph_view" : "image_view")
     },
     setHasSeenBanner(key, v) {
-        localStorage.setItem(BANNER + key, v)
+        storage.setItem(BANNER + key, v)
     },
     getHasSeenBanner(key) {
-        let res = localStorage.getItem(BANNER + key);
+        let res = storage.getItem(BANNER + key);
         if (res === null) return false;
         return JSON.parse(res);
     },
     setGraphDrawDots(v) {
-        localStorage.setItem(GRAPH_DRAW_DOTS, v)
+        storage.setItem(GRAPH_DRAW_DOTS, v)
     },
     getGraphDrawDots() {
-        return localStorage.getItem(GRAPH_DRAW_DOTS) === "true"
+        return storage.getItem(GRAPH_DRAW_DOTS) === "true"
     },
     setDashboardDisableAdaptiveLayout(v) {
-        localStorage.setItem(DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY, JSON.stringify(v))
+        storage.setItem(DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY, JSON.stringify(v))
     },
     getDashboardDisableAdaptiveLayout() {
-        let res = localStorage.getItem(DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY);
+        let res = storage.getItem(DASHBOARD_DISABLE_ADAPTIVE_LAYOUT_KEY);
         if (res === null) return false;
         return JSON.parse(res);
     },

@@ -1,3 +1,4 @@
+import storage from "../../utils/storage";
 import React, { useMemo } from "react";
 import { Box, Text } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
@@ -16,7 +17,7 @@ function resolutionOptions(type, unitVal, maxDecimals) {
 
 function getSensorsFromCache() {
     try {
-        return JSON.parse(localStorage.getItem("sensors")) || [];
+        return JSON.parse(storage.getItem("sensors")) || [];
     } catch {
         return [];
     }

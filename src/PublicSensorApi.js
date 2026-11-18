@@ -1,5 +1,5 @@
 import pjson from "../package.json";
-import { isStagingEnv } from "./utils/env";
+import { isDemoRoute, isStagingEnv } from "./utils/env";
 import { isThrottled, retryAfterMs } from "./utils/requestThrottle";
 import { getPublicResponse, getPublicHistoryResponse, savePublicResponse } from "./PublicDataCache";
 
@@ -24,6 +24,10 @@ function reservePublicRequest(url) {
 // Public sensors never use account credentials or authenticated history storage.
 async function request(endpoint, params, cacheKey, signal, history) {
     if (signal?.aborted) throw signal.reason || new DOMException("Aborted", "AbortError");
+    if (isDemoRoute()) {
+        const { demoRequest } = await import("./demo/DemoApi");
+        return demoRequest(`/get?${new URLSearchParams(params)}`, { signal });
+    }
     const cached = history ? getPublicHistoryResponse(history) : getPublicResponse(cacheKey);
     if (cached) {
         if (!history) return cached;

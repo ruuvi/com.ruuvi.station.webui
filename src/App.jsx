@@ -1,3 +1,4 @@
+import storage from "./utils/storage";
 import React, { useEffect, useState } from "react";
 import logger from "./utils/logger";
 import {
@@ -5,6 +6,7 @@ import {
   Route,
   BrowserRouter,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 import NetworkApi from "./NetworkApi";
 import logo from './img/ruuvi-vector-logo.svg'
@@ -30,7 +32,8 @@ import MyAccountModal from "./components/dialogs/MyAccountModal";
 import SettingsMenu from "./components/menus/SettingsMenu";
 import MobileMenu from "./components/menus/MobileMenu";
 import detectForceRefresh from "./utils/detectForceRefresh";
-import { isPublicRoute as isPublicRoutePath } from "./utils/env";
+import { isPublicRoute as isPublicRoutePath, isDemoRoute, appPath } from "./utils/env";
+import DemoBanner from "./demo/DemoBanner";
 const ShareCenter = React.lazy(() => import("./states/ShareCenter"));
 const SensorCompare = React.lazy(() => import("./states/SensorCompare"));
 const SignIn = React.lazy(() => import("./states/SignIn"));
@@ -116,7 +119,7 @@ function Logo(props) {
   let ruuviLogo = colorMode === "light" ? logo : logoDark
   return (
     <>
-      <Image alt="logo" height={30} src={ruuviLogo} fit="scale-down" style={{ cursor: "pointer" }} onClick={() => window.location.href = "/"} />
+      <Image alt="logo" height={30} src={ruuviLogo} fit="scale-down" style={{ cursor: "pointer" }} onClick={() => window.location.href = appPath()} />
       <span style={subscriptionText}>
         {props.subscription.split(" ")[0]}
       </span>
@@ -174,14 +177,14 @@ function loadInitalSettings(forceUpdate, browserLang) {
       const newSettings = settings.data.settings || {};
       let previousString = null;
       try {
-        previousString = localStorage.getItem("settings");
+        previousString = storage.getItem("settings");
       } catch (error) {
         logger.error("Failed to read cached settings", error);
       }
       const newString = JSON.stringify(newSettings);
       const settingsChanged = previousString !== newString;
 
-      localStorage.setItem("settings", newString);
+      storage.setItem("settings", newString);
 
       const settingsLng = newSettings.PROFILE_LANGUAGE_CODE;
       const targetLanguage = settingsLng || browserLang;
@@ -203,10 +206,10 @@ function loadInitalSettings(forceUpdate, browserLang) {
 
 export default function App() {
   useEffect(() => {
-    cache.init().catch(error => logger.error("Could not initialize cache", error));
+    if (!isDemoRoute()) cache.init().catch(error => logger.error("Could not initialize cache", error));
   }, []);
   try {
-    let cookie = document.cookie;
+    let cookie = isDemoRoute() ? "" : document.cookie;
     if (cookie) {
       let keys = cookie.split(";")
       keys.forEach(key => {
@@ -233,7 +236,7 @@ export default function App() {
     const supportedLangs = ["en", "fi", "sv"]
     let lng = params.lng.split("-")[0]
     if (supportedLangs.indexOf(lng) > -1) {
-      localStorage.setItem("selected_language", lng)
+      storage.setItem("selected_language", lng)
       i18next.changeLanguage(lng)
     }
     */
@@ -245,6 +248,7 @@ export default function App() {
   let { i18n } = useTranslation()
 
   useEffect(() => {
+    if (isDemoRoute()) return;
     const cleanup = detectForceRefresh();
     return cleanup
   }, [])
@@ -357,7 +361,8 @@ export default function App() {
 
   return (
     <Provider>
-      <BrowserRouter basename={"/"}>
+      <BrowserRouter basename={isDemoRoute() ? "/demo" : "/"}>
+        {isDemoRoute() && <DemoBanner />}
         {isPublicRoute ? (
           <PublicTopBar />
         ) : hideTopBar ? null : <>
@@ -415,16 +420,17 @@ function TopBar({ reloadSub, setShowDialog }) {
     }}
   />
   const nav = useNavigate()
+  const location = useLocation()
   return <>
     {isWideVersion ?
       <>
-        <Button variant="topbar" onClick={() => nav("/")} className={window.location.href.endsWith("/") ? "activeNav" : ""}>
+        <Button variant="topbar" onClick={() => nav("/")} className={location.pathname === "/" ? "activeNav" : ""}>
           {i18next.t("home")}
         </Button>
-        <Button variant="topbar" onClick={() => nav("/compare")} className={window.location.href.indexOf("/compare") !== -1 ? "activeNav" : ""}>
+        <Button variant="topbar" onClick={() => nav("/compare")} className={location.pathname === "/compare" ? "activeNav" : ""}>
           {i18next.t("compare")}
         </Button>
-        <Button variant="topbar" onClick={() => nav("/shares")} className={window.location.href.indexOf("/shares") !== -1 ? "activeNav" : ""}>
+        <Button variant="topbar" onClick={() => nav("/shares")} className={location.pathname === "/shares" ? "activeNav" : ""}>
           {i18next.t("share_center")}
         </Button>
         {sensorMenu}

@@ -3,9 +3,10 @@ import react from '@vitejs/plugin-react';
 
 // Vite's HTML fallback needs the explicit index for a URL without a trailing
 // slash. Static hosts serve the built delete-account/index.html directory entry.
-function serveAccountDeletion(server) {
+function serveDirectoryEntries(server) {
   server.middlewares.use((request, _response, next) => {
     request.url = request.url.replace(/^\/delete-account(?=\?|$)/, '/delete-account/index.html');
+    request.url = request.url.replace(/^\/demo(?=\?|$)/, '/demo/index.html');
     next();
   });
 }
@@ -20,15 +21,16 @@ export default defineConfig(() => {
         input: {
           station: 'index.html',
           deleteAccount: 'delete-account/index.html',
+          demo: 'demo/index.html',
         },
       },
       // Let Vite split dependencies: the old node_modules path splitter grouped
       // pnpm packages into one .pnpm chunk, pulling lazy PDF dependencies into boot.
     },
     plugins: [react(), {
-      name: 'account-deletion-entry',
-      configureServer: serveAccountDeletion,
-      configurePreviewServer: serveAccountDeletion,
+      name: 'directory-entries',
+      configureServer: serveDirectoryEntries,
+      configurePreviewServer: serveDirectoryEntries,
     }],
     server: {
       mimeTypes: {

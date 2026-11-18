@@ -1,3 +1,4 @@
+import storage from "../utils/storage";
 import React, { Component } from "react";
 import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
@@ -116,7 +117,7 @@ class Settings extends Component {
                 clearSaving();
                 new NetworkApi().getSettings(settings => {
                     if (settings.result === "success") {
-                        localStorage.setItem("settings", JSON.stringify(settings.data.settings));
+                        storage.setItem("settings", JSON.stringify(settings.data.settings));
                         if (this.props.updateApp) this.props.updateApp();
                     }
                 });

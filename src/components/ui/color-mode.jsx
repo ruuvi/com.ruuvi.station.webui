@@ -1,3 +1,5 @@
+import storage from "../../utils/storage";
+import { isDemoRoute } from "../../utils/env";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 // Chakra v3 has no built-in color mode manager; it only reacts to a `light` /
@@ -19,7 +21,7 @@ function matchDark() {
 
 function readStored() {
     try {
-        return localStorage.getItem(STORAGE_KEY);
+        return storage.getItem(STORAGE_KEY);
     } catch {
         return null;
     }
@@ -69,6 +71,7 @@ export function ColorModeProvider({ children }) {
 
     // Keep other tabs in sync, the way the v2 localStorage manager did.
     useEffect(() => {
+        if (isDemoRoute()) return;
         const onStorage = (event) => {
             if (event.key === STORAGE_KEY) setPreference(event.newValue || "system");
         };
@@ -79,7 +82,7 @@ export function ColorModeProvider({ children }) {
     const setColorMode = useCallback((next) => {
         setPreference(next);
         try {
-            localStorage.setItem(STORAGE_KEY, next);
+            storage.setItem(STORAGE_KEY, next);
         } catch {
             /* storage may be unavailable (private mode) */
         }

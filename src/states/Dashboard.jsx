@@ -1,3 +1,4 @@
+import storage from "../utils/storage";
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import logger from "../utils/logger";
 import NetworkApi from "../NetworkApi";
@@ -26,7 +27,7 @@ const infoText = {
 }
 
 const getSensorCache = () => {
-    let sensors = localStorage.getItem("sensors")
+    let sensors = storage.getItem("sensors")
     if (!sensors) return []
     return JSON.parse(sensors)
 }
@@ -161,9 +162,9 @@ function Dashboard(props) {
 
         setOrder(newOrder.length ? [...newOrder] : null);
         try {
-            let settings = JSON.parse(localStorage.getItem("settings") || "{}");
+            let settings = JSON.parse(storage.getItem("settings") || "{}");
             settings["SENSOR_ORDER"] = JSON.stringify(newOrder);
-            localStorage.setItem("settings", JSON.stringify(settings));
+            storage.setItem("settings", JSON.stringify(settings));
         } catch { /* ignore */ }
         new NetworkApi().setSetting("SENSOR_ORDER", JSON.stringify(newOrder), b => {
             if (b.result === "success") {
@@ -171,7 +172,7 @@ function Dashboard(props) {
                     if (settings.result === "success") {
                         // Skip if a newer write has superseded this one
                         if (pendingOrderRef.current === key) {
-                            localStorage.setItem("settings", JSON.stringify(settings.data.settings));
+                            storage.setItem("settings", JSON.stringify(settings.data.settings));
                         }
                         settle();
                         if (reloadTagsRef.current) reloadTagsRef.current();
@@ -224,7 +225,7 @@ function Dashboard(props) {
                 const newSensors = resp.data.sensors;
                 setSensors(newSensors);
                 setLoading(false);
-                localStorage.setItem("sensors", JSON.stringify(newSensors));
+                storage.setItem("sensors", JSON.stringify(newSensors));
                 checkSensorOrder(newSensors);
             }
         } catch (e) {
@@ -289,7 +290,7 @@ function Dashboard(props) {
     function removeSensor() {
         const current = getCurrentSensor().sensor;
         setSensors(prev => prev.filter(x => x.sensor !== current));
-        localStorage.removeItem("sensors");
+        storage.removeItem("sensors");
         navigate('/');
         reloadTagsRef.current();
     }
@@ -300,7 +301,7 @@ function Dashboard(props) {
             if (idx > -1) {
                 const next = [...prev];
                 next[idx] = sensor;
-                localStorage.removeItem("sensors");
+                storage.removeItem("sensors");
                 return next;
             }
             return prev;
