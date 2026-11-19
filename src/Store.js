@@ -34,7 +34,7 @@ const Store = {
         storage.setItem(DASHBOARD_CARD_TYPE_KEY, v)
     },
     getDashboardCardType() {
-        return storage.getItem(DASHBOARD_CARD_TYPE_KEY) || (isDemoRoute() ? "graph_view" : "image_view")
+        return storage.getItem(DASHBOARD_CARD_TYPE_KEY) || (isDemoRoute() ? "image_graph_view" : "image_view")
     },
     setHasSeenBanner(key, v) {
         storage.setItem(BANNER + key, v)

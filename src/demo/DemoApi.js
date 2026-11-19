@@ -13,7 +13,7 @@ const PLAN = {
     endTime: 0,
 };
 const STATE_KEY = "api-state-v1";
-const STATE_VERSION = 5;
+const STATE_VERSION = 6;
 const success = (data = {}) => ({ result: "success", data });
 const failure = (code = "ER_FORBIDDEN") => ({ result: "error", code });
 
@@ -42,7 +42,7 @@ function readState() {
         if (version < STATE_VERSION) {
             // Each version only adds newly introduced samples, so intentionally
             // removed sensors stay removed. Allocate around user-claimed IDs.
-            const firstNewProfile = { 1: 4, 2: 5, 3: 20, 4: 22 }[version];
+            const firstNewProfile = { 1: 4, 2: 5, 3: 20, 4: 22, 5: 22 }[version];
             for (let profile = firstNewProfile; profile < DEMO_SENSORS.length; profile++) {
                 let suffix = profile + 1;
                 while (state.sensors.some(sensor => sensor.sensor === sampleId(suffix))) suffix++;
@@ -59,6 +59,14 @@ function readState() {
                 for (const sensor of state.sensors) {
                     if (sensor.profile === 20 && sensor.name === "RuuviTag (all fields)") sensor.name = "RuuviTag";
                     if (sensor.profile === 21 && sensor.name === "Ruuvi Air (all fields)") sensor.name = "Ruuvi Air";
+                }
+            }
+            if (version < 6) {
+                for (const sensor of state.sensors) {
+                    // Profile 0 is shared by the living room Air sample and locally claimed tags.
+                    if (sensor.picture === undefined && (sensor.profile !== 0 || sensor.air)) {
+                        sensor.picture = DEMO_SENSORS[sensor.profile].picture;
+                    }
                 }
             }
             state.version = STATE_VERSION;
@@ -79,8 +87,8 @@ function sampleId(suffix) {
 }
 
 function makeSample(profile, id = sampleId(profile + 1)) {
-    const { name, air } = DEMO_SENSORS[profile];
-    return makeSensor(id, name, profile, air);
+    const { name, air, picture } = DEMO_SENSORS[profile];
+    return { ...makeSensor(id, name, profile, air), picture };
 }
 
 // Encode real Ruuvi packets so graphs, offsets, unit conversions, statistics,

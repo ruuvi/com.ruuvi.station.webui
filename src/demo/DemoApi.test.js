@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import NetworkApi from "../NetworkApi";
 import PublicSensorApi from "../PublicSensorApi";
 import cache from "../DataCache";
@@ -78,10 +78,13 @@ describe("demo API integration", () => {
         const api = new NetworkApi();
         expect(api.getUser().email).toBe("demo@example.com");
         expect(api.isStaging()).toBe(false);
-        expect(Store.getDashboardCardType()).toBe("graph_view");
+        expect(Store.getDashboardCardType()).toBe("image_graph_view");
         const { data } = await api.getAllSensorsAsync();
         expect(data.sensors).toHaveLength(DEMO_SENSORS.length);
+        expect(new Set(data.sensors.map(sensor => sensor.picture)).size).toBe(data.sensors.length);
         for (const sensor of data.sensors) {
+            expect(sensor.picture).toMatch(/^\/demo\/backgrounds\/[\w-]+\.webp$/);
+            expect(existsSync(`public${sensor.picture}`)).toBe(true);
             expect(sensor.measurements).toHaveLength(1);
             expect(sensor.measurements[0].parsed.temperature).toBeTypeOf("number");
             expect(sensor.measurements[0].parsed.mac).toBe(sensor.sensor);
@@ -216,6 +219,28 @@ describe("demo API integration", () => {
         expect(sensors.find(sensor => sensor.sensor === air.sensor).name).toBe("Ruuvi Air");
     });
 
+    it("adds photos to samples in an existing session while preserving uploads, renames and claims", async () => {
+        const api = new NetworkApi();
+        const claimedId = "D0:DE:00:00:00:AA";
+        await api.claim(claimedId, "My tag");
+        const legacy = JSON.parse(storage.getItem("api-state-v1"));
+        legacy.version = 5;
+        legacy.sensors = legacy.sensors.filter(sensor => sensor.name !== "Garden");
+        for (const sensor of legacy.sensors) delete sensor.picture;
+        const livingRoom = legacy.sensors.find(sensor => sensor.sensor === SENSOR);
+        livingRoom.name = "Lounge";
+        const bedroom = legacy.sensors.find(sensor => sensor.name === "Bedroom");
+        bedroom.picture = "data:image/jpeg;base64,ZGVtbw==";
+        storage.setItem("api-state-v1", JSON.stringify(legacy));
+
+        const { data } = await api.getAllSensorsAsync();
+        expect(data.sensors.map(sensor => sensor.name)).not.toContain("Garden");
+        expect(data.sensors.find(sensor => sensor.name === "Lounge").picture).toBe("/demo/backgrounds/living-room.webp");
+        expect(data.sensors.find(sensor => sensor.sensor === bedroom.sensor).picture).toBe(bedroom.picture);
+        expect(data.sensors.find(sensor => sensor.sensor === claimedId).picture).toBeUndefined();
+        expect((await api.getAllSensorsAsync()).data.sensors).toEqual(data.sensors);
+    });
+
     it("persists sensor edits, alerts, notes, uploads, and simulated shares across API instances", async () => {
         const api = new NetworkApi();
         await new Promise(resolve => api.updateSensorData(SENSOR, { name: "My demo room", offsetTemperature: 2 }, resolve));
@@ -245,13 +270,13 @@ describe("demo API integration", () => {
         await new Promise(resolve => api.setSetting("UNIT_TEMPERATURE", "K", resolve));
         const result = await new Promise(resolve => api.getSettings(resolve));
         storage.setItem("settings", JSON.stringify(result.data.settings));
-        Store.setDashboardCardType("image_view");
+        Store.setDashboardCardType("graph_view");
         expect(readSettings().UNIT_TEMPERATURE).toBe("K");
-        expect(Store.getDashboardCardType()).toBe("image_view");
+        expect(Store.getDashboardCardType()).toBe("graph_view");
         sessionStorage.setItem("unrelated", "keep");
         storage.clear();
         expect(sessionStorage.getItem("unrelated")).toBe("keep");
-        expect(Store.getDashboardCardType()).toBe("graph_view");
+        expect(Store.getDashboardCardType()).toBe("image_graph_view");
         expect(readSettings()).toEqual({});
     });
 
@@ -295,6 +320,7 @@ describe("demo API integration", () => {
         const publicApi = new PublicSensorApi();
         const result = await publicApi.getLatest(SENSOR);
         expect(result.data.measurements).toHaveLength(1);
+        expect(result.data.picture).toBe("/demo/backgrounds/living-room.webp");
         const history = await publicApi.getHistory(SENSOR, NOW - DAY, NOW);
         expect(history.data.measurements).toHaveLength(24 * 12);
         window.history.replaceState(null, "", "/");

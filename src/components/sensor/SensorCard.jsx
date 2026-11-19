@@ -43,7 +43,8 @@ const SensorCard = ({
 }) => {
     const { t } = useTranslation();
     const [showRemoveDialog, setShowRemoveDialog] = useState(false);
-    const [picture, setPicture] = useState(sensor.picture);
+    const [uploadedPicture, setUploadedPicture] = useState(null);
+    const picture = uploadedPicture || sensor.picture;
     const [uploadingImage, setUploadingImage] = useState(false);
     const showGraph =
         cardType === "graph_view" || cardType === "image_graph_view";
@@ -257,16 +258,16 @@ const SensorCard = ({
                 style={{ display: "none" }}
                 id={uploadInputId}
                 onChange={(event) => {
-                    const previousPicture = picture;
+                    const previousPicture = uploadedPicture;
                     setUploadingImage(true);
                     uploadBackgroundImage(
                         sensor,
                         event,
                         t,
-                        preview => setPicture(preview),
+                        setUploadedPicture,
                         result => {
                             setUploadingImage(false);
-                            setPicture(result || previousPicture);
+                            setUploadedPicture(result || previousPicture);
                         },
                     );
                     event.target.value = "";
